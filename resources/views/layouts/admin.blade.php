@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Motorazad Admin Dashboard - لوحة إدارة مزادات السيارات">
+    <title>Motorazad — @yield('title', 'لوحة التحكم')</title>
+   
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.rtl.min.css') }}" rel="stylesheet">
+    <!-- DataTables CSS -->
+      <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.bootstrap5.min.css') }}">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="{{ asset('vendor/toastr/toastr.min.css') }}">
+    {{-- Apply saved theme immediately to prevent flash --}}
+    <script>
+        (function() {
+            var saved = localStorage.getItem('motorzad-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+    @yield('css')
+</head>
+<body>
+    {{-- ========== SIDEBAR ========== --}}
+    @include('layouts.admin.sidebar')
+
+    {{-- ========== MAIN CONTENT ========== --}}
+    <div class="main-content">
+        @include('layouts.admin.topbar')
+
+        <div class="page-content fade-in">
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    <div>@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>
+                </div>
+            @endif
+
+            @yield('content')
+        </div>
+    </div>
+
+    @include('layouts.admin.scripts')
+
+    @yield('js')
+</body>
+</html>
