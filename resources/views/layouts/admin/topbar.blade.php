@@ -1,9 +1,18 @@
         <div class="topbar">
             <div class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="بحث سريع..." class="form-control">
+                <input type="text" placeholder="{{ __('Quick Search...') }}" class="form-control">
             </div>
             <div class="topbar-right" style="display:flex; align-items:center; gap:1rem;">
+                {{-- Language Toggle --}}
+                <div style="display:flex; align-items:center;">
+                    @if (app()->getLocale() == 'ar')
+                        <a href="{{ route('lang.switch', 'en') }}" class="btn btn-ghost btn-sm" style="font-weight:700; border:1px solid var(--border-light);">English</a>
+                    @else
+                        <a href="{{ route('lang.switch', 'ar') }}" class="btn btn-ghost btn-sm" style="font-weight:700; border:1px solid var(--border-light); font-family:'Tajawal',sans-serif;">عربي</a>
+                    @endif
+                </div>
+                
                 {{-- Theme Toggle --}}
                 <div style="display:flex; align-items:center; gap:0.6rem;">
                     <span class="theme-label" id="themeLabel">الوضع الليلي</span>

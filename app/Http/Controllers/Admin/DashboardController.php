@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Page;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -15,6 +16,7 @@ class DashboardController extends Controller
             'users_count' => User::count(),
             'roles_count' => Role::count(),
             'permissions_count' => Permission::count(),
+            'pages_count' => Page::count(),
         ];
         return view('admin.dashboard', compact('stats'));
     }

@@ -60,38 +60,38 @@
 @endsection
 
 @section('actions')
-<div style="font-size:0.85rem; color:var(--text-muted);">إجمالي: <span>{{ $stats['total'] }}</span> مستخدم</div>
+<div style="font-size:0.85rem; color:var(--text-muted);">{{ __('Total:') }} <span>{{ $stats['total'] }}</span> {{ __('User') }}</div>
 @endsection
 
 @section('content')
 <div id="page-loader"><div class="spinner"></div></div>
 <div class="page-header">
     <div>
-        <h1>إدارة المستخدمين</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">لوحة التحكم</a> / المستخدمين</div>
+        <h1>{{ __('User Management') }}</h1>
+        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Users') }}</div>
     </div>
    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    إضافة مستخدم جديد
+    {{ __('Add New User') }}
 </button>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <h2>قائمة المستخدمين</h2>
+        <h2>{{ __('Users List') }}</h2>
     </div>
     <div class="table-responsive">
         <table id="users-table" class="table table-striped w-100" style="text-align: right;">
             <thead>
                 <tr>
-                    <th>الصورة</th>
-                    <th>المعلومات</th>
-                    <th>رقم الهاتف</th>
-                    <th>الأدوار</th>
-                    <th>الحالة</th>
-                    <th>توثيق الحساب</th>
-                    <th>توثيق الهوية</th>
-                    <th>الإجراءات</th>
+                    <th>{{ __('Photo') }}</th>
+                    <th>{{ __('Information') }}</th>
+                    <th>{{ __('Phone Number') }}</th>
+                    <th>{{ __('Roles') }}</th>
+                    <th>{{ __('Status') }}</th>
+                    <th>{{ __('Account Verification') }}</th>
+                    <th>{{ __('Identity Verification') }}</th>
+                    <th>{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -106,7 +106,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">إضافة مستخدم جديد</h5>
+                <h5 class="modal-title">{{ __('Add New User') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addUserForm">
@@ -114,81 +114,81 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">الاسم الأول</label>
+                            <label class="form-label">{{ __('First Name') }}</label>
                             <input type="text" name="first_name" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">اسم العائلة</label>
+                            <label class="form-label">{{ __('Last Name') }}</label>
                             <input type="text" name="last_name" class="form-control" required>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">البريد الإلكتروني</label>
+                            <label class="form-label">{{ __('Email Address') }}</label>
                             <input type="email" name="email" class="form-control" required dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">كلمة المرور</label>
+                            <label class="form-label">{{ __('Password') }}</label>
                             <input type="password" name="password" class="form-control" required dir="ltr" style="text-align:left;">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رمز الدولة</label>
+                            <label class="form-label">{{ __('Country Code') }}</label>
                             <input type="text" name="country_code" class="form-control" placeholder="+966" dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رقم الهاتف</label>
+                            <label class="form-label">{{ __('Phone Number') }}</label>
                             <input type="text" name="phone" class="form-control" dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رقم الهوية / الإقامة</label>
+                            <label class="form-label">{{ __('ID / Residence Number') }}</label>
                             <input type="text" name="id_number" class="form-control" dir="ltr" style="text-align:left;">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">الدولة</label>
+                            <label class="form-label">{{ __('Country') }}</label>
                             <input type="text" name="country" class="form-control">
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">المدينة</label>
+                            <label class="form-label">{{ __('City') }}</label>
                             <input type="text" name="city" class="form-control">
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">العنوان</label>
+                        <label class="form-label">{{ __('Address') }}</label>
                         <input type="text" name="address" class="form-control">
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">تاريخ الميلاد</label>
+                            <label class="form-label">{{ __('Date of Birth') }}</label>
                             <input type="date" name="date_of_birth" class="form-control">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">الجنس</label>
+                            <label class="form-label">{{ __('Gender') }}</label>
                             <select name="gender" class="form-control">
-                                <option value="">غير محدد</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
+                                <option value="">{{ __('Not Specified') }}</option>
+                                <option value="male">{{ __('Male') }}</option>
+                                <option value="female">{{ __('Female') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">الحالة</label>
+                            <label class="form-label">{{ __('Status') }}</label>
                             <select name="status" class="form-control" required>
-                                <option value="active">نشط</option>
-                                <option value="inactive">غير نشط</option>
+                                <option value="active">{{ __('Active') }}</option>
+                                <option value="inactive">{{ __('Inactive') }}</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">الأدوار (الصلاحيات)</label>
+                        <label class="form-label">{{ __('Roles (Permissions)') }}</label>
                         <div class="checkbox-grid">
                             @foreach($roles as $role)
                             <div class="checkbox-item">
@@ -202,8 +202,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">حفظ المستخدم</button>
+                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('Save User') }}</button>
                 </div>
             </form>
         </div>
@@ -215,7 +215,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تعديل المستخدم</h5>
+                <h5 class="modal-title">{{ __('Edit User') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editUserForm">
@@ -224,81 +224,81 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">الاسم الأول</label>
+                            <label class="form-label">{{ __('First Name') }}</label>
                             <input type="text" id="edit_first_name" name="first_name" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">اسم العائلة</label>
+                            <label class="form-label">{{ __('Last Name') }}</label>
                             <input type="text" id="edit_last_name" name="last_name" class="form-control" required>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">البريد الإلكتروني</label>
+                            <label class="form-label">{{ __('Email Address') }}</label>
                             <input type="email" id="edit_email" name="email" class="form-control" required dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label>كلمة المرور <small class="text-muted">(اتركها فارغة إذا لم ترد التغيير)</small></label>
+                            <label>{{ __('Password') }} <small class="text-muted">({{ __('Leave empty if you do not want to change it') }})</small></label>
                             <input type="password" id="edit_password" name="password" class="form-control" dir="ltr" style="text-align:left;">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رمز الدولة</label>
+                            <label class="form-label">{{ __('Country Code') }}</label>
                             <input type="text" id="edit_country_code" name="country_code" class="form-control" placeholder="+966" dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رقم الهاتف</label>
+                            <label class="form-label">{{ __('Phone Number') }}</label>
                             <input type="text" id="edit_phone" name="phone" class="form-control" dir="ltr" style="text-align:left;">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">رقم الهوية / الإقامة</label>
+                            <label class="form-label">{{ __('ID / Residence Number') }}</label>
                             <input type="text" id="edit_id_number" name="id_number" class="form-control" dir="ltr" style="text-align:left;">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">الدولة</label>
+                            <label class="form-label">{{ __('Country') }}</label>
                             <input type="text" id="edit_country" name="country" class="form-control">
                         </div>
                         <div class="col-md-6 mb-3 form-group">
-                            <label class="form-label">المدينة</label>
+                            <label class="form-label">{{ __('City') }}</label>
                             <input type="text" id="edit_city" name="city" class="form-control">
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">العنوان</label>
+                        <label class="form-label">{{ __('Address') }}</label>
                         <input type="text" id="edit_address" name="address" class="form-control">
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">تاريخ الميلاد</label>
+                            <label class="form-label">{{ __('Date of Birth') }}</label>
                             <input type="date" id="edit_date_of_birth" name="date_of_birth" class="form-control">
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">الجنس</label>
+                            <label class="form-label">{{ __('Gender') }}</label>
                             <select id="edit_gender" name="gender" class="form-control">
-                                <option value="">غير محدد</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
+                                <option value="">{{ __('Not Specified') }}</option>
+                                <option value="male">{{ __('Male') }}</option>
+                                <option value="female">{{ __('Female') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
-                            <label class="form-label">الحالة</label>
+                            <label class="form-label">{{ __('Status') }}</label>
                             <select id="edit_status" name="status" class="form-control" required>
-                                <option value="active">نشط</option>
-                                <option value="inactive">غير نشط</option>
+                                <option value="active">{{ __('Active') }}</option>
+                                <option value="inactive">{{ __('Inactive') }}</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">الأدوار (الصلاحيات)</label>
+                        <label class="form-label">{{ __('Roles (Permissions)') }}</label>
                         <div class="checkbox-grid">
                             @foreach($roles as $role)
                             <div class="checkbox-item">
@@ -312,8 +312,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">تحديث المستخدم</button>
+                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('Update User') }}</button>
                 </div>
             </form>
         </div>
@@ -325,7 +325,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">الملف الشخصي للمستخدم</h5>
+                <h5 class="modal-title">{{ __('User Profile') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="viewUserBody">
@@ -387,16 +387,16 @@
                 { data: 'actions', orderable: false, searchable: false }
             ],
             language: {
-                "sProcessing": "جاري التحميل...",
-                "sLengthMenu": "أظهر _MENU_ مدخلات",
-                "sZeroRecords": "لم يعثر على أية سجلات",
-                "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                "sSearch": "بحث:",
+                "sProcessing": "{{ __('Loading...') }}",
+                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
+                "sZeroRecords": "{{ __('No matching records found') }}",
+                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
+                "sSearch": "{{ __('Search:') }}",
                 "oPaginate": {
-                    "sFirst": "الأول",
-                    "sPrevious": "السابق",
-                    "sNext": "التالي",
-                    "sLast": "الأخير"
+                    "sFirst": "{{ __('First') }}",
+                    "sPrevious": "{{ __('Previous') }}",
+                    "sNext": "{{ __('Next') }}",
+                    "sLast": "{{ __('Last') }}"
                 }
             }
         });
@@ -488,17 +488,17 @@
                         </div>
                         <div class="col-md-8">
                             <table class="table table-bordered table-striped" style="text-align:right;">
-                                <tr><th>الاسم الأول</th><td>${user.first_name || '---'}</td></tr>
-                                <tr><th>اسم العائلة</th><td>${user.last_name || '---'}</td></tr>
-                                <tr><th>البريد الإلكتروني</th><td>${user.email}</td></tr>
-                                <tr><th>رقم الهاتف</th><td dir="ltr" style="text-align:right;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
-                                <tr><th>رقم الهوية</th><td>${user.id_number || '---'}</td></tr>
-                                <tr><th>المدينة</th><td>${user.city || '---'}</td></tr>
-                                <tr><th>الدولة</th><td>${user.country || '---'}</td></tr>
-                                <tr><th>العنوان</th><td>${user.address || '---'}</td></tr>
-                                <tr><th>الجنس</th><td>${user.gender === 'male' ? 'ذكر' : (user.gender === 'female' ? 'أنثى' : '---')}</td></tr>
-                                <tr><th>تاريخ الميلاد</th><td>${user.date_of_birth || '---'}</td></tr>
-                                <tr><th>تاريخ الانضمام</th><td>${response.created_at}</td></tr>
+                                <tr><th>{{ __('First Name') }}</th><td>${user.first_name || '---'}</td></tr>
+                                <tr><th>{{ __('Last Name') }}</th><td>${user.last_name || '---'}</td></tr>
+                                <tr><th>{{ __('Email Address') }}</th><td>${user.email}</td></tr>
+                                <tr><th>{{ __('Phone Number') }}</th><td dir="ltr" style="text-align:right;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
+                                <tr><th>{{ __('ID / Residence Number') }}</th><td>${user.id_number || '---'}</td></tr>
+                                <tr><th>{{ __('City') }}</th><td>${user.city || '---'}</td></tr>
+                                <tr><th>{{ __('Country') }}</th><td>${user.country || '---'}</td></tr>
+                                <tr><th>{{ __('Address') }}</th><td>${user.address || '---'}</td></tr>
+                                <tr><th>{{ __('Gender') }}</th><td>${user.gender === 'male' ? '{{ __("Male") }}' : (user.gender === 'female' ? '{{ __("Female") }}' : '---')}</td></tr>
+                                <tr><th>{{ __('Date of Birth') }}</th><td>${user.date_of_birth || '---'}</td></tr>
+                                <tr><th>{{ __('Date Joined') }}</th><td>${response.created_at}</td></tr>
                             </table>
                         </div>
                     </div>

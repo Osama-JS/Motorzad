@@ -21,11 +21,11 @@
 
         function updateUI(theme) {
             if (theme === 'dark') {
-                label.textContent = 'الوضع الليلي';
+                label.textContent = '{{ __("Dark Mode") }}';
                 moonIcon.style.display = 'block';
                 sunIcon.style.display = 'none';
             } else {
-                label.textContent = 'الوضع النهاري';
+                label.textContent = '{{ __("Light Mode") }}';
                 moonIcon.style.display = 'none';
                 sunIcon.style.display = 'block';
             }
