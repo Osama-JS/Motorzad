@@ -14,7 +14,7 @@
     </a>
 </div>
 
-<div style="max-width:800px;">
+<div style="max-width:800px; width:100%;">
     <div class="card">
         <div class="card-header">
             <h2>{{ __('Update Role Information') }}</h2>

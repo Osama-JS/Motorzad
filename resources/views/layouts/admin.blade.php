@@ -29,6 +29,9 @@
     @yield('css')
 </head>
 <body>
+    {{-- ========== SIDEBAR OVERLAY ========== --}}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     {{-- ========== SIDEBAR ========== --}}
     @include('layouts.admin.sidebar')
 
@@ -57,6 +60,56 @@
 
     @include('layouts.admin.scripts')
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+                });
+            }
+
+            if (sidebarCloseBtn) {
+                sidebarCloseBtn.addEventListener('click', closeSidebar);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+
+            // Close sidebar on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    closeSidebar();
+                }
+            });
+
+            // Close sidebar when clicking a nav item on mobile
+            document.querySelectorAll('.sidebar .nav-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 1024) {
+                        closeSidebar();
+                    }
+                });
+            });
+        });
+    </script>
     @yield('js')
 </body>
 </html>

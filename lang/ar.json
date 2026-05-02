@@ -151,5 +151,12 @@
     "Page Details": "تفاصيل الصفحة",
     "Edit Page:": "تعديل الصفحة:",
     "Update Page": "تحديث الصفحة",
-    "Are you sure you want to delete this page?": "هل أنت متأكد من حذف هذه الصفحة؟"
+    "Are you sure you want to delete this page?": "هل أنت متأكد من حذف هذه الصفحة؟",
+    "Active Users": "المستخدمين النشطين",
+    "Inactive Users": "المستخدمين غير النشطين",
+    "Unverified Users": "المستخدمين غير الموثقين",
+    "Total Pages": "إجمالي الصفحات",
+    "Active Pages": "الصفحات النشطة",
+    "Inactive Pages": "الصفحات غير النشطة",
+    "Footer Pages": "صفحات التذييل"
 }

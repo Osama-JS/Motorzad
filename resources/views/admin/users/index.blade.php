@@ -5,31 +5,53 @@
 @section('css')
 
 <style>
-
-    .modal-backdrop{
+    .modal-backdrop {
         --bs-backdrop-zindex: 0 !important;
+    }
+    .modal {
+        z-index: 1050 !important;
     }
 
     /* DataTables wrapper spacing */
     .dataTables_wrapper { padding: 1rem; color: var(--text-color); }
-
-
-    
-    .mb-3 { margin-bottom: 1rem !important; }
-
-    .dataTables_wrapper { padding: 1rem; color: var(--text-color); }
     .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input {
-        background-color: var(--surface-color);
-        color: var(--text-color);
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        padding: 4px;
+        background-color: var(--bg-input);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 12px;
     }
-    .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-muted); }
-    table.dataTable.table-striped>tbody>tr.odd>* { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.02); }
+    
+    .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { 
+        color: var(--text-muted); 
+        margin-top: 1rem;
+    }
+
     .table td { vertical-align: middle; }
     
-    .form-group label { margin-bottom: 0.5rem; display: block; font-weight: 500; }
+    .form-group label { margin-bottom: 0.5rem; display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); }
+
+    /* Custom Checkbox Styling for Grid */
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .checkbox-item {
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        padding: 0.75rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+    
+    .checkbox-item:hover {
+        border-color: var(--brand-red);
+    }
 
     /* Loading Overlay */
     #page-loader {
@@ -38,23 +60,52 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
         display: none;
         justify-content: center;
         align-items: center;
         z-index: 9999;
     }
     .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--brand-red);
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255,255,255,0.1);
+        border-top: 5px solid var(--brand-red);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Adjustments for User Table */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .page-header .btn {
+            width: 100%;
+        }
+        
+        /* Modal adjustments */
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        .row > [class^="col-"] {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* Fix for horizontal scroll in small tables */
+    .table-responsive {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        margin-top: 0.5rem;
     }
 </style>
 @endsection
@@ -76,12 +127,51 @@
 </button>
 </div>
 
+<div class="row mb-4">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+        <div class="stat-card blue h-100">
+            <div class="stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-value">{{ $stats['total'] }}</div>
+            <div class="stat-label">{{ __('Total Users') }}</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+        <div class="stat-card green h-100">
+            <div class="stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="stat-value">{{ $stats['active'] }}</div>
+            <div class="stat-label">{{ __('Active Users') }}</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-sm-0">
+        <div class="stat-card red h-100">
+            <div class="stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="stat-value">{{ $stats['inactive'] }}</div>
+            <div class="stat-label">{{ __('Inactive Users') }}</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card gold h-100">
+            <div class="stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-value">{{ $stats['unverified'] }}</div>
+            <div class="stat-label">{{ __('Unverified Users') }}</div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h2>{{ __('Users List') }}</h2>
     </div>
     <div class="table-responsive">
-        <table id="users-table" class="table table-striped w-100" style="text-align: right;">
+        <table id="users-table" class="table table-striped w-100">
             <thead>
                 <tr>
                     <th>{{ __('Photo') }}</th>
@@ -483,23 +573,28 @@
                 const user = response.user;
                 const html = `
                     <div class="row">
-                        <div class="col-md-4 text-center">
-                            <img src="${response.photo_url}" class="img-fluid rounded shadow mb-3" style="max-width: 150px; border-radius:12px;">
+                        <div class="col-md-4 text-center mb-4 mb-md-0">
+                            <img src="${response.photo_url}" class="img-fluid rounded shadow mb-3" style="max-width: 150px; width: 100%; border-radius:12px; object-fit: cover;">
+                            <div class="mt-2">
+                                <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-danger'}">${user.status === 'active' ? '{{ __("Active") }}' : '{{ __("Inactive") }}'}</span>
+                            </div>
                         </div>
                         <div class="col-md-8">
-                            <table class="table table-bordered table-striped" style="text-align:right;">
-                                <tr><th>{{ __('First Name') }}</th><td>${user.first_name || '---'}</td></tr>
-                                <tr><th>{{ __('Last Name') }}</th><td>${user.last_name || '---'}</td></tr>
-                                <tr><th>{{ __('Email Address') }}</th><td>${user.email}</td></tr>
-                                <tr><th>{{ __('Phone Number') }}</th><td dir="ltr" style="text-align:right;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
-                                <tr><th>{{ __('ID / Residence Number') }}</th><td>${user.id_number || '---'}</td></tr>
-                                <tr><th>{{ __('City') }}</th><td>${user.city || '---'}</td></tr>
-                                <tr><th>{{ __('Country') }}</th><td>${user.country || '---'}</td></tr>
-                                <tr><th>{{ __('Address') }}</th><td>${user.address || '---'}</td></tr>
-                                <tr><th>{{ __('Gender') }}</th><td>${user.gender === 'male' ? '{{ __("Male") }}' : (user.gender === 'female' ? '{{ __("Female") }}' : '---')}</td></tr>
-                                <tr><th>{{ __('Date of Birth') }}</th><td>${user.date_of_birth || '---'}</td></tr>
-                                <tr><th>{{ __('Date Joined') }}</th><td>${response.created_at}</td></tr>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" style="text-align:right;">
+                                    <tr><th style="width: 40%;">{{ __('First Name') }}</th><td>${user.first_name || '---'}</td></tr>
+                                    <tr><th>{{ __('Last Name') }}</th><td>${user.last_name || '---'}</td></tr>
+                                    <tr><th>{{ __('Email Address') }}</th><td>${user.email}</td></tr>
+                                    <tr><th>{{ __('Phone Number') }}</th><td dir="ltr" style="text-align:right;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
+                                    <tr><th>{{ __('ID / Residence Number') }}</th><td>${user.id_number || '---'}</td></tr>
+                                    <tr><th>{{ __('City') }}</th><td>${user.city || '---'}</td></tr>
+                                    <tr><th>{{ __('Country') }}</th><td>${user.country || '---'}</td></tr>
+                                    <tr><th>{{ __('Address') }}</th><td>${user.address || '---'}</td></tr>
+                                    <tr><th>{{ __('Gender') }}</th><td>${user.gender === 'male' ? '{{ __("Male") }}' : (user.gender === 'female' ? '{{ __("Female") }}' : '---')}</td></tr>
+                                    <tr><th>{{ __('Date of Birth') }}</th><td>${user.date_of_birth || '---'}</td></tr>
+                                    <tr><th>{{ __('Date Joined') }}</th><td>${response.created_at}</td></tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 `;

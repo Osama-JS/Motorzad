@@ -21,12 +21,43 @@
     </a>
 </div>
 
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </div>
+        <div class="stat-value">{{ $stats['total'] }}</div>
+        <div class="stat-label">{{ __('Total Pages') }}</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stat-value">{{ $stats['active'] }}</div>
+        <div class="stat-label">{{ __('Active Pages') }}</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="stat-value">{{ $stats['inactive'] }}</div>
+        <div class="stat-label">{{ __('Inactive Pages') }}</div>
+    </div>
+    <div class="stat-card gold">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="stat-value">{{ $stats['footer'] }}</div>
+        <div class="stat-label">{{ __('Footer Pages') }}</div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h2>{{ __('Pages List') }}</h2>
     </div>
     <div class="table-responsive">
-        <table id="pages-table" class="table table-striped w-100" style="text-align: right;">
+        <table id="pages-table" class="table table-striped w-100">
             <thead>
                 <tr>
                     <th>{{ __('ID') }}</th>

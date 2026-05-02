@@ -10,6 +10,23 @@
     </div>
 </div>
 
+<div class="stats-grid">
+    <div class="stat-card green">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="stat-value">{{ $permissions->count() }}</div>
+        <div class="stat-label">{{ __('All Permissions') }}</div>
+    </div>
+    <div class="stat-card gold">
+        <div class="stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="stat-value">{{ $permissions->sum(function($p) { return $p->roles->count(); }) }}</div>
+        <div class="stat-label">{{ __('Linked to') }} {{ __('Role') }}</div>
+    </div>
+</div>
+
 <div class="two-col">
     {{-- Permissions Table --}}
     <div class="col-wide">
@@ -18,6 +35,7 @@
                 <h2>{{ __('All Permissions') }}</h2>
                 <span class="badge badge-info">{{ $permissions->count() }} {{ __('Permission') }}</span>
             </div>
+            <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -49,7 +67,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5">
+                        <td colspan="4">
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 <p>{{ __('No permissions. Add the first permission from the side form.') }}</p>
@@ -59,6 +77,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

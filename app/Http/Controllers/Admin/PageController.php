@@ -14,7 +14,13 @@ class PageController extends Controller
      */
     public function index()
     {
-        return view('admin.pages.index');
+        $stats = [
+            'total' => Page::count(),
+            'active' => Page::where('is_active', true)->count(),
+            'inactive' => Page::where('is_active', false)->count(),
+            'footer' => Page::where('show_in_footer', true)->count(),
+        ];
+        return view('admin.pages.index', compact('stats'));
     }
 
     /**
