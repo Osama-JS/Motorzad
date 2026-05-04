@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -35,8 +35,19 @@ class User extends Authenticatable
         'profile_photo',
         'password',
         'id_number',
+        'kyc_level',
         'identity_verified_at',
     ];
+
+    public function kycRequests()
+    {
+        return $this->hasMany(KycRequest::class);
+    }
+
+    public function latestKycRequest()
+    {
+        return $this->hasOne(KycRequest::class)->latestOfMany();
+    }
 
     public function getFullNameAttribute()
     {

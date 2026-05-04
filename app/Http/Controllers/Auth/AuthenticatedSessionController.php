@@ -32,6 +32,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('admin.dashboard'));
         }
 
+        if ($request->user()->hasRole('bidder')) {
+            return redirect()->intended(route('bidder.dashboard'));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

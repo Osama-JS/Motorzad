@@ -31,15 +31,24 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'phone' => ['required', 'string', 'max:20', 'unique:'.User::class],
+            'country_code' => ['required', 'string', 'max:10'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
+            'phone' => $request->phone,
+            'country_code' => $request->country_code,
             'password' => Hash::make($request->password),
+            'status' => 'pending', // الحساب يبدأ بانتظار التحقق
+            'kyc_level' => 0,
         ]);
 
         $user->assignRole('bidder');
@@ -48,10 +57,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if ($user->hasRole('admin')) {
-            return redirect(route('admin.dashboard'));
-        }
-
-        return redirect(route('dashboard', absolute: false));
+        // Redirect to verification notice as a mandatory first step
+        return redirect()->route('verification.notice');
     }
 }

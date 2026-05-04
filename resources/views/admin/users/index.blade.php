@@ -142,26 +142,26 @@
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div class="stat-value">{{ $stats['active'] }}</div>
-            <div class="stat-label">{{ __('Active Users') }}</div>
+            <div class="stat-value">{{ $stats['approved'] }}</div>
+            <div class="stat-label">{{ __('Approved Users') }}</div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-sm-0">
+        <div class="stat-card gold h-100">
+            <div class="stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="stat-value">{{ $stats['pending'] }}</div>
+            <div class="stat-label">بانتظار التحقق</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
         <div class="stat-card red h-100">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
-            <div class="stat-value">{{ $stats['inactive'] }}</div>
-            <div class="stat-label">{{ __('Inactive Users') }}</div>
-        </div>
-    </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card gold h-100">
-            <div class="stat-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <div class="stat-value">{{ $stats['unverified'] }}</div>
-            <div class="stat-label">{{ __('Unverified Users') }}</div>
+            <div class="stat-value">{{ $stats['rejected'] }}</div>
+            <div class="stat-label">المرفوضة</div>
         </div>
     </div>
 </div>
@@ -178,9 +178,9 @@
                     <th>{{ __('Information') }}</th>
                     <th>{{ __('Phone Number') }}</th>
                     <th>{{ __('Roles') }}</th>
+                    <th>KYC Level</th>
                     <th>{{ __('Status') }}</th>
-                    <th>{{ __('Account Verification') }}</th>
-                    <th>{{ __('Identity Verification') }}</th>
+                    <th>{{ __('Verification') }}</th>
                     <th>{{ __('Actions') }}</th>
                 </tr>
             </thead>
@@ -269,10 +269,20 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
+                            <label class="form-label">KYC Level</label>
+                            <select name="kyc_level" class="form-control" required>
+                                <option value="0">Level 0</option>
+                                <option value="1">Level 1</option>
+                                <option value="2">Level 2</option>
+                                <option value="3">Level 3</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Status') }}</label>
                             <select name="status" class="form-control" required>
-                                <option value="active">{{ __('Active') }}</option>
-                                <option value="inactive">{{ __('Inactive') }}</option>
+                                <option value="pending">بانتظار التحقق</option>
+                                <option value="approved">مقبول</option>
+                                <option value="rejected">مرفوض</option>
                             </select>
                         </div>
                     </div>
@@ -379,10 +389,20 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
+                            <label class="form-label">KYC Level</label>
+                            <select id="edit_kyc_level" name="kyc_level" class="form-control" required>
+                                <option value="0">Level 0</option>
+                                <option value="1">Level 1</option>
+                                <option value="2">Level 2</option>
+                                <option value="3">Level 3</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Status') }}</label>
                             <select id="edit_status" name="status" class="form-control" required>
-                                <option value="active">{{ __('Active') }}</option>
-                                <option value="inactive">{{ __('Inactive') }}</option>
+                                <option value="pending">بانتظار التحقق</option>
+                                <option value="approved">مقبول</option>
+                                <option value="rejected">مرفوض</option>
                             </select>
                         </div>
                     </div>
@@ -431,7 +451,7 @@
 <script>
     var usersDataUrl = "{{ route('admin.users.data') }}";
     let updateUserUrl = "{{ route('admin.users.update', ':id') }}";
-    let toggleStatusUrlTemplate = "{{ route('admin.users.toggle-status', ':id') }}";
+    let updateStatusUrlTemplate = "{{ route('admin.users.update-status', ':id') }}";
 </script>
 
 <script>
@@ -471,9 +491,9 @@
                 { data: 'info' },
                 { data: 'phone' },
                 { data: 'roles' },
+                { data: 'kyc_level' },
                 { data: 'status' },
                 { data: 'verified' },
-                { data: 'identity' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
             language: {
@@ -571,12 +591,16 @@
         $.get(url, function(response) {
             if (response.success) {
                 const user = response.user;
+                const kyc = response.kyc_request;
                 const html = `
                     <div class="row">
                         <div class="col-md-4 text-center mb-4 mb-md-0">
                             <img src="${response.photo_url}" class="img-fluid rounded shadow mb-3" style="max-width: 150px; width: 100%; border-radius:12px; object-fit: cover;">
                             <div class="mt-2">
-                                <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-danger'}">${user.status === 'active' ? '{{ __("Active") }}' : '{{ __("Inactive") }}'}</span>
+                                <span class="badge ${user.status === 'approved' ? 'badge-success' : (user.status === 'rejected' ? 'badge-danger' : 'badge-warning')}">${user.status === 'approved' ? 'مقبول ✅' : (user.status === 'rejected' ? 'مرفوض ❌' : 'بانتظار التحقق ⏳')}</span>
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge badge-info">Level ${user.kyc_level}</span>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -587,16 +611,35 @@
                                     <tr><th>{{ __('Email Address') }}</th><td>${user.email}</td></tr>
                                     <tr><th>{{ __('Phone Number') }}</th><td dir="ltr" style="text-align:right;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
                                     <tr><th>{{ __('ID / Residence Number') }}</th><td>${user.id_number || '---'}</td></tr>
-                                    <tr><th>{{ __('City') }}</th><td>${user.city || '---'}</td></tr>
-                                    <tr><th>{{ __('Country') }}</th><td>${user.country || '---'}</td></tr>
-                                    <tr><th>{{ __('Address') }}</th><td>${user.address || '---'}</td></tr>
-                                    <tr><th>{{ __('Gender') }}</th><td>${user.gender === 'male' ? '{{ __("Male") }}' : (user.gender === 'female' ? '{{ __("Female") }}' : '---')}</td></tr>
-                                    <tr><th>{{ __('Date of Birth') }}</th><td>${user.date_of_birth || '---'}</td></tr>
                                     <tr><th>{{ __('Date Joined') }}</th><td>${response.created_at}</td></tr>
                                 </table>
                             </div>
                         </div>
                     </div>
+
+                    ${kyc ? `
+                    <hr class="my-4">
+                    <h5 class="mb-3">مستندات التحقق (KYC Request)</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="d-block font-bold mb-2">صورة الهوية</label>
+                            <a href="${kyc.id_image_url}" target="_blank">
+                                <img src="${kyc.id_image_url}" class="img-fluid rounded border" style="max-height: 200px;">
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="d-block font-bold mb-2">صورة السيلفي</label>
+                            <a href="${kyc.selfie_image_url}" target="_blank">
+                                <img src="${kyc.selfie_image_url}" class="img-fluid rounded border" style="max-height: 200px;">
+                            </a>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <p><strong>الاسم في الطلب:</strong> ${kyc.full_name}</p>
+                            <p><strong>الدولة:</strong> ${kyc.country}</p>
+                            ${kyc.admin_note ? `<div class="p-3 bg-light rounded mt-2"><strong>ملاحظة الإدارة:</strong> ${kyc.admin_note}</div>` : ''}
+                        </div>
+                    </div>
+                    ` : '<div class="alert alert-info mt-3 text-center">لا يوجد طلب تحقق مرفق لهذا المستخدم.</div>'}
                 `;
                 $('#viewUserBody').html(html);
                 $('#viewUserModal').modal('show');
@@ -627,6 +670,7 @@
                 $('#edit_date_of_birth').val(user.date_of_birth);
                 $('#edit_id_number').val(user.id_number);
                 $('#edit_status').val(user.status);
+                $('#edit_kyc_level').val(user.kyc_level);
                 $('#edit_gender').val(user.gender);
                 $('#edit_password').val('');
                 
@@ -641,22 +685,33 @@
         });
     }
 
-    function toggleUserStatus(id) {
-        const url = toggleStatusUrlTemplate.replace(':id', id);
+    function updateUserStatus(id, status) {
+        const url = updateStatusUrlTemplate.replace(':id', id);
+        let title = status === 'approved' ? 'قبول التحقق؟' : 'رفض التحقق؟';
+        let text = status === 'approved' ? 'سيتم قبول مستندات المستخدم ورفع مستواه إلى Level 3.' : 'سيتم رفض الطلب. يرجى إدخال سبب الرفض أدناه:';
+        let icon = status === 'approved' ? 'success' : 'warning';
+        let confirmBtn = status === 'approved' ? '#10b981' : '#ef4444';
+
         Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: 'هل تريد تغيير حالة المستخدم؟',
-            icon: 'warning',
+            title: title,
+            text: text,
+            input: status === 'rejected' ? 'textarea' : null,
+            inputPlaceholder: 'اكتب سبب الرفض هنا...',
+            icon: icon,
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: confirmBtn,
             cancelButtonColor: '#d33',
-            confirmButtonText: 'نعم، قم بالتغيير!',
+            confirmButtonText: 'نعم، قم بالتأكيد!',
             cancelButtonText: 'إلغاء'
         }).then((result) => {
-            if (result.value || result.isConfirmed) {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: url,
                     method: 'POST',
+                    data: { 
+                        status: status,
+                        note: result.value || ''
+                    },
                     success: function(response) {
                         if (response.success) {
                             usersTable.ajax.reload(null, false);

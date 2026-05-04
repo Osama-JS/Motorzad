@@ -19,12 +19,22 @@
 
         .auth-wrapper {
             width: 100%;
-            max-width: 440px;
+            max-width: 500px;
             animation: fadeIn 0.6s ease;
         }
 
         .auth-card {
             padding: 2.5rem;
+        }
+        
+        .row {
+            margin-right: -0.75rem;
+            margin-left: -0.75rem;
+        }
+        
+        .col-md-6 {
+            padding-right: 0.75rem;
+            padding-left: 0.75rem;
         }
 
         .auth-logo {

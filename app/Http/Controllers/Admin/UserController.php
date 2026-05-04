@@ -15,8 +15,9 @@ class UserController extends Controller
     {
         $stats = [
             'total' => User::count(),
-            'active' => User::where('status', 'active')->count(),
-            'inactive' => User::where('status', 'inactive')->count(),
+            'approved' => User::where('status', 'approved')->count(),
+            'pending' => User::where('status', 'pending')->count(),
+            'rejected' => User::where('status', 'rejected')->count(),
             'unverified' => User::whereNull('email_verified_at')->count(),
         ];
         
@@ -29,19 +30,21 @@ class UserController extends Controller
      */
     public function getData(Request $request)
     {
-        $users = User::with('roles')->get();
+        $users = User::with(['roles', 'latestKycRequest'])->get();
 
         return response()->json([
             'data' => $users->map(function($user) {
-                $statusBadge = $user->status === 'active'
-                    ? '<span class="badge badge-success">نشط</span>'
-                    : '<span class="badge badge-danger">غير نشط</span>';
+                if ($user->status === 'approved') {
+                    $statusBadge = '<span class="badge badge-success">مقبول ✅</span>';
+                } elseif ($user->status === 'rejected') {
+                    $statusBadge = '<span class="badge badge-danger">مرفوض ❌</span>';
+                } else {
+                    $statusBadge = '<span class="badge badge-warning">بانتظار التحقق ⏳</span>';
+                }
+
+                $kycLevelBadge = '<span class="badge badge-info">Level ' . $user->kyc_level . '</span>';
 
                 $verifiedBadge = $user->email_verified_at
-                    ? '<span class="badge badge-success">موثق</span>'
-                    : '<span class="badge badge-warning">غير موثق</span>';
-
-                $identityBadge = $user->identity_verified_at
                     ? '<span class="badge badge-success">موثق</span>'
                     : '<span class="badge badge-warning">غير موثق</span>';
 
@@ -60,16 +63,15 @@ class UserController extends Controller
                             </div>',
                     'phone' => ($user->country_code ? $user->country_code . ' ' : '') . ($user->phone ?? '---'),
                     'roles' => $rolesHtml,
+                    'kyc_level' => $kycLevelBadge,
                     'status' => $statusBadge,
                     'verified' => $verifiedBadge,
-                    'identity' => $identityBadge,
                     'actions' => '
                         <div class="actions-cell" style="display:flex; gap:5px; justify-content:center;">
                             <button onclick="viewUser(' . $user->id . ')" class="btn-icon-only info" title="عرض الملف" style="background:#3b82f6; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                             <button onclick="editUser(' . $user->id . ')" class="btn-icon-only edit" title="تعديل" style="background:var(--primary); color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                            ' . (!$user->email_verified_at ? '<button onclick="verifyUser(' . $user->id . ')" class="btn-icon-only success" title="توثيق الحساب" style="background:#10b981; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>' : '') . '
-                            ' . (!$user->identity_verified_at ? '<button onclick="verifyIdentity(' . $user->id . ')" class="btn-icon-only info" title="توثيق الهوية" style="background:#06b6d4; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>' : '') . '
-                            <button onclick="toggleUserStatus(' . $user->id . ')" class="btn-icon-only warning" title="تفعيل/تعطيل" style="background:#f59e0b; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></button>
+                            ' . ($user->status !== 'approved' ? '<button onclick="updateUserStatus(' . $user->id . ', \'approved\')" class="btn-icon-only success" title="قبول" style="background:#10b981; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>' : '') . '
+                            ' . ($user->status !== 'rejected' ? '<button onclick="updateUserStatus(' . $user->id . ', \'rejected\')" class="btn-icon-only danger" title="رفض" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '') . '
                             <button onclick="deleteUser(' . $user->id . ')" class="btn-icon-only delete" title="حذف" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                         </div>'
                 ];
@@ -79,11 +81,22 @@ class UserController extends Controller
 
     public function show(Request $request, User $user)
     {
+        $kycRequest = $user->latestKycRequest;
+        
         return response()->json([
             'success' => true,
             'user' => $user,
             'roles' => $user->roles->pluck('name')->toArray(),
             'photo_url' => $user->profile_photo_url,
+            'kyc_request' => $kycRequest ? [
+                'full_name' => $kycRequest->full_name,
+                'country' => $kycRequest->country,
+                'id_number' => $kycRequest->id_number,
+                'id_image_url' => asset('storage/' . $kycRequest->id_image),
+                'selfie_image_url' => asset('storage/' . $kycRequest->selfie_image),
+                'status' => $kycRequest->status,
+                'admin_note' => $kycRequest->admin_note,
+            ] : null,
             'created_at' => $user->created_at->format('Y-m-d H:i')
         ]);
     }
@@ -97,7 +110,8 @@ class UserController extends Controller
             'phone'        => 'nullable|string|unique:users,phone',
             'country_code' => 'nullable|string|max:10',
             'password'     => 'required|min:8',
-            'status'       => 'required|in:active,inactive',
+            'status'       => 'required|in:approved,pending,rejected',
+            'kyc_level'    => 'required|integer|min:0|max:3',
             'country'      => 'nullable|string|max:100',
             'city'         => 'nullable|string|max:100',
             'address'      => 'nullable|string|max:500',
@@ -132,7 +146,8 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', Rule::unique('users')->ignore($user->id)],
             'country_code' => 'nullable|string|max:10',
             'password' => 'nullable|min:8',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:approved,pending,rejected',
+            'kyc_level' => 'required|integer|min:0|max:3',
             'country'      => 'nullable|string|max:100',
             'city'         => 'nullable|string|max:100',
             'address'      => 'nullable|string|max:500',
@@ -142,7 +157,7 @@ class UserController extends Controller
             'roles' => 'array'
         ]);
 
-        $data = $request->only(['first_name', 'last_name', 'email', 'phone', 'country_code', 'status', 'country', 'city', 'address', 'gender', 'date_of_birth', 'id_number']);
+        $data = $request->only(['first_name', 'last_name', 'email', 'phone', 'country_code', 'status', 'kyc_level', 'country', 'city', 'address', 'gender', 'date_of_birth', 'id_number']);
         $data['name'] = $request->first_name . ' ' . $request->last_name;
 
         if ($request->filled('password')) {
@@ -160,14 +175,44 @@ class UserController extends Controller
         ]);
     }
 
-    public function toggleStatus(User $user)
+    public function updateStatus(Request $request, User $user)
     {
-        $newStatus = $user->status === 'active' ? 'inactive' : 'active';
-        $user->update(['status' => $newStatus]);
+        $request->validate([
+            'status' => 'required|in:approved,pending,rejected',
+            'note' => 'nullable|string'
+        ]);
+
+        $newStatus = $request->status;
+        $user->update([
+            'status' => $newStatus,
+            'kyc_level' => ($newStatus === 'approved' ? 3 : ($newStatus === 'rejected' ? 1 : $user->kyc_level))
+        ]);
+
+        // Update the latest KYC request as well
+        $kyc = $user->latestKycRequest;
+        if ($kyc) {
+            $kyc->update([
+                'status' => $newStatus,
+                'admin_note' => $request->note,
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now()
+            ]);
+        }
+
+        if ($newStatus === 'approved') {
+            \Illuminate\Support\Facades\Mail::raw('يسعدنا إخبارك بأنه تم قبول طلب التحقق (KYC) الخاص بك بنجاح. حسابك الآن موثق بالكامل ويمكنك استخدام كافة مميزات المنصة.', function ($message) use ($user) {
+                $message->to($user->email)->subject('تم قبول توثيق حسابك ✅ - موتورزاد');
+            });
+        } elseif ($newStatus === 'rejected') {
+            $note = $request->note ? "\nسبب الرفض: " . $request->note : "";
+            \Illuminate\Support\Facades\Mail::raw('نأسف لإخبارك بأنه تم رفض طلب التحقق (KYC) الخاص بك.' . $note . "\nيرجى إعادة رفع المستندات بشكل أوضح.", function ($message) use ($user) {
+                $message->to($user->email)->subject('تم رفض توثيق حسابك ❌ - موتورزاد');
+            });
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تغيير حالة المستخدم إلى ' . ($newStatus === 'active' ? 'نشط' : 'غير نشط'),
+            'message' => 'تم تحديث حالة التحقق بنجاح وإرسال إشعار للمستخدم.',
             'status' => $newStatus
         ]);
     }

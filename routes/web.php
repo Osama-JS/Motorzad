@@ -16,12 +16,16 @@ Route::get('lang/{locale}', function ($locale) {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // KYC Routes
+    Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
+    Route::post('/kyc', [\App\Http\Controllers\KycController::class, 'store'])->name('kyc.store');
 });
 
 // Admin Management Routes
@@ -32,7 +36,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
     Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
     Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
-    Route::post('users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::post('users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
     Route::post('users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verify'])->name('users.verify');
     Route::post('users/{user}/verify-identity', [\App\Http\Controllers\Admin\UserController::class, 'verifyIdentity'])->name('users.verify-identity');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
@@ -40,6 +44,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Settings Routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+});
+
+// Bidder Management Routes
+Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Bidder\DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::get('/resources', function () {
