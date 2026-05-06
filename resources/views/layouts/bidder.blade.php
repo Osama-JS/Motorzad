@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Motorazad Admin Dashboard - لوحة إدارة مزادات السيارات">
-    <title>Motorazad — @yield('title', 'لوحة التحكم')</title>
+    <meta name="description" content="Motorazad Bidder Dashboard - لوحة تحكم المزايد">
+    <title>Motorazad — @yield('title', 'لوحة المزايد')</title>
    
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @if (app()->getLocale() == 'ar')
         <link href="{{ asset('vendor/bootstrap/css/bootstrap.rtl.min.css') }}" rel="stylesheet">
     @else
-        <!-- Assuming you have standard bootstrap, or you can point to a CDN if it doesn't exist. Typically vendor/bootstrap/css/bootstrap.min.css -->
         <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     @endif
-    <!-- DataTables CSS -->
-      <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.bootstrap5.min.css') }}">
-    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bidder.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/toastr/toastr.min.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
     {{-- Apply saved theme immediately to prevent flash --}}
     <script>
         (function() {
@@ -34,11 +30,11 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     {{-- ========== SIDEBAR ========== --}}
-    @include('layouts.admin.sidebar')
+    @include('layouts.bidder.sidebar')
 
     {{-- ========== MAIN CONTENT ========== --}}
     <div class="main-content">
-        @include('layouts.admin.topbar')
+        @include('layouts.bidder.topbar')
 
         <div class="page-content fade-in">
             @if(session('success'))
@@ -94,14 +90,12 @@
                 overlay.addEventListener('click', closeSidebar);
             }
 
-            // Close sidebar on Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && sidebar.classList.contains('open')) {
                     closeSidebar();
                 }
             });
 
-            // Close sidebar when clicking a nav item on mobile
             document.querySelectorAll('.sidebar .nav-item').forEach(function(item) {
                 item.addEventListener('click', function() {
                     if (window.innerWidth <= 1024) {
