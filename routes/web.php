@@ -55,6 +55,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // Bidder Management Routes
 Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Bidder\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'index'])->name('bank-details.index');
+    Route::post('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'update'])->name('bank-details.update');
 });
 
 Route::get('/resources', function () {

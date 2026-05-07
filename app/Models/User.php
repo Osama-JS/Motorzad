@@ -37,6 +37,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'id_number',
         'kyc_level',
         'identity_verified_at',
+        'iban',
+        'bic_code',
+        'beneficiary_name',
+        'address_1',
+        'address_2',
+        'bank_city',
+        'bank_country',
+        'check_bank',
+        'bank_name',
+        'account_number',
     ];
 
     public function kycRequests()
