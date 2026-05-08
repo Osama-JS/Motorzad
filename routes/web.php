@@ -50,6 +50,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('bank-accounts/data', [App\Http\Controllers\Admin\BankAccountController::class, 'getData'])->name('bank-accounts.data');
     Route::post('bank-accounts/{id}/toggle-active', [App\Http\Controllers\Admin\BankAccountController::class, 'toggleActive'])->name('bank-accounts.toggle-active');
     Route::resource('bank-accounts', App\Http\Controllers\Admin\BankAccountController::class);
+
+    // FAQs Management
+    Route::get('faqs/data', [\App\Http\Controllers\Admin\FaqController::class, 'getData'])->name('faqs.data');
+    Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
+    Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
 });
 
 // Bidder Management Routes

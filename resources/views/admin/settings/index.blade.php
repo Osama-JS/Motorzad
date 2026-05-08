@@ -164,20 +164,52 @@
             <div class="card">
                 <div class="card-header"><h2>{{ __('Social Media Links') }}</h2></div>
                 <div class="card-body">
-                    <div class="social-input-group mb-3">
-                        <label class="form-label">{{ __('Facebook') }}</label>
-                        <div class="input-with-icon"><span class="input-icon" style="color:#1877f2;">f</span>
-                        <input type="url" name="facebook_url" class="form-control" value="{{ \App\Models\Setting::get('facebook_url') }}" dir="ltr"></div>
-                    </div>
-                    <div class="social-input-group mb-3">
-                        <label class="form-label">{{ __('Twitter (X)') }}</label>
-                        <div class="input-with-icon"><span class="input-icon" style="color:#1da1f2;">𝕏</span>
-                        <input type="url" name="twitter_url" class="form-control" value="{{ \App\Models\Setting::get('twitter_url') }}" dir="ltr"></div>
-                    </div>
-                    <div class="social-input-group mb-3">
-                        <label class="form-label">{{ __('Instagram') }}</label>
-                        <div class="input-with-icon"><span class="input-icon" style="color:#e4405f;">◎</span>
-                        <input type="url" name="instagram_url" class="form-control" value="{{ \App\Models\Setting::get('instagram_url') }}" dir="ltr"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Facebook') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#1877f2;"><i class="fa-brands fa-facebook-f"></i></span>
+                            <input type="url" name="facebook_url" class="form-control" value="{{ \App\Models\Setting::get('facebook_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Twitter (X)') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#1da1f2;"><i class="fa-brands fa-x-twitter"></i></span>
+                            <input type="url" name="twitter_url" class="form-control" value="{{ \App\Models\Setting::get('twitter_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Instagram') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#e4405f;"><i class="fa-brands fa-instagram"></i></span>
+                            <input type="url" name="instagram_url" class="form-control" value="{{ \App\Models\Setting::get('instagram_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('LinkedIn') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#0a66c2;"><i class="fa-brands fa-linkedin-in"></i></span>
+                            <input type="url" name="linkedin_url" class="form-control" value="{{ \App\Models\Setting::get('linkedin_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('TikTok') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#000000;"><i class="fa-brands fa-tiktok"></i></span>
+                            <input type="url" name="tiktok_url" class="form-control" value="{{ \App\Models\Setting::get('tiktok_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Snapchat') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#FFFC00; text-shadow: 0px 0px 1px #000;"><i class="fa-brands fa-snapchat"></i></span>
+                            <input type="url" name="snapchat_url" class="form-control" value="{{ \App\Models\Setting::get('snapchat_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('YouTube') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#FF0000;"><i class="fa-brands fa-youtube"></i></span>
+                            <input type="url" name="youtube_url" class="form-control" value="{{ \App\Models\Setting::get('youtube_url') }}" dir="ltr"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('WhatsApp') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#25D366;"><i class="fa-brands fa-whatsapp"></i></span>
+                            <input type="text" name="whatsapp_number" class="form-control" value="{{ \App\Models\Setting::get('whatsapp_number') }}" dir="ltr" placeholder="Example: +966500000000"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Telegram') }}</label>
+                            <div class="input-with-icon"><span class="input-icon" style="color:#0088cc;"><i class="fa-brands fa-telegram"></i></span>
+                            <input type="url" name="telegram_url" class="form-control" value="{{ \App\Models\Setting::get('telegram_url') }}" dir="ltr"></div>
+                        </div>
                     </div>
                 </div>
             </div>
