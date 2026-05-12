@@ -55,6 +55,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('faqs/data', [\App\Http\Controllers\Admin\FaqController::class, 'getData'])->name('faqs.data');
     Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
     Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
+
+    // Wallets Management
+    Route::get('wallets/data', [\App\Http\Controllers\Admin\WalletController::class, 'getData'])->name('wallets.data');
+    Route::get('wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');
+    Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
+    Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
+    Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
 });
 
 // Bidder Management Routes

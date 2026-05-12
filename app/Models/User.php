@@ -15,6 +15,22 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable, HasRoles;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            $user->wallet()->create([
+                'balance' => 0,
+                'total_deposits' => 0,
+                'total_withdrawals' => 0,
+                'debt_ceiling' => 0,
+                'debt_usage' => 0,
+            ]);
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -48,6 +64,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'bank_name',
         'account_number',
     ];
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
 
     public function kycRequests()
     {
