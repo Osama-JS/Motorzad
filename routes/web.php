@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WalletTransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,6 +27,18 @@ Route::middleware('auth')->group(function () {
     // KYC Routes
     Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
     Route::post('/kyc', [\App\Http\Controllers\KycController::class, 'store'])->name('kyc.store');
+});
+
+// مسارات إدارة حركات المحفظة المخصصة بالمعيار الصناعي (ذات أولوية توجيه عليا)
+Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role:admin'])->group(function () {
+    // جلب سجل الحركات للجدول
+    Route::get('/transactions', [WalletTransactionController::class, 'index'])->name('transactions.index');
+    // حفظ معاملة جديدة من النافذة المنبثقة
+    Route::post('/transactions', [WalletTransactionController::class, 'store'])->name('transactions.store');
+    // جلب بيانات معاملة محددة للتعديل
+    Route::get('/transactions/{transaction}/edit', [WalletTransactionController::class, 'edit'])->name('transactions.edit');
+    // تحديث المعاملة المالية عبر AJAX
+    Route::post('/transactions/{transaction}/update', [WalletTransactionController::class, 'update'])->name('transactions.update');
 });
 
 // Admin Management Routes

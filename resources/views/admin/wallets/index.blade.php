@@ -88,67 +88,36 @@
     </div>
 </div>
 
-<!-- Modal for adjusting balance -->
-<div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ __('Add Financial Transaction') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="transactionForm" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" id="wallet_id" name="wallet_id">
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Operation Type') }}</label>
-                        <select name="type" class="form-control" required>
-                            <option value="credit">{{ __('Deposit') }} (Credit)</option>
-                            <option value="debit">{{ __('Withdraw') }} (Debit)</option>
-                        </select>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Amount') }}</label>
-                        <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Description / Notes') }}</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Attachment (Optional)') }}</label>
-                        <input type="file" name="attachment" class="form-control">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Save Transaction') }}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@endsection
 
+@section('modals')
 <!-- Modal for updating debt ceiling -->
-<div class="modal fade" id="debtModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="debtModal" tabindex="-1" aria-labelledby="debtModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ __('Update Debt Ceiling') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+        <div class="modal-content border-0 shadow-lg">
             <form id="debtForm">
                 @csrf
                 <input type="hidden" id="debt_wallet_id" name="wallet_id">
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Allowed Debt Ceiling') }}</label>
-                        <input type="number" name="debt_ceiling" id="debt_ceiling_input" class="form-control" step="0.01" min="0" required>
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold fs-4 d-flex align-items-center gap-2" id="debtModalLabel">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold, #f59e0b)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>{{ __('Update Debt Ceiling') }}</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <div class="card border-0 shadow-none mb-0" style="background: var(--bg-body); border-radius: var(--radius-lg);">
+                        <div class="card-body p-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label fw-bold">{{ __('Allowed Debt Ceiling') }} <span class="text-danger">*</span></label>
+                                <input type="number" name="debt_ceiling" id="debt_ceiling_input" class="form-control form-control-lg px-3 py-2" step="0.01" min="0" required>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
+                <div class="modal-footer border-top-0 pb-4 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-ghost px-4 py-2" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm">{{ __('Update') }}</button>
                 </div>
             </form>
         </div>
@@ -194,16 +163,16 @@
                 { 
                     data: 'id',
                     render: function(data, type, row) {
+                        const baseUrl = "{{ url('admin/wallets') }}";
                         return `
-                            <div class="btn-group">
-                                <a href="/admin/wallets/${data}" class="btn btn-sm btn-info" title="{{ __('View Details') }}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <div class="btn-group shadow-sm" style="border-radius: 8px;">
+                                <a href="${baseUrl}/${data}/transactions" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold" title="{{ __('Advanced Transactions History') }}">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4H10a2 2 0 0 1-2-2v-4"/><circle cx="18" cy="12" r="1.5"/></svg>
+                                    <span>{{ __('Transactions') }}</span>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-success" onclick="openTransactionModal(${data})" title="{{ __('Add Transaction') }}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-warning" onclick="openDebtModal(${data}, ${row.debt_ceiling})" title="{{ __('Debt Ceiling') }}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <button type="button" class="btn btn-sm btn-warning d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-dark" onclick="openDebtModal(${data}, ${row.debt_ceiling})" title="{{ __('Debt Ceiling') }}">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                                    <span>{{ __('Ceiling') }}</span>
                                 </button>
                             </div>
                         `;
@@ -225,38 +194,14 @@
             }
         });
 
-        // Handle Transaction Form Submit
-        $('#transactionForm').on('submit', function(e) {
-            e.preventDefault();
-            const id = $('#wallet_id').val();
-            const formData = new FormData(this);
-            
-            $.ajax({
-                url: `/admin/wallets/${id}/transaction`,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        $('#transactionModal').modal('hide');
-                        walletsTable.ajax.reload(null, false);
-                        Swal.fire("{{ __('Success') }}", response.message, 'success');
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire("{{ __('Error') }}", "{{ __('Operation failed, please check the data') }}", 'error');
-                }
-            });
-        });
-
         // Handle Debt Form Submit
         $('#debtForm').on('submit', function(e) {
             e.preventDefault();
             const id = $('#debt_wallet_id').val();
+            const baseUrl = "{{ url('admin/wallets') }}";
             
             $.ajax({
-                url: `/admin/wallets/${id}/debt-ceiling`,
+                url: `${baseUrl}/${id}/debt-ceiling`,
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {
@@ -272,12 +217,6 @@
             });
         });
     });
-
-    function openTransactionModal(id) {
-        $('#wallet_id').val(id);
-        $('#transactionForm')[0].reset();
-        $('#transactionModal').modal('show');
-    }
 
     function openDebtModal(id, currentCeiling) {
         $('#debt_wallet_id').val(id);

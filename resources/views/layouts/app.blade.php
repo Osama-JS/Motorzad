@@ -11,11 +11,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <link href="{{ asset('vendor/bootstrap/css/bootstrap.rtl.min.css') }}" rel="stylesheet">
-        <!-- DataTables CSS -->
-        <link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.boot    strap5.min.css') }}">
-        <!-- Toastr CSS -->
-        <link rel="stylesheet" href="{{ asset('vendor/toastr/toastr.min.css') }}">
+        
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
