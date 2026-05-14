@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('withdrawal_requests', function (Blueprint $table) {
+            $table->id();
             // الروابط (العلاقات)
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->comment('السائق طالب السحب');
             $table->foreignId('wallet_id')->constrained('wallets')->cascadeOnDelete()->comment('رقم المحفظة');
