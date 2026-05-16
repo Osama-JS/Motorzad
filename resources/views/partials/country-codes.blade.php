@@ -1,0 +1,72 @@
+<option value="+966" {{ $selected == '+966' ? 'selected' : '' }}>السعودية (+966)</option>
+<option value="+971" {{ $selected == '+971' ? 'selected' : '' }}>الإمارات (+971)</option>
+<option value="+965" {{ $selected == '+965' ? 'selected' : '' }}>الكويت (+965)</option>
+<option value="+974" {{ $selected == '+974' ? 'selected' : '' }}>قطر (+974)</option>
+<option value="+968" {{ $selected == '+968' ? 'selected' : '' }}>عمان (+968)</option>
+<option value="+973" {{ $selected == '+973' ? 'selected' : '' }}>البحرين (+973)</option>
+<option value="+20" {{ $selected == '+20' ? 'selected' : '' }}>مصر (+20)</option>
+<option value="+962" {{ $selected == '+962' ? 'selected' : '' }}>الأردن (+962)</option>
+<option value="+961" {{ $selected == '+961' ? 'selected' : '' }}>لبنان (+961)</option>
+<option value="+963" {{ $selected == '+963' ? 'selected' : '' }}>سوريا (+963)</option>
+<option value="+964" {{ $selected == '+964' ? 'selected' : '' }}>العراق (+964)</option>
+<option value="+212" {{ $selected == '+212' ? 'selected' : '' }}>المغرب (+212)</option>
+<option value="+213" {{ $selected == '+213' ? 'selected' : '' }}>الجزائر (+213)</option>
+<option value="+216" {{ $selected == '+216' ? 'selected' : '' }}>تونس (+216)</option>
+<option value="+218" {{ $selected == '+218' ? 'selected' : '' }}>ليبيا (+218)</option>
+<option value="+249" {{ $selected == '+249' ? 'selected' : '' }}>السودان (+249)</option>
+<option value="+967" {{ $selected == '+967' ? 'selected' : '' }}>اليمن (+967)</option>
+<option value="+970" {{ $selected == '+970' ? 'selected' : '' }}>فلسطين (+970)</option>
+<option value="+252" {{ $selected == '+252' ? 'selected' : '' }}>الصومال (+252)</option>
+<option value="+222" {{ $selected == '+222' ? 'selected' : '' }}>موريتانيا (+222)</option>
+<option value="+253" {{ $selected == '+253' ? 'selected' : '' }}>جيبوتي (+253)</option>
+<option value="+269" {{ $selected == '+269' ? 'selected' : '' }}>جزر القمر (+269)</option>
+<option value="+1" {{ $selected == '+1' ? 'selected' : '' }}>الولايات المتحدة / كندا (+1)</option>
+<option value="+44" {{ $selected == '+44' ? 'selected' : '' }}>المملكة المتحدة (+44)</option>
+<option value="+33" {{ $selected == '+33' ? 'selected' : '' }}>فرنسا (+33)</option>
+<option value="+49" {{ $selected == '+49' ? 'selected' : '' }}>ألمانيا (+49)</option>
+<option value="+90" {{ $selected == '+90' ? 'selected' : '' }}>تركيا (+90)</option>
+<option value="+39" {{ $selected == '+39' ? 'selected' : '' }}>إيطاليا (+39)</option>
+<option value="+34" {{ $selected == '+34' ? 'selected' : '' }}>إسبانيا (+34)</option>
+<option value="+7" {{ $selected == '+7' ? 'selected' : '' }}>روسيا (+7)</option>
+<option value="+86" {{ $selected == '+86' ? 'selected' : '' }}>الصين (+86)</option>
+<option value="+91" {{ $selected == '+91' ? 'selected' : '' }}>الهند (+91)</option>
+<option value="+81" {{ $selected == '+81' ? 'selected' : '' }}>اليابان (+81)</option>
+<option value="+82" {{ $selected == '+82' ? 'selected' : '' }}>كوريا الجنوبية (+82)</option>
+<option value="+61" {{ $selected == '+61' ? 'selected' : '' }}>أستراليا (+61)</option>
+<option value="+55" {{ $selected == '+55' ? 'selected' : '' }}>البرازيل (+55)</option>
+<option value="+52" {{ $selected == '+52' ? 'selected' : '' }}>المكسيك (+52)</option>
+<option value="+27" {{ $selected == '+27' ? 'selected' : '' }}>جنوب أفريقيا (+27)</option>
+<option value="+60" {{ $selected == '+60' ? 'selected' : '' }}>ماليزيا (+60)</option>
+<option value="+62" {{ $selected == '+62' ? 'selected' : '' }}>إندونيسيا (+62)</option>
+<option value="+63" {{ $selected == '+63' ? 'selected' : '' }}>الفلبين (+63)</option>
+<option value="+66" {{ $selected == '+66' ? 'selected' : '' }}>تايلاند (+66)</option>
+<option value="+92" {{ $selected == '+92' ? 'selected' : '' }}>باكستان (+92)</option>
+<option value="+31" {{ $selected == '+31' ? 'selected' : '' }}>هولندا (+31)</option>
+<option value="+32" {{ $selected == '+32' ? 'selected' : '' }}>بلجيكا (+32)</option>
+<option value="+41" {{ $selected == '+41' ? 'selected' : '' }}>سويسرا (+41)</option>
+<option value="+46" {{ $selected == '+46' ? 'selected' : '' }}>السويد (+46)</option>
+<option value="+47" {{ $selected == '+47' ? 'selected' : '' }}>النرويج (+47)</option>
+<option value="+45" {{ $selected == '+45' ? 'selected' : '' }}>الدنمارك (+45)</option>
+<option value="+358" {{ $selected == '+358' ? 'selected' : '' }}>فنلندا (+358)</option>
+<option value="+353" {{ $selected == '+353' ? 'selected' : '' }}>أيرلندا (+353)</option>
+<option value="+351" {{ $selected == '+351' ? 'selected' : '' }}>البرتغال (+351)</option>
+<option value="+30" {{ $selected == '+30' ? 'selected' : '' }}>اليونان (+30)</option>
+<option value="+48" {{ $selected == '+48' ? 'selected' : '' }}>بولندا (+48)</option>
+<option value="+420" {{ $selected == '+420' ? 'selected' : '' }}>التشيك (+420)</option>
+<option value="+36" {{ $selected == '+36' ? 'selected' : '' }}>المجر (+36)</option>
+<option value="+43" {{ $selected == '+43' ? 'selected' : '' }}>النمسا (+43)</option>
+<option value="+64" {{ $selected == '+64' ? 'selected' : '' }}>نيوزيلندا (+64)</option>
+<option value="+65" {{ $selected == '+65' ? 'selected' : '' }}>سنغافورة (+65)</option>
+<option value="+84" {{ $selected == '+84' ? 'selected' : '' }}>فيتنام (+84)</option>
+<option value="+234" {{ $selected == '+234' ? 'selected' : '' }}>نيجيريا (+234)</option>
+<option value="+251" {{ $selected == '+251' ? 'selected' : '' }}>إثيوبيا (+251)</option>
+<option value="+254" {{ $selected == '+254' ? 'selected' : '' }}>كينيا (+254)</option>
+<option value="+255" {{ $selected == '+255' ? 'selected' : '' }}>تنزانيا (+255)</option>
+<option value="+256" {{ $selected == '+256' ? 'selected' : '' }}>أوغندا (+256)</option>
+<option value="+233" {{ $selected == '+233' ? 'selected' : '' }}>غانا (+233)</option>
+<option value="+225" {{ $selected == '+225' ? 'selected' : '' }}>ساحل العاج (+225)</option>
+<option value="+54" {{ $selected == '+54' ? 'selected' : '' }}>الأرجنتين (+54)</option>
+<option value="+56" {{ $selected == '+56' ? 'selected' : '' }}>تشيلي (+56)</option>
+<option value="+57" {{ $selected == '+57' ? 'selected' : '' }}>كولومبيا (+57)</option>
+<option value="+51" {{ $selected == '+51' ? 'selected' : '' }}>بيرو (+51)</option>
+<option value="+58" {{ $selected == '+58' ? 'selected' : '' }}>فنزويلا (+58)</option>

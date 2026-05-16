@@ -39,7 +39,9 @@
     <div class="form-group">
         <label class="form-label">رقم الهاتف</label>
         <div style="display: flex; gap: 0.5rem;">
-            <input type="text" name="country_code" class="form-control" placeholder="+966" value="{{ old('country_code', '+966') }}" style="max-width: 80px;" required>
+            <select name="country_code" class="form-control" style="max-width: 120px;" required>
+                @include('partials.country-codes', ['selected' => old('country_code', '+966')])
+            </select>
             <input type="text" name="phone" class="form-control" placeholder="50xxxxxxx" value="{{ old('phone') }}" required>
         </div>
         @error('phone')

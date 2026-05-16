@@ -227,7 +227,9 @@
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Country Code') }}</label>
-                            <input type="text" name="country_code" class="form-control" placeholder="+966" dir="ltr" style="text-align:left;">
+                            <select name="country_code" class="form-control" dir="ltr" style="text-align:left;">
+                                @include('partials.country-codes', ['selected' => '+966'])
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Phone Number') }}</label>
@@ -347,7 +349,9 @@
                     <div class="row">
                         <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Country Code') }}</label>
-                            <input type="text" id="edit_country_code" name="country_code" class="form-control" placeholder="+966" dir="ltr" style="text-align:left;">
+                            <select id="edit_country_code" name="country_code" class="form-control" dir="ltr" style="text-align:left;">
+                                @include('partials.country-codes', ['selected' => ''])
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3 form-group">
                             <label class="form-label">{{ __('Phone Number') }}</label>

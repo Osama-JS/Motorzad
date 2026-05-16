@@ -88,6 +88,12 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/dashboard', [\App\Http\Controllers\Bidder\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'index'])->name('bank-details.index');
     Route::post('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'update'])->name('bank-details.update');
+
+    // Wallet Routes
+    Route::get('/wallet', [\App\Http\Controllers\Bidder\WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/transactions', [\App\Http\Controllers\Bidder\WalletController::class, 'transactions'])->name('wallet.transactions');
+    Route::post('/wallet/withdraw', [\App\Http\Controllers\Bidder\WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
+    Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
 });
 
 Route::get('/resources', function () {

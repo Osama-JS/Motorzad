@@ -80,6 +80,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(KycRequest::class)->latestOfMany();
     }
 
+    public function depositRequests()
+    {
+        return $this->hasMany(DepositRequest::class);
+    }
+
+    public function withdrawalRequests()
+    {
+        return $this->hasMany(WithdrawalRequest::class);
+    }
+
     public function getFullNameAttribute()
     {
         if ($this->first_name && $this->last_name) {

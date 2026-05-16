@@ -56,9 +56,16 @@
             </a>
 
             <div class="nav-section-title">{{ __('Account') }}</div>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.wallet') ? 'active' : '' }}">
+            <a href="{{ route('bidder.wallet.index') }}" class="nav-item {{ request()->routeIs('bidder.wallet.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 <span>{{ __('My Wallet') }}</span>
+            </a>
+            <a href="{{ route('kyc.index') }}" class="nav-item {{ request()->routeIs('kyc.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>{{ __('Identity Verification') }}</span>
+                @if(auth()->user()->kyc_level == 0)
+                    <span class="nav-badge" style="background:rgba(245,158,11,.15); color:#f59e0b;">{{ __('Required') }}</span>
+                @endif
             </a>
             <a href="{{ route('bidder.bank-details.index') }}" class="nav-item {{ request()->routeIs('bidder.bank-details.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/><line x1="5" y1="21" x2="5" y2="10"/><line x1="19" y1="21" x2="19" y2="10"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>
