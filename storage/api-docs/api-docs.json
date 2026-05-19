@@ -1,0 +1,313 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Motorzad API Documentation",
+        "description": "API Documentation for Motorzad Car Auctions Platform.",
+        "contact": {
+            "email": "support@motorzad.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/Motorzad/public",
+            "description": "XAMPP Apache Server (Local)"
+        },
+        {
+            "url": "http://localhost:8000",
+            "description": "Artisan Development Server (php artisan serve)"
+        },
+        {
+            "url": "/",
+            "description": "Production Server (Root Domain)"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new bidder",
+                "description": "Registers a new bidder and sends a verification link to their email.",
+                "operationId": "registerBidder",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "The language of the response (ar, en)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "phone",
+                                    "country_code",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "country_code": {
+                                        "type": "string",
+                                        "example": "+966"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Riyadh"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1995-05-15"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful registration",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration successful. Please verify your email via the link sent."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login a user",
+                "description": "Logs in a user and returns an authentication token. Supports login using either email or phone number.",
+                "operationId": "loginUser",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "The language of the response (ar, en)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized / Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "These credentials do not match our records."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
+}
