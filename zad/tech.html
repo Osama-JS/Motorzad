@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>موتورزاد — التقنيات والبنية التحتية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e53e3e;--bg:#0a0d14;--card:#161c27;--card2:#1a2235;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--text2:#8892a4;--text3:#c0cde0;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--purple:#8b5cf6;--gold:#d4af37}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;font-size:0.85rem}
+.topbar a{color:var(--text2)}.topbar a:hover{color:var(--text)}.sep{color:var(--border)}
+.page-hero{background:linear-gradient(135deg,#0a0d14,#0d1420);border-bottom:1px solid var(--border);padding:56px 40px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(245,158,11,0.1),transparent);pointer-events:none}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:var(--orange);padding:5px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;margin-bottom:20px;position:relative}
+.page-hero h1{font-size:2.6rem;font-weight:900;position:relative}.page-hero h1 span{color:var(--orange)}
+.page-hero p{color:var(--text2);margin-top:10px;font-size:0.95rem;position:relative}
+.container{max-width:1150px;margin:0 auto;padding:50px 40px}
+.sec-hd{margin-bottom:22px}.sec-hd h2{font-size:1.4rem;font-weight:800}.sec-hd p{color:var(--text2);font-size:0.87rem;margin-top:5px}
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:50px}
+.tech-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.tech-card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.tech-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.tech-card-head h3{font-size:0.95rem;font-weight:700}
+.tech-card-head p{font-size:0.75rem;color:var(--text2);margin-top:2px}
+.tech-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;display:flex;align-items:center;justify-content:space-between}
+.tech-item:last-child{border-bottom:none}
+.tech-name{color:var(--text3)}
+.tech-badge{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:50px}
+.b-cur{background:rgba(34,197,94,0.12);color:var(--green)}
+.b-add{background:rgba(239,68,68,0.12);color:#ef4444}
+.b-opt{background:rgba(59,130,246,0.12);color:var(--blue)}
+.pkg-section{margin-bottom:50px}
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pkg-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.pkg-head{padding:14px 20px;background:var(--card2);border-bottom:1px solid var(--border);font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.pkg-body{padding:16px 20px}
+.pkg-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.83rem}
+.pkg-row:last-child{border-bottom:none}
+.pkg-name{font-family:monospace;color:var(--text3);font-size:0.8rem}
+.pkg-cmd{font-family:monospace;font-size:0.72rem;color:var(--text2);background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:4px}
+.arch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:50px}
+.arch-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center}
+.arch-card .icon{font-size:2rem;margin-bottom:12px}
+.arch-card h3{font-size:0.95rem;font-weight:700;margin-bottom:8px}
+.arch-card p{font-size:0.8rem;color:var(--text2);line-height:1.6}
+.arch-card .arrow{font-size:1.5rem;color:var(--border);margin:0 -8px}
+.flow-wrap{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;margin-bottom:50px}
+.flow-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:0.82rem;font-weight:600;text-align:center;color:var(--text3)}
+.flow-arrow{color:var(--text2);font-size:1.2rem;padding:0 4px}
+.cmd-section{margin-bottom:50px}
+.cmd-block{background:#0d1117;border:1px solid var(--border);border-radius:12px;padding:20px;font-family:monospace;font-size:0.83rem;line-height:2}
+.cmd-comment{color:#636e7b}
+.cmd-cmd{color:#7ec8e3}
+.cmd-arg{color:#f0d060}
+footer{border-top:1px solid var(--border);padding:24px 40px;text-align:center;color:var(--text2);font-size:0.82rem}
+footer a{color:var(--red)}
+@media(max-width:900px){.pkg-grid{grid-template-columns:1fr}.arch-grid{grid-template-columns:1fr 1fr}.container{padding:30px 20px}.page-hero{padding:40px 20px}.page-hero h1{font-size:2rem}}
+@media(max-width:600px){.arch-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">🏠 الرئيسية</a><span class="sep">/</span>
+  <span style="color:var(--text)">التقنيات والبنية التحتية</span>
+  <span style="margin-right:auto"></span><a href="index.html">← العودة</a>
+</div>
+
+<div class="page-hero">
+  <div class="badge">🛠️ Tech Stack</div>
+  <h1>التقنيات <span>والبنية التحتية</span></h1>
+  <p>مراجعة شاملة للتقنيات المستخدمة وما يُنصح إضافته لاستكمال منصة مزادات احترافية</p>
+</div>
+
+<div class="container">
+
+  <!-- CURRENT STACK -->
+  <div class="sec-hd"><h2>✅ التقنيات الموجودة حالياً</h2><p>الأدوات والحزم المثبتة في المشروع</p></div>
+  <div class="tech-grid">
+
+    <div class="tech-card">
+      <div class="tech-card-head">
+        <div class="tech-icon" style="background:rgba(255,45,32,0.12)">🐘</div>
+        <div><h3>Laravel (PHP)</h3><p>الإطار الخلفي الأساسي</p></div>
+      </div>
+      <div class="tech-item"><span class="tech-name">Laravel Framework</span><span class="tech-badge b-cur">v10/11</span></div>
+      <div class="tech-item"><span class="tech-name">Laravel Breeze</span><span class="tech-badge b-cur">Auth</span></div>
+      <div class="tech-item"><span class="tech-name">Spatie Permissions</span><span class="tech-badge b-cur">Roles</span></div>
+      <div class="tech-item"><span class="tech-name">Eloquent ORM</span><span class="tech-badge b-cur">Database</span></div>
+      <div class="tech-item"><span class="tech-name">Laravel Mail</span><span class="tech-badge b-cur">Email</span></div>
+      <div class="tech-item"><span class="tech-name">Laravel Storage</span><span class="tech-badge b-cur">Files</span></div>
+    </div>
+
+    <div class="tech-card">
+      <div class="tech-card-head">
+        <div class="tech-icon" style="background:rgba(59,130,246,0.12)">🎨</div>
+        <div><h3>Frontend</h3><p>واجهة المستخدم</p></div>
+      </div>
+      <div class="tech-item"><span class="tech-name">Blade Templates</span><span class="tech-badge b-cur">Views</span></div>
+      <div class="tech-item"><span class="tech-name">Tailwind CSS</span><span class="tech-badge b-cur">Styling</span></div>
+      <div class="tech-item"><span class="tech-name">Bootstrap 5 (Admin)</span><span class="tech-badge b-cur">Admin UI</span></div>
+      <div class="tech-item"><span class="tech-name">DataTables.js</span><span class="tech-badge b-cur">Tables</span></div>
+      <div class="tech-item"><span class="tech-name">Toastr.js</span><span class="tech-badge b-cur">Alerts</span></div>
+      <div class="tech-item"><span class="tech-name">Font Awesome 6</span><span class="tech-badge b-cur">Icons</span></div>
+    </div>
+
+    <div class="tech-card">
+      <div class="tech-card-head">
+        <div class="tech-icon" style="background:rgba(34,197,94,0.12)">🗄️</div>
+        <div><h3>قاعدة البيانات</h3><p>التخزين والاستعلامات</p></div>
+      </div>
+      <div class="tech-item"><span class="tech-name">MySQL (XAMPP)</span><span class="tech-badge b-cur">Primary DB</span></div>
+      <div class="tech-item"><span class="tech-name">Laravel Migrations</span><span class="tech-badge b-cur">Schema</span></div>
+      <div class="tech-item"><span class="tech-name">Laravel Seeders</span><span class="tech-badge b-cur">Data</span></div>
+      <div class="tech-item"><span class="tech-name">Eloquent Relationships</span><span class="tech-badge b-cur">ORM</span></div>
+    </div>
+
+    <div class="tech-card">
+      <div class="tech-card-head">
+        <div class="tech-icon" style="background:rgba(245,158,11,0.12)">⚙️</div>
+        <div><h3>Build Tools</h3><p>أدوات البناء والتطوير</p></div>
+      </div>
+      <div class="tech-item"><span class="tech-name">Vite</span><span class="tech-badge b-cur">Bundler</span></div>
+      <div class="tech-item"><span class="tech-name">PostCSS</span><span class="tech-badge b-cur">CSS</span></div>
+      <div class="tech-item"><span class="tech-name">Yarn</span><span class="tech-badge b-cur">Packages</span></div>
+      <div class="tech-item"><span class="tech-name">XAMPP (Apache)</span><span class="tech-badge b-cur">Local Server</span></div>
+    </div>
+
+  </div>
+
+  <!-- REQUIRED PACKAGES -->
+  <div class="sec-hd"><h2>📦 الحزم المطلوب إضافتها</h2><p>حزم PHP وJS ضرورية لاستكمال وحدات المنصة</p></div>
+  <div class="pkg-grid">
+
+    <div class="pkg-card">
+      <div class="pkg-head">🐘 حزم PHP (Composer)</div>
+      <div class="pkg-body">
+        <div class="pkg-row"><span class="pkg-name">laravel/reverb</span><span class="pkg-cmd">WebSockets (Real-time)</span></div>
+        <div class="pkg-row"><span class="pkg-name">pusher/pusher-php-server</span><span class="pkg-cmd">البث اللحظي</span></div>
+        <div class="pkg-row"><span class="pkg-name">intervention/image</span><span class="pkg-cmd">ضغط صور السيارات</span></div>
+        <div class="pkg-row"><span class="pkg-name">maatwebsite/excel</span><span class="pkg-cmd">تصدير Excel</span></div>
+        <div class="pkg-row"><span class="pkg-name">barryvdh/laravel-dompdf</span><span class="pkg-cmd">تصدير PDF</span></div>
+        <div class="pkg-row"><span class="pkg-name">laravel/horizon</span><span class="pkg-cmd">إدارة Queue Jobs</span></div>
+        <div class="pkg-row"><span class="pkg-name">laravel/scout</span><span class="pkg-cmd">بحث نصي متقدم</span></div>
+      </div>
+    </div>
+
+    <div class="pkg-card">
+      <div class="pkg-head">📦 حزم JavaScript (NPM/Yarn)</div>
+      <div class="pkg-body">
+        <div class="pkg-row"><span class="pkg-name">laravel-echo</span><span class="pkg-cmd">استقبال البث اللحظي</span></div>
+        <div class="pkg-row"><span class="pkg-name">pusher-js</span><span class="pkg-cmd">مكتبة Pusher للـ JS</span></div>
+        <div class="pkg-row"><span class="pkg-name">chart.js</span><span class="pkg-cmd">الرسوم البيانية</span></div>
+        <div class="pkg-row"><span class="pkg-name">flatpickr</span><span class="pkg-cmd">اختيار التواريخ</span></div>
+        <div class="pkg-row"><span class="pkg-name">sortablejs</span><span class="pkg-cmd">ترتيب صور السيارات</span></div>
+        <div class="pkg-row"><span class="pkg-name">glightbox</span><span class="pkg-cmd">معرض صور السيارة</span></div>
+        <div class="pkg-row"><span class="pkg-name">alpinejs</span><span class="pkg-cmd">تفاعلية خفيفة الوزن</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="sec-hd"><h2>🏗️ بنية التطبيق المقترحة</h2><p>كيفية تنظيم الكود للمراحل القادمة</p></div>
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="icon">🌐</div>
+      <h3>طلب المستخدم</h3>
+      <p>المتصفح يرسل HTTP Request إلى Laravel Router الذي يوجهه للـ Middleware والـ Controller</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">⚙️</div>
+      <h3>طبقة الخدمات</h3>
+      <p>Services Layer: WalletService, AuctionService, BidService — منطق الأعمال مفصول عن الـ Controller</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">🗄️</div>
+      <h3>طبقة البيانات</h3>
+      <p>Eloquent Models مع Relationships محكمة وScopes للاستعلامات الشائعة</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">📡</div>
+      <h3>البث اللحظي</h3>
+      <p>Events → Broadcasting → Laravel Echo → WebSocket Channel يُحدّث واجهة المزايد فوراً</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">⏰</div>
+      <h3>المهام الخلفية</h3>
+      <p>Queue Jobs للإشعارات والإيميلات. Scheduled Commands لإنهاء المزادات تلقائياً</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">🔔</div>
+      <h3>الإشعارات</h3>
+      <p>Laravel Notifications → Database + Mail + Broadcast للتبليغ الفوري والمحفوظ</p>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="sec-hd"><h2>💻 أوامر التثبيت المطلوبة</h2><p>الأوامر الجاهزة للنسخ واللصق لتثبيت الحزم</p></div>
+  <div class="cmd-block">
+    <div class="cmd-comment"># حزم PHP المطلوبة</div>
+    <div><span class="cmd-cmd">composer require</span> <span class="cmd-arg">laravel/reverb intervention/image-laravel</span></div>
+    <div><span class="cmd-cmd">composer require</span> <span class="cmd-arg">maatwebsite/excel barryvdh/laravel-dompdf</span></div>
+    <div><span class="cmd-cmd">composer require</span> <span class="cmd-arg">pusher/pusher-php-server laravel/horizon</span></div>
+    <div>&nbsp;</div>
+    <div class="cmd-comment"># حزم JavaScript المطلوبة</div>
+    <div><span class="cmd-cmd">yarn add</span> <span class="cmd-arg">laravel-echo pusher-js chart.js flatpickr alpinejs</span></div>
+    <div><span class="cmd-cmd">yarn add</span> <span class="cmd-arg">sortablejs glightbox</span></div>
+    <div>&nbsp;</div>
+    <div class="cmd-comment"># إعداد Laravel Reverb (WebSockets)</div>
+    <div><span class="cmd-cmd">php artisan</span> <span class="cmd-arg">reverb:install</span></div>
+    <div><span class="cmd-cmd">php artisan</span> <span class="cmd-arg">reverb:start</span></div>
+    <div>&nbsp;</div>
+    <div class="cmd-comment"># Migrations الجديدة المطلوبة</div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_vehicles_table</span></div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_vehicle_images_table</span></div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_auctions_table</span></div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_bids_table</span></div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_auction_deposits_table</span></div>
+    <div><span class="cmd-cmd">php artisan make:migration</span> <span class="cmd-arg">create_watchlists_table</span></div>
+    <div>&nbsp;</div>
+    <div class="cmd-comment"># Models وServices المطلوبة</div>
+    <div><span class="cmd-cmd">php artisan make:model</span> <span class="cmd-arg">Vehicle -mf</span></div>
+    <div><span class="cmd-cmd">php artisan make:model</span> <span class="cmd-arg">Auction -mf</span></div>
+    <div><span class="cmd-cmd">php artisan make:model</span> <span class="cmd-arg">Bid -mf</span></div>
+    <div><span class="cmd-cmd">php artisan make:service</span> <span class="cmd-arg">AuctionService</span></div>
+    <div><span class="cmd-cmd">php artisan make:service</span> <span class="cmd-arg">BidService</span></div>
+    <div>&nbsp;</div>
+    <div class="cmd-comment"># Events للبث اللحظي</div>
+    <div><span class="cmd-cmd">php artisan make:event</span> <span class="cmd-arg">BidPlaced</span></div>
+    <div><span class="cmd-cmd">php artisan make:event</span> <span class="cmd-arg">AuctionEnded</span></div>
+    <div><span class="cmd-cmd">php artisan make:notification</span> <span class="cmd-arg">AuctionWonNotification</span></div>
+    <div><span class="cmd-cmd">php artisan make:notification</span> <span class="cmd-arg">OutBidNotification</span></div>
+  </div>
+
+  <!-- FLOW -->
+  <div class="sec-hd" style="margin-top:50px"><h2>🔄 تدفق عملية المزايدة</h2><p>كيف تسير عملية المزايدة من البداية للنهاية تقنياً</p></div>
+  <div class="flow-wrap">
+    <div class="flow-box">🙋 المزايد<br>يضغط "زايد"</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">✅ التحقق<br>الرصيد + التأمين</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">💾 حفظ<br>bids record</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">📡 BidPlaced<br>Event يُطلق</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">🔊 Broadcast<br>WebSocket</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">📺 تحديث<br>كل المشاركين</div>
+  </div>
+  <div class="flow-wrap">
+    <div class="flow-box">⏰ المزاد<br>ينتهي</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">🏆 تحديد<br>الفائز</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">💸 إعادة<br>تأمين الخاسرين</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">📧 إشعار<br>الفائز</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">💳 الدفع<br>الإلكتروني</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">🚗 تسليم<br>السيارة</div>
+  </div>
+
+</div>
+<footer><p><a href="index.html">← العودة للرئيسية</a> &bull; موتورزاد — التقنيات والبنية التحتية &bull; مايو 2026</p></footer>
+</body>
+</html>

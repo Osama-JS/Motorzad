@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>موتورزاد — قاعدة البيانات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e53e3e;--bg:#0a0d14;--card:#161c27;--card2:#1a2235;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--text2:#8892a4;--text3:#c0cde0;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--purple:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;font-size:0.85rem}
+.topbar a{color:var(--text2)}.topbar a:hover{color:var(--text)}.sep{color:var(--border)}
+.page-hero{background:linear-gradient(135deg,#0a0d14,#0d1520);border-bottom:1px solid var(--border);padding:56px 40px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(59,130,246,0.1),transparent);pointer-events:none}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;padding:5px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;margin-bottom:20px;position:relative}
+.page-hero h1{font-size:2.6rem;font-weight:900;position:relative}.page-hero h1 span{color:var(--blue)}
+.page-hero p{color:var(--text2);margin-top:10px;font-size:0.95rem;position:relative}
+.container{max-width:1150px;margin:0 auto;padding:50px 40px}
+.sec-hd{margin-bottom:24px}.sec-hd h2{font-size:1.5rem;font-weight:800}.sec-hd p{color:var(--text2);font-size:0.88rem;margin-top:5px}
+.tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-bottom:50px}
+.tbl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;border-top:3px solid var(--accent)}
+.tbl-card-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.tbl-card-head h3{font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.tbl-badge{font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:50px}
+.b-done{background:rgba(34,197,94,0.15);color:var(--green)}
+.b-miss{background:rgba(239,68,68,0.15);color:#ef4444}
+.tbl-card-body{padding:14px 20px}
+.field-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem}
+.field-row:last-child{border-bottom:none}
+.field-name{color:var(--text3);font-family:monospace;font-size:0.8rem}
+.field-type{color:var(--text2);font-size:0.75rem;background:rgba(255,255,255,0.05);padding:2px 7px;border-radius:4px}
+.field-key{color:var(--orange);font-size:0.7rem;font-weight:700}
+.field-fk{color:var(--purple);font-size:0.7rem;font-weight:700}
+.rel-section{margin-bottom:50px}
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rel-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.rel-card h3{font-size:0.95rem;font-weight:700;margin-bottom:14px;color:var(--text3)}
+.rel-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.83rem}
+.rel-item:last-child{border-bottom:none}
+.rel-from{color:var(--blue);font-weight:600;min-width:120px;font-family:monospace;font-size:0.78rem}
+.rel-arrow{color:var(--text2)}
+.rel-to{color:var(--green);font-family:monospace;font-size:0.78rem}
+.rel-type{color:var(--text2);font-size:0.72rem;margin-right:auto}
+.missing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:50px}
+.miss-card{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:22px}
+.miss-card h3{font-size:0.95rem;font-weight:700;color:#ef4444;margin-bottom:14px}
+.miss-field{padding:6px 0;border-bottom:1px solid rgba(239,68,68,0.1);font-size:0.82rem;color:var(--text3)}
+.miss-field:last-child{border-bottom:none}
+footer{border-top:1px solid var(--border);padding:24px 40px;text-align:center;color:var(--text2);font-size:0.82rem}
+footer a{color:var(--red)}
+@media(max-width:768px){.container{padding:30px 20px}.rel-grid,.missing-grid{grid-template-columns:1fr}.page-hero{padding:40px 20px}.page-hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">🏠 الرئيسية</a><span class="sep">/</span>
+  <span style="color:var(--text)">قاعدة البيانات</span>
+  <span style="margin-right:auto"></span><a href="roadmap.html">خارطة الطريق →</a>
+</div>
+
+<div class="page-hero">
+  <div class="badge">🗄️ Database Schema</div>
+  <h1>قاعدة البيانات <span>والمخططات</span></h1>
+  <p>الجداول الموجودة، الجداول المطلوبة، والعلاقات الكاملة بين نماذج البيانات</p>
+</div>
+
+<div class="container">
+
+  <!-- EXISTING TABLES -->
+  <div class="sec-hd"><h2>✅ الجداول الموجودة (22 جدول)</h2><p>جداول قاعدة البيانات المبنية والمطبّقة حالياً</p></div>
+  <div class="tables-grid">
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>👤 users</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">name, first_name, last_name</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">email, phone, country_code</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">enum: pending/approved/rejected</span></div>
+        <div class="field-row"><span class="field-name">kyc_level</span><span class="field-type">integer 0-3</span></div>
+        <div class="field-row"><span class="field-name">iban, bic_code, bank_name</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">profile_photo, id_number</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">email_verified_at, identity_verified_at</span><span class="field-type">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>💰 wallets</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">user_id</span><span class="field-fk">FK→users</span></div>
+        <div class="field-row"><span class="field-name">balance</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">total_deposits</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">total_withdrawals</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">debt_ceiling</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">debt_usage</span><span class="field-type">decimal(5,2)</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>📋 wallet_transactions</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">wallet_id</span><span class="field-fk">FK→wallets</span></div>
+        <div class="field-row"><span class="field-name">type</span><span class="field-type">enum: credit/debit</span></div>
+        <div class="field-row"><span class="field-name">amount</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">description, attachment_path</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">created_by</span><span class="field-fk">FK→users</span></div>
+        <div class="field-row"><span class="field-name">payment_method, maturity_time</span><span class="field-type">string</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>📤 withdrawal_requests</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">user_id, wallet_id</span><span class="field-fk">FK</span></div>
+        <div class="field-row"><span class="field-name">requested_amount, approved_amount</span><span class="field-type">decimal</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">pending/approved/rejected/completed</span></div>
+        <div class="field-row"><span class="field-name">payment_method, admin_notes</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">action_by, processed_at</span><span class="field-type">FK/timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>📥 deposit_requests</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">user_id, wallet_id</span><span class="field-fk">FK</span></div>
+        <div class="field-row"><span class="field-name">bank_account_id</span><span class="field-fk">FK→bank_accounts</span></div>
+        <div class="field-row"><span class="field-name">amount</span><span class="field-type">decimal(15,2)</span></div>
+        <div class="field-row"><span class="field-name">receipt_path</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">pending/approved/rejected</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>🪪 kyc_requests</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">user_id</span><span class="field-fk">FK→users</span></div>
+        <div class="field-row"><span class="field-name">full_name, country, id_number</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">id_image, selfie_image</span><span class="field-type">string (path)</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">pending/approved/rejected</span></div>
+        <div class="field-row"><span class="field-name">admin_note, reviewed_by, reviewed_at</span><span class="field-type">mixed</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>🏦 bank_accounts</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">id</span><span class="field-key">PK</span></div>
+        <div class="field-row"><span class="field-name">bank_name</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">iban</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">beneficiary_name</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">logo_path</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">is_active</span><span class="field-type">boolean</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-card" style="--accent:#22c55e">
+      <div class="tbl-card-head"><h3>⚙️ settings / faqs / pages</h3><span class="tbl-badge b-done">✅ موجود</span></div>
+      <div class="tbl-card-body">
+        <div class="field-row"><span class="field-name">settings: key, value</span><span class="field-type">key-value store</span></div>
+        <div class="field-row"><span class="field-name">faqs: question_ar/en, answer_ar/en</span><span class="field-type">text</span></div>
+        <div class="field-row"><span class="field-name">faqs: is_active, sort_order</span><span class="field-type">boolean/int</span></div>
+        <div class="field-row"><span class="field-name">pages: title, slug, content</span><span class="field-type">string/text</span></div>
+        <div class="field-row"><span class="field-name">pages: meta_title, meta_desc</span><span class="field-type">string</span></div>
+        <div class="field-row"><span class="field-name">roles & permissions (Spatie)</span><span class="field-type">5 جداول</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MISSING TABLES -->
+  <div class="sec-hd"><h2>❌ الجداول المطلوبة (غير موجودة)</h2><p>جداول يجب إنشاؤها لتشغيل محرك المزادات</p></div>
+  <div class="missing-grid">
+
+    <div class="miss-card">
+      <h3>🚗 vehicles — جدول السيارات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">make (الماركة: تويوتا، BMW...)</div>
+      <div class="miss-field">model (الموديل: كامري، X5...)</div>
+      <div class="miss-field">year (سنة الصنع)</div>
+      <div class="miss-field">color, mileage, vin_number</div>
+      <div class="miss-field">condition: new/used/damaged</div>
+      <div class="miss-field">engine_size, transmission, fuel_type</div>
+      <div class="miss-field">inspection_report (تقرير الفحص)</div>
+      <div class="miss-field">ownership_documents (وثائق الملكية)</div>
+      <div class="miss-field">city, region, country</div>
+      <div class="miss-field">created_by FK→users</div>
+      <div class="miss-field">status: pending/approved/live/sold</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>🖼️ vehicle_images — صور السيارات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">vehicle_id FK→vehicles</div>
+      <div class="miss-field">image_path (مسار الصورة)</div>
+      <div class="miss-field">is_primary (الصورة الرئيسية)</div>
+      <div class="miss-field">sort_order (ترتيب العرض)</div>
+      <div class="miss-field">caption (وصف الصورة)</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>🔨 auctions — جدول المزادات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">vehicle_id FK→vehicles</div>
+      <div class="miss-field">title_ar, title_en (عنوان المزاد)</div>
+      <div class="miss-field">start_price (السعر الابتدائي)</div>
+      <div class="miss-field">reserve_price (سعر التحفظ)</div>
+      <div class="miss-field">min_bid_increment (أدنى زيادة)</div>
+      <div class="miss-field">deposit_amount (مبلغ التأمين)</div>
+      <div class="miss-field">starts_at, ends_at (وقت البدء والانتهاء)</div>
+      <div class="miss-field">status: scheduled/live/ended/cancelled</div>
+      <div class="miss-field">current_price (آخر سعر)</div>
+      <div class="miss-field">winner_id FK→users</div>
+      <div class="miss-field">created_by FK→users</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>💬 bids — جدول المزايدات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">auction_id FK→auctions</div>
+      <div class="miss-field">user_id FK→users</div>
+      <div class="miss-field">amount (مبلغ المزايدة)</div>
+      <div class="miss-field">is_winning (هل هو الفائز الحالي)</div>
+      <div class="miss-field">ip_address (للتحقق من التلاعب)</div>
+      <div class="miss-field">created_at (وقت المزايدة بالثانية)</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>🔒 auction_deposits — تأمينات المزادات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">auction_id FK→auctions</div>
+      <div class="miss-field">user_id FK→users</div>
+      <div class="miss-field">wallet_id FK→wallets</div>
+      <div class="miss-field">amount (مبلغ التأمين المحجوز)</div>
+      <div class="miss-field">status: held/released/forfeited</div>
+      <div class="miss-field">released_at (وقت الإفراج)</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>⭐ watchlists — قائمة المراقبة</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">user_id FK→users</div>
+      <div class="miss-field">auction_id FK→auctions</div>
+      <div class="miss-field">created_at (وقت الإضافة)</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>🔔 notifications — الإشعارات</h3>
+      <div class="miss-field">id — UUID</div>
+      <div class="miss-field">type (نوع الإشعار)</div>
+      <div class="miss-field">notifiable_id, notifiable_type</div>
+      <div class="miss-field">data (JSON: الرسالة والرابط)</div>
+      <div class="miss-field">read_at (وقت القراءة)</div>
+    </div>
+
+    <div class="miss-card">
+      <h3>💳 payments — المدفوعات</h3>
+      <div class="miss-field">id — PK</div>
+      <div class="miss-field">user_id FK→users</div>
+      <div class="miss-field">auction_id FK→auctions</div>
+      <div class="miss-field">amount, currency</div>
+      <div class="miss-field">payment_gateway (moyasar/hyperpay)</div>
+      <div class="miss-field">transaction_id (معرف البوابة)</div>
+      <div class="miss-field">status: pending/paid/failed/refunded</div>
+    </div>
+
+  </div>
+
+  <!-- RELATIONS -->
+  <div class="sec-hd"><h2>🔗 العلاقات الكاملة بين الجداول</h2><p>مخطط العلاقات المطلوب بعد اكتمال قاعدة البيانات</p></div>
+  <div class="rel-grid">
+    <div class="rel-card">
+      <h3>علاقات الموجودة الحالية</h3>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──hasOne──›</span><span class="rel-to">wallets</span></div>
+      <div class="rel-item"><span class="rel-from">wallets</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">wallet_transactions</span></div>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">kyc_requests</span></div>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">withdrawal_requests</span></div>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">deposit_requests</span></div>
+      <div class="rel-item"><span class="rel-from">bank_accounts</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">deposit_requests</span></div>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──BelongsToMany──›</span><span class="rel-to">roles</span></div>
+    </div>
+    <div class="rel-card">
+      <h3>علاقات مطلوبة (جديدة)</h3>
+      <div class="rel-item"><span class="rel-from">vehicles</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">vehicle_images</span></div>
+      <div class="rel-item"><span class="rel-from">vehicles</span><span class="rel-arrow">──hasOne──›</span><span class="rel-to">auctions</span></div>
+      <div class="rel-item"><span class="rel-from">auctions</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">bids</span></div>
+      <div class="rel-item"><span class="rel-from">auctions</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">auction_deposits</span></div>
+      <div class="rel-item"><span class="rel-from">auctions</span><span class="rel-arrow">──BelongsToMany──›</span><span class="rel-to">users (watchlist)</span></div>
+      <div class="rel-item"><span class="rel-from">auctions</span><span class="rel-arrow">──hasOne──›</span><span class="rel-to">payments</span></div>
+      <div class="rel-item"><span class="rel-from">users</span><span class="rel-arrow">──hasMany──›</span><span class="rel-to">notifications</span></div>
+    </div>
+  </div>
+
+</div>
+<footer><p><a href="index.html">← العودة للرئيسية</a> &bull; موتورزاد — قاعدة البيانات &bull; مايو 2026</p></footer>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>موتورزاد — الشاشات المطلوبة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e53e3e;--bg:#0a0d14;--card:#161c27;--card2:#1a2235;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--text2:#8892a4;--text3:#c0cde0;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--purple:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;font-size:0.85rem}
+.topbar a{color:var(--text2)}.topbar a:hover{color:var(--text)}.sep{color:var(--border)}
+.page-hero{background:linear-gradient(135deg,#0a0d14,#130d1a);border-bottom:1px solid var(--border);padding:56px 40px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(139,92,246,0.1),transparent);pointer-events:none}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);color:var(--purple);padding:5px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;margin-bottom:20px;position:relative}
+.page-hero h1{font-size:2.6rem;font-weight:900;position:relative}.page-hero h1 span{color:var(--purple)}
+.page-hero p{color:var(--text2);margin-top:10px;font-size:0.95rem;position:relative}
+.container{max-width:1150px;margin:0 auto;padding:50px 40px}
+.sec-hd{margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-hd h2{font-size:1.4rem;font-weight:800;display:flex;align-items:center;gap:10px}
+.sec-hd p{color:var(--text2);font-size:0.87rem;margin-top:5px}
+.role-section{margin-bottom:50px}
+.screens-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:20px}
+.screen-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;border-right:3px solid var(--s-color)}
+.screen-card h4{font-size:0.88rem;font-weight:700;margin-bottom:10px;color:var(--text3)}
+.screen-url{font-family:monospace;font-size:0.75rem;color:var(--s-color);background:rgba(255,255,255,0.04);padding:4px 10px;border-radius:6px;margin-bottom:10px;display:block}
+.screen-desc{font-size:0.8rem;color:var(--text2);line-height:1.6}
+.screen-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.s-tag{font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:50px}
+.t-done{background:rgba(34,197,94,0.12);color:var(--green)}
+.t-miss{background:rgba(239,68,68,0.12);color:#ef4444}
+.t-part{background:rgba(245,158,11,0.12);color:var(--orange)}
+.t-rt{background:rgba(59,130,246,0.12);color:var(--blue)}
+.summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:50px}
+.sum-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.sum-box .n{font-size:2rem;font-weight:900}.sum-box .l{font-size:0.78rem;color:var(--text2);margin-top:4px}
+footer{border-top:1px solid var(--border);padding:24px 40px;text-align:center;color:var(--text2);font-size:0.82rem}
+footer a{color:var(--red)}
+@media(max-width:768px){.summary-bar{grid-template-columns:1fr 1fr}.container{padding:30px 20px}.page-hero{padding:40px 20px}.page-hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">🏠 الرئيسية</a><span class="sep">/</span>
+  <span style="color:var(--text)">الشاشات المطلوبة</span>
+  <span style="margin-right:auto"></span><a href="tech.html">التقنيات →</a>
+</div>
+
+<div class="page-hero">
+  <div class="badge">📱 Screens Map</div>
+  <h1>الشاشات والصفحات <span>المطلوبة</span></h1>
+  <p>قائمة شاملة لكل صفحة ومسار URL مطلوب في المنصة لكل نوع مستخدم</p>
+</div>
+
+<div class="container">
+
+  <div class="summary-bar">
+    <div class="sum-box"><div class="n" style="color:var(--green)">11</div><div class="l">شاشة مكتملة</div></div>
+    <div class="sum-box"><div class="n" style="color:var(--orange)">4</div><div class="l">شاشة جزئية</div></div>
+    <div class="sum-box"><div class="n" style="color:#ef4444">26</div><div class="l">شاشة مفقودة</div></div>
+    <div class="sum-box"><div class="n" style="color:var(--blue)">41</div><div class="l">إجمالي الشاشات</div></div>
+  </div>
+
+  <!-- PUBLIC -->
+  <div class="role-section">
+    <div class="sec-hd">
+      <h2>🌐 الصفحات العامة (Public)</h2>
+      <p>صفحات يراها الجميع بدون تسجيل دخول</p>
+    </div>
+    <div class="screens-grid">
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>الصفحة الرئيسية</h4>
+        <span class="screen-url">/</span>
+        <div class="screen-desc">Landing Page التسويقية مع المزادات المميزة والإحصائيات والشهادات</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span><span class="s-tag t-done">RTL ✓</span><span class="s-tag t-done">Dark Mode ✓</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>قائمة المزادات العامة</h4>
+        <span class="screen-url">/auctions</span>
+        <div class="screen-desc">عرض كل المزادات النشطة والقادمة مع فلترة ببحث وماركة وفئة سعرية</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span><span class="s-tag t-rt">فلترة AJAX</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>تفاصيل المزاد (عام)</h4>
+        <span class="screen-url">/auctions/{id}</span>
+        <div class="screen-desc">صفحة تفاصيل المزاد للزوار — العرض فقط، تسجيل مطلوب للمزايدة</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>تسجيل الدخول</h4>
+        <span class="screen-url">/login</span>
+        <div class="screen-desc">نموذج الدخول مع رابط استعادة كلمة المرور</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>إنشاء حساب</h4>
+        <span class="screen-url">/register</span>
+        <div class="screen-desc">نموذج التسجيل مع التحقق من البريد الإلكتروني</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>استعادة كلمة المرور</h4>
+        <span class="screen-url">/forgot-password</span>
+        <div class="screen-desc">إرسال رابط إعادة التعيين للبريد الإلكتروني</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIDDER -->
+  <div class="role-section">
+    <div class="sec-hd">
+      <h2>🏁 لوحة تحكم المزايد (Bidder)</h2>
+      <p>صفحات المزايد المسجل — تتطلب role:bidder</p>
+    </div>
+    <div class="screens-grid">
+      <div class="screen-card" style="--s-color:var(--orange)">
+        <h4>لوحة التحكم الرئيسية</h4>
+        <span class="screen-url">/bidder/dashboard</span>
+        <div class="screen-desc">إحصائيات المزايد وآخر المزادات وسجل النشاط</div>
+        <div class="screen-tags"><span class="s-tag t-part">⚠️ بيانات وهمية</span><span class="s-tag t-miss">يحتاج ربط حقيقي</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>قائمة المزادات</h4>
+        <span class="screen-url">/bidder/auctions</span>
+        <div class="screen-desc">استعراض كل المزادات المتاحة مع فلترة وبحث</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span><span class="s-tag t-rt">Real-time</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>تفاصيل مزاد + المزايدة</h4>
+        <span class="screen-url">/bidder/auctions/{id}</span>
+        <div class="screen-desc">صور السيارة، المواصفات، سجل المزايدات، زر "زايد الآن"، عداد تنازلي حي</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ أهم صفحة مفقودة</span><span class="s-tag t-rt">WebSocket</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>مزاداتي</h4>
+        <span class="screen-url">/bidder/my-auctions</span>
+        <div class="screen-desc">المزادات التي شارك فيها: النشطة، الفائزة، المنتهية</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>قائمة المراقبة</h4>
+        <span class="screen-url">/bidder/watchlist</span>
+        <div class="screen-desc">المزادات المضافة للمتابعة مع تنبيه قرب الانتهاء</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>المحفظة المالية</h4>
+        <span class="screen-url">/bidder/wallet</span>
+        <div class="screen-desc">الرصيد، الحركات، شحن بإيصال، طلب سحب، رسم بياني شهري</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>البيانات البنكية</h4>
+        <span class="screen-url">/bidder/bank-details</span>
+        <div class="screen-desc">ربط الحساب البنكي الشخصي لاستلام المبالغ المسحوبة</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>التحقق من الهوية</h4>
+        <span class="screen-url">/kyc</span>
+        <div class="screen-desc">رفع الهوية والصورة الذاتية وتتبع حالة الطلب</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>إشعاراتي</h4>
+        <span class="screen-url">/bidder/notifications</span>
+        <div class="screen-desc">قائمة كل الإشعارات مع تحديد المقروء وغير المقروء</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>الدفع وإتمام الصفقة</h4>
+        <span class="screen-url">/bidder/auctions/{id}/pay</span>
+        <div class="screen-desc">إتمام الدفع للسيارة الفائزة عبر بوابة الدفع الإلكتروني</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span><span class="s-tag t-rt">Gateway</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="role-section">
+    <div class="sec-hd">
+      <h2>⚙️ لوحة تحكم الأدمن (Admin)</h2>
+      <p>صفحات الإدارة — تتطلب role:admin</p>
+    </div>
+    <div class="screens-grid">
+      <div class="screen-card" style="--s-color:var(--orange)">
+        <h4>لوحة التحكم الرئيسية</h4>
+        <span class="screen-url">/admin/dashboard</span>
+        <div class="screen-desc">إحصائيات الموقع، الإيرادات، المزادات النشطة</div>
+        <div class="screen-tags"><span class="s-tag t-part">⚠️ يحتاج Charts</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>إدارة المستخدمين</h4>
+        <span class="screen-url">/admin/users</span>
+        <div class="screen-desc">قائمة وCRUD كامل مع مراجعة KYC وتغيير الحالة</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>إدارة السيارات</h4>
+        <span class="screen-url">/admin/vehicles</span>
+        <div class="screen-desc">إضافة وتعديل وحذف السيارات مع رفع الصور والمواصفات</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>إضافة / تعديل سيارة</h4>
+        <span class="screen-url">/admin/vehicles/create</span>
+        <div class="screen-desc">نموذج كامل بالمواصفات والصور وتقرير الفحص</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>إدارة المزادات</h4>
+        <span class="screen-url">/admin/auctions</span>
+        <div class="screen-desc">قائمة المزادات مع حالاتها: مجدولة، حية، منتهية</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>إنشاء مزاد جديد</h4>
+        <span class="screen-url">/admin/auctions/create</span>
+        <div class="screen-desc">ربط سيارة بمزاد وتحديد الأسعار والمواعيد والشروط</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>تفاصيل مزاد (Admin)</h4>
+        <span class="screen-url">/admin/auctions/{id}</span>
+        <div class="screen-desc">متابعة المزاد الحي، المزايدات، المشاركين، والنتيجة</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--orange)">
+        <h4>طلبات الإيداع</h4>
+        <span class="screen-url">/admin/deposit-requests</span>
+        <div class="screen-desc">مراجعة إيصالات التحويل وقبول/رفض شحن المحافظ</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ Controller مفقود</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>طلبات السحب</h4>
+        <span class="screen-url">/admin/wallets/withdrawals</span>
+        <div class="screen-desc">مراجعة طلبات السحب ومعالجتها مع تحديث الرصيد</div>
+        <div class="screen-tags"><span class="s-tag t-part">⚠️ ناقص خصم الرصيد</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>إدارة المحافظ</h4>
+        <span class="screen-url">/admin/wallets</span>
+        <div class="screen-desc">عرض محافظ الأعضاء والعمليات اليدوية وسقف الدين</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>الحسابات البنكية</h4>
+        <span class="screen-url">/admin/bank-accounts</span>
+        <div class="screen-desc">CRUD للحسابات البنكية مع تفعيل/تعطيل</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>الإعدادات العامة</h4>
+        <span class="screen-url">/admin/settings</span>
+        <div class="screen-desc">شعار الموقع، الألوان، السوشيال، وضع الصيانة</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:#ef4444">
+        <h4>التقارير والإحصائيات</h4>
+        <span class="screen-url">/admin/reports</span>
+        <div class="screen-desc">إيرادات، مزادات، أفضل المزايدين، تصدير Excel/PDF</div>
+        <div class="screen-tags"><span class="s-tag t-miss">❌ مفقودة</span></div>
+      </div>
+      <div class="screen-card" style="--s-color:var(--green)">
+        <h4>الأسئلة الشائعة والصفحات</h4>
+        <span class="screen-url">/admin/faqs &nbsp; /admin/pages</span>
+        <div class="screen-desc">إدارة محتوى الموقع والأسئلة</div>
+        <div class="screen-tags"><span class="s-tag t-done">✅ مكتملة</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<footer><p><a href="index.html">← العودة للرئيسية</a> &bull; موتورزاد — الشاشات المطلوبة &bull; مايو 2026</p></footer>
+</body>
+</html>

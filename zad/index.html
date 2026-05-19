@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>موتورزاد — مركز تقارير المشروع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e53e3e; --red-dark: #c53030; --red-glow: rgba(229,62,62,0.3);
+    --gold: #d4af37; --gold-light: #f0d060;
+    --bg: #0a0d14; --bg2: #0e1219; --bg3: #131720;
+    --card: #161c27; --card2: #1a2235;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #f0f4ff; --text2: #8892a4; --text3: #c0cde0;
+    --green: #22c55e; --blue: #3b82f6; --orange: #f59e0b; --purple: #8b5cf6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0d14 0%, #0f1520 50%, #0a0d14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(229,62,62,0.12), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto;
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(229,62,62,0.12); border: 1px solid rgba(229,62,62,0.35);
+    color: #ff7070; padding: 6px 18px; border-radius: 50px;
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.5px;
+    margin-bottom: 28px;
+  }
+  .hero-badge .dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
+  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.2; margin-bottom: 20px; }
+  .hero h1 span { color: var(--red); }
+  .hero p { font-size: 1.1rem; color: var(--text2); max-width: 600px; margin: 0 auto 40px; line-height: 1.8; }
+  .hero-stats { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--border); }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 2.2rem; font-weight: 900; color: var(--text); }
+  .hero-stat .num span { color: var(--red); }
+  .hero-stat .lbl { font-size: 0.82rem; color: var(--text2); margin-top: 4px; }
+
+  /* NAV CARDS */
+  .nav-section { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+  .nav-section h2 { font-size: 1.4rem; color: var(--text2); margin-bottom: 30px; font-weight: 500; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .nav-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    text-decoration: none; color: inherit;
+    transition: all 0.3s ease; position: relative; overflow: hidden;
+    display: block;
+  }
+  .nav-card::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 100%; height: 3px;
+    background: var(--accent, var(--red));
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+  .nav-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .nav-card:hover::before { transform: scaleX(1); }
+  .card-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 18px;
+    background: var(--icon-bg, rgba(229,62,62,0.12));
+  }
+  .nav-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+  .nav-card p { font-size: 0.875rem; color: var(--text2); line-height: 1.7; }
+  .card-meta { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+  .card-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+  }
+  .tag-done { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .tag-pending { background: rgba(245,158,11,0.12); color: var(--orange); border: 1px solid rgba(245,158,11,0.2); }
+  .tag-missing { background: rgba(229,62,62,0.12); color: #ff7070; border: 1px solid rgba(229,62,62,0.2); }
+
+  /* PROGRESS SECTION */
+  .progress-section { max-width: 1200px; margin: 0 auto; padding: 0 40px 60px; }
+  .section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+  .section-sub { color: var(--text2); margin-bottom: 30px; font-size: 0.95rem; }
+  .progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .progress-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .progress-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text3); }
+  .prog-item { margin-bottom: 16px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+  .prog-label span:first-child { color: var(--text3); }
+  .prog-label span:last-child { font-weight: 700; }
+  .prog-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 100px; transition: width 1s ease; }
+  .fill-green { background: linear-gradient(90deg, #16a34a, #22c55e); }
+  .fill-orange { background: linear-gradient(90deg, #d97706, #f59e0b); }
+  .fill-red { background: linear-gradient(90deg, #dc2626, #ef4444); }
+  .fill-blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+
+  /* SUMMARY TABLE */
+  .summary-section { max-width: 1200px; margin: 0 auto; padding: 0 40px 80px; }
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--card2); padding: 14px 20px; text-align: right; font-size: 0.82rem; color: var(--text2); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 20px; font-size: 0.88rem; border-bottom: 1px solid var(--border); color: var(--text3); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .status-dot { display: inline-flex; align-items: center; gap: 6px; }
+  .dot-g { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .dot-o { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+  .dot-r { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 30px 40px; text-align: center; color: var(--text2); font-size: 0.85rem; }
+  footer span { color: var(--red); }
+
+  @media(max-width:768px){
+    .hero-inner{padding:60px 20px 40px}
+    .nav-section,.progress-section,.summary-section{padding-right:20px;padding-left:20px}
+    .progress-grid{grid-template-columns:1fr}
+    th,td{padding:10px 14px}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-badge"><div class="dot"></div> تقارير المشروع — موتورزاد</div>
+    <h1>مركز تقارير وتحليل<br><span>منصة موتورزاد</span></h1>
+    <p>تحليل شامل وتفصيلي لكل جانب من جوانب المشروع الحالية، وخارطة طريق متكاملة للوصول إلى منصة مزادات سيارات احترافية عالمية المستوى.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">47<span>%</span></div><div class="lbl">نسبة الاكتمال الكلية</div></div>
+      <div class="hero-stat"><div class="num">10<span></span></div><div class="lbl">متحكمات مكتملة</div></div>
+      <div class="hero-stat"><div class="num">22<span></span></div><div class="lbl">جداول في قاعدة البيانات</div></div>
+      <div class="hero-stat"><div class="num">8<span></span></div><div class="lbl">وحدات رئيسية متبقية</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV CARDS -->
+<div class="nav-section">
+  <h2>📋 صفحات التقارير</h2>
+  <div class="cards-grid">
+
+    <a href="analysis.html" class="nav-card" style="--accent:#e53e3e;--icon-bg:rgba(229,62,62,0.12)">
+      <div class="card-icon">🔍</div>
+      <h3>تحليل الوضع الحالي</h3>
+      <p>فحص شامل لكل ما تم تنفيذه وما هو ناقص في المشروع بالتفصيل الكامل.</p>
+      <div class="card-meta"><span class="card-tag tag-pending">⚠️ مهم جداً</span></div>
+    </a>
+
+    <a href="database.html" class="nav-card" style="--accent:#3b82f6;--icon-bg:rgba(59,130,246,0.12)">
+      <div class="card-icon">🗄️</div>
+      <h3>قاعدة البيانات والمخططات</h3>
+      <p>جميع الجداول الموجودة، الجداول المطلوبة، والعلاقات بينها بالتفصيل الكامل.</p>
+      <div class="card-meta"><span class="card-tag tag-missing">❌ ناقص</span></div>
+    </a>
+
+    <a href="roadmap.html" class="nav-card" style="--accent:#d4af37;--icon-bg:rgba(212,175,55,0.12)">
+      <div class="card-icon">🗺️</div>
+      <h3>خارطة الطريق</h3>
+      <p>خطة التطوير المرحلية التفصيلية مقسمة على مراحل واضحة مع الأولويات والجداول الزمنية.</p>
+      <div class="card-meta"><span class="card-tag tag-pending">⏳ قيد التخطيط</span></div>
+    </a>
+
+    <a href="features.html" class="nav-card" style="--accent:#22c55e;--icon-bg:rgba(34,197,94,0.12)">
+      <div class="card-icon">⚡</div>
+      <h3>الميزات والوحدات</h3>
+      <p>قائمة شاملة لكل الميزات المطلوبة لمنصة مزادات سيارات احترافية مقارنةً بما هو موجود.</p>
+      <div class="card-meta"><span class="card-tag tag-done">✅ جاهز جزئياً</span></div>
+    </a>
+
+    <a href="screens.html" class="nav-card" style="--accent:#8b5cf6;--icon-bg:rgba(139,92,246,0.12)">
+      <div class="card-icon">📱</div>
+      <h3>الشاشات والصفحات المطلوبة</h3>
+      <p>قائمة كاملة بكل الصفحات والشاشات المطلوبة إنشاؤها لكل نوع مستخدم.</p>
+      <div class="card-meta"><span class="card-tag tag-missing">❌ مطلوب التطوير</span></div>
+    </a>
+
+    <a href="tech.html" class="nav-card" style="--accent:#f59e0b;--icon-bg:rgba(245,158,11,0.12)">
+      <div class="card-icon">🛠️</div>
+      <h3>التقنيات والبنية التحتية</h3>
+      <p>مراجعة التقنيات المستخدمة وما يُنصح إضافته من حزم وأدوات لاستكمال المنصة.</p>
+      <div class="card-meta"><span class="card-tag tag-done">✅ قاعدة جيدة</span></div>
+    </a>
+
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <h2 class="section-title">نسب التقدم حسب الوحدات</h2>
+  <p class="section-sub">تقييم عام لمستوى اكتمال كل وحدة رئيسية في المنصة</p>
+  <div class="progress-grid">
+
+    <div class="progress-card">
+      <h3>✅ الوحدات المكتملة</h3>
+      <div class="prog-item">
+        <div class="prog-label"><span>نظام المصادقة والتسجيل</span><span style="color:var(--green)">95%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:95%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>إدارة المستخدمين (CRUD)</span><span style="color:var(--green)">90%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:90%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>التحقق من الهوية (KYC)</span><span style="color:var(--green)">85%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:85%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>نظام المحافظ المالية</span><span style="color:var(--green)">80%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:80%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>إعدادات النظام</span><span style="color:var(--green)">90%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:90%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>إدارة الحسابات البنكية</span><span style="color:var(--green)">95%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-green" style="width:95%"></div></div>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <h3>⚠️ الوحدات الناقصة بالكامل</h3>
+      <div class="prog-item">
+        <div class="prog-label"><span>إدارة المركبات والسيارات</span><span style="color:#ef4444">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-red" style="width:2%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>محرك المزادات الحي</span><span style="color:#ef4444">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-red" style="width:2%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>نظام المزايدة اللحظي</span><span style="color:#ef4444">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-red" style="width:2%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>الإشعارات والتنبيهات</span><span style="color:var(--orange)">10%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-orange" style="width:10%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>نظام التقارير والإحصائيات</span><span style="color:var(--orange)">20%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-orange" style="width:20%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-label"><span>بوابات الدفع المتكاملة</span><span style="color:#ef4444">5%</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-red" style="width:5%"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUMMARY TABLE -->
+<div class="summary-section">
+  <h2 class="section-title">ملخص الحالة التفصيلي</h2>
+  <p class="section-sub">نظرة سريعة على حالة كل مكوّن في المنصة</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>المكوّن</th>
+          <th>الحالة</th>
+          <th>الأولوية</th>
+          <th>ملاحظة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>🔐 تسجيل الدخول والمصادقة</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>Laravel Breeze + Spatie Roles</td></tr>
+        <tr><td>👤 إدارة المستخدمين للأدمن</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>CRUD كامل مع DataTables</td></tr>
+        <tr><td>🪪 نظام التحقق KYC</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>رفع الهوية والصورة الذاتية</td></tr>
+        <tr><td>💰 نظام المحافظ المالية</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل 80%</span></td><td>عالية</td><td>ناقص: ربط الموافقة بالخصم</td></tr>
+        <tr><td>📥 طلبات الإيداع</td><td><span class="status-dot"><span class="dot-o"></span>جزئي</span></td><td>عالية</td><td>ناقص: واجهة الأدمن للمراجعة</td></tr>
+        <tr><td>📤 طلبات السحب</td><td><span class="status-dot"><span class="dot-o"></span>جزئي</span></td><td>عالية</td><td>ناقص: خصم الرصيد عند الموافقة</td></tr>
+        <tr><td>🏦 الحسابات البنكية</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>CRUD كامل مع تفعيل/تعطيل</td></tr>
+        <tr><td>⚙️ إعدادات النظام</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>شامل للوجو والألوان والسوشيال</td></tr>
+        <tr><td>📄 الصفحات التعريفية والأسئلة</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>FAQs + Pages CRUD</td></tr>
+        <tr><td>🚗 إدارة السيارات والمركبات</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>🔴 حرجة</td><td>لا يوجد نموذج ولا جدول ولا واجهة</td></tr>
+        <tr><td>🔨 محرك المزادات</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>🔴 حرجة</td><td>الوحدة الأساسية للمنصة غائبة</td></tr>
+        <tr><td>📡 المزايدة اللحظية (Real-time)</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>🔴 حرجة</td><td>يحتاج WebSockets أو Pusher</td></tr>
+        <tr><td>🔔 الإشعارات</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>عالية</td><td>لا نظام إشعارات مبني بعد</td></tr>
+        <tr><td>💳 بوابة الدفع المتكاملة</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>عالية</td><td>لا يوجد Stripe/Moyasar/HyperPay</td></tr>
+        <tr><td>📊 تقارير المزادات والإحصائيات</td><td><span class="status-dot"><span class="dot-r"></span>مفقود</span></td><td>متوسطة</td><td>Dashboard الأدمن بيانات ثابتة فقط</td></tr>
+        <tr><td>🌐 الصفحة الرئيسية التسويقية</td><td><span class="status-dot"><span class="dot-g"></span>مكتمل</span></td><td>—</td><td>Landing Page احترافية مع ثيمات</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <p>موتورزاد — تقارير المشروع &bull; أُعدّ بتاريخ <span>مايو 2026</span></p>
+</footer>
+
+</body>
+</html>

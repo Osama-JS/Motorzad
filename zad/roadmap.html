@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>موتورزاد — خارطة الطريق</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e53e3e;--gold:#d4af37;--bg:#0a0d14;--card:#161c27;--card2:#1a2235;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--text2:#8892a4;--text3:#c0cde0;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--purple:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;font-size:0.85rem}
+.topbar a{color:var(--text2)}.topbar a:hover{color:var(--text)}.sep{color:var(--border)}
+.page-hero{background:linear-gradient(135deg,#0a0d14,#0f1520);border-bottom:1px solid var(--border);padding:56px 40px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(212,175,55,0.1),transparent);pointer-events:none}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);color:var(--gold);padding:5px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;margin-bottom:20px;position:relative}
+.page-hero h1{font-size:2.6rem;font-weight:900;position:relative}.page-hero h1 span{color:var(--gold)}
+.page-hero p{color:var(--text2);margin-top:10px;font-size:0.95rem;position:relative}
+.container{max-width:1100px;margin:0 auto;padding:50px 40px}
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:50px}
+.ov-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;text-align:center}
+.ov-card .num{font-size:2rem;font-weight:900;color:var(--accent,var(--text))}
+.ov-card .lbl{font-size:0.8rem;color:var(--text2);margin-top:4px}
+.phase-block{margin-bottom:40px}
+.phase-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:18px 24px;border-radius:14px;border:1px solid var(--p-border);background:var(--p-bg)}
+.phase-num{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;background:var(--p-accent);color:#fff;flex-shrink:0}
+.phase-header h2{font-size:1.2rem;font-weight:800}
+.phase-header p{color:var(--text2);font-size:0.85rem;margin-top:3px}
+.phase-duration{margin-right:auto;font-size:0.8rem;font-weight:700;padding:4px 14px;border-radius:50px;background:var(--p-accent-light);color:var(--p-accent)}
+.tasks-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.task-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.task-card h4{font-size:0.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.task-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;color:var(--text3);display:flex;align-items:flex-start;gap:6px}
+.task-item:last-child{border-bottom:none}
+.task-item::before{content:'→';color:var(--text2);flex-shrink:0}
+.deliverables{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:14px}
+.deliverables h4{font-size:0.85rem;font-weight:700;color:var(--text2);margin-bottom:10px}
+.del-list{display:flex;flex-wrap:wrap;gap:8px}
+.del-tag{padding:4px 12px;border-radius:50px;font-size:0.75rem;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border)}
+.timeline{margin:50px 0}
+.timeline h2{font-size:1.5rem;font-weight:800;margin-bottom:24px}
+.tl-row{display:flex;gap:0;margin-bottom:0}
+.tl-cell{flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--border);position:relative}
+.tl-cell:last-child{border-right:none}
+.tl-cell .week{font-size:0.75rem;color:var(--text2);margin-bottom:6px}
+.tl-cell .act{font-size:0.78rem;font-weight:600;color:var(--text3)}
+.tl-bar{height:4px;border-radius:2px;margin:8px 4px 0}
+footer{border-top:1px solid var(--border);padding:24px 40px;text-align:center;color:var(--text2);font-size:0.82rem}
+footer a{color:var(--red)}
+@media(max-width:900px){.overview-grid{grid-template-columns:1fr 1fr}.tasks-grid{grid-template-columns:1fr}.container{padding:30px 20px}.page-hero{padding:40px 20px}.page-hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">🏠 الرئيسية</a><span class="sep">/</span>
+  <span style="color:var(--text)">خارطة الطريق</span>
+  <span style="margin-right:auto"></span><a href="features.html">الميزات →</a>
+</div>
+
+<div class="page-hero">
+  <div class="badge">🗺️ Development Roadmap</div>
+  <h1>خارطة الطريق <span>التفصيلية</span></h1>
+  <p>خطة التطوير المرحلية للوصول إلى منصة مزادات سيارات احترافية عالمية المستوى</p>
+</div>
+
+<div class="container">
+
+  <!-- OVERVIEW -->
+  <div class="overview-grid">
+    <div class="ov-card" style="--accent:#ef4444"><div class="num">4</div><div class="lbl">مراحل تطوير</div></div>
+    <div class="ov-card" style="--accent:var(--orange)"><div class="num">16</div><div class="lbl">أسبوع تقديري</div></div>
+    <div class="ov-card" style="--accent:var(--blue)"><div class="num">28+</div><div class="lbl">مهمة برمجية</div></div>
+    <div class="ov-card" style="--accent:var(--green)"><div class="num">100%</div><div class="lbl">نسبة الاكتمال المستهدفة</div></div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase-block">
+    <div class="phase-header" style="--p-bg:rgba(239,68,68,0.06);--p-border:rgba(239,68,68,0.2);--p-accent:#ef4444;--p-accent-light:rgba(239,68,68,0.12)">
+      <div class="phase-num">1</div>
+      <div>
+        <h2>🔴 المرحلة الأولى — إنهاء الأساس المالي</h2>
+        <p>إكمال الوحدات الموجودة وإصلاح الثغرات الحرجة قبل البناء فوقها</p>
+      </div>
+      <div class="phase-duration">أسبوعان</div>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-card">
+        <h4>💰 إصلاح نظام السحب والإيداع</h4>
+        <div class="task-item">WithdrawalController: استدعاء WalletService عند approval</div>
+        <div class="task-item">إنشاء Admin/DepositController كامل</div>
+        <div class="task-item">Route::resource لـ deposit-requests في Admin</div>
+        <div class="task-item">View: جدول طلبات الإيداع مع زر القبول/الرفض</div>
+        <div class="task-item">تحديث رصيد المحفظة تلقائياً عند قبول الإيداع</div>
+      </div>
+      <div class="task-card">
+        <h4>📊 تحسين لوحة تحكم الأدمن</h4>
+        <div class="task-item">إضافة Chart.js للإيرادات والمعاملات</div>
+        <div class="task-item">إضافة إحصائيات طلبات الإيداع والسحب</div>
+        <div class="task-item">بطاقات الأنشطة الأخيرة وآخر المعاملات</div>
+        <div class="task-item">تنبيهات الطلبات المعلقة في الـ Sidebar</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <h4>✅ المُسلَّمات</h4>
+      <div class="del-list">
+        <span class="del-tag">نظام مالي مكتمل 100%</span>
+        <span class="del-tag">لوحة إيداعات للأدمن</span>
+        <span class="del-tag">خصم السحب تلقائي</span>
+        <span class="del-tag">Dashboard بـ Charts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-block">
+    <div class="phase-header" style="--p-bg:rgba(245,158,11,0.06);--p-border:rgba(245,158,11,0.2);--p-accent:#f59e0b;--p-accent-light:rgba(245,158,11,0.12)">
+      <div class="phase-num" style="background:#d97706">2</div>
+      <div>
+        <h2>🟡 المرحلة الثانية — بناء قلب المنصة (السيارات والمزادات)</h2>
+        <p>إنشاء الوحدات الأساسية التي بدونها لا يوجد منصة مزادات</p>
+      </div>
+      <div class="phase-duration" style="--p-accent:#d97706;--p-accent-light:rgba(245,158,11,0.12)">6 أسابيع</div>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-card">
+        <h4>🚗 وحدة السيارات (Vehicles)</h4>
+        <div class="task-item">Migration: جدول vehicles الكامل بجميع الحقول</div>
+        <div class="task-item">Migration: جدول vehicle_images</div>
+        <div class="task-item">Model Vehicle مع علاقات hasMany images / hasOne auction</div>
+        <div class="task-item">Admin/VehicleController CRUD كامل</div>
+        <div class="task-item">رفع صور متعددة مع تحديد الصورة الرئيسية</div>
+        <div class="task-item">واجهة إضافة وتعديل السيارة بتصميم احترافي</div>
+        <div class="task-item">قائمة السيارات مع DataTable وفلترة متقدمة</div>
+      </div>
+      <div class="task-card">
+        <h4>🔨 محرك المزادات (Auctions)</h4>
+        <div class="task-item">Migration: جدول auctions الكامل</div>
+        <div class="task-item">Migration: جدول bids لتتبع المزايدات</div>
+        <div class="task-item">Migration: جدول auction_deposits (التأمينات)</div>
+        <div class="task-item">Model Auction مع علاقات vehicle / bids / deposits</div>
+        <div class="task-item">AuctionService: منطق إنشاء وإنهاء المزاد</div>
+        <div class="task-item">Admin/AuctionController: إنشاء وجدولة المزاد</div>
+        <div class="task-item">منطق تحديد الفائز وإشعاره تلقائياً</div>
+      </div>
+      <div class="task-card">
+        <h4>📱 صفحات المزايد للمزادات</h4>
+        <div class="task-item">bidder/auctions/index: قائمة المزادات مع فلترة</div>
+        <div class="task-item">bidder/auctions/show: تفاصيل المزاد وصور السيارة</div>
+        <div class="task-item">سجل المزايدات داخل صفحة المزاد</div>
+        <div class="task-item">زر المزايدة مع التحقق من الرصيد والتأمين</div>
+        <div class="task-item">صفحة مزاداتي: النشطة والفائزة والمنتهية</div>
+      </div>
+      <div class="task-card">
+        <h4>🔒 نظام التأمينات</h4>
+        <div class="task-item">خصم مبلغ التأمين من محفظة المزايد عند الدخول</div>
+        <div class="task-item">تجميد الرصيد طوال فترة المزاد</div>
+        <div class="task-item">إعادة التأمين للخاسرين عند انتهاء المزاد</div>
+        <div class="task-item">احتجاز تأمين الفائز لحين إتمام الدفع</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <h4>✅ المُسلَّمات</h4>
+      <div class="del-list">
+        <span class="del-tag">CRUD كامل للسيارات</span>
+        <span class="del-tag">نظام إنشاء مزاد</span>
+        <span class="del-tag">صفحات استعراض المزادات</span>
+        <span class="del-tag">نظام المزايدة الأساسي</span>
+        <span class="del-tag">نظام التأمينات</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-block">
+    <div class="phase-header" style="--p-bg:rgba(59,130,246,0.06);--p-border:rgba(59,130,246,0.2);--p-accent:#3b82f6;--p-accent-light:rgba(59,130,246,0.12)">
+      <div class="phase-num" style="background:#2563eb">3</div>
+      <div>
+        <h2>🔵 المرحلة الثالثة — المزايدة اللحظية والإشعارات</h2>
+        <p>تحويل المنصة من ثابتة إلى حية بالكامل مع تجربة مستخدم استثنائية</p>
+      </div>
+      <div class="phase-duration" style="--p-accent:#2563eb">4 أسابيع</div>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-card">
+        <h4>📡 Real-Time Bidding (WebSockets)</h4>
+        <div class="task-item">تثبيت Pusher أو Laravel Reverb</div>
+        <div class="task-item">BidPlaced Event يُبث عند كل مزايدة جديدة</div>
+        <div class="task-item">AuctionEnded Event عند انتهاء المزاد</div>
+        <div class="task-item">JS Listener: تحديث السعر والعداد لحظياً</div>
+        <div class="task-item">عداد تنازلي محمي من الخادم</div>
+        <div class="task-item">تنبيه "لقد تجاوزك مزايد آخر" لحظياً</div>
+      </div>
+      <div class="task-card">
+        <h4>🔔 نظام الإشعارات</h4>
+        <div class="task-item">جرس الإشعارات في الـ Topbar للجميع</div>
+        <div class="task-item">Notification: BidPlaced, OutBid, AuctionWon</div>
+        <div class="task-item">Notification: DepositApproved, WithdrawalProcessed</div>
+        <div class="task-item">إيميل عند الفوز بالمزاد مع تفاصيل الدفع</div>
+        <div class="task-item">صفحة "إشعاراتي" مع علامة القراءة</div>
+      </div>
+      <div class="task-card">
+        <h4">⭐ قائمة المراقبة Watchlist</h4>
+        <div class="task-item">Migration: جدول watchlists</div>
+        <div class="task-item">زر "متابعة المزاد" في كل بطاقة</div>
+        <div class="task-item">صفحة "مزاداتي المتابَعة"</div>
+        <div class="task-item">إشعار عند قرب انتهاء المزاد المتابَع</div>
+      </div>
+      <div class="task-card">
+        <h4>🔍 البحث والفلترة المتقدمة</h4>
+        <div class="task-item">فلترة المزادات: ماركة / موديل / سنة / حالة</div>
+        <div class="task-item">فلترة بالسعر: من/إلى</div>
+        <div class="task-item">ترتيب: الأحدث / الأقل وقتاً / الأعلى سعراً</div>
+        <div class="task-item">بحث نصي فوري (AJAX)</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <h4>✅ المُسلَّمات</h4>
+      <div class="del-list">
+        <span class="del-tag">Real-time Bidding</span>
+        <span class="del-tag">إشعارات شاملة</span>
+        <span class="del-tag">قائمة المراقبة</span>
+        <span class="del-tag">بحث وفلترة متقدمة</span>
+        <span class="del-tag">عداد تنازلي حي</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-block">
+    <div class="phase-header" style="--p-bg:rgba(34,197,94,0.06);--p-border:rgba(34,197,94,0.2);--p-accent:#22c55e;--p-accent-light:rgba(34,197,94,0.12)">
+      <div class="phase-num" style="background:#16a34a">4</div>
+      <div>
+        <h2>🟢 المرحلة الرابعة — الإنهاء والاحتراف</h2>
+        <p>بوابات الدفع، التقارير المتقدمة، والأمان والاختبار الشامل</p>
+      </div>
+      <div class="phase-duration" style="--p-accent:#16a34a">4 أسابيع</div>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-card">
+        <h4>💳 بوابة الدفع</h4>
+        <div class="task-item">دمج Moyasar أو HyperPay</div>
+        <div class="task-item">دفع التأمين الإلكتروني للمزاد</div>
+        <div class="task-item">دفع قيمة السيارة الفائزة</div>
+        <div class="task-item">استرداد تلقائي للخاسرين</div>
+        <div class="task-item">إيصالات دفع رقمية</div>
+      </div>
+      <div class="task-card">
+        <h4>📊 تقارير متقدمة</h4>
+        <div class="task-item">Dashboard الأدمن: Charts كاملة وحية</div>
+        <div class="task-item">تقرير الإيرادات اليومية/الشهرية</div>
+        <div class="task-item">تقرير أفضل المزايدين ونشاطهم</div>
+        <div class="task-item">تصدير Excel و PDF للتقارير</div>
+      </div>
+      <div class="task-card">
+        <h4>🛡️ الأمان والأداء</h4>
+        <div class="task-item">Rate Limiting على نقطة المزايدة</div>
+        <div class="task-item">تشفير البيانات الحساسة</div>
+        <div class="task-item">Caching للمزادات الحية</div>
+        <div class="task-item">Queue Jobs للإشعارات والإيميلات</div>
+        <div class="task-item">اختبارات Unit و Feature</div>
+      </div>
+      <div class="task-card">
+        <h4>✨ تحسينات UX نهائية</h4>
+        <div class="task-item">صفحة "من نحن" وصفحات قانونية</div>
+        <div class="task-item">نظام تقييم بعد الصفقة</div>
+        <div class="task-item">PWA: تطبيق متصفح قابل للتثبيت</div>
+        <div class="task-item">SEO وتحسين سرعة التحميل</div>
+        <div class="task-item">اختبار متصفحات وأجهزة متعددة</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <h4>✅ المُسلَّمات النهائية</h4>
+      <div class="del-list">
+        <span class="del-tag">بوابة دفع مكتملة</span>
+        <span class="del-tag">تقارير متقدمة</span>
+        <span class="del-tag">منصة آمنة 100%</span>
+        <span class="del-tag">اختبارات شاملة</span>
+        <span class="del-tag">جاهزة للإطلاق</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<footer><p><a href="index.html">← العودة للرئيسية</a> &bull; موتورزاد — خارطة الطريق &bull; مايو 2026</p></footer>
+</body>
+</html>

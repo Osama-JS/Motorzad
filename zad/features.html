@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>موتورزاد — الميزات والوحدات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e53e3e;--bg:#0a0d14;--card:#161c27;--card2:#1a2235;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--text2:#8892a4;--text3:#c0cde0;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--purple:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;font-size:0.85rem}
+.topbar a{color:var(--text2)}.topbar a:hover{color:var(--text)}.sep{color:var(--border)}
+.page-hero{background:linear-gradient(135deg,#0a0d14,#0d1a14);border-bottom:1px solid var(--border);padding:56px 40px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(34,197,94,0.1),transparent);pointer-events:none}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:var(--green);padding:5px 14px;border-radius:50px;font-size:0.78rem;font-weight:700;margin-bottom:20px;position:relative}
+.page-hero h1{font-size:2.6rem;font-weight:900;position:relative}.page-hero h1 span{color:var(--green)}
+.page-hero p{color:var(--text2);margin-top:10px;font-size:0.95rem;position:relative}
+.container{max-width:1150px;margin:0 auto;padding:50px 40px}
+.sec-hd{margin-bottom:24px}.sec-hd h2{font-size:1.5rem;font-weight:800}.sec-hd p{color:var(--text2);font-size:0.88rem;margin-top:5px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:50px}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-right:3px solid var(--accent)}
+.feat-card h4{font-size:0.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.feat-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;display:flex;align-items:center;gap:8px}
+.feat-item:last-child{border-bottom:none}
+.done{color:var(--green);font-size:0.9rem}
+.miss{color:#ef4444;font-size:0.9rem}
+.half{color:var(--orange);font-size:0.9rem}
+.feat-text{color:var(--text3)}
+.comparison{margin-bottom:50px}
+.comp-table{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--card2);padding:14px 20px;text-align:right;font-size:0.82rem;color:var(--text2);font-weight:700;border-bottom:1px solid var(--border)}
+td{padding:12px 20px;font-size:0.85rem;border-bottom:1px solid var(--border);color:var(--text3);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.015)}
+.st{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.75rem;font-weight:700}
+.st-done{background:rgba(34,197,94,0.15);color:var(--green)}
+.st-miss{background:rgba(239,68,68,0.15);color:#ef4444}
+.st-part{background:rgba(245,158,11,0.15);color:var(--orange)}
+.priority{display:inline-flex;padding:2px 8px;border-radius:50px;font-size:0.7rem;font-weight:700}
+.p1{background:rgba(239,68,68,0.15);color:#ef4444}
+.p2{background:rgba(245,158,11,0.15);color:var(--orange)}
+.p3{background:rgba(59,130,246,0.15);color:var(--blue)}
+.p4{background:rgba(139,92,246,0.15);color:var(--purple)}
+footer{border-top:1px solid var(--border);padding:24px 40px;text-align:center;color:var(--text2);font-size:0.82rem}
+footer a{color:var(--red)}
+@media(max-width:900px){.features-grid{grid-template-columns:1fr 1fr}.container{padding:30px 20px}.page-hero{padding:40px 20px}.page-hero h1{font-size:2rem}}
+@media(max-width:600px){.features-grid{grid-template-columns:1fr}th,td{padding:10px 14px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">🏠 الرئيسية</a><span class="sep">/</span>
+  <span style="color:var(--text)">الميزات والوحدات</span>
+  <span style="margin-right:auto"></span><a href="screens.html">الشاشات →</a>
+</div>
+
+<div class="page-hero">
+  <div class="badge">⚡ Features Map</div>
+  <h1>الميزات <span>والوحدات الكاملة</span></h1>
+  <p>مقارنة شاملة بين ما هو موجود في المنصة وما يحتاجه نظام مزادات سيارات احترافي</p>
+</div>
+
+<div class="container">
+
+  <!-- FEATURES CARDS -->
+  <div class="sec-hd"><h2>⚡ خريطة الميزات التفصيلية</h2><p>✅ موجود &nbsp;|&nbsp; ⚠️ جزئي &nbsp;|&nbsp; ❌ مفقود</p></div>
+  <div class="features-grid">
+
+    <div class="feat-card" style="--accent:#22c55e">
+      <h4>🔐 المصادقة والهوية</h4>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">تسجيل / دخول / خروج</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">استعادة كلمة المرور</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">توثيق البريد الإلكتروني</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">نظام الأدوار والصلاحيات</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تسجيل الدخول بـ Google/Apple</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">المصادقة الثنائية (2FA)</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#22c55e">
+      <h4>🪪 التحقق من الهوية KYC</h4>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">رفع بطاقة الهوية</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">رفع الصورة الذاتية</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">مراجعة الأدمن مع الملاحظات</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إيميل إخطار تلقائي</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">KYC تلقائي AI (مستقبلي)</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#22c55e">
+      <h4>💰 النظام المالي</h4>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">محفظة مالية لكل مستخدم</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">سجل الحركات المالية</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">شحن يدوي بإيصال</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">طلب سحب مع التحقق</span></div>
+      <div class="feat-item"><span class="half">⚠️</span><span class="feat-text">موافقة الأدمن على الإيداع</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">دفع إلكتروني مباشر</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#ef4444">
+      <h4>🚗 إدارة السيارات</h4>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إضافة سيارة للمنصة</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">رفع صور متعددة</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تقرير الفحص الفني</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">بيانات هيكل السيارة (VIN)</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تصنيف وفلترة السيارات</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">قائمة السيارات للمستخدمين</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#ef4444">
+      <h4>🔨 محرك المزادات</h4>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إنشاء وجدولة المزادات</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تحديد السعر الابتدائي</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">أدنى زيادة مسموح بها</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">سعر التحفظ (Reserve Price)</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تحديد الفائز تلقائياً</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إلغاء أو تمديد المزاد</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#ef4444">
+      <h4>📡 المزايدة اللحظية</h4>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تحديث السعر بدون Reload</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">عداد تنازلي حي</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تنبيه "تم تجاوزك" فوري</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">قائمة المزايدات الحية</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">منع التلاعب والازدواجية</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#f59e0b">
+      <h4>🔔 الإشعارات</h4>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">جرس الإشعارات في الـ UI</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إيميل قبول/رفض KYC</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إشعار الفوز بالمزاد</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إشعار التجاوز (Outbid)</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إشعار طلب إيداع جديد للأدمن</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">SMS وPush Notification</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#22c55e">
+      <h4>⚙️ لوحة تحكم الإدارة</h4>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إدارة المستخدمين</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إدارة الأدوار والصلاحيات</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إدارة الحسابات البنكية</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">إعدادات الموقع الشاملة</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">إدارة السيارات والمزادات</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تقارير وإحصائيات متقدمة</span></div>
+    </div>
+
+    <div class="feat-card" style="--accent:#8b5cf6">
+      <h4>✨ ميزات احترافية</h4>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">قائمة المراقبة Watchlist</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">تقييم ما بعد الصفقة</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">حساب البائع (Seller)</span></div>
+      <div class="feat-item"><span class="miss">❌</span><span class="feat-text">نظام العمولة</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">دعم RTL والعربية</span></div>
+      <div class="feat-item"><span class="done">✅</span><span class="feat-text">وضع داكن/فاتح</span></div>
+    </div>
+
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="sec-hd"><h2>📋 جدول المقارنة الشامل</h2><p>مقارنة كل ميزة بحالتها الحالية وأولويتها وتقدير الجهد</p></div>
+  <div class="comp-table">
+    <table>
+      <thead>
+        <tr><th>الميزة</th><th>الحالة</th><th>الأولوية</th><th>التقدير</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🔐 نظام المصادقة الكامل</td><td><span class="st st-done">✅ مكتمل</span></td><td><span class="priority p4">P4</span></td><td>—</td></tr>
+        <tr><td>🪪 التحقق من الهوية KYC</td><td><span class="st st-done">✅ مكتمل</span></td><td><span class="priority p4">P4</span></td><td>—</td></tr>
+        <tr><td>💰 المحافظ المالية + السحب</td><td><span class="st st-part">⚠️ جزئي</span></td><td><span class="priority p1">P1</span></td><td>2–3 أيام</td></tr>
+        <tr><td>📥 مراجعة طلبات الإيداع</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>1–2 يوم</td></tr>
+        <tr><td>🚗 جدول وواجهة السيارات</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>5–7 أيام</td></tr>
+        <tr><td>🖼️ رفع صور السيارات</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>2 أيام</td></tr>
+        <tr><td>🔨 محرك المزادات (CRUD + منطق)</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>7–10 أيام</td></tr>
+        <tr><td>💬 جدول المزايدات (Bids)</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>2–3 أيام</td></tr>
+        <tr><td>🔒 نظام التأمينات</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>3 أيام</td></tr>
+        <tr><td>📱 صفحات المزادات للمزايد</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p1">P1</span></td><td>5–7 أيام</td></tr>
+        <tr><td>📡 Real-Time Bidding</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>5–7 أيام</td></tr>
+        <tr><td>⏱️ عداد تنازلي حي</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>2 أيام</td></tr>
+        <tr><td>🔔 نظام الإشعارات</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>4–5 أيام</td></tr>
+        <tr><td>⭐ قائمة المراقبة</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>1–2 يوم</td></tr>
+        <tr><td>💳 بوابة الدفع الإلكتروني</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>5–7 أيام</td></tr>
+        <tr><td>📊 تقارير متقدمة وCharts</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p3">P3</span></td><td>3–4 أيام</td></tr>
+        <tr><td>📤 تصدير Excel/PDF</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p3">P3</span></td><td>2 أيام</td></tr>
+        <tr><td>🔍 بحث وفلترة متقدمة</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p2">P2</span></td><td>2–3 أيام</td></tr>
+        <tr><td>⭐ نظام التقييم</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p3">P3</span></td><td>2–3 أيام</td></tr>
+        <tr><td>📱 PWA تطبيق متصفح</td><td><span class="st st-miss">❌ مفقود</span></td><td><span class="priority p4">P4</span></td><td>2 أيام</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<footer><p><a href="index.html">← العودة للرئيسية</a> &bull; موتورزاد — الميزات &bull; مايو 2026</p></footer>
+</body>
+</html>
