@@ -21,7 +21,9 @@ return new class extends Migration
         });
 
         // 1. Change to string first to allow any value
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN status VARCHAR(255)");
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'mysql') {
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN status VARCHAR(255)");
+        }
 
         // 2. Map existing status values to new ones
         \Illuminate\Support\Facades\DB::table('users')->where('status', 'active')->update(['status' => 'approved']);
@@ -31,7 +33,9 @@ return new class extends Migration
         \Illuminate\Support\Facades\DB::table('users')->whereNotIn('status', ['pending', 'approved', 'rejected'])->update(['status' => 'pending']);
 
         // 4. Back to enum with new values
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'mysql') {
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
+        }
     }
 
     /**
