@@ -327,5 +327,14 @@
     "All": "All",
     "Deposits": "Deposits",
     "Withdrawals": "Withdrawals",
-    "Bank Details": "Bank Details"
+    "Bank Details": "Bank Details",
+    "Verification status retrieved successfully.": "Verification status retrieved successfully.",
+    "Your identity is already verified.": "Your identity is already verified.",
+    "You already have a pending verification request.": "You already have a pending verification request.",
+    "Identity verification request submitted successfully.": "Identity verification request submitted successfully.",
+    "Verification history retrieved successfully.": "Verification history retrieved successfully.",
+    "Verification requests retrieved successfully.": "Verification requests retrieved successfully.",
+    "KYC request reviewed successfully.": "KYC request reviewed successfully.",
+    "User not found.": "User not found.",
+    "Unauthorized access.": "Unauthorized access."
 }

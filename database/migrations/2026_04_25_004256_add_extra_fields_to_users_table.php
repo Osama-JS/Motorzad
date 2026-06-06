@@ -16,7 +16,11 @@ return new class extends Migration
             $table->string('last_name', 100)->nullable()->after('first_name');
             $table->string('phone')->nullable()->unique()->after('email');
             $table->string('country_code', 10)->nullable()->after('phone');
-            $table->enum('status', ['active', 'inactive'])->default('active')->after('password');
+            if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+                $table->string('status')->default('active')->after('password');
+            } else {
+                $table->enum('status', ['active', 'inactive'])->default('active')->after('password');
+            }
             $table->string('country')->nullable()->after('status');
             $table->string('city')->nullable()->after('country');
             $table->text('address')->nullable()->after('city');

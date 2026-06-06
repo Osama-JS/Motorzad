@@ -19,24 +19,24 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'first_name'   => 'required|string|max:100',
-            'last_name'    => 'required|string|max:100',
-            'email'        => 'required|email|unique:users,email',
-            'phone'        => 'nullable|string|unique:users,phone',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|unique:users,phone',
             'country_code' => 'nullable|string|max:10',
-            'password'     => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $user = User::create([
-            'first_name'   => $validated['first_name'],
-            'last_name'    => $validated['last_name'],
-            'name'         => $validated['first_name'] . ' ' . $validated['last_name'],
-            'email'        => $validated['email'],
-            'phone'        => $validated['phone'] ?? null,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
             'country_code' => $validated['country_code'] ?? null,
-            'password'     => Hash::make($validated['password']),
-            'status'       => 'pending',
-            'kyc_level'    => 0,
+            'password' => Hash::make($validated['password']),
+            'status' => 'pending',
+            'kyc_level' => 0,
         ]);
 
         $user->assignRole('bidder');
@@ -46,8 +46,8 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('Registration successful. Please complete your profile.'),
-            'token'   => $token,
-            'user'    => new UserResource($user->load('wallet')),
+            'token' => $token,
+            'user' => new UserResource($user->load('wallet')),
         ], 201);
     }
 
@@ -57,7 +57,7 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
@@ -78,8 +78,8 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('Login successful.'),
-            'token'   => $token,
-            'user'    => new UserResource($user->load(['wallet', 'latestKycRequest'])),
+            'token' => $token,
+            'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
         ]);
     }
 
@@ -103,7 +103,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => new UserResource(
+            'data' => new UserResource(
                 $request->user()->load(['wallet', 'latestKycRequest'])
             ),
         ]);
@@ -117,14 +117,14 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'first_name'   => 'sometimes|string|max:100',
-            'last_name'    => 'sometimes|string|max:100',
-            'phone'        => 'sometimes|nullable|string|unique:users,phone,' . $user->id,
+            'first_name' => 'sometimes|string|max:100',
+            'last_name' => 'sometimes|string|max:100',
+            'phone' => 'sometimes|nullable|string|unique:users,phone,' . $user->id,
             'country_code' => 'sometimes|nullable|string|max:10',
-            'country'      => 'sometimes|nullable|string|max:100',
-            'city'         => 'sometimes|nullable|string|max:100',
-            'gender'       => 'sometimes|nullable|in:male,female',
-            'date_of_birth'=> 'sometimes|nullable|date',
+            'country' => 'sometimes|nullable|string|max:100',
+            'city' => 'sometimes|nullable|string|max:100',
+            'gender' => 'sometimes|nullable|in:male,female',
+            'date_of_birth' => 'sometimes|nullable|date',
         ]);
 
         if (isset($validated['first_name']) || isset($validated['last_name'])) {
@@ -138,7 +138,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('Profile updated successfully.'),
-            'data'    => new UserResource($user->fresh()),
+            'data' => new UserResource($user->fresh()),
         ]);
     }
 
@@ -149,7 +149,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'password'         => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $user = $request->user();
@@ -188,8 +188,8 @@ class AuthController extends Controller
         $user->update(['profile_photo' => $path]);
 
         return response()->json([
-            'success'   => true,
-            'message'   => __('Photo uploaded successfully.'),
+            'success' => true,
+            'message' => __('Photo uploaded successfully.'),
             'photo_url' => $user->profile_photo_url,
         ]);
     }

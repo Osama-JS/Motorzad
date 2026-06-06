@@ -407,5 +407,14 @@
     "Pending": "قيد الانتظار",
     "All": "الكل",
     "Deposits": "الإيداعات",
-    "Withdrawals": "السحوبات"
+    "Withdrawals": "السحوبات",
+    "Verification status retrieved successfully.": "تم استرداد حالة التحقق بنجاح.",
+    "Your identity is already verified.": "هويتك موثقة بالفعل.",
+    "You already have a pending verification request.": "لديك طلب تحقق قيد المراجعة بالفعل.",
+    "Identity verification request submitted successfully.": "تم إرسال طلب التحقق من الهوية بنجاح.",
+    "Verification history retrieved successfully.": "تم استرداد سجل التحقق بنجاح.",
+    "Verification requests retrieved successfully.": "تم استرداد طلبات التحقق بنجاح.",
+    "KYC request reviewed successfully.": "تمت مراجعة طلب التحقق بنجاح.",
+    "User not found.": "المستخدم غير موجود.",
+    "Unauthorized access.": "غير مصرح بالدخول."
 }
