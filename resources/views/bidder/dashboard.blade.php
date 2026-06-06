@@ -14,11 +14,11 @@
         <h2>{{ __('Welcome back') }}، <span class="user-name">{{ auth()->user()->full_name }}</span> 👋</h2>
         <p>{{ __('Track your auctions, manage your bids, and discover new opportunities. Experience the next generation of premium bidding.') }}</p>
         <div class="hero-actions">
-            <a href="#" class="btn-premium primary">
+            <a href="{{ route('bidder.auctions.index') }}" class="btn-premium primary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 {{ __('Browse Auctions') }}
             </a>
-            <a href="#" class="btn-premium secondary">
+            <a href="{{ route('bidder.auctions.index', ['tab' => 'live']) }}" class="btn-premium secondary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {{ __('Live Auctions') }}
             </a>
@@ -43,7 +43,7 @@
 
 {{-- ===== PREMIUM QUICK ACTIONS ===== --}}
 <div class="premium-actions">
-    <a href="#" class="p-action-card red">
+    <a href="{{ route('bidder.auctions.index', ['tab' => 'live']) }}" class="p-action-card red">
         <div class="p-action-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
@@ -63,7 +63,7 @@
         </div>
     </a>
     
-    <a href="#" class="p-action-card gold">
+    <a href="{{ route('bidder.auctions.index', ['tab' => 'watchlist']) }}" class="p-action-card gold">
         <div class="p-action-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </div>
@@ -73,7 +73,7 @@
         </div>
     </a>
     
-    <a href="#" class="p-action-card green">
+    <a href="{{ route('bidder.wallet.index') }}" class="p-action-card green">
         <div class="p-action-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         </div>
@@ -94,12 +94,12 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     {{ __('Featured Auctions') }}
                 </h2>
-                <a href="#" class="btn btn-ghost btn-sm">{{ __('View All') }}</a>
+                <a href="{{ route('bidder.auctions.index') }}" class="btn btn-ghost btn-sm">{{ __('View All') }}</a>
             </div>
             
             <div class="premium-auctions-grid">
                 @forelse($featuredAuctions as $auction)
-                <div class="auc-card">
+                <div class="auc-card" onclick="window.location='{{ route('bidder.auctions.show', $auction['id']) }}'" style="cursor:pointer;">
                     <div class="auc-img-wrap">
                         <img src="{{ $auction['image'] }}" alt="{{ $auction['title'] }}" loading="lazy">
                         <span class="auc-badge {{ $auction['status'] }}">
@@ -131,10 +131,10 @@
                                 <span class="label">{{ __('Current Price') }}</span>
                                 <span class="value">{{ number_format($auction['current_price']) }} {{ __('SAR') }}</span>
                             </div>
-                            <button class="auc-btn">
+                            <a href="{{ route('bidder.auctions.show', $auction['id']) }}" class="auc-btn" style="text-decoration:none;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
                                 {{ __('Bid') }}
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

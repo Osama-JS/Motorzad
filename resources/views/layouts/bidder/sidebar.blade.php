@@ -26,12 +26,12 @@
             </a>
 
             <div class="nav-section-title">{{ __('Auctions') }}</div>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.auctions.active') ? 'active' : '' }}">
+            <a href="{{ route('bidder.auctions.index', ['tab' => 'live']) }}" class="nav-item {{ request()->routeIs('bidder.auctions.index') && request('tab') === 'live' ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>{{ __('Live Auctions') }}</span>
                 <span class="nav-badge pulse">{{ __('Live') }}</span>
             </a>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.auctions.browse') ? 'active' : '' }}">
+            <a href="{{ route('bidder.auctions.index') }}" class="nav-item {{ request()->routeIs('bidder.auctions.index') && !request('tab') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <span>{{ __('Browse Auctions') }}</span>
             </a>
@@ -45,7 +45,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/><path d="M18 9v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 7v14"/></svg>
                 <span>{{ __('Won Auctions') }}</span>
             </a>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.watchlist') ? 'active' : '' }}">
+            <a href="{{ route('bidder.auctions.index', ['tab' => 'watchlist']) }}" class="nav-item {{ request()->routeIs('bidder.auctions.index') && request('tab') === 'watchlist' ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 <span>{{ __('Watchlist') }}</span>
             </a>

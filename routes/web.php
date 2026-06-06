@@ -16,6 +16,13 @@ Route::get('lang/{locale}', function ($locale) {
 })->name('lang.switch');
 
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($user->hasRole('bidder')) {
+        return redirect()->route('bidder.dashboard');
+    }
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
@@ -100,6 +107,12 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/wallet/transactions', [\App\Http\Controllers\Bidder\WalletController::class, 'transactions'])->name('wallet.transactions');
     Route::post('/wallet/withdraw', [\App\Http\Controllers\Bidder\WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
+
+    // Auctions Routes
+    Route::get('/auctions', [\App\Http\Controllers\Bidder\AuctionController::class, 'index'])->name('auctions.index');
+    Route::get('/auctions/{id}', [\App\Http\Controllers\Bidder\AuctionController::class, 'show'])->name('auctions.show');
+    Route::post('/auctions/{id}/bid', [\App\Http\Controllers\Bidder\AuctionController::class, 'placeBid'])->name('auctions.bid');
+    Route::post('/auctions/{id}/watch', [\App\Http\Controllers\Bidder\AuctionController::class, 'toggleWatchlist'])->name('auctions.watch');
 });
 
 Route::get('/resources', function () {

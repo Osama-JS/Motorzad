@@ -40,7 +40,7 @@
             </button>
             @if(Route::has('login'))
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
+                    <a href="{{ url('/') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
                 @else
                     <a href="{{ route('login') }}" class="btn btn-ghost">{{ __('Log In') }}</a>
                     @if(Route::has('register'))
@@ -61,9 +61,17 @@
             <h1 class="hero-title">{{ __('Discover the world of') }} <span class="highlight">{{ __('car auctions') }}</span> {{ __('with an unmatched experience') }}</h1>
             <p class="hero-desc">{{ __('Join thousands of bidders and get your dream car at the best price. Motorzad provides you with a safe, transparent, and fast bidding experience.') }}</p>
             <div class="hero-actions">
-                @if(Route::has('register'))
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-lg">{{ __('Start Bidding Now') }}</a>
-                @endif
+                @auth
+                    @if(auth()->user()->status === 'approved')
+                        <a href="{{ route('bidder.auctions.index') }}" class="btn btn-primary btn-lg">{{ app()->getLocale() === 'ar' ? 'ابدأ المزايدة الآن' : 'Start Bidding Now' }}</a>
+                    @else
+                        <a href="{{ route('kyc.index') }}" class="btn btn-primary btn-lg">{{ app()->getLocale() === 'ar' ? 'وثق حسابك لبدء المزايدة' : 'Verify Account to Start Bidding' }}</a>
+                    @endif
+                @else
+                    @if(Route::has('register'))
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">{{ app()->getLocale() === 'ar' ? 'ابدأ المزايدة الآن' : 'Start Bidding Now' }}</a>
+                    @endif
+                @endauth
                 <a href="#how" class="btn btn-ghost btn-lg">{{ __('How it works?') }}</a>
             </div>
             <div class="hero-stats">

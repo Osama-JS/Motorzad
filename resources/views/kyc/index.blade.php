@@ -239,9 +239,13 @@
             <div style="flex:1; max-width:60px; height:2px; background:#10b981;"></div>
             <div class="kyc-tl-item"><div class="kyc-tl-dot" style="background:#10b981;"></div>{{ __('Verified') }} ✅</div>
         </div>
-        <div style="margin-top:2rem;">
-            <a href="{{ route('bidder.dashboard') }}" class="btn-kyc-submit" style="display:inline-flex; text-decoration:none;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <div style="margin-top:2.5rem; display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+            <a href="{{ route('bidder.auctions.index') }}" class="btn-kyc-submit" style="display:inline-flex; text-decoration:none; background:linear-gradient(135deg, var(--brand-red), #991b1b); align-items:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-inline-end:.5rem;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+                {{ app()->getLocale() === 'ar' ? 'ابدأ المزايدة الآن' : 'Start Bidding Now' }}
+            </a>
+            <a href="{{ route('bidder.dashboard') }}" class="btn-kyc-submit" style="display:inline-flex; text-decoration:none; background:var(--bg-hover); border:1px solid var(--border); color:var(--text); align-items:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-inline-end:.5rem;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 {{ __('Go to Dashboard') }}
             </a>
         </div>
