@@ -82,6 +82,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
     Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
     Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
+
+    // Deposit Requests Management (previously MISSING)
+    Route::get('deposits/data', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.data');
+    Route::get('deposits', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.index');
+    Route::get('deposits/{deposit}', [\App\Http\Controllers\Admin\DepositController::class, 'show'])->name('deposits.show');
+    Route::post('deposits/{deposit}/process', [\App\Http\Controllers\Admin\DepositController::class, 'process'])->name('deposits.process');
 });
 // Bidder Management Routes
 Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->group(function () {
