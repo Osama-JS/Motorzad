@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+});
+
+Route::prefix('otp')->group(function () {
+    Route::post('send', [\App\Http\Controllers\Api\OtpController::class, 'sendOtp']);
+    Route::post('verify', [\App\Http\Controllers\Api\OtpController::class, 'verifyOtp']);
 });
 
 // ─── Authenticated Routes ──────────────────────────────────────────────────
@@ -32,13 +39,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('profile', [AuthController::class, 'updateProfile']);
         Route::put('change-password', [AuthController::class, 'changePassword']);
         Route::post('photo', [AuthController::class, 'uploadPhoto']);
+        Route::post('email/verify', [AuthController::class, 'verifyEmail']);
+        Route::post('email/resend', [AuthController::class, 'resendVerificationEmail']);
     });
 
     // KYC
     Route::prefix('kyc')->group(function () {
         Route::get('/', [KycController::class, 'show']);
         Route::post('/', [KycController::class, 'store']);
+        Route::get('status', [\App\Http\Controllers\Api\KycApiController::class, 'status']);
+        Route::post('submit', [\App\Http\Controllers\Api\KycApiController::class, 'submit']);
+        Route::get('history', [\App\Http\Controllers\Api\KycApiController::class, 'history']);
     });
+
 
     // Wallet
     Route::prefix('wallet')->group(function () {
@@ -74,6 +87,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/bids', [\App\Http\Controllers\Api\BidController::class, 'myBids']);
         Route::get('/won', [\App\Http\Controllers\Api\BidController::class, 'wonAuctions']);
     });
+});
+
+// ─── API Documentation Redirect ─────────────────────────────────────────────
+Route::get('documentations', function () {
+    return redirect()->route('l5-swagger.default.api');
 });
 
 // ─── Fallback ──────────────────────────────────────────────────────────────

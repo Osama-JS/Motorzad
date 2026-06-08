@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
+use App\Http\Resources\UserResource;
 
 class OtpController extends Controller
 {
@@ -19,7 +20,7 @@ class OtpController extends Controller
         summary: "Send an OTP code",
         operationId: "sendOtp",
         description: "Generates a 6-digit OTP and sends it via phone or email. In local or debug mode, the code is returned in the response for easy testing.",
-        tags: ["OTP Authentication"],
+        tags: ["Authentication"],
         parameters: [
             new OA\Parameter(
                 name: "Accept-Language",
@@ -111,7 +112,7 @@ class OtpController extends Controller
         summary: "Verify OTP code and authenticate",
         operationId: "verifyOtp",
         description: "Verifies the OTP code. If correct and user exists, authenticates them. If they do not exist, automatically registers them as a bidder and returns access token.",
-        tags: ["OTP Authentication"],
+        tags: ["Authentication"],
         parameters: [
             new OA\Parameter(
                 name: "Accept-Language",
@@ -221,6 +222,11 @@ class OtpController extends Controller
                 ->first();
         }
 
+        // If existing user verified via email, mark as verified
+        if ($user && $request->filled('email') && is_null($user->email_verified_at)) {
+            $user->update(['email_verified_at' => now()]);
+        }
+
         $isNewUser = false;
         if (!$user) {
             $isNewUser = true;
@@ -229,6 +235,14 @@ class OtpController extends Controller
             $email = $request->filled('email') ? $request->email : $request->phone . '@motorzad.com';
             $phone = $request->filled('phone') ? $request->phone : null;
             $countryCode = $request->filled('phone') ? $request->country_code : null;
+
+            // Check if phone or email is already taken to avoid duplicate entry crashes
+            if ($phone && User::where('phone', $phone)->where('country_code', $countryCode)->exists()) {
+                return $this->apiResponse(true, __('The phone number is already registered with another account.'), null, null, 400);
+            }
+            if ($email && User::where('email', $email)->exists()) {
+                return $this->apiResponse(true, __('The email is already registered with another account.'), null, null, 400);
+            }
 
             // Generate temporary unique name
             $nameSuffix = $phone ? substr($phone, -4) : substr(md5($email), 0, 4);
@@ -246,6 +260,11 @@ class OtpController extends Controller
                 'kyc_level' => 0,
             ]);
 
+            if ($request->filled('email')) {
+                $user->email_verified_at = now();
+                $user->save();
+            }
+
             // Assign 'bidder' role
             $user->assignRole('bidder');
         }
@@ -258,20 +277,7 @@ class OtpController extends Controller
             $isNewUser ? __('Registration and login successful.') : __('Verification and login successful.'),
             [
                 'access_token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                    'country_code' => $user->country_code,
-                    'city' => $user->city,
-                    'gender' => $user->gender,
-                    'date_of_birth' => $user->date_of_birth,
-                    'status' => $user->status,
-                    'kyc_level' => $user->kyc_level,
-                ]
+                'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
             ],
             null,
             200

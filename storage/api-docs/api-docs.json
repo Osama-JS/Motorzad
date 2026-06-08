@@ -23,14 +23,14 @@
         }
     ],
     "paths": {
-        "/api/register": {
+        "/api/auth/register": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Register a new bidder",
-                "description": "Registers a new bidder and sends a verification link to their email.",
-                "operationId": "registerBidder",
+                "summary": "Register a new customer",
+                "description": "Registers a new customer and sends an OTP to their email.",
+                "operationId": "registerCustomer",
                 "parameters": [
                     {
                         "name": "Accept-Language",
@@ -56,8 +56,6 @@
                                     "first_name",
                                     "last_name",
                                     "email",
-                                    "phone",
-                                    "country_code",
                                     "password",
                                     "password_confirmation"
                                 ],
@@ -73,38 +71,25 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "user@example.com"
+                                        "example": "john@example.com"
                                     },
                                     "phone": {
                                         "type": "string",
-                                        "example": "+1234567890"
+                                        "example": "500000000"
                                     },
                                     "country_code": {
                                         "type": "string",
                                         "example": "+966"
                                     },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "Riyadh"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "example": "male"
-                                    },
-                                    "date_of_birth": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "1995-05-15"
-                                    },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "Secret123"
+                                        "example": "password123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "Secret123"
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -113,30 +98,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "Successful registration",
+                    "201": {
+                        "description": "Registration successful",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "success": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Registration successful. Please verify your email via the link sent."
+                                            "example": "Registration successful. Please complete your profile."
                                         },
-                                        "data": {
-                                            "properties": {
-                                                "access_token": {
-                                                    "type": "string",
-                                                    "example": "1|abc..."
-                                                },
-                                                "user": {
-                                                    "type": "object"
-                                                }
-                                            },
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "user": {
                                             "type": "object"
                                         }
                                     },
@@ -146,44 +125,23 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 }
             }
         },
-        "/api/login": {
+        "/api/auth/login": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Login a user",
-                "description": "Logs in a user and returns an authentication token. Supports login using either email or phone number.",
+                "summary": "Login user",
+                "description": "Authenticates a user and returns an access token.",
                 "operationId": "loginUser",
                 "parameters": [
                     {
                         "name": "Accept-Language",
                         "in": "header",
-                        "description": "The language of the response (ar, en)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -200,20 +158,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
                                     "email": {
                                         "type": "string",
                                         "format": "email",
                                         "example": "user@example.com"
                                     },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "+1234567890"
-                                    },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "Secret123"
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -223,7 +181,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful login",
+                        "description": "Login successful",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -255,7 +213,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized / Invalid credentials",
+                        "description": "Invalid credentials",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -266,30 +224,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "These credentials do not match our records."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
+                                            "example": "Invalid credentials."
                                         },
                                         "data": {
                                             "type": "object"
@@ -303,17 +238,67 @@
                 }
             }
         },
-        "/api/user": {
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "description": "Revokes the user's current access token.",
+                "operationId": "logoutUser",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/me": {
             "get": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Get authenticated user details",
-                "description": "Returns the details of the currently authenticated user.",
-                "operationId": "getAuthenticatedUser",
+                "summary": "Get current user profile",
+                "description": "Returns the authenticated user's profile information.",
+                "operationId": "getCurrentUser",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Authenticated user details",
+                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -324,9 +309,122 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User profile retrieved successfully."
+                                            "example": "Profile retrieved successfully."
                                         },
                                         "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile": {
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update user profile",
+                "description": "Updates the authenticated user's profile details.",
+                "operationId": "updateUserProfile",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "500000000"
+                                    },
+                                    "country_code": {
+                                        "type": "string",
+                                        "example": "+966"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Saudi Arabia"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Riyadh"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ]
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -335,21 +433,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -359,17 +444,64 @@
                 ]
             }
         },
-        "/api/logout": {
-            "post": {
+        "/api/auth/change-password": {
+            "put": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Logout the authenticated user",
-                "description": "Logs out the authenticated user by revoking their access token.",
-                "operationId": "logoutUser",
+                "summary": "Change user password",
+                "description": "Changes the authenticated user's password.",
+                "operationId": "changeUserPassword",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "oldpassword123"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful logout",
+                        "description": "Password changed successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -380,7 +512,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Successfully logged out."
+                                            "example": "Password changed successfully."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -388,15 +524,23 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated",
+                    "422": {
+                        "description": "Validation error or incorrect old password",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Unauthenticated."
+                                            "example": "Current password is incorrect."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -412,19 +556,99 @@
                 ]
             }
         },
-        "/api/forgot-password": {
+        "/api/auth/photo": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Request a password reset code",
-                "description": "Sends a 6-digit verification code to the user's email if it is registered in our records.",
+                "summary": "Upload profile photo",
+                "description": "Uploads a new profile photo for the authenticated user.",
+                "operationId": "uploadProfilePhoto",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "photo": {
+                                        "description": "Profile photo image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photo uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Photo uploaded successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "photo_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/profile_photos/xyz.png"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Forgot Password",
+                "description": "Sends an OTP to the user's email to reset their password.",
                 "operationId": "forgotPassword",
                 "parameters": [
                     {
                         "name": "Accept-Language",
                         "in": "header",
-                        "description": "The language of the response (ar, en)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -458,7 +682,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password reset code sent successfully",
+                        "description": "OTP sent successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -469,12 +693,12 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Password reset code sent successfully."
+                                            "example": "Password reset OTP sent to your email."
                                         },
                                         "data": {
                                             "properties": {
-                                                "token": {
-                                                    "description": "Only returned in debug/local environments",
+                                                "otp": {
+                                                    "description": "Only in local/debug mode",
                                                     "type": "string",
                                                     "example": "123456"
                                                 }
@@ -488,180 +712,23 @@
                         }
                     },
                     "404": {
-                        "description": "Email not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User with this email does not exist."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "User not found"
                     }
                 }
             }
         },
-        "/api/check-token": {
+        "/api/auth/reset-password": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Check if reset code is valid",
-                "description": "Validates the 6-digit code sent to the email.",
-                "operationId": "checkToken",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "token"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@example.com"
-                                    },
-                                    "token": {
-                                        "type": "string",
-                                        "example": "123456"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Token is valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Token is valid."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid or expired token",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid or expired code."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/reset-password": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Reset user password",
-                "description": "Updates the user's password using the validated 6-digit reset code.",
+                "summary": "Reset Password",
+                "description": "Verifies the OTP and sets a new password.",
                 "operationId": "resetPassword",
                 "parameters": [
                     {
                         "name": "Accept-Language",
                         "in": "header",
-                        "description": "The language of the response (ar, en)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -680,7 +747,7 @@
                             "schema": {
                                 "required": [
                                     "email",
-                                    "token",
+                                    "otp",
                                     "password",
                                     "password_confirmation"
                                 ],
@@ -690,19 +757,19 @@
                                         "format": "email",
                                         "example": "user@example.com"
                                     },
-                                    "token": {
+                                    "otp": {
                                         "type": "string",
                                         "example": "123456"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "NewSecret123"
+                                        "example": "newpassword123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "NewSecret123"
+                                        "example": "newpassword123"
                                     }
                                 },
                                 "type": "object"
@@ -712,7 +779,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password reset successful",
+                        "description": "Password reset successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -723,7 +790,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Password has been reset successfully."
+                                            "example": "Password reset successfully. You can now login."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -732,7 +803,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid or expired token",
+                        "description": "Invalid or expired OTP",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -743,7 +814,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Invalid or expired code."
+                                            "example": "Invalid or expired OTP code."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -752,59 +827,23 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 }
             }
         },
-        "/api/email/verify/{id}/{hash}": {
-            "get": {
+        "/api/auth/email/verify": {
+            "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Verify user's email address",
-                "description": "Validates the signature of the email verification link sent to the user and marks email as verified.",
+                "summary": "Verify user email",
+                "description": "Verifies the authenticated user's email using the 6-digit OTP code sent during registration.",
                 "operationId": "verifyEmail",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "hash",
-                        "in": "path",
-                        "description": "SHA-1 hash of the user's email",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
                         "name": "Accept-Language",
                         "in": "header",
-                        "description": "The language of the response (ar, en)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -816,6 +855,25 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Email verified successfully",
@@ -830,210 +888,13 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Email verified successfully."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid verification link",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid verification link."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/email/resend": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Resend email verification notification",
-                "description": "Resends the signed verification link to the authenticated user's email address.",
-                "operationId": "resendEmailVerification",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Verification link sent successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Email verification link sent."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Email already verified",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Email already verified."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/user/profile": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Update authenticated user profile",
-                "description": "Updates the profile details of the currently authenticated user.",
-                "operationId": "updateProfile",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "first_name": {
-                                        "type": "string",
-                                        "example": "John"
-                                    },
-                                    "last_name": {
-                                        "type": "string",
-                                        "example": "Doe"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "500000000"
-                                    },
-                                    "country_code": {
-                                        "type": "string",
-                                        "example": "+966"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "Riyadh"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "example": "male",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ]
-                                    },
-                                    "date_of_birth": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "1995-05-15"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Profile updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User profile updated successfully."
                                         },
                                         "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -1042,8 +903,8 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error",
+                    "400": {
+                        "description": "Invalid or expired OTP",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1054,9 +915,75 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Validation failed."
+                                            "example": "Invalid or expired OTP code."
                                         },
                                         "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/email/resend": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Resend email verification OTP",
+                "description": "Regenerates and resends the 6-digit OTP verification code to the authenticated user's email.",
+                "operationId": "resendVerificationEmail",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verification OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Verification OTP sent to your email."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "otp": {
+                                                    "description": "Only in local/debug mode",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -1064,94 +991,9 @@
                                 }
                             }
                         }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/user/change-password": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Change authenticated user password",
-                "description": "Changes the password of the currently authenticated user after verifying the current password.",
-                "operationId": "changePassword",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "current_password",
-                                    "password",
-                                    "password_confirmation"
-                                ],
-                                "properties": {
-                                    "current_password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "OldSecret123"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "NewSecret123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "NewSecret123"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Password changed successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Password has been changed successfully."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     },
                     "400": {
-                        "description": "Incorrect current password",
+                        "description": "Email is already verified",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1162,140 +1004,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "The provided password does not match your current password."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
+                                            "example": "Email is already verified."
                                         },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/user/delete": {
-            "delete": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Permanently delete user account",
-                "description": "Permanently deletes the currently authenticated user account and revokes all active tokens.",
-                "operationId": "deleteAccount",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "password"
-                                ],
-                                "properties": {
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "Secret123"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Account deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Your account has been permanently deleted."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Incorrect password confirmation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The provided password does not match your current password."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -1314,7 +1027,7 @@
         "/api/kyc/status": {
             "get": {
                 "tags": [
-                    "Identity Verification"
+                    "Authentication"
                 ],
                 "summary": "Get current user KYC status",
                 "description": "Returns the identity verification status of the currently authenticated user.",
@@ -1421,7 +1134,7 @@
         "/api/kyc/submit": {
             "post": {
                 "tags": [
-                    "Identity Verification"
+                    "Authentication"
                 ],
                 "summary": "Submit identity verification documents",
                 "description": "Allows the authenticated user to upload national ID and selfie images to request identity verification.",
@@ -1561,7 +1274,7 @@
         "/api/kyc/history": {
             "get": {
                 "tags": [
-                    "Identity Verification"
+                    "Authentication"
                 ],
                 "summary": "Get KYC verification history",
                 "description": "Returns a paginated list of all past KYC verification requests submitted by the authenticated user.",
@@ -1661,262 +1374,10 @@
                 ]
             }
         },
-        "/api/admin/kyc/requests": {
-            "get": {
-                "tags": [
-                    "Identity Verification Admin"
-                ],
-                "summary": "List all KYC requests (Admin)",
-                "description": "Returns a paginated list of all KYC requests, filterable by status and searchable by user info.",
-                "operationId": "adminGetKycRequests",
-                "parameters": [
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter requests by status (pending, approved, rejected)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "approved",
-                                "rejected"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search term matching name, email, or ID number",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Verification requests retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Verification requests retrieved successfully."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden / Access Denied",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/kyc/requests/{kycRequest}/review": {
-            "post": {
-                "tags": [
-                    "Identity Verification Admin"
-                ],
-                "summary": "Review KYC verification request (Admin)",
-                "description": "Approves or rejects a KYC verification request, updating the user status and sending notification emails.",
-                "operationId": "adminReviewKycRequest",
-                "parameters": [
-                    {
-                        "name": "kycRequest",
-                        "in": "path",
-                        "description": "KYC Request ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "Accept-Language",
-                        "in": "header",
-                        "description": "The language of the response (ar, en)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "en",
-                            "enum": [
-                                "en",
-                                "ar"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "example": "approved",
-                                        "enum": [
-                                            "approved",
-                                            "rejected"
-                                        ]
-                                    },
-                                    "note": {
-                                        "description": "Optional feedback note, recommended when status is rejected.",
-                                        "type": "string",
-                                        "example": "Document is clear and verified."
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "KYC request reviewed successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "KYC request reviewed successfully."
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden / Access Denied",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation failed."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/otp/send": {
             "post": {
                 "tags": [
-                    "OTP Authentication"
+                    "Authentication"
                 ],
                 "summary": "Send an OTP code",
                 "description": "Generates a 6-digit OTP and sends it via phone or email. In local or debug mode, the code is returned in the response for easy testing.",
@@ -2022,7 +1483,7 @@
         "/api/otp/verify": {
             "post": {
                 "tags": [
-                    "OTP Authentication"
+                    "Authentication"
                 ],
                 "summary": "Verify OTP code and authenticate",
                 "description": "Verifies the OTP code. If correct and user exists, authenticates them. If they do not exist, automatically registers them as a bidder and returns access token.",
@@ -2173,18 +1634,6 @@
         {
             "name": "Authentication",
             "description": "Authentication"
-        },
-        {
-            "name": "Identity Verification",
-            "description": "Identity Verification"
-        },
-        {
-            "name": "Identity Verification Admin",
-            "description": "Identity Verification Admin"
-        },
-        {
-            "name": "OTP Authentication",
-            "description": "OTP Authentication"
         }
     ]
 }

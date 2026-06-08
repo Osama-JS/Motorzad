@@ -16,4 +16,11 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_api_documentations_redirects_to_api_documentation(): void
+    {
+        $response = $this->get('/api/documentations');
+
+        $response->assertRedirect('/api/documentation');
+    }
 }
