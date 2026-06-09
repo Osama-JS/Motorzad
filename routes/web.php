@@ -95,6 +95,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('deposits', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.index');
     Route::get('deposits/{deposit}', [\App\Http\Controllers\Admin\DepositController::class, 'show'])->name('deposits.show');
     Route::post('deposits/{deposit}/process', [\App\Http\Controllers\Admin\DepositController::class, 'process'])->name('deposits.process');
+
+    // Auctions Management
+    Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
+    Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
+
+    // Vehicles Management
+    Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
+    Route::resource('vehicles', \App\Http\Controllers\Admin\VehicleController::class);
 });
 // Bidder Management Routes
 Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->group(function () {

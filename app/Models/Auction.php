@@ -11,7 +11,7 @@ class Auction extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'vehicle_id', 'created_by', 'title_ar', 'title_en',
+        'vehicle_id', 'image', 'created_by', 'title_ar', 'title_en',
         'description_ar', 'description_en', 'location',
         'start_price', 'reserve_price', 'min_bid_increment', 'buy_now_price',
         'deposit_amount', 'deposit_required',
