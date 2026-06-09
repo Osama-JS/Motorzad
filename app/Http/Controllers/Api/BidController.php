@@ -49,13 +49,15 @@ class BidController extends Controller
 
         // 4. Validate bid amount
         $request->validate([
-            'amount' => 'required|numeric|min:0',
+            'amount'       => 'required|numeric|min:0',
+            'is_auto_bid'  => 'nullable|boolean',
+            'max_auto_bid' => 'nullable|numeric|gte:amount',
         ]);
 
         $currentPrice  = $auction->current_price;
         $minimumBid    = $currentPrice + $auction->min_bid_increment;
 
-        if ($request->amount < $minimumBid) {
+        if ($request->amount < $minimumBid && !$auction->bids()->where('user_id', $user->id)->where('status', 'active')->exists()) {
             return response()->json([
                 'success'     => false,
                 'message'     => __('Your bid must be at least :amount.', ['amount' => number_format($minimumBid, 2)]),
@@ -83,6 +85,68 @@ class BidController extends Controller
         // ── Place Bid ──────────────────────────────────────────────────────
 
         DB::transaction(function () use ($request, $auction, $user) {
+            $isAutoBid = $request->boolean('is_auto_bid');
+            $maxAutoBid = $isAutoBid ? $request->max_auto_bid : null;
+            $newBidAmount = $request->amount;
+
+            // Get the current highest active bid (if any)
+            $currentHighestBid = $auction->bids()->where('status', 'active')->first();
+
+            // Setup proxy war variables
+            $rivalBid = null;
+            if ($currentHighestBid && $currentHighestBid->user_id !== $user->id && $currentHighestBid->is_auto_bid) {
+                $rivalBid = $currentHighestBid;
+            }
+
+            if ($rivalBid) {
+                $userMax = $isAutoBid ? $maxAutoBid : $newBidAmount;
+                $rivalMax = $rivalBid->max_auto_bid;
+
+                if ($userMax > $rivalMax) {
+                    // User wins proxy war
+                    $newBidAmount = min($rivalMax + $auction->min_bid_increment, $userMax);
+                    
+                    // Mark rival as outbid
+                    $rivalBid->update(['status' => 'outbid']);
+                } else {
+                    // Rival wins proxy war
+                    $rivalNewAmount = min($userMax + $auction->min_bid_increment, $rivalMax);
+                    
+                    // User's bid gets placed but immediately outbid
+                    $auction->bids()->where('status', 'active')->where('user_id', $user->id)->update(['status' => 'outbid']);
+                    Bid::create([
+                        'auction_id' => $auction->id,
+                        'user_id'    => $user->id,
+                        'amount'     => $newBidAmount,
+                        'is_auto_bid'=> $isAutoBid,
+                        'max_auto_bid'=> $maxAutoBid,
+                        'status'     => 'outbid',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
+                    $auction->increment('bids_count');
+
+                    // Rival's new winning bid
+                    $auction->bids()->where('status', 'active')->where('user_id', $rivalBid->user_id)->update(['status' => 'outbid']);
+                    Bid::create([
+                        'auction_id' => $auction->id,
+                        'user_id'    => $rivalBid->user_id,
+                        'amount'     => $rivalNewAmount,
+                        'is_auto_bid'=> true,
+                        'max_auto_bid'=> $rivalMax,
+                        'status'     => 'active',
+                        'ip_address' => 'system',
+                        'user_agent' => 'proxy-bid',
+                    ]);
+                    $auction->increment('bids_count');
+
+                    // Auto-extend logic
+                    $this->handleAutoExtend($auction);
+                    return; // Early return because proxy logic handled the new state
+                }
+            }
+
+            // Normal flow (or User won proxy war)
             // Mark previous active bids as outbid
             $auction->bids()
                 ->where('status', 'active')
@@ -97,24 +161,21 @@ class BidController extends Controller
 
             // Create new bid
             $bid = Bid::create([
-                'auction_id' => $auction->id,
-                'user_id'    => $user->id,
-                'amount'     => $request->amount,
-                'status'     => 'active',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
+                'auction_id'   => $auction->id,
+                'user_id'      => $user->id,
+                'amount'       => $newBidAmount,
+                'is_auto_bid'  => $isAutoBid,
+                'max_auto_bid' => $maxAutoBid,
+                'status'       => 'active',
+                'ip_address'   => $request->ip(),
+                'user_agent'   => $request->userAgent(),
             ]);
 
             // Update bids count
             $auction->increment('bids_count');
 
-            // Auto-extend if bid placed in last X minutes
-            $extendThreshold = now()->subMinutes($auction->auto_extend_minutes);
-            if ($auction->end_time->lessThanOrEqualTo(now()->addMinutes($auction->auto_extend_minutes))) {
-                $auction->update([
-                    'end_time' => now()->addMinutes($auction->auto_extend_minutes),
-                ]);
-            }
+            // Auto-extend
+            $this->handleAutoExtend($auction);
 
             return $bid;
         });
@@ -129,6 +190,66 @@ class BidController extends Controller
             'end_time'      => $auction->end_time->toISOString(),
             'time_remaining'=> $auction->time_remaining,
         ], 201);
+    }
+
+    /**
+     * Handle auto-extension of auction time if bid is within threshold.
+     */
+    protected function handleAutoExtend(Auction $auction): void
+    {
+        $extendThreshold = now()->subMinutes($auction->auto_extend_minutes);
+        if ($auction->end_time->lessThanOrEqualTo(now()->addMinutes($auction->auto_extend_minutes))) {
+            $auction->update([
+                'end_time' => now()->addMinutes($auction->auto_extend_minutes),
+            ]);
+        }
+    }
+
+    /**
+     * Update an active bid (for modifying amount or auto-bid settings).
+     */
+    public function update(Request $request, Auction $auction, Bid $bid): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($bid->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => __('Unauthorized.')], 403);
+        }
+
+        if ($bid->status !== 'active') {
+            return response()->json(['success' => false, 'message' => __('You can only update an active bid.')], 422);
+        }
+
+        if ($auction->status !== 'live' || now()->isAfter($auction->end_time)) {
+            return response()->json(['success' => false, 'message' => __('Auction is not live.')], 422);
+        }
+
+        $request->validate([
+            'amount'       => 'nullable|numeric|min:' . $bid->amount,
+            'is_auto_bid'  => 'nullable|boolean',
+            'max_auto_bid' => 'nullable|numeric|gte:amount',
+        ]);
+
+        $newAmount = $request->input('amount', $bid->amount);
+        $isAutoBid = $request->input('is_auto_bid', $bid->is_auto_bid);
+        $maxAutoBid = $isAutoBid ? $request->input('max_auto_bid', $bid->max_auto_bid) : null;
+
+        // If they are just updating their proxy, we just save it.
+        // If they are increasing their explicit bid amount, we update that.
+        $bid->update([
+            'amount'       => $newAmount,
+            'is_auto_bid'  => $isAutoBid,
+            'max_auto_bid' => $maxAutoBid,
+        ]);
+
+        // If their new amount is higher, they are just bidding against themselves.
+        // It does not trigger proxy war unless another user outbids them later.
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Bid updated successfully.'),
+            'bid'     => $bid,
+        ]);
     }
 
     /**
