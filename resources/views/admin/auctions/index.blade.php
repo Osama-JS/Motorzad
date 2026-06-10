@@ -689,6 +689,40 @@
         return localISOTime;
     }
 
+    function handleFilePreview(input, previewId) {
+        const previewContainer = document.getElementById(previewId);
+        if (!previewContainer) return;
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const thumb = previewContainer.querySelector('.preview-thumb');
+                const nameEl = previewContainer.querySelector('.preview-name');
+                const sizeEl = previewContainer.querySelector('.preview-size');
+
+                if (thumb) thumb.src = e.target.result;
+                if (nameEl) nameEl.textContent = file.name;
+                if (sizeEl) sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+                previewContainer.classList.add('has-file');
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            const thumb = previewContainer.querySelector('.preview-thumb');
+            const nameEl = previewContainer.querySelector('.preview-name');
+            const sizeEl = previewContainer.querySelector('.preview-size');
+
+            if (thumb) thumb.src = '';
+            if (nameEl) nameEl.textContent = '';
+            if (sizeEl) sizeEl.textContent = '';
+
+            previewContainer.classList.remove('has-file');
+        }
+    }
+
     $(document).ready(function() {
         $.ajaxSetup({
             headers: {
@@ -698,6 +732,12 @@
 
         $('#addAuctionModal').on('show.bs.modal', function() {
             $('#addAuctionForm')[0].reset();
+            const preview = document.getElementById('addImagePreview');
+            if (preview) {
+                preview.classList.remove('has-file');
+                const thumb = preview.querySelector('.preview-thumb');
+                if (thumb) thumb.src = '';
+            }
         });
 
         auctionsTable = $('#auctions-table').DataTable({
@@ -832,6 +872,27 @@
                 
                 $('#edit_start_time').val(formatDateTimeForInput(auction.start_time));
                 $('#edit_end_time').val(formatDateTimeForInput(auction.end_time));
+
+                // عرض صورة المزاد الحالية إذا كانت موجودة
+                const editPreview = document.getElementById('editImagePreview');
+                if (editPreview) {
+                    const thumb = editPreview.querySelector('.preview-thumb');
+                    const nameEl = editPreview.querySelector('.preview-name');
+                    const sizeEl = editPreview.querySelector('.preview-size');
+                    
+                    if (auction.image) {
+                        const imageUrl = "{{ asset('storage') }}/" + auction.image;
+                        if (thumb) thumb.src = imageUrl;
+                        if (nameEl) nameEl.textContent = auction.image.split('/').pop();
+                        if (sizeEl) sizeEl.textContent = ''; // الحجم غير معروف من الخادم
+                        editPreview.classList.add('has-file');
+                    } else {
+                        if (thumb) thumb.src = '';
+                        if (nameEl) nameEl.textContent = '';
+                        if (sizeEl) sizeEl.textContent = '';
+                        editPreview.classList.remove('has-file');
+                    }
+                }
                 
                 $('#editAuctionModal').modal('show');
             }

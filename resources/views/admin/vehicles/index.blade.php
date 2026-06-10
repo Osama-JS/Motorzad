@@ -101,9 +101,41 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addVehicleForm">
+            <form id="addVehicleForm" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
+
+                    <!-- Section: صور المركبة -->
+                    <div class="modal-form-section">
+                        <div class="section-header">
+                            <div class="section-icon icon-red">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </div>
+                            {{ __('Vehicle Images') }}
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">
+                                        <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        {{ __('Select Images') }}
+                                    </label>
+                                    <div class="file-upload-zone" id="addVehicleImagesZone">
+                                        <input type="file" name="images[]" accept="image/*" multiple onchange="handleMultipleFilesPreview(this, 'addVehicleImagesPreview', 'add_primary_image_index')">
+                                        <input type="hidden" name="primary_image_index" id="add_primary_image_index" value="0">
+                                        <div class="file-upload-content">
+                                            <div class="upload-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            </div>
+                                            <div class="upload-text">{{ __('Drag the images here or') }} <span class="upload-highlight">{{ __('click to choose') }}</span></div>
+                                            <div class="upload-hint">{{ __('PNG, JPG, WEBP — Max size 2MB per image') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-2" id="addVehicleImagesPreview"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Section: معلومات الموديل والشركة -->
                     <div class="modal-form-section">
@@ -247,6 +279,65 @@
                         </div>
                     </div>
 
+                    <!-- Section: المميزات والعيوب -->
+                    <div class="modal-form-section">
+                        <div class="section-header">
+                            <div class="section-icon icon-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                            </div>
+                            {{ __('Features & Issues') }}
+                        </div>
+                        <div class="section-body">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    {{ __('Features') }}
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="sunroof">
+                                        <span class="check-label">{{ __('Sunroof') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="leather_seats">
+                                        <span class="check-label">{{ __('Leather Seats') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="rear_camera">
+                                        <span class="check-label">{{ __('Rear Camera') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="sensors">
+                                        <span class="check-label">{{ __('Sensors') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="navigation_system">
+                                        <span class="check-label">{{ __('Navigation System') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="cruise_control">
+                                        <span class="check-label">{{ __('Cruise Control') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="keyless_entry">
+                                        <span class="check-label">{{ __('Keyless Entry') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="bluetooth">
+                                        <span class="check-label">{{ __('Bluetooth') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">
+                                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    {{ __('Issues / Defects') }}
+                                </label>
+                                <textarea name="issues" class="form-control" rows="2" placeholder="{{ __('List any issues or defects (scratch, mechanical issues, etc.). Leave empty if none.') }}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Section: الوصف -->
                     <div class="modal-form-section">
                         <div class="section-header">
@@ -301,10 +392,57 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editVehicleForm">
+            <form id="editVehicleForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" id="edit_vehicle_id">
                 <div class="modal-body">
+
+                    <!-- Section: معرض الصور الحالي -->
+                    <div class="modal-form-section">
+                        <div class="section-header">
+                            <div class="section-icon icon-gold">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                            </div>
+                            {{ __('Current Image Gallery') }}
+                        </div>
+                        <div class="section-body">
+                            <div class="row g-2" id="editVehicleGallery">
+                                <!-- Existing images will be loaded here via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: إضافة صور جديدة -->
+                    <div class="modal-form-section">
+                        <div class="section-header">
+                            <div class="section-icon icon-red">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </div>
+                            {{ __('Add New Images') }}
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">
+                                        <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        {{ __('Select Images') }}
+                                    </label>
+                                    <div class="file-upload-zone" id="editVehicleImagesZone">
+                                        <input type="file" name="images[]" accept="image/*" multiple onchange="handleMultipleFilesPreview(this, 'editVehicleImagesPreview', 'edit_primary_image_index')">
+                                        <input type="hidden" name="primary_image_index" id="edit_primary_image_index" value="-1">
+                                        <div class="file-upload-content">
+                                            <div class="upload-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            </div>
+                                            <div class="upload-text">{{ __('Drag the images here or') }} <span class="upload-highlight">{{ __('click to choose') }}</span></div>
+                                            <div class="upload-hint">{{ __('PNG, JPG, WEBP — Max size 2MB per image') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-2" id="editVehicleImagesPreview"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Section: معلومات الموديل والشركة -->
                     <div class="modal-form-section">
@@ -438,12 +576,80 @@
                                         <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                                         {{ __('Status') }}
                                     </label>
-                                    <select id="edit_status" name="status" class="form-control" required>
+                                    <select id="edit_status" name="status" class="form-control" required onchange="if(this.value === 'rejected') { $('#rejection_reason_row').show(); } else { $('#rejection_reason_row').hide(); }">
                                         <option value="approved">🟢 {{ __('Approved') }}</option>
                                         <option value="pending">📅 {{ __('Pending Review') }}</option>
                                         <option value="rejected">❌ {{ __('Rejected') }}</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="row" id="rejection_reason_row" style="display: none;">
+                                <div class="col-md-12 mb-3 form-group">
+                                    <label class="form-label">
+                                        <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        {{ __('Rejection Reason') }}
+                                    </label>
+                                    <textarea id="edit_rejection_reason" name="rejection_reason" class="form-control" rows="2" placeholder="{{ __('Please write the reason for rejecting the vehicle...') }}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: المميزات والعيوب -->
+                    <div class="modal-form-section">
+                        <div class="section-header">
+                            <div class="section-icon icon-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                            </div>
+                            {{ __('Features & Issues') }}
+                        </div>
+                        <div class="section-body">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    {{ __('Features') }}
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="sunroof" id="edit_feature_sunroof">
+                                        <span class="check-label">{{ __('Sunroof') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="leather_seats" id="edit_feature_leather_seats">
+                                        <span class="check-label">{{ __('Leather Seats') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="rear_camera" id="edit_feature_rear_camera">
+                                        <span class="check-label">{{ __('Rear Camera') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="sensors" id="edit_feature_sensors">
+                                        <span class="check-label">{{ __('Sensors') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="navigation_system" id="edit_feature_navigation_system">
+                                        <span class="check-label">{{ __('Navigation System') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="cruise_control" id="edit_feature_cruise_control">
+                                        <span class="check-label">{{ __('Cruise Control') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="keyless_entry" id="edit_feature_keyless_entry">
+                                        <span class="check-label">{{ __('Keyless Entry') }}</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="features[]" value="bluetooth" id="edit_feature_bluetooth">
+                                        <span class="check-label">{{ __('Bluetooth') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">
+                                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    {{ __('Issues / Defects') }}
+                                </label>
+                                <textarea id="edit_issues" name="issues" class="form-control" rows="2" placeholder="{{ __('List any issues or defects (scratch, mechanical issues, etc.). Leave empty if none.') }}"></textarea>
                             </div>
                         </div>
                     </div>
@@ -497,6 +703,127 @@
 <script>
     let vehiclesTable;
 
+    function handleMultipleFilesPreview(input, previewId, primaryInputId) {
+        const previewContainer = document.getElementById(previewId);
+        if (!previewContainer) return;
+        previewContainer.innerHTML = '';
+
+        const files = input.files;
+        if (files && files.length > 0) {
+            document.getElementById(primaryInputId).value = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col-6 col-sm-4 col-md-3 vehicle-img-preview-col';
+                    col.dataset.index = i;
+                    col.style.position = 'relative';
+                    col.style.cursor = 'pointer';
+
+                    const borderStyle = (i === 0) ? '3px solid var(--brand-red)' : '1px solid var(--border)';
+                    const badgeDisplay = (i === 0) ? 'block' : 'none';
+
+                    col.innerHTML = `
+                        <div class="card p-1 text-center bg-dark" style="border: ${borderStyle}; border-radius: 8px; position: relative; overflow: hidden; height:120px;">
+                            <img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius: 6px;" alt="">
+                            <span class="badge bg-danger primary-badge" style="position:absolute; top:8px; right:8px; display: ${badgeDisplay}; font-size:10px;">${"{{ __('Primary') }}"}</span>
+                            <div class="hover-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; opacity:0; transition:0.2s;">
+                                <span class="text-white" style="font-size:11px; font-weight:bold;">${"{{ __('Set Primary') }}"}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    const card = col.querySelector('.card');
+                    const overlay = col.querySelector('.hover-overlay');
+                    col.addEventListener('mouseenter', () => overlay.style.opacity = '1');
+                    col.addEventListener('mouseleave', () => overlay.style.opacity = '0');
+
+                    col.addEventListener('click', function() {
+                        document.getElementById(primaryInputId).value = i;
+                        previewContainer.querySelectorAll('.vehicle-img-preview-col').forEach(el => {
+                            el.querySelector('.card').style.border = '1px solid var(--border)';
+                            el.querySelector('.primary-badge').style.display = 'none';
+                        });
+                        card.style.border = '3px solid var(--brand-red)';
+                        col.querySelector('.primary-badge').style.display = 'block';
+                    });
+
+                    previewContainer.appendChild(col);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+    }
+
+    function setPrimaryVehicleImage(imageId) {
+        let url = "{{ route('admin.vehicles.set-primary-image', ':id') }}".replace(':id', imageId);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    vehiclesTable.ajax.reload(null, false);
+                    const gallery = $('#editVehicleGallery');
+                    gallery.find('.existing-image-col').each(function() {
+                        const colId = $(this).data('image-id');
+                        if (colId == imageId) {
+                            $(this).find('.card').css('border', '3px solid var(--brand-red)');
+                            $(this).find('.primary-badge').show();
+                        } else {
+                            $(this).find('.card').css('border', '1px solid var(--border)');
+                            $(this).find('.primary-badge').hide();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function deleteVehicleImage(imageId) {
+        let url = "{{ route('admin.vehicles.delete-image', ':id') }}".replace(':id', imageId);
+        Swal.fire({
+            title: "{{ __('Delete this image?') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('Yes, delete!') }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            vehiclesTable.ajax.reload(null, false);
+                            const imageCol = $(`.existing-image-col[data-image-id="${imageId}"]`);
+                            imageCol.fadeOut(300, function() {
+                                $(this).remove();
+                                if ($('#editVehicleGallery').find('.existing-image-col').length === 0) {
+                                    $('#editVehicleGallery').html('<div class="col-12 text-center text-muted p-3">' + "{{ __('No Images Available') }}" + '</div>');
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
     $(document).ready(function() {
         $.ajaxSetup({
             headers: {
@@ -506,6 +833,8 @@
 
         $('#addVehicleModal').on('show.bs.modal', function() {
             $('#addVehicleForm')[0].reset();
+            $('#addVehicleImagesPreview').html('');
+            $('#add_primary_image_index').val('0');
         });
 
         vehiclesTable = $('#vehicles-table').DataTable({
@@ -542,11 +871,14 @@
             $.ajax({
                 url: "{{ route('admin.vehicles.store') }}",
                 type: "POST",
-                data: $(this).serialize(),
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
                 success: function (response) {
                     if (response.success) {
                         $('#addVehicleModal').modal('hide');
                         $('#addVehicleForm')[0].reset();
+                        $('#addVehicleImagesPreview').html('');
                         vehiclesTable.ajax.reload(null, false);
                         toastr.success(response.message);
                     }
@@ -574,15 +906,20 @@
 
             const id = $('#edit_vehicle_id').val();
             const url = updateVehicleUrl.replace(':id', id);
-            const formData = $(this).serialize() + '&_method=PUT';
+            const formData = new FormData(this);
+            formData.append('_method', 'PUT');
 
             $.ajax({
                 url: url,
                 method: 'POST',
                 data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     if (response.success) {
                         $('#editVehicleModal').modal('hide');
+                        $('#editVehicleForm')[0].reset();
+                        $('#editVehicleImagesPreview').html('');
                         vehiclesTable.ajax.reload(null, false);
                         toastr.success(response.message);
                     }
@@ -625,6 +962,69 @@
                 $('#edit_status').val(vehicle.status);
                 $('#edit_description_ar').val(vehicle.description_ar);
                 $('#edit_description_en').val(vehicle.description_en);
+                $('#edit_rejection_reason').val(vehicle.rejection_reason);
+
+                if (vehicle.status === 'rejected') {
+                    $('#rejection_reason_row').show();
+                } else {
+                    $('#rejection_reason_row').hide();
+                }
+
+                // ضبط المميزات والعيوب في التعديل
+                $('#editVehicleModal').find('input[name="features[]"]').prop('checked', false);
+                if (vehicle.features && Array.isArray(vehicle.features)) {
+                    vehicle.features.forEach(feature => {
+                        $(`#edit_feature_${feature}`).prop('checked', true);
+                    });
+                }
+                $('#edit_issues').val(vehicle.issues || '');
+
+                // تهيئة معرض الصور الحالية ومعاينة الصور الجديدة
+                $('#editVehicleGallery').html('');
+                $('#editVehicleImagesPreview').html('');
+                $('#edit_primary_image_index').val('-1');
+
+                if (vehicle.images && vehicle.images.length > 0) {
+                    vehicle.images.forEach(img => {
+                        const borderStyle = img.is_primary ? '3px solid var(--brand-red)' : '1px solid var(--border)';
+                        const badgeDisplay = img.is_primary ? 'block' : 'none';
+                        const url = "{{ asset('storage') }}/" + img.image_path;
+
+                        const col = $(`
+                            <div class="col-6 col-sm-4 col-md-3 existing-image-col" data-image-id="${img.id}">
+                                <div class="card p-1 text-center bg-dark" style="border: ${borderStyle}; border-radius: 8px; position: relative; overflow: hidden; height:120px;">
+                                    <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius: 6px;" alt="">
+                                    <span class="badge bg-danger primary-badge" style="position:absolute; top:8px; right:8px; display: ${badgeDisplay}; font-size:10px;">${"{{ __('Primary') }}"}</span>
+                                    <div class="image-actions" style="position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:4px; justify-content:center; opacity:0; transition:0.2s;">
+                                        <button type="button" class="btn btn-sm btn-primary py-1 px-2 set-primary-btn" title="${"{{ __('Set Primary') }}"}" style="font-size:10px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                                        <button type="button" class="btn btn-sm btn-danger py-1 px-2 delete-image-btn" title="${"{{ __('Delete') }}"}" style="font-size:10px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+
+                        col.find('.card').hover(
+                            function() { $(this).find('.image-actions').css('opacity', '1'); },
+                            function() { $(this).find('.image-actions').css('opacity', '0'); }
+                        );
+
+                        col.find('.set-primary-btn').click(function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPrimaryVehicleImage(img.id);
+                        });
+
+                        col.find('.delete-image-btn').click(function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            deleteVehicleImage(img.id);
+                        });
+
+                        $('#editVehicleGallery').append(col);
+                    });
+                } else {
+                    $('#editVehicleGallery').html('<div class="col-12 text-center text-muted p-3">' + "{{ __('No Images Available') }}" + '</div>');
+                }
                 
                 $('#editVehicleModal').modal('show');
             }
@@ -659,6 +1059,74 @@
                     },
                     error: function(xhr) {
                         toastr.error("{{ __('Could not delete vehicle, it might be linked to an auction.') }}");
+                    }
+                });
+            }
+        });
+    }
+
+    function approveVehicle(id) {
+        let url = "{{ route('admin.vehicles.approve', ':id') }}".replace(':id', id);
+        
+        Swal.fire({
+            title: "{{ __('Approve Vehicle?') }}",
+            text: "{{ __('Are you sure you want to approve this vehicle?') }}",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('Yes, approve!') }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            location.reload();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function rejectVehicle(id) {
+        let url = "{{ route('admin.vehicles.reject', ':id') }}".replace(':id', id);
+        
+        Swal.fire({
+            title: "{{ __('Reject Vehicle') }}",
+            input: 'textarea',
+            inputLabel: "{{ __('Reason for Rejection') }}",
+            inputPlaceholder: "{{ __('Please write the reason for rejecting the vehicle...') }}",
+            inputAttributes: {
+                'aria-label': "{{ __('Reason for Rejection') }}"
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('Reject') }}",
+            cancelButtonText: "{{ __('Cancel') }}",
+            inputValidator: (value) => {
+                if (!value) {
+                    return "{{ __('You must write a reason for rejection!') }}";
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        rejection_reason: result.value
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            location.reload();
+                        }
                     }
                 });
             }
