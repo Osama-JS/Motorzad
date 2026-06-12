@@ -596,7 +596,7 @@ function toggleWatch(btn, id) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSR-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({ currently_watched: currentlyWatched })
     })

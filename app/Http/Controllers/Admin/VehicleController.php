@@ -27,45 +27,57 @@ class VehicleController extends Controller
         return response()->json([
             'data' => $vehicles->map(function($vehicle) {
                 $statusBadge = match($vehicle->status) {
-                    'approved' => '<span class="badge badge-success">معتمدة</span>',
-                    'pending' => '<span class="badge badge-warning">قيد المراجعة</span>',
-                    'rejected' => '<span class="badge badge-danger">مرفوضة</span>',
-                    default => '<span class="badge badge-secondary">'.$vehicle->status.'</span>',
+                    'approved' => '<span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-check" style="font-size:0.75rem;"></i> '.__('Approved').'</span>',
+                    'pending' => '<span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock" style="font-size:0.75rem;"></i> '.__('Pending').'</span>',
+                    'rejected' => '<span class="status-indicator status-cancelled" style="background:#fee2e2; color:#b91c1c; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-xmark" style="font-size:0.75rem;"></i> '.__('Rejected').'</span>',
+                    default => '<span class="status-indicator status-draft" style="background:#f1f5f9; color:#475569; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__($vehicle->status).'</span>',
                 };
 
                 $quickActions = '';
                 if ($vehicle->status === 'pending') {
                     $quickActions = '
-                        <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn-icon-only approve" title="قبول" style="background:#10b981; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
-                        <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn-icon-only reject" title="رفض" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check" style="font-size:0.75rem;"></i> '.__('Approve').'</button>
+                        <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark" style="font-size:0.75rem;"></i> '.__('Reject').'</button>
                     ';
                 }
 
+                $imageHtml = $vehicle->primary_image_url 
+                                ? '<img src="' . $vehicle->primary_image_url . '" width="60" style="border-radius:10px; object-fit:cover; height:45px; border: 1px solid var(--border);" alt="">' 
+                                : '<div style="width:60px;height:45px;background:#eee;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;border: 1px solid var(--border);">' . __('No Image') . '</div>';
+
                 return [
                     'id' => $vehicle->id,
-                    'image' => $vehicle->primary_image_url 
-                                ? '<img src="' . $vehicle->primary_image_url . '" width="50" style="border-radius:8px; object-fit:cover; height:50px;" alt="">' 
-                                : '<div style="width:50px;height:50px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;">لا توجد</div>',
+                    'image' => $imageHtml,
                     'title' => '<strong>' . $vehicle->title . '</strong>',
                     'vin_number' => $vehicle->vin_number ?? 'N/A',
                     'status' => $statusBadge,
                     'actions' => '
-                        <div class="actions-cell" style="display:flex; gap:5px; justify-content:center;">
+                        <div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">
                             ' . $quickActions . '
-                            <button onclick="editVehicle(' . $vehicle->id . ')" class="btn-icon-only edit" title="تعديل" style="background:var(--primary); color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                            <button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn-icon-only delete" title="حذف" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            <a href="' . route('admin.vehicles.show', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i> ' . __('View') . '</a>
+                            <a href="' . route('admin.vehicles.edit', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i> ' . __('Edit') . '</a>
+                            <button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i> ' . __('Delete') . '</button>
                         </div>'
                 ];
             })
         ]);
     }
 
+    public function create()
+    {
+        return view('admin.vehicles.create');
+    }
+
+    public function edit(Vehicle $vehicle)
+    {
+        $vehicle->load('images');
+        return view('admin.vehicles.edit', compact('vehicle'));
+    }
+
     public function show(Vehicle $vehicle)
     {
-        return response()->json([
-            'success' => true,
-            'vehicle' => $vehicle->load('images')
-        ]);
+        $vehicle->load(['images', 'submittedBy']);
+        return view('admin.vehicles.show', compact('vehicle'));
     }
 
     public function store(Request $request)
@@ -120,10 +132,13 @@ class VehicleController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إضافة المركبة بنجاح'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إضافة المركبة بنجاح'
+            ]);
+        }
+        return redirect()->route('admin.vehicles.index')->with('success', 'تم إضافة المركبة بنجاح');
     }
 
     public function update(Request $request, Vehicle $vehicle)
@@ -194,10 +209,13 @@ class VehicleController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تحديث المركبة بنجاح'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث المركبة بنجاح'
+            ]);
+        }
+        return redirect()->route('admin.vehicles.index')->with('success', 'تم تحديث المركبة بنجاح');
     }
 
     public function destroy(Vehicle $vehicle)

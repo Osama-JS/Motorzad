@@ -161,7 +161,7 @@ class AuctionController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => __('This auction is not accepting bids.')
-                ], 422);
+                ], 200);
             }
 
             $currentPrice = $auction->current_price;
@@ -171,7 +171,7 @@ class AuctionController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => __('Bid must be at least :amount SAR.', ['amount' => number_format($minBid)])
-                ], 422);
+                ], 200);
             }
 
             // Wallet Check: Let's assume the user has a wallet
@@ -180,7 +180,7 @@ class AuctionController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => __('Insufficient wallet balance. You need at least :amount SAR deposit.', ['amount' => number_format($auction->deposit_amount)])
-                ], 422);
+                ], 200);
             }
 
             // Create the bid
@@ -221,7 +221,7 @@ class AuctionController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => __('Bid must be at least :amount SAR.', ['amount' => number_format($minBid)])
-                ], 422);
+                ], 200);
             }
 
             return response()->json([
@@ -263,6 +263,118 @@ class AuctionController extends Controller
 
         // Mock watchlist toggle
         return response()->json(['success' => true, 'watched' => !$request->input('currently_watched')]);
+    }
+
+    /**
+     * Display a list of auctions the bidder has bid on.
+     */
+    public function myBids(Request $request)
+    {
+        $user = auth()->user();
+        if ($user->status !== 'approved') {
+            return redirect()->route('kyc.index')
+                ->with('error', __('Please complete identity verification to view your bids.'));
+        }
+
+        // Check if user has real bids
+        $realBidsCount = Bid::where('user_id', $user->id)->count();
+
+        if ($realBidsCount > 0) {
+            // Fetch auctions where user has bid
+            $auctions = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'bids' => function($q) use ($user) {
+                $q->where('user_id', $user->id)->latest();
+            }])
+            ->whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->latest()
+            ->paginate(10);
+
+            // Dynamically calculate status for each auction
+            foreach ($auctions as $auction) {
+                // Get the user's highest bid in this auction
+                $userMaxBid = $auction->bids->first()->amount ?? 0;
+                $auction->user_max_bid = $userMaxBid;
+
+                // Determine Bidder Status
+                if ($auction->status === 'live' && now()->between($auction->start_time, $auction->end_time)) {
+                    if ($auction->winner_id == $user->id) {
+                        $auction->bidder_status = 'winning'; // Winning
+                    } else {
+                        $auction->bidder_status = 'outbid'; // Outbid
+                    }
+                } else {
+                    // Ended
+                    if ($auction->winner_id == $user->id) {
+                        $auction->bidder_status = 'won'; // Won
+                    } else {
+                        $auction->bidder_status = 'lost'; // Lost
+                    }
+                }
+            }
+            
+            $usingMock = false;
+        } else {
+            // Mock data representing different states for presentation
+            $mockAuctions = $this->getMockAuctions();
+            
+            // Add custom fields representing different bidder statuses
+            // Auction 1 (Live, user is winning)
+            $mockAuctions[0]['bidder_status'] = 'winning';
+            $mockAuctions[0]['user_max_bid'] = 585000;
+            
+            // Auction 2 (Live, user is outbid)
+            $mockAuctions[1]['bidder_status'] = 'outbid';
+            $mockAuctions[1]['user_max_bid'] = 495000; // current is 510000
+            
+            // Auction 3 (Live, user is winning)
+            $mockAuctions[2]['bidder_status'] = 'winning';
+            $mockAuctions[2]['user_max_bid'] = 435000;
+            
+            // Auction 5 (Ended, user won)
+            $mockAuctions[4]['bidder_status'] = 'won';
+            $mockAuctions[4]['user_max_bid'] = 345000;
+            
+            // Create an Auction 6 to represent 'Lost'
+            $mockAuctions[] = [
+                'id' => 6,
+                'title_ar' => 'لكزس LX600 Signature 2023 - فل كامل',
+                'title_en' => 'Lexus LX600 Signature 2023 - Full Option',
+                'make' => 'Lexus',
+                'model' => 'LX600',
+                'year' => 2023,
+                'color' => 'أسود / Black',
+                'mileage' => 15000,
+                'location' => 'الدمام',
+                'start_price' => 450000,
+                'current_price' => 520000,
+                'min_bid_increment' => 5000,
+                'deposit_amount' => 10000,
+                'bids_count' => 14,
+                'start_time' => now()->subDays(5),
+                'end_time' => now()->subDays(1),
+                'status' => 'ended',
+                'transmission' => 'automatic',
+                'fuel_type' => 'petrol',
+                'engine_capacity' => '3.5L V6 Twin-Turbo',
+                'condition' => 'excellent',
+                'image' => 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800&fit=crop',
+                'description_ar' => 'لكزس LX600 فئة سيجنتشر المميزة أعلى مواصفات مع شاشات خلفية، حالة الوكالة تماماً.',
+                'description_en' => 'Lexus LX600 Signature grade, top specs with rear screens, showroom condition.',
+                'bidder_status' => 'lost',
+                'user_max_bid' => 490000 // current/winning is 520000
+            ];
+
+            // Only show auctions we bid on (all except upcoming id 4)
+            $filteredMock = array_filter($mockAuctions, function($auc) {
+                return isset($auc['bidder_status']);
+            });
+
+            $auctions = collect(array_values($filteredMock));
+            $usingMock = true;
+        }
+
+        return view('bidder.auctions.my-bids', compact('auctions', 'usingMock'));
     }
 
     /**

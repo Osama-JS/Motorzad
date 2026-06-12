@@ -32,11 +32,11 @@ class AuctionController extends Controller
         return response()->json([
             'data' => $auctions->map(function($auction) {
                 $statusBadge = match($auction->status) {
-                    'live' => '<span class="badge badge-success">Live</span>',
-                    'scheduled' => '<span class="badge badge-warning">Scheduled</span>',
-                    'completed' => '<span class="badge badge-info">Completed</span>',
-                    'cancelled' => '<span class="badge badge-danger">Cancelled</span>',
-                    default => '<span class="badge badge-secondary">'.$auction->status.'</span>',
+                    'live' => '<span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Live').'</span>',
+                    'scheduled' => '<span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Scheduled').'</span>',
+                    'completed', 'sold', 'ended' => '<span class="status-indicator status-completed" style="background:#e0f2fe; color:#0369a1; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Completed').'</span>',
+                    'cancelled' => '<span class="status-indicator status-cancelled" style="background:#fee2e2; color:#b91c1c; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Cancelled').'</span>',
+                    default => '<span class="status-indicator status-draft" style="background:#f1f5f9; color:#475569; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__($auction->status).'</span>',
                 };
 
                 $imageUrl = $auction->image ? asset('storage/' . $auction->image) : ($auction->vehicle && $auction->vehicle->primary_image_url ? $auction->vehicle->primary_image_url : null);
@@ -54,9 +54,10 @@ class AuctionController extends Controller
                     'start_time' => $auction->start_time ? $auction->start_time->format('Y-m-d H:i') : '-',
                     'end_time' => $auction->end_time ? $auction->end_time->format('Y-m-d H:i') : '-',
                     'actions' => '
-                        <div class="actions-cell" style="display:flex; gap:5px; justify-content:center;">
-                            <button onclick="editAuction(' . $auction->id . ')" class="btn-icon-only edit" title="' . __('Edit') . '" style="background:var(--primary); color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                            <button onclick="deleteAuction(' . $auction->id . ')" class="btn-icon-only delete" title="' . __('Delete') . '" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        <div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">
+                            <a href="' . route('admin.auctions.show', $auction->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i> ' . __('View') . '</a>
+                            <a href="' . route('admin.auctions.edit', $auction->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i> ' . __('Edit') . '</a>
+                            <button onclick="deleteAuction(' . $auction->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i> ' . __('Delete') . '</button>
                         </div>'
                 ];
             })
@@ -65,10 +66,23 @@ class AuctionController extends Controller
 
     public function show(Auction $auction)
     {
-        return response()->json([
-            'success' => true,
-            'auction' => $auction
-        ]);
+        $auction->load(['vehicle.images', 'creator', 'winner', 'bids' => function($q) {
+            $q->with('user')->orderBy('amount', 'desc');
+        }, 'deposits.user']);
+
+        return view('admin.auctions.show', compact('auction'));
+    }
+
+    public function create()
+    {
+        $vehicles = Vehicle::all();
+        return view('admin.auctions.create', compact('vehicles'));
+    }
+
+    public function edit(Auction $auction)
+    {
+        $vehicles = Vehicle::all();
+        return view('admin.auctions.edit', compact('auction', 'vehicles'));
     }
 
     public function store(Request $request)
@@ -104,10 +118,14 @@ class AuctionController extends Controller
 
         Auction::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Auction added successfully')
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('Auction added successfully')
+            ]);
+        }
+
+        return redirect()->route('admin.auctions.index')->with('success', __('Auction added successfully'));
     }
 
     public function update(Request $request, Auction $auction)
@@ -144,10 +162,14 @@ class AuctionController extends Controller
 
         $auction->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Auction updated successfully')
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('Auction updated successfully')
+            ]);
+        }
+
+        return redirect()->route('admin.auctions.index')->with('success', __('Auction updated successfully'));
     }
 
     public function destroy(Auction $auction)

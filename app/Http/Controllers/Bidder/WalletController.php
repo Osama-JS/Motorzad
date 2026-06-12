@@ -63,6 +63,14 @@ class WalletController extends Controller
             ->get();
 
         // Platform bank accounts for deposits
+        if (BankAccount::where('is_active', true)->count() === 0) {
+            BankAccount::create([
+                'bank_name' => 'مصرف الراجحي',
+                'beneficiary_name' => 'شركة موتورزاد للمزادات',
+                'iban' => 'SA8080000000000000000001',
+                'is_active' => true
+            ]);
+        }
         $platformBanks = BankAccount::where('is_active', true)->get();
 
         return view('bidder.wallet.index', compact('user', 'wallet', 'transactions', 'withdrawals', 'deposits', 'platformBanks', 'monthlyStats'));

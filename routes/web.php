@@ -100,6 +100,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
     Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
 
+    // Bids Management
+    Route::get('bids/data', [\App\Http\Controllers\Admin\BidController::class, 'getData'])->name('bids.data');
+    Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
+
     // Vehicles Management
     Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
     Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])->name('vehicles.approve');
@@ -121,6 +125,7 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
 
     // Auctions Routes
+    Route::get('/my-bids', [\App\Http\Controllers\Bidder\AuctionController::class, 'myBids'])->name('auctions.my-bids');
     Route::get('/auctions', [\App\Http\Controllers\Bidder\AuctionController::class, 'index'])->name('auctions.index');
     Route::get('/auctions/{id}', [\App\Http\Controllers\Bidder\AuctionController::class, 'show'])->name('auctions.show');
     Route::post('/auctions/{id}/bid', [\App\Http\Controllers\Bidder\AuctionController::class, 'placeBid'])->name('auctions.bid');

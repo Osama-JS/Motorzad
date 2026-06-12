@@ -428,9 +428,9 @@ html[dir="rtl"] .currency-suffix {
             {{-- Description Tab Content --}}
             <div id="descTab" class="tab-content">
                 <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;">{{ app()->getLocale() === 'ar' ? 'وصف المركبة' : 'Vehicle Description' }}</h3>
-                <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.5rem;">
-                    {{ app()->getLocale() === 'ar' ? $auction->description_ar : $auction->description_en }}
-                </p>
+                <div style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    {!! app()->getLocale() === 'ar' ? $auction->description_ar : $auction->description_en !!}
+                </div>
                 @if($vehicle->issues)
                     <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); padding: 1rem; border-radius: 10px;">
                         <strong style="color: #f59e0b; display: block; margin-bottom: 0.25rem;">⚠️ {{ app()->getLocale() === 'ar' ? 'العيوب أو الملاحظات' : 'Issues & Wear' }}</strong>
@@ -590,7 +590,7 @@ function placeBidNow() {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSR-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({ amount: bidAmount })
     })

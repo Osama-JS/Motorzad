@@ -130,6 +130,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'identity_verified_at' => 'datetime',
             'password' => 'hashed',
             'check_bank' => 'boolean',
+            'date_of_birth' => 'date',
         ];
     }
 }

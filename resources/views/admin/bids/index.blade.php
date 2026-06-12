@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', __('Auctions'))
+@section('title', app()->getLocale() === 'ar' ? 'سجل المزايدات العامة' : 'Global Bids Log')
 
 @section('css')
 <style>
@@ -16,9 +16,6 @@
         --glass-border: rgba(51, 65, 85, 0.8);
     }
 
-    .modal-backdrop { --bs-backdrop-zindex: 0 !important; }
-    .modal { z-index: 1050 !important; }
-    
     /* Stats Row upgrade */
     .stat-card-gradient {
         position: relative;
@@ -51,7 +48,6 @@
     }
     .scg-purple { background: linear-gradient(135deg, #6366f1, #a855f7); }
     .scg-emerald { background: linear-gradient(135deg, #059669, #10b981); }
-    .scg-amber { background: linear-gradient(135deg, #d97706, #f59e0b); }
     .scg-blue { background: linear-gradient(135deg, #2563eb, #3b82f6); }
 
     .scg-value {
@@ -196,53 +192,36 @@
 </style>
 @endsection
 
-@section('actions')
-<div style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">
-    {{ __('Total:') }} <span class="text-primary fs-5 font-weight-bold ml-1">{{ $stats['total'] }}</span> {{ __('Auction') }}
-</div>
-@endsection
-
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('Auctions Management') }}</h1>
+        <h1 class="h3 mb-1 font-weight-extrabold">{{ app()->getLocale() === 'ar' ? 'سجل المزايدات العامة' : 'Global Bids Log' }}</h1>
         <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Auctions') }}
+            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ app()->getLocale() === 'ar' ? 'المزايدات' : 'Bids' }}
         </div>
     </div>
-    <a href="{{ route('admin.auctions.create') }}" class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill">
-        <i class="fa-solid fa-plus"></i>
-        <span>{{ __('Add New Auction') }}</span>
-    </a>
 </div>
 
 {{-- Upgraded Stats Row --}}
 <div class="row mb-4">
-    <div class="col-12 col-sm-6 col-lg-3">
+    <div class="col-12 col-md-4">
         <div class="stat-card-gradient scg-blue">
-            <div class="scg-value">{{ $stats['total'] }}</div>
-            <div class="scg-label">{{ __('Total Auctions') }}</div>
-            <i class="fa-solid fa-list-check scg-icon"></i>
+            <div class="scg-value">{{ number_format($stats['total']) }}</div>
+            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'إجمالي المزايدات' : 'Total Bids' }}</div>
+            <i class="fa-solid fa-gavel scg-icon"></i>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-emerald">
-            <div class="scg-value">{{ $stats['live'] }}</div>
-            <div class="scg-label">{{ __('Live Auctions') }}</div>
-            <i class="fa-solid fa-fire scg-icon"></i>
-        </div>
-    </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-amber">
-            <div class="scg-value">{{ $stats['scheduled'] }}</div>
-            <div class="scg-label">{{ __('Scheduled Auctions') }}</div>
-            <i class="fa-solid fa-calendar-days scg-icon"></i>
-        </div>
-    </div>
-    <div class="col-12 col-sm-6 col-lg-3">
+    <div class="col-12 col-md-4">
         <div class="stat-card-gradient scg-purple">
-            <div class="scg-value">{{ $stats['completed'] }}</div>
-            <div class="scg-label">{{ __('Completed Auctions') }}</div>
+            <div class="scg-value">{{ number_format($stats['auto_bids']) }}</div>
+            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'مزايدات تلقائية (Auto Bids)' : 'Auto Bids Count' }}</div>
+            <i class="fa-solid fa-robot scg-icon"></i>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="stat-card-gradient scg-emerald">
+            <div class="scg-value">{{ number_format($stats['active_bids']) }}</div>
+            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'مزايدات نشطة حالياً' : 'Active Bids Count' }}</div>
             <i class="fa-solid fa-circle-check scg-icon"></i>
         </div>
     </div>
@@ -251,20 +230,19 @@
 {{-- Table Panel Container --}}
 <div class="premium-panel">
     <div class="panel-header-premium">
-        <h2>{{ __('Auctions List') }}</h2>
+        <h2>{{ app()->getLocale() === 'ar' ? 'قائمة المزايدات الحية على المنصة' : 'Platform Live Bids List' }}</h2>
     </div>
     <div class="table-responsive">
-        <table id="auctions-table" class="table w-100">
+        <table id="bids-table" class="table w-100">
             <thead>
                 <tr>
-                    <th>{{ __('Image') }}</th>
-                    <th>{{ __('Title') }}</th>
-                    <th>{{ __('Vehicle') }}</th>
-                    <th>{{ __('Start Price') }}</th>
-                    <th>{{ __('Status') }}</th>
-                    <th>{{ __('Start Time') }}</th>
-                    <th>{{ __('End Time') }}</th>
-                    <th class="text-center">{{ __('Actions') }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'المزايد' : 'Bidder' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'المزاد / المركبة' : 'Auction / Vehicle' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'مبلغ المزايدة' : 'Bid Amount' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة' : 'Type' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'التوقيت' : 'Time' }}</th>
+                    <th>{{ app()->getLocale() === 'ar' ? 'عنوان IP' : 'IP Address' }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,17 +250,15 @@
         </table>
     </div>
 </div>
-
 @endsection
 
 @section('js')
 <script>
-    var auctionsDataUrl = "{{ route('admin.auctions.data') }}";
-    let updateAuctionUrl = "{{ route('admin.auctions.update', ':id') }}";
+    var bidsDataUrl = "{{ route('admin.bids.data') }}";
 </script>
 
 <script>
-    let auctionsTable;
+    let bidsTable;
 
     $(document).ready(function() {
         $.ajaxSetup({
@@ -291,20 +267,20 @@
             }
         });
 
-        auctionsTable = $('#auctions-table').DataTable({
+        bidsTable = $('#bids-table').DataTable({
             processing: true,
             serverSide: false,
-            ajax: auctionsDataUrl,
+            ajax: bidsDataUrl,
             columns: [
-                { data: 'image', orderable: false, searchable: false },
-                { data: 'title' },
-                { data: 'vehicle' },
-                { data: 'start_price' },
+                { data: 'user' },
+                { data: 'auction' },
+                { data: 'amount' },
+                { data: 'type' },
                 { data: 'status' },
-                { data: 'start_time' },
-                { data: 'end_time' },
-                { data: 'actions', orderable: false, searchable: false }
+                { data: 'time' },
+                { data: 'ip' }
             ],
+            order: [[5, 'desc']], // Sort by time column descending
             language: {
                 "sProcessing": "{{ __('Loading...') }}",
                 "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
@@ -320,36 +296,5 @@
             }
         });
     });
-
-    function deleteAuction(id) {
-        let url = "{{ route('admin.auctions.destroy', ':id') }}".replace(':id', id);
-        
-        Swal.fire({
-            title: "{{ __('Delete Auction?') }}",
-            text: "{{ __('This action cannot be undone!') }}",
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: "{{ __('Yes, delete!') }}",
-            cancelButtonText: "{{ __('Cancel') }}"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    data: {
-                        _method: 'DELETE'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            auctionsTable.ajax.reload(null, false);
-                            toastr.success(response.message);
-                        }
-                    }
-                });
-            }
-        });
-    }
 </script>
 @endsection

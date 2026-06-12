@@ -46,6 +46,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>{{ __('Auctions') }}</span>
             </a>
+            <a href="{{ route('admin.bids.index') }}" class="nav-item {{ request()->routeIs('admin.bids.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-5 5 1.5 1.5-1.5 1.5L5 17l1.5-1.5L5 14l5-5L14 13Z"/><path d="m16 8 5-5-1.5-1.5-5 5 1.5-1.5 1.5-1.5-5 5 1.5 1.5 5-5-1.5-1.5Z"/></svg>
+                <span>{{ __('Bids Log') }}</span>
+            </a>
             <a href="{{ route('admin.vehicles.index') }}" class="nav-item {{ request()->routeIs('admin.vehicles.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                 <span>{{ __('Vehicles') }}</span>
@@ -61,6 +65,10 @@
             <a href="{{ route('admin.withdrawals.index') }}" class="nav-item {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
                 <span>{{ __('Withdrawals') }}</span>
+            </a>
+            <a href="{{ route('admin.deposits.index') }}" class="nav-item {{ request()->routeIs('admin.deposits.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                <span>{{ __('Deposits') }}</span>
             </a>
             <a href="{{ route('admin.faqs.index') }}" class="nav-item {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>

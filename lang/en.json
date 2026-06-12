@@ -412,5 +412,6 @@
     "This action cannot be undone! Make sure this vehicle is not linked to any auction.": "This action cannot be undone! Make sure this vehicle is not linked to any auction.",
     "Could not delete vehicle, it might be linked to an auction.": "Could not delete vehicle, it might be linked to an auction.",
     "Manufacturer & Model": "Manufacturer & Model",
-    "Registration & Identity": "Registration & Identity"
+    "Registration & Identity": "Registration & Identity",
+    "Basic Information": "Basic Information"
 }
