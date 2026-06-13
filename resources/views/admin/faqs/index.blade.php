@@ -72,14 +72,20 @@
                                     </h6>
                                     
                                     <div class="form-group mb-4">
-                                        <label for="question_ar" class="form-label fw-bold">{{ __('Question') }} <span class="text-danger">*</span></label>
+                                        <label for="question_ar" class="form-label fw-bold d-flex justify-content-between align-items-center w-100">
+                                            <span>{{ __('Question') }} <span class="text-danger">*</span></span>
+                                            <x-translate-button from="#question_ar" to="#question_en" />
+                                        </label>
                                         <div class="position-relative">
                                             <input type="text" class="form-control form-control-lg px-3 py-2" id="question_ar" name="question_ar" placeholder="أدخل السؤال بالعربية..." required>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-0">
-                                        <label for="answer_ar" class="form-label fw-bold">{{ __('Answer') }} <span class="text-danger">*</span></label>
+                                        <label for="answer_ar" class="form-label fw-bold d-flex justify-content-between align-items-center w-100">
+                                            <span>{{ __('Answer') }} <span class="text-danger">*</span></span>
+                                            <x-translate-button from="#answer_ar" to="#answer_en" />
+                                        </label>
                                         <textarea class="form-control px-3 py-2" id="answer_ar" name="answer_ar" rows="6" placeholder="أدخل الإجابة بالعربية..." required></textarea>
                                     </div>
                                 </div>

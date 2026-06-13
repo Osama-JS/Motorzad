@@ -11,11 +11,18 @@ class Vehicle extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'submitted_by', 'make', 'model', 'year', 'color', 'vin_number',
+        'submitted_by',
+        'make_ar', 'make_en',
+        'model_ar', 'model_en',
+        'year',
+        'color_ar', 'color_en',
+        'vin_number',
         'mileage', 'plate_number', 'country_of_origin',
         'fuel_type', 'transmission', 'engine_capacity', 'cylinders',
         'condition', 'description_ar', 'description_en',
-        'features', 'issues', 'status', 'rejection_reason',
+        'features',
+        'issues_ar', 'issues_en',
+        'status', 'rejection_reason',
         'reviewed_by', 'reviewed_at', 'damage_points',
     ];
 
@@ -56,6 +63,30 @@ class Vehicle extends Model
     }
 
     // ── Accessors ──────────────────────────────────────────────────────────
+
+    public function getMakeAttribute()
+    {
+        $locale = app()->getLocale();
+        return $locale === 'ar' ? ($this->make_ar ?? $this->make_en) : ($this->make_en ?? $this->make_ar);
+    }
+
+    public function getModelAttribute()
+    {
+        $locale = app()->getLocale();
+        return $locale === 'ar' ? ($this->model_ar ?? $this->model_en) : ($this->model_en ?? $this->model_ar);
+    }
+
+    public function getColorAttribute()
+    {
+        $locale = app()->getLocale();
+        return $locale === 'ar' ? ($this->color_ar ?? $this->color_en) : ($this->color_en ?? $this->color_ar);
+    }
+
+    public function getIssuesAttribute()
+    {
+        $locale = app()->getLocale();
+        return $locale === 'ar' ? ($this->issues_ar ?? $this->issues_en) : ($this->issues_en ?? $this->issues_ar);
+    }
 
     public function getTitleAttribute(): string
     {

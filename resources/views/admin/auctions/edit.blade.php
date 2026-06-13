@@ -307,10 +307,7 @@
                         <div class="col-md-6 form-group">
                             <label class="form-label d-flex justify-content-between align-items-center w-100">
                                 <span>{{ __('Title (Arabic)') }}</span>
-                                <button type="button" class="btn btn-sm btn-link p-0 text-primary translate-btn" data-from="#title_ar" data-to="#title_en" style="text-decoration: none; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                                    {{ __('Translate to English') }}
-                                </button>
+                                <x-translate-button from="#title_ar" to="#title_en" />
                             </label>
                             <input type="text" name="title_ar" id="title_ar" class="form-control" placeholder="{{ __('Enter auction title in Arabic') }}" value="{{ old('title_ar', $auction->title_ar) }}" required>
                         </div>
@@ -319,9 +316,18 @@
                             <input type="text" name="title_en" id="title_en" class="form-control" placeholder="{{ __('Enter auction title in English') }}" value="{{ old('title_en', $auction->title_en) }}" required>
                         </div>
                     </div>
-                    <div class="form-group mb-0">
-                        <label class="form-label">{{ __('Location') }}</label>
-                        <input type="text" name="location" class="form-control" placeholder="{{ __('Example: Riyadh, Saudi Arabia') }}" value="{{ old('location', $auction->location) }}">
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-0">
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Location (Arabic)') }}</span>
+                                <x-translate-button from="#location_ar" to="#location_en" />
+                            </label>
+                            <input type="text" name="location_ar" id="location_ar" class="form-control" placeholder="مثال: الرياض، المملكة العربية السعودية" value="{{ old('location_ar', $auction->location_ar) }}">
+                        </div>
+                        <div class="col-md-6 form-group mb-0">
+                            <label class="form-label">{{ __('Location (English)') }}</label>
+                            <input type="text" name="location_en" id="location_en" class="form-control" placeholder="Example: Riyadh, Saudi Arabia" value="{{ old('location_en', $auction->location_en) }}">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -379,10 +385,7 @@
                         <div class="col-md-6 form-group mb-3 mb-md-0">
                             <label class="form-label d-flex justify-content-between align-items-center w-100">
                                 <span>{{ __('Description (Arabic)') }}</span>
-                                <button type="button" class="btn btn-sm btn-link p-0 text-primary translate-btn" data-from="#description_ar" data-to="#description_en" data-type="editor" style="text-decoration: none; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                                    {{ __('Translate to English') }}
-                                </button>
+                                <x-translate-button from="#description_ar" to="#description_en" type="editor" />
                             </label>
                             <textarea name="description_ar" id="description_ar" class="form-control" rows="5" placeholder="{{ __('Enter auction description in Arabic...') }}">{{ old('description_ar', $auction->description_ar) }}</textarea>
                         </div>
@@ -524,6 +527,7 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
 <script>
     const editors = {};
+    window.editors = editors;
 
     function initializeEditor(selector) {
         ClassicEditor
@@ -546,97 +550,6 @@
         if (document.querySelector('#description_en')) {
             initializeEditor('#description_en');
         }
-
-        // Translation logic
-        async function translateText(text, fromLang = 'ar', toLang = 'en') {
-            if (!text || text.trim() === '') return '';
-            try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data && data[0]) {
-                    return data[0].map(x => x[0]).join('');
-                }
-                return text;
-            } catch (e) {
-                console.error('Translation error:', e);
-                throw e;
-            }
-        }
-
-        async function translateHtml(htmlStr, fromLang = 'ar', toLang = 'en') {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlStr;
-
-            const textNodes = [];
-            function findTextNodes(node) {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    if (node.nodeValue.trim() !== '') {
-                        textNodes.push(node);
-                    }
-                } else {
-                    for (let child of node.childNodes) {
-                        findTextNodes(child);
-                    }
-                }
-            }
-            findTextNodes(tempDiv);
-
-            for (let node of textNodes) {
-                try {
-                    const translated = await translateText(node.nodeValue, fromLang, toLang);
-                    node.nodeValue = translated;
-                } catch (err) {
-                    console.error('Failed to translate node:', node.nodeValue, err);
-                }
-            }
-
-            return tempDiv.innerHTML;
-        }
-
-        $(document).on('click', '.translate-btn', async function() {
-            const btn = $(this);
-            const fromSelector = btn.data('from');
-            const toSelector = btn.data('to');
-            const isEditor = btn.data('type') === 'editor';
-            
-            let sourceText = '';
-            if (isEditor) {
-                const editorInstance = editors[fromSelector];
-                if (editorInstance) {
-                    sourceText = editorInstance.getData();
-                }
-            } else {
-                sourceText = $(fromSelector).val();
-            }
-
-            if (!sourceText || sourceText.trim() === '') {
-                toastr.warning('{{ __("Please enter text first") }}');
-                return;
-            }
-
-            const originalHtml = btn.html();
-            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __("Translating...") }}');
-
-            try {
-                let translated = '';
-                if (isEditor) {
-                    translated = await translateHtml(sourceText, 'ar', 'en');
-                    const targetEditorInstance = editors[toSelector];
-                    if (targetEditorInstance) {
-                        targetEditorInstance.setData(translated);
-                    }
-                } else {
-                    translated = await translateText(sourceText, 'ar', 'en');
-                    $(toSelector).val(translated);
-                }
-                toastr.success('{{ __("Translated successfully") }}');
-            } catch (error) {
-                toastr.error('{{ __("Translation failed") }}');
-            } finally {
-                btn.prop('disabled', false).html(originalHtml);
-            }
-        });
     });
 
     function handleFilePreview(input, previewId) {

@@ -368,7 +368,15 @@
                         <div class="spec-icon-wrapper"><i class="fa-solid fa-circle-dot"></i></div>
                         <div class="spec-details">
                             <span class="spec-label">{{ __('Transmission') }}</span>
-                            <span class="spec-value">{{ $vehicle->transmission ?? 'N/A' }}</span>
+                            <span class="spec-value">
+                                @if(strtolower($vehicle->transmission) === 'automatic')
+                                    {{ __('Automatic') }}
+                                @elseif(strtolower($vehicle->transmission) === 'manual')
+                                    {{ __('Manual') }}
+                                @else
+                                    {{ $vehicle->transmission ?? 'N/A' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
                     <!-- Fuel Type -->
@@ -376,7 +384,19 @@
                         <div class="spec-icon-wrapper"><i class="fa-solid fa-gas-pump"></i></div>
                         <div class="spec-details">
                             <span class="spec-label">{{ __('Fuel Type') }}</span>
-                            <span class="spec-value">{{ $vehicle->fuel_type ?? 'N/A' }}</span>
+                            <span class="spec-value">
+                                @if(strtolower($vehicle->fuel_type) === 'petrol')
+                                    {{ __('Petrol') }}
+                                @elseif(strtolower($vehicle->fuel_type) === 'diesel')
+                                    {{ __('Diesel') }}
+                                @elseif(strtolower($vehicle->fuel_type) === 'electric')
+                                    {{ __('Electric') }}
+                                @elseif(strtolower($vehicle->fuel_type) === 'hybrid')
+                                    {{ __('Hybrid') }}
+                                @else
+                                    {{ $vehicle->fuel_type ?? 'N/A' }}
+                                @endif
+                            </span>
                         </div>
                     </div>
                     <!-- Engine -->
@@ -384,7 +404,7 @@
                         <div class="spec-icon-wrapper"><i class="fa-solid fa-bolt"></i></div>
                         <div class="spec-details">
                             <span class="spec-label">{{ __('Engine Capacity') }} / {{ __('Cylinders') }}</span>
-                            <span class="spec-value">{{ $vehicle->engine_capacity ?? 'N/A' }} / {{ $vehicle->cylinders ?? 'N/A' }} Cyl</span>
+                            <span class="spec-value">{{ $vehicle->engine_capacity ?? 'N/A' }} / {{ $vehicle->cylinders ?? 'N/A' }} {{ __('Cyl') }}</span>
                         </div>
                     </div>
                     <!-- Mileage -->
@@ -392,7 +412,7 @@
                         <div class="spec-icon-wrapper"><i class="fa-solid fa-gauge"></i></div>
                         <div class="spec-details">
                             <span class="spec-label">{{ __('Mileage') }}</span>
-                            <span class="spec-value">{{ number_format($vehicle->mileage ?? 0) }} km</span>
+                            <span class="spec-value">{{ number_format($vehicle->mileage ?? 0) }} {{ __('km') }}</span>
                         </div>
                     </div>
                     <!-- VIN Number -->
@@ -533,9 +553,21 @@
             </div>
             <div class="panel-body-premium">
                 @if(is_array($vehicle->features) && count($vehicle->features) > 0)
+                    @php
+                        $featureTranslations = [
+                            'sunroof' => __('Sunroof'),
+                            'leather_seats' => __('Leather Seats'),
+                            'rear_camera' => __('Rear Camera'),
+                            'sensors' => __('Sensors'),
+                            'navigation_system' => __('Navigation System'),
+                            'cruise_control' => __('Cruise Control'),
+                            'keyless_entry' => __('Keyless Entry'),
+                            'bluetooth' => __('Bluetooth'),
+                        ];
+                    @endphp
                     <div class="d-flex flex-wrap" style="margin: -4px;">
                         @foreach($vehicle->features as $feature)
-                            <span class="feature-pill"><i class="fa-solid fa-circle-check"></i> {{ $feature }}</span>
+                            <span class="feature-pill"><i class="fa-solid fa-circle-check"></i> {{ $featureTranslations[$feature] ?? ucfirst(str_replace('_', ' ', $feature)) }}</span>
                         @endforeach
                     </div>
                 @else

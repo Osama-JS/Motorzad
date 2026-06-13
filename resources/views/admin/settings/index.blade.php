@@ -71,19 +71,25 @@
                 <div class="card-header"><h2>{{ __('Site Identity and Basic Info') }}</h2></div>
                 <div class="card-body">
                     <div class="row"><div class="col-md-6 mb-3">
-                        <label class="form-label">{{ __('Site Name (Arabic)') }}</label>
-                        <input type="text" name="site_name_ar" class="form-control" value="{{ \App\Models\Setting::get('site_name_ar') }}">
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Site Name (Arabic)') }}</span>
+                            <x-translate-button from="#site_name_ar" to="#site_name_en" />
+                        </label>
+                        <input type="text" name="site_name_ar" id="site_name_ar" class="form-control" value="{{ \App\Models\Setting::get('site_name_ar') }}">
                     </div><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Site Name (English)') }}</label>
-                        <input type="text" name="site_name_en" class="form-control" value="{{ \App\Models\Setting::get('site_name_en') }}" dir="ltr">
+                        <input type="text" name="site_name_en" id="site_name_en" class="form-control" value="{{ \App\Models\Setting::get('site_name_en') }}" dir="ltr">
                     </div></div>
                     <div class="mb-3">
-                        <label class="form-label">{{ __('Site Description (Arabic)') }}</label>
-                        <textarea name="site_description_ar" class="form-control" rows="2">{{ \App\Models\Setting::get('site_description_ar') }}</textarea>
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Site Description (Arabic)') }}</span>
+                            <x-translate-button from="#site_description_ar" to="#site_description_en" />
+                        </label>
+                        <textarea name="site_description_ar" id="site_description_ar" class="form-control" rows="2">{{ \App\Models\Setting::get('site_description_ar') }}</textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ __('Site Description (English)') }}</label>
-                        <textarea name="site_description_en" class="form-control" rows="2" dir="ltr">{{ \App\Models\Setting::get('site_description_en') }}</textarea>
+                        <textarea name="site_description_en" id="site_description_en" class="form-control" rows="2" dir="ltr">{{ \App\Models\Setting::get('site_description_en') }}</textarea>
                     </div>
                     <div class="row"><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Email Address') }}</label>
@@ -129,12 +135,15 @@
                 <div class="card-header"><h2>{{ __('Our Story') }}</h2></div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label">{{ __('Our Story (Arabic)') }}</label>
-                        <textarea name="story_ar" class="form-control" rows="5">{{ \App\Models\Setting::get('story_ar') }}</textarea>
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Our Story (Arabic)') }}</span>
+                            <x-translate-button from="#story_ar" to="#story_en" />
+                        </label>
+                        <textarea name="story_ar" id="story_ar" class="form-control" rows="5">{{ \App\Models\Setting::get('story_ar') }}</textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ __('Our Story (English)') }}</label>
-                        <textarea name="story_en" class="form-control" rows="5" dir="ltr">{{ \App\Models\Setting::get('story_en') }}</textarea>
+                        <textarea name="story_en" id="story_en" class="form-control" rows="5" dir="ltr">{{ \App\Models\Setting::get('story_en') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -142,18 +151,24 @@
                 <div class="card-header"><h2>{{ __('Mission and Vision') }}</h2></div>
                 <div class="card-body">
                     <div class="row"><div class="col-md-6 mb-3">
-                        <label class="form-label">{{ __('Mission (Arabic)') }}</label>
-                        <textarea name="mission_ar" class="form-control" rows="3">{{ \App\Models\Setting::get('mission_ar') }}</textarea>
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Mission (Arabic)') }}</span>
+                            <x-translate-button from="#mission_ar" to="#mission_en" />
+                        </label>
+                        <textarea name="mission_ar" id="mission_ar" class="form-control" rows="3">{{ \App\Models\Setting::get('mission_ar') }}</textarea>
                     </div><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Mission (English)') }}</label>
-                        <textarea name="mission_en" class="form-control" rows="3" dir="ltr">{{ \App\Models\Setting::get('mission_en') }}</textarea>
+                        <textarea name="mission_en" id="mission_en" class="form-control" rows="3" dir="ltr">{{ \App\Models\Setting::get('mission_en') }}</textarea>
                     </div></div>
                     <div class="row"><div class="col-md-6 mb-3">
-                        <label class="form-label">{{ __('Vision (Arabic)') }}</label>
-                        <textarea name="vision_ar" class="form-control" rows="3">{{ \App\Models\Setting::get('vision_ar') }}</textarea>
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Vision (Arabic)') }}</span>
+                            <x-translate-button from="#vision_ar" to="#vision_en" />
+                        </label>
+                        <textarea name="vision_ar" id="vision_ar" class="form-control" rows="3">{{ \App\Models\Setting::get('vision_ar') }}</textarea>
                     </div><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Vision (English)') }}</label>
-                        <textarea name="vision_en" class="form-control" rows="3" dir="ltr">{{ \App\Models\Setting::get('vision_en') }}</textarea>
+                        <textarea name="vision_en" id="vision_en" class="form-control" rows="3" dir="ltr">{{ \App\Models\Setting::get('vision_en') }}</textarea>
                     </div></div>
                 </div>
             </div>

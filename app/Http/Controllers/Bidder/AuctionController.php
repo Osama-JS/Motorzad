@@ -38,8 +38,10 @@ class AuctionController extends Controller
                     $q->where('title_ar', 'like', "%{$search}%")
                       ->orWhere('title_en', 'like', "%{$search}%")
                       ->orWhereHas('vehicle', function($vq) use ($search) {
-                          $vq->where('make', 'like', "%{$search}%")
-                            ->orWhere('model', 'like', "%{$search}%")
+                          $vq->where('make_ar', 'like', "%{$search}%")
+                            ->orWhere('make_en', 'like', "%{$search}%")
+                            ->orWhere('model_ar', 'like', "%{$search}%")
+                            ->orWhere('model_en', 'like', "%{$search}%")
                             ->orWhere('year', 'like', "%{$search}%");
                       });
                 });

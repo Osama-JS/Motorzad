@@ -12,7 +12,7 @@ class Auction extends Model
 
     protected $fillable = [
         'vehicle_id', 'image', 'created_by', 'title_ar', 'title_en',
-        'description_ar', 'description_en', 'location',
+        'description_ar', 'description_en', 'location_ar', 'location_en',
         'start_price', 'reserve_price', 'min_bid_increment', 'buy_now_price',
         'deposit_amount', 'deposit_required',
         'start_time', 'end_time', 'auto_extend_minutes',
@@ -81,6 +81,12 @@ class Auction extends Model
     public function getTitleAttribute(): string
     {
         return app()->getLocale() === 'ar' ? $this->title_ar : $this->title_en;
+    }
+
+    public function getLocationAttribute()
+    {
+        $locale = app()->getLocale();
+        return $locale === 'ar' ? ($this->location_ar ?? $this->location_en) : ($this->location_en ?? $this->location_ar);
     }
 
     public function getIsLiveAttribute(): bool

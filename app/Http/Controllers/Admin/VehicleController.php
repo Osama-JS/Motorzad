@@ -83,10 +83,13 @@ class VehicleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'make' => 'required|string|max:100',
-            'model' => 'required|string|max:100',
+            'make_ar' => 'required|string|max:100',
+            'make_en' => 'required|string|max:100',
+            'model_ar' => 'required|string|max:100',
+            'model_en' => 'required|string|max:100',
             'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'color' => 'nullable|string|max:50',
+            'color_ar' => 'nullable|string|max:50',
+            'color_en' => 'nullable|string|max:50',
             'vin_number' => 'nullable|string|max:50|unique:vehicles,vin_number',
             'mileage' => 'nullable|integer|min:0',
             'plate_number' => 'nullable|string|max:50',
@@ -104,7 +107,8 @@ class VehicleController extends Controller
             'primary_image_index' => 'nullable|integer',
             'features' => 'nullable|array',
             'features.*' => 'string',
-            'issues' => 'nullable|string',
+            'issues_ar' => 'nullable|string',
+            'issues_en' => 'nullable|string',
             'damage_points' => 'nullable|string',
         ]);
 
@@ -149,10 +153,13 @@ class VehicleController extends Controller
     public function update(Request $request, Vehicle $vehicle)
     {
         $validated = $request->validate([
-            'make' => 'required|string|max:100',
-            'model' => 'required|string|max:100',
+            'make_ar' => 'required|string|max:100',
+            'make_en' => 'required|string|max:100',
+            'model_ar' => 'required|string|max:100',
+            'model_en' => 'required|string|max:100',
             'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'color' => 'nullable|string|max:50',
+            'color_ar' => 'nullable|string|max:50',
+            'color_en' => 'nullable|string|max:50',
             'vin_number' => 'nullable|string|max:50|unique:vehicles,vin_number,' . $vehicle->id,
             'mileage' => 'nullable|integer|min:0',
             'plate_number' => 'nullable|string|max:50',
@@ -171,7 +178,8 @@ class VehicleController extends Controller
             'rejection_reason' => 'nullable|string|max:1000',
             'features' => 'nullable|array',
             'features.*' => 'string',
-            'issues' => 'nullable|string',
+            'issues_ar' => 'nullable|string',
+            'issues_en' => 'nullable|string',
             'damage_points' => 'nullable|string',
         ]);
 

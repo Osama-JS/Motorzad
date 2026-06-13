@@ -32,7 +32,7 @@ class AuctionController extends Controller
         }
 
         if ($request->filled('make')) {
-            $query->whereHas('vehicle', fn ($q) => $q->where('make', 'like', '%' . $request->make . '%'));
+            $query->whereHas('vehicle', fn ($q) => $q->where(fn ($sub) => $sub->where('make_ar', 'like', '%' . $request->make . '%')->orWhere('make_en', 'like', '%' . $request->make . '%')));
         }
 
         if ($request->filled('price_min')) {

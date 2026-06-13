@@ -23,12 +23,15 @@
             @method('PUT')
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">{{ __('Title (Arabic)') }}</label>
-                    <input type="text" name="title_ar" class="form-control" required value="{{ old('title_ar', $page->title_ar) }}">
+                    <label class="form-label d-flex justify-content-between align-items-center w-100">
+                        <span>{{ __('Title (Arabic)') }}</span>
+                        <x-translate-button from="#title_ar" to="#title_en" />
+                    </label>
+                    <input type="text" name="title_ar" id="title_ar" class="form-control" required value="{{ old('title_ar', $page->title_ar) }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">{{ __('Title (English)') }}</label>
-                    <input type="text" name="title_en" class="form-control" required value="{{ old('title_en', $page->title_en) }}" dir="ltr">
+                    <input type="text" name="title_en" id="title_en" class="form-control" required value="{{ old('title_en', $page->title_en) }}" dir="ltr">
                 </div>
             </div>
 
@@ -39,7 +42,10 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">{{ __('Content (Arabic)') }}</label>
+                <label class="form-label d-flex justify-content-between align-items-center w-100">
+                    <span>{{ __('Content (Arabic)') }}</span>
+                    <x-translate-button from="#content_ar" to="#content_en" type="editor" />
+                </label>
                 <textarea name="content_ar" class="form-control" id="content_ar" rows="10" required>{{ old('content_ar', $page->content_ar) }}</textarea>
             </div>
 
@@ -78,11 +84,17 @@
 @section('js')
 <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
 <script>
+    const editors = {};
+    window.editors = editors;
+
     function initializeEditor(selector) {
         ClassicEditor
             .create(document.querySelector(selector), {
                 language: '{{ app()->getLocale() }}',
                 toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo' ]
+            })
+            .then(editor => {
+                editors[selector] = editor;
             })
             .catch(error => {
                 console.error(error);

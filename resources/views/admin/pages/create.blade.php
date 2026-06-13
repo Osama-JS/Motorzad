@@ -22,12 +22,15 @@
             @csrf
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">{{ __('Title (Arabic)') }}</label>
-                    <input type="text" name="title_ar" class="form-control" required value="{{ old('title_ar') }}">
+                    <label class="form-label d-flex justify-content-between align-items-center w-100">
+                        <span>{{ __('Title (Arabic)') }}</span>
+                        <x-translate-button from="#title_ar" to="#title_en" />
+                    </label>
+                    <input type="text" name="title_ar" id="title_ar" class="form-control" required value="{{ old('title_ar') }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">{{ __('Title (English)') }}</label>
-                    <input type="text" name="title_en" class="form-control" required value="{{ old('title_en') }}" dir="ltr">
+                    <input type="text" name="title_en" id="title_en" class="form-control" required value="{{ old('title_en') }}" dir="ltr">
                 </div>
             </div>
 
@@ -38,13 +41,16 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">{{ __('Content (Arabic)') }}</label>
-                <textarea name="content_ar" class="form-control" rows="10" required>{{ old('content_ar') }}</textarea>
+                <label class="form-label d-flex justify-content-between align-items-center w-100">
+                    <span>{{ __('Content (Arabic)') }}</span>
+                    <x-translate-button from="#content_ar" to="#content_en" />
+                </label>
+                <textarea name="content_ar" id="content_ar" class="form-control" rows="10" required>{{ old('content_ar') }}</textarea>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">{{ __('Content (English)') }}</label>
-                <textarea name="content_en" class="form-control" rows="10" required dir="ltr">{{ old('content_en') }}</textarea>
+                <textarea name="content_en" id="content_en" class="form-control" rows="10" required dir="ltr">{{ old('content_en') }}</textarea>
             </div>
 
             <div class="row mb-4">

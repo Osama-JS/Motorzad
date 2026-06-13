@@ -53,3 +53,110 @@
         }
     })();
     </script>
+
+<script>
+    // Global translation helper logic
+    (function() {
+        async function translateText(text, fromLang = 'ar', toLang = 'en') {
+            if (!text || text.trim() === '') return '';
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data[0]) {
+                    return data[0].map(x => x[0]).join('');
+                }
+                return text;
+            } catch (e) {
+                console.error('Translation error:', e);
+                throw e;
+            }
+        }
+
+        async function translateHtml(htmlStr, fromLang = 'ar', toLang = 'en') {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlStr;
+
+            const textNodes = [];
+            function findTextNodes(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (node.nodeValue.trim() !== '') {
+                        textNodes.push(node);
+                    }
+                } else {
+                    for (let child of node.childNodes) {
+                        findTextNodes(child);
+                    }
+                }
+            }
+            findTextNodes(tempDiv);
+
+            for (let node of textNodes) {
+                try {
+                    const translated = await translateText(node.nodeValue, fromLang, toLang);
+                    node.nodeValue = translated;
+                } catch (err) {
+                    console.error('Failed to translate node:', node.nodeValue, err);
+                }
+            }
+
+            return tempDiv.innerHTML;
+        }
+
+        $(document).on('click', '.translate-btn', async function() {
+            const btn = $(this);
+            const fromSelector = btn.data('from');
+            const toSelector = btn.data('to');
+            const fromLang = btn.data('from-lang') || 'ar';
+            const toLang = btn.data('to-lang') || 'en';
+            const isEditor = btn.data('type') === 'editor';
+            
+            let sourceText = '';
+            if (isEditor) {
+                const editorInstance = (window.editors || {})[fromSelector];
+                if (editorInstance) {
+                    sourceText = editorInstance.getData();
+                }
+            } else {
+                sourceText = $(fromSelector).val();
+            }
+
+            if (!sourceText || sourceText.trim() === '') {
+                if (window.toastr) {
+                    toastr.warning('{{ __("Please enter text first") }}');
+                } else {
+                    alert('{{ __("Please enter text first") }}');
+                }
+                return;
+            }
+
+            const originalHtml = btn.html();
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __("Translating...") }}');
+
+            try {
+                let translated = '';
+                if (isEditor) {
+                    translated = await translateHtml(sourceText, fromLang, toLang);
+                    const targetEditorInstance = (window.editors || {})[toSelector];
+                    if (targetEditorInstance) {
+                        targetEditorInstance.setData(translated);
+                    }
+                } else {
+                    translated = await translateText(sourceText, fromLang, toLang);
+                    $(toSelector).val(translated);
+                }
+                if (window.toastr) {
+                    toastr.success('{{ __("Translated successfully") }}');
+                }
+            } catch (error) {
+                if (window.toastr) {
+                    toastr.error('{{ __("Translation failed") }}');
+                } else {
+                    alert('{{ __("Translation failed") }}');
+                }
+            } finally {
+                btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    })();
+</script>

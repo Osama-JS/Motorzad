@@ -134,7 +134,7 @@
     </div>
     <a href="{{ route('admin.auctions.export-report') }}" class="btn btn-success d-flex align-items-center gap-2 px-4 rounded-pill">
         <i class="fa-solid fa-file-csv"></i>
-        <span>{{ app()->getLocale() === 'ar' ? 'تصدير التقرير المالي' : 'Export Financial Report' }}</span>
+        <span>{{ __('Export Financial Report') }}</span>
     </a>
 </div>
 
@@ -143,28 +143,28 @@
     <div class="col-12 col-sm-6 col-lg-3">
         <div class="stat-card-gradient scg-purple">
             <div class="scg-value">{{ number_format($totalCommissions, 2) }} SAR</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'إجمالي العمولات المحصلة' : 'Total Commissions' }}</div>
+            <div class="scg-label">{{ __('Total Commissions') }}</div>
             <i class="fa-solid fa-wallet scg-icon"></i>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
         <div class="stat-card-gradient scg-emerald">
             <div class="scg-value">{{ $soldCount }}</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'المزادات المباعة بنجاح' : 'Successful Sales' }}</div>
+            <div class="scg-label">{{ __('Successful Sales') }}</div>
             <i class="fa-solid fa-circle-check scg-icon"></i>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
         <div class="stat-card-gradient scg-amber">
             <div class="scg-value">{{ $totalEnded }}</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'المزادات غير المباعة / الملغاة' : 'Unsold / Cancelled' }}</div>
+            <div class="scg-label">{{ __('Unsold / Cancelled') }}</div>
             <i class="fa-solid fa-circle-xmark scg-icon"></i>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
         <div class="stat-card-gradient scg-blue">
             <div class="scg-value">{{ number_format($avgCommission, 2) }} SAR</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'متوسط العمولة لكل سيارة' : 'Avg Commission' }}</div>
+            <div class="scg-label">{{ __('Avg Commission') }}</div>
             <i class="fa-solid fa-calculator scg-icon"></i>
         </div>
     </div>
@@ -177,7 +177,7 @@
             <div class="panel-header-premium">
                 <h3>
                     <i class="fa-solid fa-chart-line text-primary"></i>
-                    <span>{{ app()->getLocale() === 'ar' ? 'نمو عمولات المنصة شهرياً' : 'Monthly Commissions Growth' }}</span>
+                    <span>{{ __('Monthly Commissions Growth') }}</span>
                 </h3>
             </div>
             <div class="panel-body-premium">
@@ -194,7 +194,7 @@
             <div class="panel-header-premium">
                 <h3>
                     <i class="fa-solid fa-chart-pie text-warning"></i>
-                    <span>{{ app()->getLocale() === 'ar' ? 'نسبة نجاح المزادات' : 'Auctions Success Ratio' }}</span>
+                    <span>{{ __('Auctions Success Ratio') }}</span>
                 </h3>
             </div>
             <div class="panel-body-premium">
@@ -211,7 +211,7 @@
     <div class="panel-header-premium">
         <h3>
             <i class="fa-solid fa-list text-success"></i>
-            <span>{{ app()->getLocale() === 'ar' ? 'آخر عمليات البيع والعمولات المستحقة' : 'Recent Sales & Commissions' }}</span>
+            <span>{{ __('Recent Sales & Commissions') }}</span>
         </h3>
     </div>
     <div class="panel-body-premium p-0">
@@ -254,7 +254,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                {{ app()->getLocale() === 'ar' ? 'لا توجد مبيعات مكتملة بعد.' : 'No completed sales yet.' }}
+                                {{ __('No completed sales yet.') }}
                             </td>
                         </tr>
                     @endforelse
@@ -286,7 +286,7 @@
             data: {
                 labels: monthsLabels,
                 datasets: [{
-                    label: "{{ app()->getLocale() === 'ar' ? 'العمولة (ريال)' : 'Commission (SAR)' }}",
+                    label: "{{ __('Commission (SAR)') }}",
                     data: monthlyData,
                     backgroundColor: 'rgba(99, 102, 241, 0.85)',
                     borderColor: 'rgb(99, 102, 241)',
@@ -329,9 +329,9 @@
             type: 'doughnut',
             data: {
                 labels: [
-                    "{{ app()->getLocale() === 'ar' ? 'مباع بنجاح' : 'Sold Successfully' }}", 
-                    "{{ app()->getLocale() === 'ar' ? 'غير مباع (لم يصل للاحتياطي)' : 'Unsold (Reserve not met)' }}", 
-                    "{{ app()->getLocale() === 'ar' ? 'ملغى' : 'Cancelled' }}"
+                    "{{ __('Sold Successfully') }}", 
+                    "{{ __('Unsold (Reserve not met)') }}", 
+                    "{{ __('Cancelled') }}"
                 ],
                 datasets: [{
                     data: [soldCount, endedCount, cancelledCount],
