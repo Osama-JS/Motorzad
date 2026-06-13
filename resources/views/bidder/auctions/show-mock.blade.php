@@ -4,6 +4,30 @@
 
 @section('css')
 <style>
+/* Car Diagram Styling */
+.car-part {
+    transition: fill 0.2s, stroke 0.2s, filter 0.2s;
+}
+.car-part.damage-scratch {
+    fill: rgba(245, 158, 11, 0.35) !important;
+    stroke: #f59e0b !important;
+    filter: drop-shadow(0px 0px 4px rgba(245, 158, 11, 0.4));
+}
+.car-part.damage-dent {
+    fill: rgba(239, 68, 68, 0.35) !important;
+    stroke: #ef4444 !important;
+    filter: drop-shadow(0px 0px 4px rgba(239, 68, 68, 0.4));
+}
+.car-part.damage-repainted {
+    fill: rgba(16, 185, 129, 0.35) !important;
+    stroke: #10b981 !important;
+    filter: drop-shadow(0px 0px 4px rgba(16, 185, 129, 0.4));
+}
+.car-part.damage-broken {
+    fill: rgba(168, 85, 247, 0.35) !important;
+    stroke: #a855f7 !important;
+    filter: drop-shadow(0px 0px 4px rgba(168, 85, 247, 0.4));
+}
 /* ===== PREMIUM SINGLE AUCTION VIEW ===== */
 .auc-detail-layout {
     display: grid;
@@ -378,6 +402,9 @@ html[dir="rtl"] .currency-suffix {
                 <button class="detail-tab-btn" onclick="switchTab(this, 'descTab')">
                     {{ app()->getLocale() === 'ar' ? 'تقرير الفحص والوصف' : 'Description & Issues' }}
                 </button>
+                <button class="detail-tab-btn" onclick="switchTab(this, 'priceTab')">
+                    {{ app()->getLocale() === 'ar' ? 'تحليل الأسعار' : 'Price History' }}
+                </button>
             </div>
 
             {{-- Specs Tab Content --}}
@@ -434,11 +461,164 @@ html[dir="rtl"] .currency-suffix {
                 <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.5rem;">
                     {{ $auctionData['description_' . app()->getLocale()] }}
                 </p>
-                <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); padding: 1rem; border-radius: 10px;">
+                <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
                     <strong style="color: #f59e0b; display: block; margin-bottom: 0.25rem;">⚠️ {{ app()->getLocale() === 'ar' ? 'ملاحظات الفحص والعيوب' : 'Inspection & Wear Notes' }}</strong>
                     <span style="font-size: 0.85rem; color: var(--text-muted);">
-                        {{ app()->getLocale() === 'ar' ? 'السيارة نظيفة جداً وخالية من المشاكل الميكانيكية والكهربائية. توجد خدوش طفيفة جداً في المصد الخلفي.' : 'No major defects found. Minor superficial scratches on the rear bumper. Under dealer warranty.' }}
+                        @if(isset($auctionData['damage_points']) && count($auctionData['damage_points']) > 0)
+                            {{ app()->getLocale() === 'ar' ? 'توجد بعض ملاحظات الفحص الموضحة بالرسم البياني أدناه.' : 'Inspection notes mapped in the diagram below.' }}
+                        @else
+                            {{ app()->getLocale() === 'ar' ? 'السيارة نظيفة جداً وخالية من المشاكل والعيوب.' : 'Excellent condition, no wear or defects registered.' }}
+                        @endif
                     </span>
+                </div>
+
+                @if(isset($auctionData['damage_points']) && count($auctionData['damage_points']) > 0)
+                    @php
+                        $damagePointsMap = [];
+                        $damagePointsDetails = [];
+                        foreach ($auctionData['damage_points'] as $p) {
+                            if (isset($p['part']) && isset($p['type'])) {
+                                $damagePointsMap[$p['part']] = $p['type'];
+                                $damagePointsDetails[$p['part']] = $p;
+                            }
+                        }
+
+                        $renderPart = function($partId, $defaultLabelAr, $defaultLabelEn) use ($damagePointsMap, $damagePointsDetails) {
+                            $class = isset($damagePointsMap[$partId]) ? 'damage-' . $damagePointsMap[$partId] : '';
+                            $titleHtml = '';
+                            if (isset($damagePointsDetails[$partId])) {
+                                $dp = $damagePointsDetails[$partId];
+                                $typeT = match($dp['type']) {
+                                    'scratch' => __('Scratch'),
+                                    'dent' => __('Dent'),
+                                    'repainted' => __('Repainted'),
+                                    'broken' => __('Broken'),
+                                    default => $dp['type']
+                                };
+                                $label = app()->getLocale() === 'ar' ? ($dp['label_ar'] ?? $defaultLabelAr) : ($dp['label_en'] ?? $defaultLabelEn);
+                                $note = !empty($dp['note']) ? ' (' . $dp['note'] . ')' : '';
+                                $titleHtml = '<title>' . e($label . ': ' . $typeT . $note) . '</title>';
+                            }
+                            return [
+                                'class' => $class,
+                                'title' => $titleHtml
+                            ];
+                        };
+                    @endphp
+
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                        <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-warning"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            {{ app()->getLocale() === 'ar' ? 'تقرير الفحص البصري وهيكل السيارة' : 'Visual Inspection & Body Report' }}
+                        </h4>
+                        
+                        <div class="row align-items-center">
+                            <div class="col-md-6 text-center mb-3 mb-md-0" style="background: rgba(30, 41, 59, 0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+                                <svg viewBox="0 0 600 350" class="car-diagram-svg read-only-diagram" style="width:100%; height:auto; max-width:420px;">
+                                    <rect x="5" y="5" width="590" height="340" rx="15" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2"/>
+                                    
+                                    <!-- Front Bumper -->
+                                    @php $p = $renderPart('front_bumper', 'صدام أمامي', 'Front Bumper'); @endphp
+                                    <path d="M 240,60 C 270,55 330,55 360,60 L 360,75 C 330,72 270,72 240,75 Z" class="car-part {{ $p['class'] }}" data-part="front_bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Hood -->
+                                    @php $p = $renderPart('hood', 'الكبوت (غطاء المحرك)', 'Hood'); @endphp
+                                    <path d="M 243,78 L 357,78 L 350,130 L 250,130 Z" class="car-part {{ $p['class'] }}" data-part="hood" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Windshield -->
+                                    @php $p = $renderPart('windshield', 'الزجاج الأمامي', 'Windshield'); @endphp
+                                    <path d="M 252,133 L 348,133 L 342,160 L 258,160 Z" class="car-part {{ $p['class'] }}" data-part="windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Roof -->
+                                    @php $p = $renderPart('roof', 'السقف', 'Roof'); @endphp
+                                    <rect x="256" y="163" width="88" height="70" rx="5" class="car-part {{ $p['class'] }}" data-part="roof" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                    <!-- Rear Windshield -->
+                                    @php $p = $renderPart('rear_windshield', 'الزجاج الخلفي', 'Rear Windshield'); @endphp
+                                    <path d="M 258,236 L 342,236 L 348,260 L 252,260 Z" class="car-part {{ $p['class'] }}" data-part="rear_windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Trunk / Tailgate -->
+                                    @php $p = $renderPart('trunk', 'الشنطة', 'Trunk'); @endphp
+                                    <path d="M 250,263 L 350,263 L 355,310 L 245,310 Z" class="car-part {{ $p['class'] }}" data-part="trunk" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Rear Bumper -->
+                                    @php $p = $renderPart('rear_bumper', 'صدام خلفي', 'Rear Bumper'); @endphp
+                                    <path d="M 240,313 C 270,318 330,318 360,313 L 360,325 C 330,322 270,322 240,325 Z" class="car-part {{ $p['class'] }}" data-part="rear_bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    
+                                    <!-- Left Front Fender -->
+                                    @php $p = $renderPart('left_fender_front', 'رفرف أمامي أيسر', 'Left Front Fender'); @endphp
+                                    <path d="M 200,65 Q 235,68 238,100 L 238,125 L 205,125 Z" class="car-part {{ $p['class'] }}" data-part="left_fender_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Left Front Door -->
+                                    @php $p = $renderPart('left_door_front', 'باب أمامي أيسر', 'Left Front Door'); @endphp
+                                    <rect x="205" y="128" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="left_door_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                    <!-- Left Rear Door -->
+                                    @php $p = $renderPart('left_door_rear', 'باب خلفي أيسر', 'Left Rear Door'); @endphp
+                                    <rect x="205" y="181" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="left_door_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                    <!-- Left Rear Fender -->
+                                    @php $p = $renderPart('left_fender_rear', 'رفرف خلفي أيسر', 'Left Rear Fender'); @endphp
+                                    <path d="M 205,234 L 238,234 L 238,270 Q 235,302 200,305 Z" class="car-part {{ $p['class'] }}" data-part="left_fender_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    
+                                    <!-- Right Front Fender -->
+                                    @php $p = $renderPart('right_fender_front', 'رفرف أمامي أيمن', 'Right Front Fender'); @endphp
+                                    <path d="M 400,65 Q 365,68 362,100 L 362,125 L 395,125 Z" class="car-part {{ $p['class'] }}" data-part="right_fender_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    <!-- Right Front Door -->
+                                    @php $p = $renderPart('right_door_front', 'باب أمامي أيمن', 'Right Front Door'); @endphp
+                                    <rect x="349" y="128" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="right_door_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                    <!-- Right Rear Door -->
+                                    @php $p = $renderPart('right_door_rear', 'باب خلفي أيمن', 'Right Rear Door'); @endphp
+                                    <rect x="349" y="181" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="right_door_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                    <!-- Right Rear Fender -->
+                                    @php $p = $renderPart('right_fender_rear', 'رفرف خلفي أيمن', 'Right Rear Fender'); @endphp
+                                    <path d="M 395,234 L 362,234 L 362,270 Q 365,302 400,305 Z" class="car-part {{ $p['class'] }}" data-part="right_fender_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                    
+                                    <!-- Wheels -->
+                                    <rect x="180" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                    <rect x="400" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                    <rect x="180" y="245" width="20" height="35" rx="5" fill="#334155" />
+                                    <rect x="400" y="245" width="20" height="35" rx="5" fill="#334155" />
+                                </svg>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-group list-group-flush px-0" style="font-size:0.85rem; padding-left:0; padding-right:0;">
+                                    @foreach($auctionData['damage_points'] as $point)
+                                        @php
+                                            $label = app()->getLocale() === 'ar' ? ($point['label_ar'] ?? $point['part']) : ($point['label_en'] ?? $point['part']);
+                                            $badgeColor = match($point['type']) {
+                                                'scratch' => 'warning',
+                                                'dent' => 'danger',
+                                                'repainted' => 'success',
+                                                'broken' => 'purple',
+                                                default => 'secondary'
+                                            };
+                                            $typeText = match($point['type']) {
+                                                'scratch' => __('Scratch'),
+                                                'dent' => __('Dent'),
+                                                'repainted' => __('Repainted'),
+                                                'broken' => __('Broken'),
+                                                default => $point['type']
+                                            };
+                                        @endphp
+                                        <li class="list-group-item d-flex justify-content-between align-items-start px-0 bg-transparent border-0 mb-2">
+                                            <div class="ms-2 me-auto text-start">
+                                                <div class="fw-bold" style="color:var(--text); font-weight:700;">{{ $label }}</div>
+                                                @if(!empty($point['note']))
+                                                    <span class="text-muted small">{{ $point['note'] }}</span>
+                                                @endif
+                                            </div>
+                                            <span class="badge bg-{{ $badgeColor }}" style="{{ $point['type'] === 'broken' ? 'background-color:#a855f7 !important;' : '' }}">{{ $typeText }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Price History Tab Content --}}
+            <div id="priceTab" class="tab-content">
+                <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;">
+                    {{ app()->getLocale() === 'ar' ? 'منحنى تطور سعر المزايدة بمرور الوقت' : 'Price Progression Curve Over Time' }}
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
+                    {{ app()->getLocale() === 'ar' ? 'يوضح هذا الرسم البياني تاريخ وتغير الأسعار ووتيرة المزايدة للمساعدة في تخطيط عروضك.' : 'This chart displays the history of bids and price progression to help you plan your bids.' }}
+                </p>
+                <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; height: 320px; position: relative; margin-top: 1rem;">
+                    <canvas id="priceHistoryChart" style="width: 100%; height: 100%; max-height: 280px;"></canvas>
                 </div>
             </div>
         </div>
@@ -467,7 +647,21 @@ html[dir="rtl"] .currency-suffix {
                 <span style="font-weight: 800; color: var(--text-secondary);">SAR</span>
             </div>
 
-            <div class="bid-form-group">
+            {{-- Bid Mode Selector --}}
+            <div class="bid-mode-selector mb-3" style="display: flex; gap: 0.5rem; background: var(--bg-hover); padding: 0.25rem; border-radius: 12px; border: 1px solid var(--border);">
+                <button type="button" class="btn btn-sm flex-grow-1 py-2 rounded-pill bid-mode-btn" id="btnModeManual" onclick="setBidMode('manual')" style="font-weight: 700; font-size: 0.8rem; border: none; background: var(--brand-red); color: white; transition: all 0.3s;">
+                    {{ app()->getLocale() === 'ar' ? 'مزايدة عادية' : 'Manual Bid' }}
+                </button>
+                <button type="button" class="btn btn-sm flex-grow-1 py-2 rounded-pill bid-mode-btn text-muted" id="btnModeAuto" onclick="setBidMode('auto')" style="font-weight: 700; font-size: 0.8rem; border: none; background: transparent; color: var(--text-muted); transition: all 0.3s;">
+                    {{ app()->getLocale() === 'ar' ? 'مزايدة تلقائية' : 'Auto Bid' }}
+                </button>
+            </div>
+
+            {{-- Manual Bid Group --}}
+            <div class="bid-form-group" id="manualBidGroup">
+                <label class="form-label" id="bidAmountLabel" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+                    {{ app()->getLocale() === 'ar' ? 'قيمة المزايدة الحالية' : 'Bid Amount' }}
+                </label>
                 <div class="bid-input-wrap">
                     <input type="number" id="bidAmountInput" value="{{ $auctionData['current_price'] + $auctionData['min_bid_increment'] }}" min="{{ $auctionData['current_price'] + $auctionData['min_bid_increment'] }}" step="{{ $auctionData['min_bid_increment'] }}">
                     <span class="currency-suffix">SAR</span>
@@ -477,10 +671,24 @@ html[dir="rtl"] .currency-suffix {
                 </small>
             </div>
 
+            {{-- Auto Bid Group (Hidden initially) --}}
+            <div class="bid-form-group" id="autoBidLimitGroup" style="display: none; margin-bottom: 1rem;">
+                <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+                    {{ app()->getLocale() === 'ar' ? 'الحد الأقصى للمزايدة التلقائية' : 'Maximum Auto Bid Limit' }}
+                </label>
+                <div class="bid-input-wrap">
+                    <input type="number" id="maxAutoBidInput" placeholder="{{ app()->getLocale() === 'ar' ? 'أدخل أقصى سعر' : 'Enter max amount' }}" min="{{ $auctionData['current_price'] + $auctionData['min_bid_increment'] * 2 }}" step="{{ $auctionData['min_bid_increment'] }}">
+                    <span class="currency-suffix">SAR</span>
+                </div>
+                <small style="display: block; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-muted); text-align: center;">
+                    {{ app()->getLocale() === 'ar' ? 'سيقوم النظام بالمزايدة بالنيابة عنك حتى هذا الحد' : 'System will automatically bid up to this limit' }}
+                </small>
+            </div>
+
             <div class="quick-bids">
-                <button class="quick-bid-btn" onclick="applyQuickBid(1000)">+1,000</button>
-                <button class="quick-bid-btn" onclick="applyQuickBid(5000)">+5,000</button>
-                <button class="quick-bid-btn" onclick="applyQuickBid(10000)">+10,000</button>
+                <button class="quick-bid-btn" id="quickBidBtn1" onclick="applyQuickBid(this)">+1,000</button>
+                <button class="quick-bid-btn" id="quickBidBtn2" onclick="applyQuickBid(this)">+5,000</button>
+                <button class="quick-bid-btn" id="quickBidBtn3" onclick="applyQuickBid(this)">+10,000</button>
             </div>
 
             <button class="btn-submit-bid" onclick="placeBidNow()">
@@ -527,6 +735,44 @@ html[dir="rtl"] .currency-suffix {
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@php
+    $priceHistory = [];
+    $startPrice = $auctionData['start_price'];
+    $currentPrice = $auctionData['current_price'];
+    $increment = $auctionData['min_bid_increment'];
+    $bidsCount = $auctionData['bids_count'];
+
+    // Start with starting price
+    $priceHistory[] = [
+        'time' => now()->subMinutes($bidsCount * 10)->format('Y-m-d H:i:s'),
+        'amount' => $startPrice,
+        'bidder' => app()->getLocale() === 'ar' ? 'سعر البداية' : 'Starting Price'
+    ];
+
+    // Generate intermediate mock bids
+    $tempPrice = $startPrice;
+    for ($i = 1; $i < $bidsCount; $i++) {
+        $tempPrice += $increment * rand(1, 2);
+        if ($tempPrice >= $currentPrice) {
+            break;
+        }
+        $priceHistory[] = [
+            'time' => now()->subMinutes(($bidsCount - $i) * 10)->format('Y-m-d H:i:s'),
+            'amount' => (float)$tempPrice,
+            'bidder' => (app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #') . rand(1000, 9999)
+        ];
+    }
+
+    // Add current price as the latest bid if it's higher than the last generated price
+    if ($currentPrice > $tempPrice || count($priceHistory) === 1) {
+        $priceHistory[] = [
+            'time' => now()->subMinutes(2)->format('Y-m-d H:i:s'),
+            'amount' => (float)$currentPrice,
+            'bidder' => app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #' . rand(1000, 9999)
+        ];
+    }
+@endphp
 <script>
 // Image gallery switcher
 function switchImage(thumb, src) {
@@ -535,20 +781,167 @@ function switchImage(thumb, src) {
     document.getElementById('mainShowcaseImg').src = src;
 }
 
+let priceHistoryData = @json($priceHistory);
+let priceChart = null;
+
+function renderPriceHistoryChart() {
+    const chartCtx = document.getElementById('priceHistoryChart')?.getContext('2d');
+    if (!chartCtx) return;
+    
+    const labels = priceHistoryData.map(item => {
+        const d = new Date(item.time);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    });
+    const dataPoints = priceHistoryData.map(item => item.amount);
+    const tooltips = priceHistoryData.map(item => `${item.bidder}: ${item.amount.toLocaleString()} SAR`);
+
+    if (priceChart) {
+        priceChart.destroy();
+    }
+
+    const strokeColor = '#ef4444'; // var(--brand-red)
+    const gridColor = 'rgba(255, 255, 255, 0.08)';
+    const textColor = 'rgba(255, 255, 255, 0.6)';
+
+    priceChart = new Chart(chartCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '{{ app()->getLocale() === "ar" ? "سعر المزايدة" : "Bid Price" }}',
+                data: dataPoints,
+                borderColor: strokeColor,
+                backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: strokeColor,
+                pointBorderColor: '#0f172a',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return tooltips[context.dataIndex];
+                        }
+                    },
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            family: 'Inter, system-ui',
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            family: 'Inter, system-ui',
+                            size: 10
+                        },
+                        callback: function(value) {
+                            return value.toLocaleString() + ' SAR';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Tabs switcher
 function switchTab(btn, tabId) {
     document.querySelectorAll('.detail-tab-btn').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(tabId).classList.add('active');
+    
+    if (tabId === 'priceTab') {
+        setTimeout(renderPriceHistoryChart, 50);
+    }
 }
 
 // Apply quick bid button addition
-function applyQuickBid(addAmt) {
+const minIncrement = {{ $auctionData['min_bid_increment'] }};
+
+function roundToNiceNumber(val) {
+    if (val < 5000) {
+        return Math.round(val / 100) * 100;
+    } else if (val < 20000) {
+        return Math.round(val / 500) * 500;
+    } else if (val < 100000) {
+        return Math.round(val / 1000) * 1000;
+    } else {
+        return Math.round(val / 5000) * 5000;
+    }
+}
+
+function updateQuickBidButtons(currentPrice) {
+    const val1 = minIncrement;
+    let val2 = Math.max(minIncrement * 2, roundToNiceNumber(currentPrice * 0.02));
+    let val3 = Math.max(minIncrement * 5, roundToNiceNumber(currentPrice * 0.05));
+    
+    if (val2 <= val1) val2 = val1 + minIncrement;
+    if (val3 <= val2) val3 = val2 + minIncrement;
+
+    const btn1 = document.getElementById('quickBidBtn1');
+    const btn2 = document.getElementById('quickBidBtn2');
+    const btn3 = document.getElementById('quickBidBtn3');
+
+    if (btn1) {
+        btn1.textContent = `+${val1.toLocaleString()}`;
+        btn1.setAttribute('data-amount', val1);
+    }
+    if (btn2) {
+        btn2.textContent = `+${val2.toLocaleString()}`;
+        btn2.setAttribute('data-amount', val2);
+    }
+    if (btn3) {
+        btn3.textContent = `+${val3.toLocaleString()}`;
+        btn3.setAttribute('data-amount', val3);
+    }
+}
+
+function applyQuickBid(btn) {
+    const addAmt = parseInt(btn.getAttribute('data-amount'));
     const currentPrice = parseInt(document.getElementById('currentPriceVal').textContent.replace(/,/g, ''));
     const input = document.getElementById('bidAmountInput');
     input.value = currentPrice + addAmt;
 }
+
+// Initial update on load
+document.addEventListener('DOMContentLoaded', () => {
+    const initialPrice = parseInt(document.getElementById('currentPriceVal').textContent.replace(/,/g, ''));
+    if (!isNaN(initialPrice)) {
+        updateQuickBidButtons(initialPrice);
+    }
+});
 
 // Countdown timer script
 let timeInSec = 11642; // 03:14:02
@@ -568,68 +961,166 @@ const timerInterval = setInterval(() => {
     timerEl.textContent = formatted;
 }, 1000);
 
-// Place bid handler
-let bidsCount = {{ $auctionData['bids_count'] }};
+let bidMode = 'manual';
+
+function setBidMode(mode) {
+    bidMode = mode;
+    const btnManual = document.getElementById('btnModeManual');
+    const btnAuto = document.getElementById('btnModeAuto');
+    const autoGroup = document.getElementById('autoBidLimitGroup');
+    const quickBids = document.querySelector('.quick-bids');
+
+    if (mode === 'manual') {
+        btnManual.style.background = 'var(--brand-red)';
+        btnManual.style.color = 'white';
+        btnManual.classList.remove('text-muted');
+
+        btnAuto.style.background = 'transparent';
+        btnAuto.style.color = 'var(--text-muted)';
+        btnAuto.classList.add('text-muted');
+
+        if (autoGroup) autoGroup.style.display = 'none';
+        if (quickBids) quickBids.style.display = 'grid';
+    } else {
+        btnAuto.style.background = 'var(--brand-red)';
+        btnAuto.style.color = 'white';
+        btnAuto.classList.remove('text-muted');
+
+        btnManual.style.background = 'transparent';
+        btnManual.style.color = 'var(--text-muted)';
+        btnManual.classList.add('text-muted');
+
+        if (autoGroup) autoGroup.style.display = 'block';
+        if (quickBids) quickBids.style.display = 'none';
+    }
+}
+
+// Place bid handler via AJAX
 function placeBidNow() {
     const btn = document.querySelector('.btn-submit-bid');
     const input = document.getElementById('bidAmountInput');
     const bidAmount = parseInt(input.value);
-    const currentPrice = parseInt(document.getElementById('currentPriceVal').textContent.replace(/,/g, ''));
-    const minIncrement = {{ $auctionData['min_bid_increment'] }};
 
-    if (bidAmount < currentPrice + minIncrement) {
-        toastr.error('{{ app()->getLocale() === "ar" ? "يجب أن تكون المزايدة أعلى من السعر الحالي بالحد الأدنى للزيادة" : "Bid must meet the minimum increment requirement" }}');
+    const isAutoBid = bidMode === 'auto';
+    const maxAutoBid = isAutoBid ? parseInt(document.getElementById('maxAutoBidInput').value) : null;
+
+    if (isAutoBid && (isNaN(maxAutoBid) || maxAutoBid < bidAmount)) {
+        toastr.error('{{ app()->getLocale() === "ar" ? "يجب أن يكون الحد الأقصى أعلى من أو يساوي قيمة البداية" : "Maximum limit must be greater than or equal to starting bid amount" }}');
         return;
     }
 
     btn.disabled = true;
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>';
 
-    // Simulate API call delay
-    setTimeout(() => {
+    fetch(`{{ route('bidder.auctions.bid', $auctionData['id']) }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ 
+            amount: bidAmount,
+            is_auto_bid: isAutoBid,
+            max_auto_bid: maxAutoBid
+        })
+    })
+    .then(async res => {
+        const data = await res.json();
         btn.disabled = false;
         btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
 
-        // Update current price
-        document.getElementById('currentPriceVal').textContent = bidAmount.toLocaleString();
-        
-        // Add to feed list
-        const feedList = document.getElementById('bidsFeedList');
-        const newItem = document.createElement('div');
-        newItem.className = 'feed-item new-bid';
-        newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${bidAmount.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
-        feedList.insertBefore(newItem, feedList.firstChild);
-
-        // Update counters
-        bidsCount++;
-        document.getElementById('bidsCountBadge').textContent = `${bidsCount} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
-
-        // Set next bid recommendation
-        input.value = bidAmount + minIncrement;
-        input.min = bidAmount + minIncrement;
-
-        toastr.success('{{ app()->getLocale() === "ar" ? "تم تسجيل مزايدتك بنجاح!" : "Your bid has been placed successfully!" }}');
-
-        // Simulate other bidder outbidding after 7 seconds
-        setTimeout(() => {
-            const outbidAmount = bidAmount + minIncrement;
-            document.getElementById('currentPriceVal').textContent = outbidAmount.toLocaleString();
+        if (res.ok && data.success) {
+            // Update current price
+            document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
             
-            const outbidItem = document.createElement('div');
-            outbidItem.className = 'feed-item new-bid';
-            outbidItem.innerHTML = `<span style="font-weight: 800;">${outbidAmount.toLocaleString()} SAR</span><span>مزايد #1905</span>`;
-            feedList.insertBefore(outbidItem, feedList.firstChild);
+            // Update quick bid buttons
+            updateQuickBidButtons(data.new_price);
             
-            bidsCount++;
-            document.getElementById('bidsCountBadge').textContent = `${bidsCount} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
-            
-            input.value = outbidAmount + minIncrement;
-            input.min = outbidAmount + minIncrement;
-            
-            toastr.warning('{{ app()->getLocale() === "ar" ? "تنبيه: تم تقديم عرض أعلى منك!" : "Alert: You have been outbid!" }}');
-        }, 7000);
+            // Add to feed list
+            const feedList = document.getElementById('bidsFeedList');
+            const newItem = document.createElement('div');
+            newItem.className = 'feed-item new-bid';
+            newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
+            feedList.insertBefore(newItem, feedList.firstChild);
 
-    }, 1200);
+            // Update counters
+            document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+
+            // Set next bid recommendation
+            input.value = data.new_price + minIncrement;
+            input.min = data.new_price + minIncrement;
+
+            // Update max auto bid input min
+            const maxInput = document.getElementById('maxAutoBidInput');
+            if (maxInput) {
+                maxInput.min = data.new_price + minIncrement * 2;
+            }
+
+            // Simulate auto-extend if time remaining is less than 2 minutes (120 seconds)
+            if (typeof timeInSec !== 'undefined' && timeInSec > 0 && timeInSec <= 120) {
+                timeInSec = 120;
+                toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد دقيقتين إضافيتين لمنع القنص!" : "Auction extended by 2 minutes to prevent sniping!" }}');
+            }
+
+            toastr.success(data.message);
+
+            // Update chart data
+            priceHistoryData.push({
+                time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                amount: data.new_price,
+                bidder: '{{ app()->getLocale() === "ar" ? "أنت (مزايد)" : "You (Bidder)" }}'
+            });
+            if (priceChart) {
+                renderPriceHistoryChart();
+            }
+
+            // Simulate other bidder outbidding after 7 seconds if not in auto-bid mode
+            setTimeout(() => {
+                const outbidAmount = data.new_price + minIncrement;
+                document.getElementById('currentPriceVal').textContent = outbidAmount.toLocaleString();
+                
+                // Update quick bid buttons dynamically for the new outbid price
+                updateQuickBidButtons(outbidAmount);
+                
+                const outbidItem = document.createElement('div');
+                outbidItem.className = 'feed-item new-bid';
+                outbidItem.innerHTML = `<span style="font-weight: 800;">${outbidAmount.toLocaleString()} SAR</span><span>مزايد #1905</span>`;
+                feedList.insertBefore(outbidItem, feedList.firstChild);
+                
+                document.getElementById('bidsCountBadge').textContent = `${data.bids_count + 1} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+                
+                input.value = outbidAmount + minIncrement;
+                input.min = outbidAmount + minIncrement;
+
+                // Update chart data for outbid
+                priceHistoryData.push({
+                    time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                    amount: outbidAmount,
+                    bidder: '{{ app()->getLocale() === "ar" ? "مزايد #1905" : "Bidder #1905" }}'
+                });
+                if (priceChart) {
+                    renderPriceHistoryChart();
+                }
+                
+                // Simulate auto-extend for outbid
+                if (typeof timeInSec !== 'undefined' && timeInSec > 0 && timeInSec <= 120) {
+                    timeInSec = 120;
+                    toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد دقيقتين إضافيتين لمنع القنص!" : "Auction extended by 2 minutes to prevent sniping!" }}');
+                }
+
+                toastr.warning('{{ app()->getLocale() === "ar" ? "تنبيه: تم تقديم عرض أعلى منك!" : "Alert: You have been outbid!" }}');
+            }, 7000);
+
+        } else {
+            toastr.error(data.message || 'Failed to submit bid');
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
+        toastr.error('Connection error.');
+    });
 }
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>

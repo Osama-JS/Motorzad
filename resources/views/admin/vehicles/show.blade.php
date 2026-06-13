@@ -4,6 +4,30 @@
 
 @section('css')
 <style>
+    /* Car Diagram Styling */
+    .car-part {
+        transition: fill 0.2s, stroke 0.2s, filter 0.2s;
+    }
+    .car-part.damage-scratch {
+        fill: rgba(245, 158, 11, 0.35) !important;
+        stroke: #f59e0b !important;
+        filter: drop-shadow(0px 0px 4px rgba(245, 158, 11, 0.4));
+    }
+    .car-part.damage-dent {
+        fill: rgba(239, 68, 68, 0.35) !important;
+        stroke: #ef4444 !important;
+        filter: drop-shadow(0px 0px 4px rgba(239, 68, 68, 0.4));
+    }
+    .car-part.damage-repainted {
+        fill: rgba(16, 185, 129, 0.35) !important;
+        stroke: #10b981 !important;
+        filter: drop-shadow(0px 0px 4px rgba(16, 185, 129, 0.4));
+    }
+    .car-part.damage-broken {
+        fill: rgba(168, 85, 247, 0.35) !important;
+        stroke: #a855f7 !important;
+        filter: drop-shadow(0px 0px 4px rgba(168, 85, 247, 0.4));
+    }
     /* Premium UI & UX Variables & Theme styles */
     :root {
         --glass-bg: rgba(255, 255, 255, 0.85);
@@ -523,14 +547,151 @@
         <!-- Issues Panel -->
         <div class="premium-panel">
             <div class="panel-header-premium">
-                <h3><i class="fa-solid fa-circle-exclamation text-danger"></i> {{ __('Known Issues') }}</h3>
+                <h3><i class="fa-solid fa-circle-exclamation text-danger"></i> {{ __('Known Issues & Wear') }}</h3>
             </div>
             <div class="panel-body-premium">
                 @if($vehicle->issues)
-                    <div class="p-3 bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 rounded-3" style="font-size:0.9rem; line-height:1.6; color:var(--text-color) !important;">
+                    <div class="p-3 mb-4 bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 rounded-3" style="font-size:0.9rem; line-height:1.6; color:var(--text-color) !important;">
                         <i class="fa-solid fa-circle-exclamation me-1"></i> {{ $vehicle->issues }}
                     </div>
-                @else
+                @endif
+
+                @if($vehicle->damage_points && count($vehicle->damage_points) > 0)
+                    @php
+                        $damagePointsMap = [];
+                        $damagePointsDetails = [];
+                        if (is_array($vehicle->damage_points)) {
+                            foreach ($vehicle->damage_points as $p) {
+                                if (isset($p['part']) && isset($p['type'])) {
+                                    $damagePointsMap[$p['part']] = $p['type'];
+                                    $damagePointsDetails[$p['part']] = $p;
+                                }
+                            }
+                        }
+
+                        $renderPart = function($partId, $defaultLabelAr, $defaultLabelEn) use ($damagePointsMap, $damagePointsDetails) {
+                            $class = isset($damagePointsMap[$partId]) ? 'damage-' . $damagePointsMap[$partId] : '';
+                            $titleHtml = '';
+                            if (isset($damagePointsDetails[$partId])) {
+                                $dp = $damagePointsDetails[$partId];
+                                $typeT = match($dp['type']) {
+                                    'scratch' => __('Scratch'),
+                                    'dent' => __('Dent'),
+                                    'repainted' => __('Repainted'),
+                                    'broken' => __('Broken'),
+                                    default => $dp['type']
+                                };
+                                $label = app()->getLocale() === 'ar' ? ($dp['label_ar'] ?? $defaultLabelAr) : ($dp['label_en'] ?? $defaultLabelEn);
+                                $note = !empty($dp['note']) ? ' (' . $dp['note'] . ')' : '';
+                                $titleHtml = '<title>' . e($label . ': ' . $typeT . $note) . '</title>';
+                            }
+                            return [
+                                'class' => $class,
+                                'title' => $titleHtml
+                            ];
+                        };
+                    @endphp
+
+                    <div class="row align-items-center mt-3">
+                        <div class="col-md-6 text-center mb-3 mb-md-0" style="background: rgba(30, 41, 59, 0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <svg viewBox="0 0 600 350" class="car-diagram-svg read-only-diagram" style="width:100%; height:auto; max-width:480px;">
+                                <!-- Outer Frame -->
+                                <rect x="5" y="5" width="590" height="340" rx="15" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2"/>
+                                
+                                <!-- Top-Down View Car Body -->
+                                <!-- Front Bumper -->
+                                @php $p = $renderPart('front_bumper', 'صدام أمامي', 'Front Bumper'); @endphp
+                                <path d="M 240,60 C 270,55 330,55 360,60 L 360,75 C 330,72 270,72 240,75 Z" class="car-part {{ $p['class'] }}" data-part="front_bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Hood -->
+                                @php $p = $renderPart('hood', 'الكبوت (غطاء المحرك)', 'Hood'); @endphp
+                                <path d="M 243,78 L 357,78 L 350,130 L 250,130 Z" class="car-part {{ $p['class'] }}" data-part="hood" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Windshield -->
+                                @php $p = $renderPart('windshield', 'الزجاج الأمامي', 'Windshield'); @endphp
+                                <path d="M 252,133 L 348,133 L 342,160 L 258,160 Z" class="car-part {{ $p['class'] }}" data-part="windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Roof -->
+                                @php $p = $renderPart('roof', 'السقف', 'Roof'); @endphp
+                                <rect x="256" y="163" width="88" height="70" rx="5" class="car-part {{ $p['class'] }}" data-part="roof" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                <!-- Rear Windshield -->
+                                @php $p = $renderPart('rear_windshield', 'الزجاج الخلفي', 'Rear Windshield'); @endphp
+                                <path d="M 258,236 L 342,236 L 348,260 L 252,260 Z" class="car-part {{ $p['class'] }}" data-part="rear_windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Trunk / Tailgate -->
+                                @php $p = $renderPart('trunk', 'الشنطة', 'Trunk'); @endphp
+                                <path d="M 250,263 L 350,263 L 355,310 L 245,310 Z" class="car-part {{ $p['class'] }}" data-part="trunk" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Rear Bumper -->
+                                @php $p = $renderPart('rear_bumper', 'صدام خلفي', 'Rear Bumper'); @endphp
+                                <path d="M 240,313 C 270,318 330,318 360,313 L 360,325 C 330,322 270,322 240,325 Z" class="car-part {{ $p['class'] }}" data-part="rear_bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                
+                                <!-- Left Front Fender -->
+                                @php $p = $renderPart('left_fender_front', 'رفرف أمامي أيسر', 'Left Front Fender'); @endphp
+                                <path d="M 200,65 Q 235,68 238,100 L 238,125 L 205,125 Z" class="car-part {{ $p['class'] }}" data-part="left_fender_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Left Front Door -->
+                                @php $p = $renderPart('left_door_front', 'باب أمامي أيسر', 'Left Front Door'); @endphp
+                                <rect x="205" y="128" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="left_door_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                <!-- Left Rear Door -->
+                                @php $p = $renderPart('left_door_rear', 'باب خلفي أيسر', 'Left Rear Door'); @endphp
+                                <rect x="205" y="181" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="left_door_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                <!-- Left Rear Fender -->
+                                @php $p = $renderPart('left_fender_rear', 'رفرف خلفي أيسر', 'Left Rear Fender'); @endphp
+                                <path d="M 205,234 L 238,234 L 238,270 Q 235,302 200,305 Z" class="car-part {{ $p['class'] }}" data-part="left_fender_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                
+                                <!-- Right Front Fender -->
+                                @php $p = $renderPart('right_fender_front', 'رفرف أمامي أيمن', 'Right Front Fender'); @endphp
+                                <path d="M 400,65 Q 365,68 362,100 L 362,125 L 395,125 Z" class="car-part {{ $p['class'] }}" data-part="right_fender_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                <!-- Right Front Door -->
+                                @php $p = $renderPart('right_door_front', 'باب أمامي أيمن', 'Right Front Door'); @endphp
+                                <rect x="349" y="128" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="right_door_front" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                <!-- Right Rear Door -->
+                                @php $p = $renderPart('right_door_rear', 'باب خلفي أيمن', 'Right Rear Door'); @endphp
+                                <rect x="349" y="181" width="46" height="50" class="car-part {{ $p['class'] }}" data-part="right_door_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</rect>
+                                <!-- Right Rear Fender -->
+                                @php $p = $renderPart('right_fender_rear', 'رفرف خلفي أيمن', 'Right Rear Fender'); @endphp
+                                <path d="M 395,234 L 362,234 L 362,270 Q 365,302 400,305 Z" class="car-part {{ $p['class'] }}" data-part="right_fender_rear" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5">{!! $p['title'] !!}</path>
+                                
+                                <!-- Wheels -->
+                                <rect x="180" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="400" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="180" y="245" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="400" y="245" width="20" height="35" rx="5" fill="#334155" />
+                            </svg>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 style="font-weight:700; font-size:0.95rem;" class="mb-3">
+                                <i class="fa-solid fa-list-check text-primary me-1"></i>
+                                {{ __('Visual Inspection Wear List') }}
+                            </h5>
+                            <ul class="list-group list-group-flush px-0" style="font-size:0.85rem; padding-left:0; padding-right:0;">
+                                @foreach($vehicle->damage_points as $point)
+                                    @php
+                                        $label = app()->getLocale() === 'ar' ? ($point['label_ar'] ?? $point['part']) : ($point['label_en'] ?? $point['part']);
+                                        $badgeColor = match($point['type']) {
+                                            'scratch' => 'warning',
+                                            'dent' => 'danger',
+                                            'repainted' => 'success',
+                                            'broken' => 'purple',
+                                            default => 'secondary'
+                                        };
+                                        $typeText = match($point['type']) {
+                                            'scratch' => __('Scratch'),
+                                            'dent' => __('Dent'),
+                                            'repainted' => __('Repainted'),
+                                            'broken' => __('Broken'),
+                                            default => $point['type']
+                                        };
+                                    @endphp
+                                    <li class="list-group-item d-flex justify-content-between align-items-start px-0 bg-transparent border-0 mb-2">
+                                        <div class="ms-2 me-auto text-start">
+                                            <div class="fw-bold">{{ $label }}</div>
+                                            @if(!empty($point['note']))
+                                                <span class="text-muted small">{{ $point['note'] }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="badge bg-{{ $badgeColor }}" style="{{ $point['type'] === 'broken' ? 'background-color:#a855f7 !important;' : '' }}">{{ $typeText }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @elseif(!$vehicle->issues)
                     <div class="p-3 bg-success bg-opacity-10 text-success border border-success border-opacity-20 rounded-3" style="font-size:0.9rem;">
                         <i class="fa-solid fa-circle-check me-1"></i> {{ __('No major issues reported.') }}
                     </div>

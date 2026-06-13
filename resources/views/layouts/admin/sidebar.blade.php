@@ -42,9 +42,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
                 <span>{{ __('Pages') }}</span>
             </a>
-            <a href="{{ route('admin.auctions.index') }}" class="nav-item {{ request()->routeIs('admin.auctions.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.auctions.index') }}" class="nav-item {{ request()->routeIs('admin.auctions.*') && !request()->routeIs('admin.auctions.analytics') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>{{ __('Auctions') }}</span>
+            </a>
+            <a href="{{ route('admin.auctions.analytics') }}" class="nav-item {{ request()->routeIs('admin.auctions.analytics') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>{{ __('Auctions Analytics') }}</span>
             </a>
             <a href="{{ route('admin.bids.index') }}" class="nav-item {{ request()->routeIs('admin.bids.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-5 5 1.5 1.5-1.5 1.5L5 17l1.5-1.5L5 14l5-5L14 13Z"/><path d="m16 8 5-5-1.5-1.5-5 5 1.5-1.5 1.5-1.5-5 5 1.5 1.5 5-5-1.5-1.5Z"/></svg>

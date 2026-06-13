@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Auction;
 use App\Models\Vehicle;
 use App\Models\User;
+use App\Services\AuctionService;
 use Illuminate\Http\Request;
 
 class AuctionController extends Controller
 {
+    public function __construct(protected AuctionService $auctionService) {}
     public function index()
     {
         $stats = [
@@ -103,12 +105,12 @@ class AuctionController extends Controller
             'location' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
             'is_featured' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
-        // Default booleans if not present
-        if (!isset($validated['deposit_required'])) $validated['deposit_required'] = false;
-        if (!isset($validated['is_featured'])) $validated['is_featured'] = false;
+        $validated['deposit_required'] = $request->has('deposit_required');
+        $validated['is_featured'] = $request->has('is_featured');
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('auctions', 'public');
@@ -146,7 +148,8 @@ class AuctionController extends Controller
             'location' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
             'is_featured' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
         $validated['deposit_required'] = $request->has('deposit_required');
@@ -180,5 +183,220 @@ class AuctionController extends Controller
             'success' => true,
             'message' => __('Auction deleted successfully')
         ]);
+    }
+
+    public function pause(Auction $auction)
+    {
+        $auction->update(['is_paused' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction paused successfully')
+        ]);
+    }
+
+    public function resume(Auction $auction)
+    {
+        $auction->update(['is_paused' => false]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction resumed successfully')
+        ]);
+    }
+
+    public function extend(Request $request, Auction $auction)
+    {
+        $request->validate([
+            'minutes' => 'required|integer|min:1|max:1440'
+        ]);
+
+        $minutes = (int)$request->minutes;
+        $endTime = $auction->end_time;
+
+        // If the auction has already ended, we extend it relative to now()
+        if ($endTime->isPast()) {
+            $newEndTime = now()->addMinutes($minutes);
+        } else {
+            $newEndTime = $endTime->addMinutes($minutes);
+        }
+
+        $auction->update([
+            'end_time' => $newEndTime,
+            // If the auction is ended, we can also restore it to live status
+            'status' => $auction->status === 'ended' || $auction->status === 'cancelled' ? 'live' : $auction->status
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction extended successfully'),
+            'new_end_time' => $newEndTime->format('Y-m-d H:i:s')
+        ]);
+    }
+
+    public function forceEnd(Request $request, Auction $auction)
+    {
+        $request->validate([
+            'action' => 'required|in:complete,cancel'
+        ]);
+
+        if ($request->action === 'complete') {
+            // End the auction immediately (awarding it to the highest bidder if reserve met)
+            // Note: to bypass status check in endAuction, we ensure status is 'live'
+            if ($auction->status !== 'live') {
+                $auction->update(['status' => 'live']);
+            }
+            $this->auctionService->endAuction($auction);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Auction ended and sold process completed.')
+            ]);
+        } else {
+            // Cancel the auction and refund all deposits
+            $this->auctionService->cancelAuction($auction);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Auction cancelled and deposits refunded successfully.')
+            ]);
+        }
+    }
+
+    public function blockUser(Request $request, Auction $auction)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'type' => 'required|in:auction,global'
+        ]);
+
+        $userId = $request->user_id;
+
+        if ($request->type === 'global') {
+            // Globally suspend the user by setting status to rejected
+            $user = User::find($userId);
+            $user->update(['status' => 'rejected']);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('User suspended globally successfully.')
+            ]);
+        } else {
+            // Block from this auction specifically by inserting into blocklist
+            \Illuminate\Support\Facades\DB::table('auction_blocklists')->insertOrIgnore([
+                'auction_id' => $auction->id,
+                'user_id' => $userId,
+                'blocked_by' => auth()->id(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('User blocked from this auction specifically.')
+            ]);
+        }
+    }
+
+    public function analytics()
+    {
+        // Total commissions
+        $totalCommissions = Auction::where('status', 'sold')->sum('commission_amount');
+
+        // Total sold auctions
+        $soldCount = Auction::where('status', 'sold')->count();
+
+        // Total ended/cancelled
+        $endedCount = Auction::where('status', 'ended')->count();
+        $cancelledCount = Auction::where('status', 'cancelled')->count();
+        $totalEnded = $endedCount + $cancelledCount;
+
+        // Average commission
+        $avgCommission = $soldCount > 0 ? $totalCommissions / $soldCount : 0;
+
+        // Monthly commission growth for the current year
+        $currentYear = now()->year;
+        $monthlyCommissions = \Illuminate\Support\Facades\DB::table('auctions')
+            ->where('status', 'sold')
+            ->whereYear('sold_at', $currentYear)
+            ->selectRaw('MONTH(sold_at) as month, SUM(commission_amount) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('total', 'month')
+            ->toArray();
+
+        // Prepare monthly data for all 12 months (defaulting to 0 if no sales)
+        $monthsData = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthsData[$m] = $monthlyCommissions[$m] ?? 0;
+        }
+
+        // Recent sales
+        $recentSales = Auction::where('status', 'sold')
+            ->with(['winner', 'vehicle'])
+            ->orderByDesc('sold_at')
+            ->limit(5)
+            ->get();
+
+        return view('admin.auctions.analytics', compact(
+            'totalCommissions',
+            'soldCount',
+            'endedCount',
+            'cancelledCount',
+            'totalEnded',
+            'avgCommission',
+            'monthsData',
+            'recentSales'
+        ));
+    }
+
+    public function exportReport(Request $request)
+    {
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=auctions_financial_report.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            // Add BOM for Excel Arabic characters
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Header
+            fputcsv($file, [
+                __('Auction ID'),
+                __('Title'),
+                __('Winner'),
+                __('Winning Bid (SAR)'),
+                __('Commission Rate (%)'),
+                __('Commission Amount (SAR)'),
+                __('Sold Date')
+            ]);
+
+            $auctions = Auction::where('status', 'sold')
+                ->with(['winner'])
+                ->orderByDesc('sold_at')
+                ->get();
+
+            foreach ($auctions as $auction) {
+                fputcsv($file, [
+                    $auction->id,
+                    $auction->title,
+                    $auction->winner?->name ?? 'N/A',
+                    number_format($auction->winning_bid_amount, 2),
+                    $auction->commission_rate . '%',
+                    number_format($auction->commission_amount, 2),
+                    $auction->sold_at ? $auction->sold_at->format('Y-m-d H:i') : 'N/A'
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

@@ -89,6 +89,17 @@ class AuctionService
     }
 
     /**
+     * Cancel an auction and release all deposits.
+     */
+    public function cancelAuction(Auction $auction): void
+    {
+        DB::transaction(function () use ($auction) {
+            $auction->update(['status' => 'cancelled']);
+            $this->releaseAllDeposits($auction);
+        });
+    }
+
+    /**
      * Release deposits for all non-winners.
      */
     private function releaseNonWinnerDeposits(Auction $auction, int $winnerId): void

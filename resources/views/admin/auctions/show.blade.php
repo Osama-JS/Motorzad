@@ -679,6 +679,76 @@
 
     {{-- Right Column: Bids & Deposits feed --}}
     <div class="col-lg-5">
+        {{-- Emergency Controls Panel --}}
+        @if(!in_array($auction->status, ['sold', 'cancelled']))
+            <div class="premium-panel border border-danger">
+                <div class="panel-header-premium bg-danger bg-opacity-10 text-danger" style="border-bottom: 1px solid var(--glass-border);">
+                    <h3 style="color:#dc2626; font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:10px;">
+                        <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                        <span>{{ app()->getLocale() === 'ar' ? 'إجراءات الطوارئ والتحكم المباشر' : 'Emergency & Live Controls' }}</span>
+                    </h3>
+                </div>
+                <div class="panel-body-premium p-4">
+                    {{-- Pause / Resume --}}
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'حالة المزاد الحالية' : 'Current Auction State' }}</h6>
+                        <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-3" style="background:#f8fafc !important; border: 1px solid var(--glass-border);">
+                            <div>
+                                @if($auction->is_paused)
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-6" style="background:#fef3c7 !important; color:#d97706 !important;">
+                                        <i class="fa-solid fa-circle-pause"></i> {{ app()->getLocale() === 'ar' ? 'موقوف مؤقتاً' : 'Temporarily Paused' }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-success px-3 py-2 rounded-pill fs-6" style="background:#dcfce7 !important; color:#15803d !important;">
+                                        <i class="fa-solid fa-circle-play"></i> {{ app()->getLocale() === 'ar' ? 'نشط / جاهز' : 'Active / Ready' }}
+                                    </span>
+                                @endif
+                            </div>
+                            <div>
+                                @if($auction->is_paused)
+                                    <button onclick="togglePause('resume')" class="btn btn-success d-flex align-items-center gap-1.5 px-3 py-2 rounded-pill font-weight-bold" style="font-size:0.8rem; background:#10b981; border:none;">
+                                        <i class="fa-solid fa-play"></i> {{ app()->getLocale() === 'ar' ? 'استئناف المزاد' : 'Resume Auction' }}
+                                    </button>
+                                @else
+                                    <button onclick="togglePause('pause')" class="btn btn-warning text-dark d-flex align-items-center gap-1.5 px-3 py-2 rounded-pill font-weight-bold" style="font-size:0.8rem; background:#f59e0b; border:none;">
+                                        <i class="fa-solid fa-pause"></i> {{ app()->getLocale() === 'ar' ? 'إيقاف مؤقت' : 'Pause Auction' }}
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Manual Extension --}}
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'تمديد المزاد يدوياً' : 'Manual Time Extension' }}</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button onclick="extendAuction(5)" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 0.8rem; border-color:#6366f1; color:#6366f1;">+5 {{ app()->getLocale() === 'ar' ? 'دقائق' : 'Mins' }}</button>
+                            <button onclick="extendAuction(10)" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 0.8rem; border-color:#6366f1; color:#6366f1;">+10 {{ app()->getLocale() === 'ar' ? 'دقائق' : 'Mins' }}</button>
+                            <button onclick="extendAuction(30)" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 0.8rem; border-color:#6366f1; color:#6366f1;">+30 {{ app()->getLocale() === 'ar' ? 'دقيقة' : 'Mins' }}</button>
+                            <button onclick="extendAuction(60)" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 0.8rem; border-color:#6366f1; color:#6366f1;">+1 {{ app()->getLocale() === 'ar' ? 'ساعة' : 'Hour' }}</button>
+                        </div>
+                    </div>
+
+                    {{-- Force End / Closure --}}
+                    <div>
+                        <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'الإنهاء الفوري للمزاد' : 'Immediate Closure' }}</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button onclick="forceEnd('complete')" class="btn btn-primary w-100 py-2 rounded-3 font-weight-bold d-flex align-items-center justify-content-center gap-1.5" style="font-size:0.8rem; background:#6366f1; border:none;">
+                                    <i class="fa-solid fa-check-double"></i> {{ app()->getLocale() === 'ar' ? 'إرساء وإتمام البيع' : 'Complete & Sell' }}
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button onclick="forceEnd('cancel')" class="btn btn-danger w-100 py-2 rounded-3 font-weight-bold d-flex align-items-center justify-content-center gap-1.5" style="font-size:0.8rem; background:#ef4444; border:none;">
+                                    <i class="fa-solid fa-ban"></i> {{ app()->getLocale() === 'ar' ? 'إلغاء ورد الضمانات' : 'Cancel & Refund' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Winner Highlight panel --}}
         @if($auction->winner)
             @php
@@ -893,5 +963,120 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
     });
+
+    // Emergency Live Action AJAX calls
+    function togglePause(action) {
+        let url = action === 'pause' ? "{{ route('admin.auctions.pause', $auction->id) }}" : "{{ route('admin.auctions.resume', $auction->id) }}";
+        let title = action === 'pause' ? "{{ __('Pause Auction?') }}" : "{{ __('Resume Auction?') }}";
+        let text = action === 'pause' ? "{{ __('Bidders will not be able to place new bids.') }}" : "{{ __('Bidders will be allowed to place bids again.') }}";
+
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('Confirm') }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function() {
+                        toastr.error("{{ __('Something went wrong!') }}");
+                    }
+                });
+            }
+        });
+    }
+
+    function extendAuction(minutes) {
+        Swal.fire({
+            title: "{{ __('Extend Auction Time?') }}",
+            text: "{{ __('Do you want to extend this auction by ') }}" + minutes + " {{ __('minutes?') }}",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: "{{ __('Confirm') }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('admin.auctions.extend', $auction->id) }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        minutes: minutes
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function() {
+                        toastr.error("{{ __('Something went wrong!') }}");
+                    }
+                });
+            }
+        });
+    }
+
+    function forceEnd(action) {
+        let title = action === 'complete' ? "{{ __('Force End and Sell?') }}" : "{{ __('Force Cancel Auction?') }}";
+        let text = action === 'complete' 
+            ? "{{ __('This will end the auction immediately and award it to the current highest bidder (if reserve met).') }}" 
+            : "{{ __('This will cancel the auction and refund all deposits immediately. This action cannot be undone!') }}";
+        let confirmBtnColor = action === 'complete' ? '#10b981' : '#ef4444';
+
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmBtnColor,
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('Confirm') }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('admin.auctions.force-end', $auction->id) }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        action: action
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function() {
+                        toastr.error("{{ __('Something went wrong!') }}");
+                    }
+                });
+            }
+        });
+    }
 </script>
 @endsection

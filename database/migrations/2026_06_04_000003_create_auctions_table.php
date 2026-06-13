@@ -37,7 +37,7 @@ return new class extends Migration
             // التوقيت
             $table->dateTime('start_time')->comment('وقت بدء المزاد');
             $table->dateTime('end_time')->comment('وقت انتهاء المزاد');
-            $table->unsignedSmallInteger('auto_extend_minutes')->default(5)
+            $table->unsignedSmallInteger('auto_extend_minutes')->default(2)
                   ->comment('تمديد تلقائي بالدقائق عند تقديم عرض في آخر لحظة');
 
             // حالة المزاد

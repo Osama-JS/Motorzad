@@ -105,7 +105,12 @@ class VehicleController extends Controller
             'features' => 'nullable|array',
             'features.*' => 'string',
             'issues' => 'nullable|string',
+            'damage_points' => 'nullable|string',
         ]);
+
+        if (isset($validated['damage_points']) && is_string($validated['damage_points'])) {
+            $validated['damage_points'] = json_decode($validated['damage_points'], true);
+        }
 
         if (!isset($validated['features'])) {
             $validated['features'] = [];
@@ -167,7 +172,12 @@ class VehicleController extends Controller
             'features' => 'nullable|array',
             'features.*' => 'string',
             'issues' => 'nullable|string',
+            'damage_points' => 'nullable|string',
         ]);
+
+        if (isset($validated['damage_points']) && is_string($validated['damage_points'])) {
+            $validated['damage_points'] = json_decode($validated['damage_points'], true);
+        }
 
         if (!isset($validated['features'])) {
             $validated['features'] = [];
@@ -303,5 +313,132 @@ class VehicleController extends Controller
             'success' => true,
             'message' => 'تم رفض المركبة وتدوين سبب الرفض بنجاح'
         ]);
+    }
+
+    public function decodeVin(Request $request)
+    {
+        $request->validate([
+            'vin' => 'required|string|min:10|max:17'
+        ]);
+
+        $vin = strtoupper($request->vin);
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::get("https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{$vin}?format=json");
+
+            if ($response->successful()) {
+                $results = $response->json()['Results'] ?? [];
+                
+                $data = [
+                    'make' => null,
+                    'model' => null,
+                    'year' => null,
+                    'engine_capacity' => null,
+                    'fuel_type' => null,
+                    'country_of_origin' => null,
+                    'transmission' => null,
+                ];
+
+                foreach ($results as $item) {
+                    $variable = $item['Variable'];
+                    $value = $item['Value'];
+
+                    if (empty($value)) continue;
+
+                    switch ($variable) {
+                        case 'Make':
+                            $data['make'] = $value;
+                            break;
+                        case 'Model':
+                            $data['model'] = $value;
+                            break;
+                        case 'Model Year':
+                            $data['year'] = (int)$value;
+                            break;
+                        case 'Displacement (L)':
+                            $data['engine_capacity'] = $value . 'L';
+                            break;
+                        case 'Fuel Type - Primary':
+                            $data['fuel_type'] = $value;
+                            break;
+                        case 'Plant Country':
+                            $data['country_of_origin'] = $value;
+                            break;
+                        case 'Transmission Style':
+                            $data['transmission'] = $value;
+                            break;
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => __('Unable to fetch data from VIN database.')
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Error: ') . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reorderImages(Request $request)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'required|integer|exists:vehicle_images,id'
+        ]);
+
+        foreach ($request->order as $index => $id) {
+            \App\Models\VehicleImage::where('id', $id)->update([
+                'sort_order' => $index
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Images reordered successfully.')
+        ]);
+    }
+
+    public function updateImage(Request $request, \App\Models\VehicleImage $image)
+    {
+        $request->validate([
+            'image_data' => 'required|string'
+        ]);
+
+        try {
+            $imgData = $request->image_data;
+            if (preg_match('/^data:image\/(\w+);base64,/', $imgData, $type)) {
+                $imgData = substr($imgData, strpos($imgData, ',') + 1);
+                $type = strtolower($type[1]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Invalid image data'], 422);
+            }
+
+            $decodedImg = base64_decode($imgData);
+            if ($decodedImg === false) {
+                return response()->json(['success' => false, 'message' => 'Base64 decode failed'], 422);
+            }
+
+            \Illuminate\Support\Facades\Storage::disk('public')->put($image->image_path, $decodedImg);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Image updated successfully.')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Error: ') . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -98,6 +98,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Auctions Management
     Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
+    Route::get('auctions/analytics', [\App\Http\Controllers\Admin\AuctionController::class, 'analytics'])->name('auctions.analytics');
+    Route::get('auctions/export-report', [\App\Http\Controllers\Admin\AuctionController::class, 'exportReport'])->name('auctions.export-report');
+    Route::post('auctions/{auction}/pause', [\App\Http\Controllers\Admin\AuctionController::class, 'pause'])->name('auctions.pause');
+    Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
+    Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
+    Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])->name('auctions.force-end');
     Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
 
     // Bids Management
@@ -105,11 +111,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
 
     // Vehicles Management
+    Route::post('vehicles/decode-vin', [\App\Http\Controllers\Admin\VehicleController::class, 'decodeVin'])->name('vehicles.decode-vin');
     Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
     Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])->name('vehicles.approve');
     Route::post('vehicles/{vehicle}/reject', [\App\Http\Controllers\Admin\VehicleController::class, 'reject'])->name('vehicles.reject');
     Route::delete('vehicles/images/{image}', [\App\Http\Controllers\Admin\VehicleController::class, 'deleteImage'])->name('vehicles.delete-image');
     Route::post('vehicles/images/{image}/set-primary', [\App\Http\Controllers\Admin\VehicleController::class, 'setPrimaryImage'])->name('vehicles.set-primary-image');
+    Route::post('vehicles/images/reorder', [\App\Http\Controllers\Admin\VehicleController::class, 'reorderImages'])->name('vehicles.images.reorder');
+    Route::post('vehicles/images/{image}/update', [\App\Http\Controllers\Admin\VehicleController::class, 'updateImage'])->name('vehicles.images.update');
     Route::resource('vehicles', \App\Http\Controllers\Admin\VehicleController::class);
 });
 // Bidder Management Routes

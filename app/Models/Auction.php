@@ -19,6 +19,7 @@ class Auction extends Model
         'status', 'winner_id', 'winning_bid_amount', 'sold_at',
         'commission_rate', 'commission_amount',
         'is_featured', 'views_count', 'bids_count',
+        'is_paused',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class Auction extends Model
         'sold_at'          => 'datetime',
         'deposit_required' => 'boolean',
         'is_featured'      => 'boolean',
+        'is_paused'        => 'boolean',
         'start_price'      => 'float',
         'reserve_price'    => 'float',
         'min_bid_increment'=> 'float',
@@ -84,6 +86,7 @@ class Auction extends Model
     public function getIsLiveAttribute(): bool
     {
         return $this->status === 'live'
+            && !$this->is_paused
             && now()->between($this->start_time, $this->end_time);
     }
 

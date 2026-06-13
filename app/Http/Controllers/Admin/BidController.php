@@ -83,4 +83,46 @@ class BidController extends Controller
             })
         ]);
     }
+
+    public function void(Bid $bid)
+    {
+        $auction = $bid->auction;
+
+        // Wrap in transaction to rollback the price if needed
+        \Illuminate\Support\Facades\DB::transaction(function () use ($bid, $auction) {
+            // Update bid status to cancelled
+            $bid->update(['status' => 'cancelled']);
+
+            // If this was the winning/highest bid of the auction, we need to rollback the price
+            $highestBid = Bid::where('auction_id', $auction->id)
+                ->where('status', 'active')
+                ->orderByDesc('amount')
+                ->first();
+
+            if ($highestBid) {
+                // Restore winner and winning bid amount to next highest
+                $auction->update([
+                    'winner_id' => $highestBid->user_id,
+                    'winning_bid_amount' => $highestBid->amount,
+                ]);
+            } else {
+                // If there are no active bids left, reset winner and winning bid amount
+                $auction->update([
+                    'winner_id' => null,
+                    'winning_bid_amount' => null,
+                ]);
+            }
+
+            // Recalculate bids count
+            $activeBidsCount = Bid::where('auction_id', $auction->id)
+                ->where('status', 'active')
+                ->count();
+            $auction->update(['bids_count' => $activeBidsCount]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Bid voided and auction price rolled back successfully.')
+        ]);
+    }
 }

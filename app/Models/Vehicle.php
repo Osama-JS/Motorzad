@@ -16,12 +16,13 @@ class Vehicle extends Model
         'fuel_type', 'transmission', 'engine_capacity', 'cylinders',
         'condition', 'description_ar', 'description_en',
         'features', 'issues', 'status', 'rejection_reason',
-        'reviewed_by', 'reviewed_at',
+        'reviewed_by', 'reviewed_at', 'damage_points',
     ];
 
     protected $casts = [
         'reviewed_at' => 'datetime',
         'features'    => 'array',
+        'damage_points' => 'array',
         'year'        => 'integer',
         'mileage'     => 'integer',
         'cylinders'   => 'integer',

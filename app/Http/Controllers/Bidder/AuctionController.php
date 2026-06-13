@@ -153,10 +153,31 @@ class AuctionController extends Controller
         }
 
         $amount = $request->input('amount');
+        $isAutoBid = $request->boolean('is_auto_bid');
+        $maxAutoBid = $isAutoBid ? floatval($request->input('max_auto_bid')) : null;
         
         // Find in DB
         $auction = Auction::find($id);
         if ($auction) {
+            if ($auction->is_paused) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('This auction is currently paused by admin.')
+                ], 200);
+            }
+            
+            // Check if blocked from this auction
+            $isBlocked = \Illuminate\Support\Facades\DB::table('auction_blocklists')
+                ->where('auction_id', $auction->id)
+                ->where('user_id', $user->id)
+                ->exists();
+            if ($isBlocked) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('You have been blocked from participating in this auction.')
+                ], 200);
+            }
+            
             if ($auction->status !== 'live' || now()->gt($auction->end_time)) {
                 return response()->json([
                     'success' => false,
@@ -167,10 +188,23 @@ class AuctionController extends Controller
             $currentPrice = $auction->current_price;
             $minBid = $currentPrice + $auction->min_bid_increment;
 
-            if ($amount < $minBid) {
+            if ($amount < $minBid && !$auction->bids()->where('user_id', $user->id)->where('status', 'active')->exists()) {
                 return response()->json([
                     'success' => false,
                     'message' => __('Bid must be at least :amount SAR.', ['amount' => number_format($minBid)])
+                ], 200);
+            }
+
+            if ($isAutoBid && !$maxAutoBid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Please specify a maximum auto bid limit.')
+                ], 200);
+            }
+            if ($isAutoBid && $maxAutoBid < $amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Maximum auto bid limit must be greater than or equal to the bid amount.')
                 ], 200);
             }
 
@@ -183,29 +217,129 @@ class AuctionController extends Controller
                 ], 200);
             }
 
-            // Create the bid
-            $bid = Bid::create([
-                'auction_id' => $auction->id,
-                'user_id' => $user->id,
-                'amount' => $amount,
-                'status' => 'active',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+            // Place Bid with Proxy War Logic
+            $result = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $auction, $user, $isAutoBid, $maxAutoBid, $amount) {
+                $newBidAmount = $amount;
 
-            // Update auction counters
-            $auction->increment('bids_count');
-            $auction->update([
-                'winning_bid_amount' => $amount,
-                'winner_id' => $user->id
-            ]);
+                // Get the current highest active bid (if any)
+                $currentHighestBid = $auction->bids()->where('status', 'active')->first();
 
-            return response()->json([
-                'success' => true,
-                'message' => __('Your bid has been placed successfully!'),
-                'new_price' => $amount,
-                'bids_count' => $auction->bids_count,
-            ]);
+                // Setup proxy war variables
+                $rivalBid = null;
+                if ($currentHighestBid && $currentHighestBid->user_id !== $user->id && $currentHighestBid->is_auto_bid) {
+                    $rivalBid = $currentHighestBid;
+                }
+
+                if ($rivalBid) {
+                    $userMax = $isAutoBid ? $maxAutoBid : $newBidAmount;
+                    $rivalMax = $rivalBid->max_auto_bid;
+
+                    if ($userMax > $rivalMax) {
+                        // User wins proxy war
+                        $newBidAmount = min($rivalMax + $auction->min_bid_increment, $userMax);
+                        
+                        // Mark rival as outbid
+                        $rivalBid->update(['status' => 'outbid']);
+                    } else {
+                        // Rival wins proxy war
+                        $rivalNewAmount = min($userMax + $auction->min_bid_increment, $rivalMax);
+                        
+                        // User's bid gets placed but immediately outbid
+                        $auction->bids()->where('status', 'active')->where('user_id', $user->id)->update(['status' => 'outbid']);
+                        Bid::create([
+                            'auction_id' => $auction->id,
+                            'user_id'    => $user->id,
+                            'amount'     => $newBidAmount,
+                            'is_auto_bid'=> $isAutoBid,
+                            'max_auto_bid'=> $maxAutoBid,
+                            'status'     => 'outbid',
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                        ]);
+                        $auction->increment('bids_count');
+
+                        // Rival's new winning bid
+                        $auction->bids()->where('status', 'active')->where('user_id', $rivalBid->user_id)->update(['status' => 'outbid']);
+                        Bid::create([
+                            'auction_id' => $auction->id,
+                            'user_id'    => $rivalBid->user_id,
+                            'amount'     => $rivalNewAmount,
+                            'is_auto_bid'=> true,
+                            'max_auto_bid'=> $rivalMax,
+                            'status'     => 'active',
+                            'ip_address' => 'system',
+                            'user_agent' => 'proxy-bid',
+                        ]);
+                        $auction->increment('bids_count');
+                        
+                        // Update auction values
+                        $auction->update([
+                            'winning_bid_amount' => $rivalNewAmount,
+                            'winner_id' => $rivalBid->user_id
+                        ]);
+
+                        // Auto-extend logic
+                        $this->handleAutoExtend($auction);
+                        
+                        return [
+                            'success' => true,
+                            'new_price' => $rivalNewAmount,
+                            'bids_count' => $auction->bids_count,
+                            'time_left_seconds' => $auction->time_remaining,
+                            'end_time' => $auction->end_time->toISOString(),
+                            'message' => __('Your bid was placed, but you have been immediately outbid by an automatic proxy bid!')
+                        ];
+                    }
+                }
+
+                // Normal flow (or User won proxy war)
+                // Mark previous active bids as outbid
+                $auction->bids()
+                    ->where('status', 'active')
+                    ->where('user_id', '!=', $user->id)
+                    ->update(['status' => 'outbid']);
+
+                // Mark user's own previous bid as outbid
+                $auction->bids()
+                    ->where('user_id', $user->id)
+                    ->where('status', 'active')
+                    ->update(['status' => 'outbid']);
+
+                // Create new bid
+                $bid = Bid::create([
+                    'auction_id'   => $auction->id,
+                    'user_id'      => $user->id,
+                    'amount'       => $newBidAmount,
+                    'is_auto_bid'  => $isAutoBid,
+                    'max_auto_bid' => $maxAutoBid,
+                    'status'       => 'active',
+                    'ip_address'   => $request->ip(),
+                    'user_agent'   => $request->userAgent(),
+                ]);
+
+                // Update bids count and winning bid
+                $auction->increment('bids_count');
+                $auction->update([
+                    'winning_bid_amount' => $newBidAmount,
+                    'winner_id' => $user->id
+                ]);
+
+                // Auto-extend
+                $this->handleAutoExtend($auction);
+
+                return [
+                    'success' => true,
+                    'new_price' => $newBidAmount,
+                    'bids_count' => $auction->bids_count,
+                    'time_left_seconds' => $auction->time_remaining,
+                    'end_time' => $auction->end_time->toISOString(),
+                    'message' => $isAutoBid 
+                        ? __('Automatic proxy bid setup successfully at :amount (Max Limit: :max)!', ['amount' => number_format($newBidAmount), 'max' => number_format($maxAutoBid)]) 
+                        : __('Your bid has been placed successfully!')
+                ];
+            });
+
+            return response()->json($result);
         }
 
         // Handle mock bidding
@@ -224,9 +358,24 @@ class AuctionController extends Controller
                 ], 200);
             }
 
+            if ($isAutoBid && !$maxAutoBid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Please specify a maximum auto bid limit.')
+                ], 200);
+            }
+            if ($isAutoBid && $maxAutoBid < $amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Maximum auto bid limit must be greater than or equal to the bid amount.')
+                ], 200);
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => __('Your bid has been placed successfully (DEMO)!'),
+                'message' => $isAutoBid 
+                    ? __('Automatic proxy bid setup successfully (DEMO) at :amount (Max Limit: :max)!', ['amount' => number_format($amount), 'max' => number_format($maxAutoBid)])
+                    : __('Your bid has been placed successfully (DEMO)!'),
                 'new_price' => $amount,
                 'bids_count' => $auc['bids_count'] + 1,
             ]);
@@ -236,6 +385,16 @@ class AuctionController extends Controller
             'success' => false,
             'message' => __('Auction not found')
         ], 404);
+    }
+
+    protected function handleAutoExtend(Auction $auction): void
+    {
+        $extendMinutes = $auction->auto_extend_minutes ?? 2;
+        if ($auction->end_time->lessThanOrEqualTo(now()->addMinutes($extendMinutes))) {
+            $auction->update([
+                'end_time' => now()->addMinutes($extendMinutes),
+            ]);
+        }
     }
 
     /**
@@ -408,6 +567,15 @@ class AuctionController extends Controller
                 'image' => 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=800&fit=crop',
                 'description_ar' => 'مرسيدس جي كلاس إصدار خاص تحت الضمان مع كامل المواصفات الفاخرة، مقاعد الكانتارا الجلدية، نظام المساعدة على القيادة، كاميرات 360 درجة.',
                 'description_en' => 'Special Edition G-Class under warranty with complete premium options, Alcantara leather seats, drive assistance system, 360 cameras.',
+                'damage_points' => [
+                    [
+                        'part' => 'rear_bumper',
+                        'type' => 'scratch',
+                        'note' => 'خدش بسيط جداً / Very minor scratch',
+                        'label_ar' => 'صدام خلفي',
+                        'label_en' => 'Rear Bumper'
+                    ]
+                ],
             ],
             [
                 'id' => 2,
@@ -434,6 +602,7 @@ class AuctionController extends Controller
                 'image' => 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800&fit=crop',
                 'description_ar' => 'بورش 911 كاريرا جي تي إس الرياضية الرائعة خالية من الرش والتعديل، طبقة حماية كاملة هيكل خارجي وداخلي.',
                 'description_en' => 'Stunning sports Porsche 911 Carrera GTS, original paint, full body PPF protection inside and out.',
+                'damage_points' => [],
             ],
             [
                 'id' => 3,
@@ -460,6 +629,15 @@ class AuctionController extends Controller
                 'image' => 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&fit=crop',
                 'description_ar' => 'بي إم دبليو M8 كومبيتيشن مجهزة بحزمة كاربون فايبر كاملة وصوت رياضي معدل بالوكالة. السيارة بحالة ممتازة وخالية من الصدمات.',
                 'description_en' => 'BMW M8 Competition featuring full factory carbon package and M Performance exhaust. Excellent shape, accident free.',
+                'damage_points' => [
+                    [
+                        'part' => 'left_door_front',
+                        'type' => 'scratch',
+                        'note' => 'خدش سطحي بسيط / Superficial scratch',
+                        'label_ar' => 'باب أمامي أيسر',
+                        'label_en' => 'Left Front Door'
+                    ]
+                ],
             ],
             [
                 'id' => 4,
@@ -486,6 +664,7 @@ class AuctionController extends Controller
                 'image' => 'https://images.unsplash.com/photo-1606220838315-056192d5e927?w=800&fit=crop',
                 'description_ar' => 'رينج روفر سبورت إصدار أوتوبيوجرافي الجديد كلياً، قمة الفخامة والتكنولوجيا الهجينة المتطورة.',
                 'description_en' => 'All-new Range Rover Sport Autobiography edition, the peak of luxury and advanced hybrid technology.',
+                'damage_points' => [],
             ],
             [
                 'id' => 5,
@@ -512,6 +691,22 @@ class AuctionController extends Controller
                 'image' => 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&fit=crop',
                 'description_ar' => 'أودي RS7 الأداء الخارق متناسق وجميل جداً، صيانة دورية بالوكالة مع تمديد للضمان.',
                 'description_en' => 'High-performance Audi RS7 in stunning Sonoma Green, full service history at agency, extended warranty.',
+                'damage_points' => [
+                    [
+                        'part' => 'front_bumper',
+                        'type' => 'dent',
+                        'note' => 'صدمة خفيفة بدون تأثير على الرديتر / Minor dent, no radiator impact',
+                        'label_ar' => 'صدام أمامي',
+                        'label_en' => 'Front Bumper'
+                    ],
+                    [
+                        'part' => 'right_fender_front',
+                        'type' => 'repainted',
+                        'note' => 'رش تجميلي بدون معجون / Cosmetic repaint only',
+                        'label_ar' => 'رفرف أمامي أيمن',
+                        'label_en' => 'Right Front Fender'
+                    ]
+                ],
             ]
         ];
     }

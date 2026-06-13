@@ -4,6 +4,35 @@
 
 @section('css')
 <style>
+    /* Car Diagram Styling */
+    .car-part {
+        cursor: pointer;
+        transition: fill 0.2s, stroke 0.2s, filter 0.2s;
+    }
+    .car-part:hover {
+        fill: rgba(59, 130, 246, 0.15);
+        stroke: #3b82f6;
+    }
+    .car-part.damage-scratch {
+        fill: rgba(245, 158, 11, 0.3) !important;
+        stroke: #f59e0b !important;
+        filter: drop-shadow(0px 0px 4px rgba(245, 158, 11, 0.4));
+    }
+    .car-part.damage-dent {
+        fill: rgba(239, 68, 68, 0.3) !important;
+        stroke: #ef4444 !important;
+        filter: drop-shadow(0px 0px 4px rgba(239, 68, 68, 0.4));
+    }
+    .car-part.damage-repainted {
+        fill: rgba(16, 185, 129, 0.3) !important;
+        stroke: #10b981 !important;
+        filter: drop-shadow(0px 0px 4px rgba(16, 185, 129, 0.4));
+    }
+    .car-part.damage-broken {
+        fill: rgba(168, 85, 247, 0.3) !important;
+        stroke: #a855f7 !important;
+        filter: drop-shadow(0px 0px 4px rgba(168, 85, 247, 0.4));
+    }
     /* Premium UI & Theme Styling */
     :root {
         --glass-bg: rgba(255, 255, 255, 0.85);
@@ -274,7 +303,12 @@
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('VIN Number') }}</label>
-                            <input type="text" name="vin_number" class="form-control" placeholder="VIN" value="{{ old('vin_number') }}">
+                            <div class="input-group">
+                                <input type="text" name="vin_number" id="vinNumberInput" class="form-control" placeholder="VIN" value="{{ old('vin_number') }}">
+                                <button type="button" id="btnDecodeVin" class="btn btn-outline-secondary" style="border:1px solid #cbd5e1; border-top-right-radius:10px; border-bottom-right-radius:10px;" title="{{ __('Decode VIN') }}">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('Color') }}</label>
@@ -322,13 +356,17 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('Engine Capacity') }}</label>
                             <input type="text" name="engine_capacity" class="form-control" placeholder="{{ __('Example: 2.5L') }}" value="{{ old('engine_capacity') }}">
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('Cylinders') }}</label>
                             <input type="number" name="cylinders" class="form-control" placeholder="{{ __('Example: 4') }}" value="{{ old('cylinders') }}">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">{{ __('Country of Origin') }}</label>
+                            <input type="text" name="country_of_origin" class="form-control" placeholder="{{ __('Example: Japan') }}" value="{{ old('country_of_origin') }}">
                         </div>
                     </div>
 
@@ -422,6 +460,143 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Interactive Damage & Wear Plotter Card -->
+            <div class="premium-card">
+                <div class="card-header-premium">
+                    <div class="icon-wrapper bg-light-warning">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    {{ __('Interactive Wear & Damage Plotter') }}
+                </div>
+                <div class="card-body-premium">
+                    <p class="text-muted mb-4" style="font-size:0.9rem;">
+                        {{ __('Click on the vehicle parts in the diagram to register damages (scratches, dents, repaints, or broken parts).') }}
+                    </p>
+                    <div class="row">
+                        <!-- Car Diagram Column -->
+                        <div class="col-md-7 text-center mb-4 mb-md-0" style="background: rgba(30, 41, 59, 0.03); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border); min-height: 380px; display:flex; align-items:center; justify-content:center;">
+                            <svg viewBox="0 0 600 350" class="car-diagram-svg" style="width:100%; height:auto; max-width:550px;">
+                                <defs>
+                                    <filter id="glow-damage" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+                                <!-- Outer Frame -->
+                                <rect x="5" y="5" width="590" height="340" rx="15" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2"/>
+                                
+                                <!-- Top-Down View Car Body -->
+                                <!-- Front Bumper -->
+                                <path d="M 240,60 C 270,55 330,55 360,60 L 360,75 C 330,72 270,72 240,75 Z" class="car-part" data-part="front_bumper" data-label-ar="صدام أمامي" data-label-en="Front Bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Hood -->
+                                <path d="M 243,78 L 357,78 L 350,130 L 250,130 Z" class="car-part" data-part="hood" data-label-ar="الكبوت (غطاء المحرك)" data-label-en="Hood" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Windshield -->
+                                <path d="M 252,133 L 348,133 L 342,160 L 258,160 Z" class="car-part" data-part="windshield" data-label-ar="الزجاج الأمامي" data-label-en="Windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Roof -->
+                                <rect x="256" y="163" width="88" height="70" rx="5" class="car-part" data-part="roof" data-label-ar="السقف" data-label-en="Roof" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Rear Windshield -->
+                                <path d="M 258,236 L 342,236 L 348,260 L 252,260 Z" class="car-part" data-part="rear_windshield" data-label-ar="الزجاج الخلفي" data-label-en="Rear Windshield" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Trunk / Tailgate -->
+                                <path d="M 250,263 L 350,263 L 355,310 L 245,310 Z" class="car-part" data-part="trunk" data-label-ar="الشنطة" data-label-en="Trunk" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Rear Bumper -->
+                                <path d="M 240,313 C 270,318 330,318 360,313 L 360,325 C 330,322 270,322 240,325 Z" class="car-part" data-part="rear_bumper" data-label-ar="صدام خلفي" data-label-en="Rear Bumper" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                
+                                <!-- Left Front Fender -->
+                                <path d="M 200,65 Q 235,68 238,100 L 238,125 L 205,125 Z" class="car-part" data-part="left_fender_front" data-label-ar="رفرف أمامي أيسر" data-label-en="Left Front Fender" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Left Front Door -->
+                                <rect x="205" y="128" width="46" height="50" class="car-part" data-part="left_door_front" data-label-ar="باب أمامي أيسر" data-label-en="Left Front Door" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Left Rear Door -->
+                                <rect x="205" y="181" width="46" height="50" class="car-part" data-part="left_door_rear" data-label-ar="باب خلفي أيسر" data-label-en="Left Rear Door" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Left Rear Fender -->
+                                <path d="M 205,234 L 238,234 L 238,270 Q 235,302 200,305 Z" class="car-part" data-part="left_fender_rear" data-label-ar="رفرف خلفي أيسر" data-label-en="Left Rear Fender" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                
+                                <!-- Right Front Fender -->
+                                <path d="M 400,65 Q 365,68 362,100 L 362,125 L 395,125 Z" class="car-part" data-part="right_fender_front" data-label-ar="رفرف أمامي أيمن" data-label-en="Right Front Fender" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Right Front Door -->
+                                <rect x="349" y="128" width="46" height="50" class="car-part" data-part="right_door_front" data-label-ar="باب أمامي أيمن" data-label-en="Right Front Door" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Right Rear Door -->
+                                <rect x="349" y="181" width="46" height="50" class="car-part" data-part="right_door_rear" data-label-ar="باب خلفي أيمن" data-label-en="Right Rear Door" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                <!-- Right Rear Fender -->
+                                <path d="M 395,234 L 362,234 L 362,270 Q 365,302 400,305 Z" class="car-part" data-part="right_fender_rear" data-label-ar="رفرف خلفي أيمن" data-label-en="Right Rear Fender" fill="rgba(0,0,0,0.02)" stroke="#94a3b8" stroke-width="1.5" />
+                                
+                                <!-- Wheels -->
+                                <rect x="180" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="400" y="85" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="180" y="245" width="20" height="35" rx="5" fill="#334155" />
+                                <rect x="400" y="245" width="20" height="35" rx="5" fill="#334155" />
+                            </svg>
+                        </div>
+                        
+                        <!-- Side Controls Column -->
+                        <div class="col-md-5">
+                            <div class="p-3 border rounded" style="background: var(--bg-card-solid); border-color: var(--border);">
+                                <h6 class="mb-3" style="font-weight:700; color: var(--text);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-primary me-1"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                    {{ __('Add wear / damage details') }}
+                                </h6>
+                                
+                                <div id="selectedPartAlert" class="alert alert-secondary py-2 px-3 mb-3" style="font-size:0.85rem; font-weight:600; border-radius:10px;">
+                                    {{ __('Selected part:') }} <span id="selectedPartLabel" class="text-primary">{{ __('None') }}</span>
+                                </div>
+                                
+                                <input type="hidden" id="activePartId" value="">
+                                
+                                <div class="form-group mb-3">
+                                    <label class="form-label" style="font-size:0.85rem;">{{ __('Damage / Defect Type') }}</label>
+                                    <select id="damageTypeSelect" class="form-select" disabled>
+                                        <option value="">-- {{ __('Select Type') }} --</option>
+                                        <option value="scratch">{{ __('Scratch / Superficial Wear') }} ({{ __('Orange') }})</option>
+                                        <option value="dent">{{ __('Dent / Body Damage') }} ({{ __('Red') }})</option>
+                                        <option value="repainted">{{ __('Repainted panel') }} ({{ __('Green') }})</option>
+                                        <option value="broken">{{ __('Broken / Cracked') }} ({{ __('Purple') }})</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label class="form-label" style="font-size:0.85rem;">{{ __('Notes (Optional)') }}</label>
+                                    <textarea id="damageNoteText" class="form-control" rows="2" placeholder="{{ __('E.g. Minor scratch 5cm') }}" disabled></textarea>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="button" id="btnAddDamage" class="btn btn-primary btn-sm flex-grow-1 py-2 rounded-pill" style="font-weight:700;" disabled>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+                                        {{ __('Apply') }}
+                                    </button>
+                                    <button type="button" id="btnDeleteDamage" class="btn btn-danger btn-sm py-2 px-3 rounded-pill" style="font-weight:700; display:none;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- List of issues -->
+                            <div class="mt-4">
+                                <h6 style="font-weight:700; font-size:0.9rem; color: var(--text-secondary);" class="mb-3">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    {{ __('Plotted Issues List') }}
+                                </h6>
+                                <div class="table-responsive" style="max-height:180px; overflow-y:auto; border: 1px solid var(--border); border-radius:8px;">
+                                    <table class="table table-sm table-hover mb-0" style="font-size:0.8rem; vertical-align: middle;">
+                                        <thead class="table-dark" style="position: sticky; top:0;">
+                                            <tr>
+                                                <th>{{ __('Part') }}</th>
+                                                <th>{{ __('Type') }}</th>
+                                                <th>{{ __('Action') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="damageTableBody">
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-3">{{ __('No issues added yet.') }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="damage_points" id="damagePointsInput" value="{{ old('damage_points') }}">
             </div>
             
         </div>
@@ -594,6 +769,266 @@
                 btn.prop('disabled', false).html(originalHtml);
             }
         });
+
+        // VIN Decoder API Integration
+        $('#btnDecodeVin').click(function() {
+            var vin = $('input[name="vin_number"]').val();
+            if (!vin || vin.trim() === '') {
+                toastr.warning('{{ __("Please enter a VIN number first") }}');
+                return;
+            }
+
+            var btn = $(this);
+            var originalHtml = btn.html();
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+            toastr.info('{{ __("Decoding VIN...") }}');
+
+            $.ajax({
+                url: '{{ route("admin.vehicles.decode-vin") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    vin: vin
+                },
+                success: function(response) {
+                    toastr.clear();
+                    if (response.success && response.data) {
+                        var data = response.data;
+                        if (data.make) $('input[name="make"]').val(data.make);
+                        if (data.model) $('input[name="model"]').val(data.model);
+                        if (data.year) $('input[name="year"]').val(data.year);
+                        if (data.engine_capacity) $('input[name="engine_capacity"]').val(data.engine_capacity);
+                        if (data.country_of_origin) $('input[name="country_of_origin"]').val(data.country_of_origin);
+                        
+                        if (data.fuel_type) {
+                            var fuel = data.fuel_type.toLowerCase();
+                            var fuelValue = '';
+                            if (fuel.includes('petrol') || fuel.includes('gasoline')) {
+                                fuelValue = 'petrol';
+                            } else if (fuel.includes('diesel')) {
+                                fuelValue = 'diesel';
+                            } else if (fuel.includes('electric')) {
+                                fuelValue = 'electric';
+                            } else if (fuel.includes('hybrid')) {
+                                fuelValue = 'hybrid';
+                            }
+                            if (fuelValue) {
+                                $('select[name="fuel_type"]').val(fuelValue);
+                            }
+                        }
+
+                        if (data.transmission) {
+                            var trans = data.transmission.toLowerCase();
+                            var transValue = '';
+                            if (trans.includes('manual')) {
+                                transValue = 'manual';
+                            } else {
+                                transValue = 'automatic'; // standard fallback
+                            }
+                            $('select[name="transmission"]').val(transValue);
+                        }
+
+                        toastr.success('{{ __("VIN decoded successfully and fields populated!") }}');
+                    } else {
+                        toastr.error('{{ __("Could not decode VIN. Please enter data manually.") }}');
+                    }
+                },
+                error: function(xhr) {
+                    toastr.clear();
+                    var msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : '{{ __("Error decoding VIN.") }}';
+                    toastr.error(msg);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+        });
+
+        // Interactive Wear & Damage Plotter logic
+        let damagePoints = {};
+        
+        try {
+            let initialVal = $('#damagePointsInput').val();
+            if (initialVal) {
+                let parsed = JSON.parse(initialVal);
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(p => {
+                        if (p.part) damagePoints[p.part] = p;
+                    });
+                } else {
+                    damagePoints = parsed;
+                }
+            }
+        } catch (e) {
+            console.error("Error parsing initial damage points", e);
+            damagePoints = {};
+        }
+
+        function colorizeDiagram() {
+            $('.car-diagram-svg .car-part').each(function() {
+                let partId = $(this).data('part');
+                $(this).removeClass('damage-scratch damage-dent damage-repainted damage-broken');
+                if (damagePoints[partId]) {
+                    let type = damagePoints[partId].type;
+                    $(this).addClass('damage-' + type);
+                }
+            });
+        }
+        
+        colorizeDiagram();
+        renderDamageTable();
+
+        // Diagram Part Click Listener
+        $('.car-diagram-svg .car-part').click(function() {
+            let partId = $(this).data('part');
+            let labelAr = $(this).data('label-ar');
+            let labelEn = $(this).data('label-en');
+            let currentLang = '{{ app()->getLocale() }}';
+            let label = currentLang === 'ar' ? labelAr : labelEn;
+
+            $('.car-diagram-svg .car-part').css('stroke-width', '1.5');
+            $(this).css('stroke-width', '3');
+
+            $('#activePartId').val(partId);
+            $('#selectedPartLabel').text(label);
+            $('#selectedPartAlert').removeClass('alert-secondary alert-warning').addClass('alert-warning');
+
+            // Enable Controls
+            $('#damageTypeSelect').prop('disabled', false);
+            $('#damageNoteText').prop('disabled', false);
+            $('#btnAddDamage').prop('disabled', false);
+
+            if (damagePoints[partId]) {
+                $('#damageTypeSelect').val(damagePoints[partId].type);
+                $('#damageNoteText').val(damagePoints[partId].note || '');
+                $('#btnDeleteDamage').show();
+                $('#btnAddDamage').html('<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> {{ __("Update") }}');
+            } else {
+                $('#damageTypeSelect').val('');
+                $('#damageNoteText').val('');
+                $('#btnDeleteDamage').hide();
+                $('#btnAddDamage').html('<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> {{ __("Apply") }}');
+            }
+        });
+
+        // Add/Update Button Click Listener
+        $('#btnAddDamage').click(function() {
+            let partId = $('#activePartId').val();
+            let type = $('#damageTypeSelect').val();
+            let note = $('#damageNoteText').val();
+
+            if (!partId) return;
+            if (!type) {
+                toastr.warning('{{ __("Please select a damage type.") }}');
+                return;
+            }
+
+            let pathEl = $('.car-diagram-svg .car-part[data-part="' + partId + '"]');
+            let labelAr = pathEl.data('label-ar');
+            let labelEn = pathEl.data('label-en');
+
+            damagePoints[partId] = {
+                part: partId,
+                label_ar: labelAr,
+                label_en: labelEn,
+                type: type,
+                note: note
+            };
+
+            colorizeDiagram();
+            saveAndRefresh();
+            resetControls();
+            toastr.success('{{ __("Wear details added successfully.") }}');
+        });
+
+        // Delete Button Click Listener
+        $('#btnDeleteDamage').click(function() {
+            let partId = $('#activePartId').val();
+            if (!partId) return;
+
+            delete damagePoints[partId];
+            
+            colorizeDiagram();
+            saveAndRefresh();
+            resetControls();
+            toastr.info('{{ __("Wear details removed.") }}');
+        });
+
+        // Delete from table
+        $(document).on('click', '.delete-damage-row', function() {
+            let partId = $(this).data('part-id');
+            if (partId && damagePoints[partId]) {
+                delete damagePoints[partId];
+                colorizeDiagram();
+                saveAndRefresh();
+                resetControls();
+                toastr.info('{{ __("Wear details removed.") }}');
+            }
+        });
+
+        function saveAndRefresh() {
+            let arr = Object.values(damagePoints);
+            $('#damagePointsInput').val(JSON.stringify(arr));
+            renderDamageTable();
+        }
+
+        function resetControls() {
+            $('#activePartId').val('');
+            $('#selectedPartLabel').text('{{ __("None") }}');
+            $('#selectedPartAlert').removeClass('alert-warning').addClass('alert-secondary');
+            $('#damageTypeSelect').val('').prop('disabled', true);
+            $('#damageNoteText').val('').prop('disabled', true);
+            $('#btnAddDamage').prop('disabled', true).html('<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> {{ __("Apply") }}');
+            $('#btnDeleteDamage').hide();
+            $('.car-diagram-svg .car-part').css('stroke-width', '1.5');
+        }
+
+        function renderDamageTable() {
+            let tbody = $('#damageTableBody');
+            tbody.empty();
+
+            let arr = Object.values(damagePoints);
+            if (arr.length === 0) {
+                tbody.append('<tr><td colspan="3" class="text-center text-muted py-3">{{ __("No issues added yet.") }}</td></tr>');
+                return;
+            }
+
+            let typeLabels = {
+                scratch: '{{ __("Scratch") }}',
+                dent: '{{ __("Dent") }}',
+                repainted: '{{ __("Repainted") }}',
+                broken: '{{ __("Broken") }}'
+            };
+
+            let badgeColors = {
+                scratch: 'warning',
+                dent: 'danger',
+                repainted: 'success',
+                broken: 'purple'
+            };
+
+            let currentLang = '{{ app()->getLocale() }}';
+
+            arr.forEach(p => {
+                let label = currentLang === 'ar' ? p.label_ar : p.label_en;
+                let badgeColor = badgeColors[p.type] || 'secondary';
+                let typeText = typeLabels[p.type] || p.type;
+                let noteHtml = p.note ? `<br><small class="text-muted">${p.note}</small>` : '';
+
+                tbody.append(`
+                    <tr>
+                        <td><strong>${label}</strong>${noteHtml}</td>
+                        <td><span class="badge bg-${badgeColor}" style="${p.type === 'broken' ? 'background-color:#a855f7 !important;' : ''}">${typeText}</span></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 delete-damage-row" data-part-id="${p.part}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
     });
 
     // Multiple Images Preview Handler

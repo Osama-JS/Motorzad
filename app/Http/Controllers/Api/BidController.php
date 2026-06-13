@@ -23,6 +23,27 @@ class BidController extends Controller
 
         // ── Validations ────────────────────────────────────────────────────
 
+        // 0. Must not be paused
+        if ($auction->is_paused) {
+            return response()->json([
+                'success' => false,
+                'message' => __('This auction is currently paused by admin.'),
+            ], 422);
+        }
+
+        // 0.5 Must not be blocked from this auction
+        $isBlocked = \Illuminate\Support\Facades\DB::table('auction_blocklists')
+            ->where('auction_id', $auction->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($isBlocked) {
+            return response()->json([
+                'success' => false,
+                'message' => __('You have been blocked from participating in this auction.'),
+            ], 403);
+        }
+
         // 1. Must be live
         if ($auction->status !== 'live') {
             return response()->json([
@@ -197,10 +218,13 @@ class BidController extends Controller
      */
     protected function handleAutoExtend(Auction $auction): void
     {
-        $extendThreshold = now()->subMinutes($auction->auto_extend_minutes);
-        if ($auction->end_time->lessThanOrEqualTo(now()->addMinutes($auction->auto_extend_minutes))) {
+        $extendMinutes = $auction->auto_extend_minutes ?? 2;
+        if ($extendMinutes <= 0) {
+            return;
+        }
+        if ($auction->end_time->lessThanOrEqualTo(now()->addMinutes($extendMinutes))) {
             $auction->update([
-                'end_time' => now()->addMinutes($auction->auto_extend_minutes),
+                'end_time' => now()->addMinutes($extendMinutes),
             ]);
         }
     }
