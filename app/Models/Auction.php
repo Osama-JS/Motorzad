@@ -61,6 +61,16 @@ class Auction extends Model
         return $this->hasMany(Bid::class)->latest();
     }
 
+    public function images()
+    {
+        return $this->hasMany(AuctionImage::class)->orderBy('sort_order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(AuctionImage::class)->where('is_primary', true);
+    }
+
     public function highestBid()
     {
         return $this->hasOne(Bid::class)->ofMany('amount', 'max')->where('status', 'active');
@@ -81,6 +91,22 @@ class Auction extends Model
     public function getTitleAttribute(): string
     {
         return app()->getLocale() === 'ar' ? $this->title_ar : $this->title_en;
+    }
+
+    public function getPrimaryImageUrlAttribute(): ?string
+    {
+        // Check new AuctionImage relationship first
+        $image = $this->primaryImage ?? $this->images->first();
+        if ($image) {
+            return asset('storage/' . $image->image_path);
+        }
+        
+        // Fallback to legacy single image column
+        if ($this->image) {
+            return asset('storage/' . $this->image);
+        }
+        
+        return null;
     }
 
     public function getLocationAttribute()

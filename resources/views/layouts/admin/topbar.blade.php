@@ -26,7 +26,7 @@
                 
                 {{-- Theme Toggle --}}
                 <div style="display:flex; align-items:center; gap:0.6rem;">
-                    <span class="theme-label" id="themeLabel">الوضع الليلي</span>
+                    <span class="theme-label" id="themeLabel">{{ __('Dark Mode') }}</span>
                     <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل المظهر">
                         <div class="theme-toggle-track">
                             {{-- Stars (visible in dark) --}}
@@ -57,6 +57,35 @@
                         </div>
                     </button>
                 </div>
+                
+                {{-- User Dropdown --}}
+                @auth
+                <div class="dropdown ms-2">
+                    <button class="btn btn-ghost dropdown-toggle d-flex align-items-center gap-2 border" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 20px; padding: 4px 12px 4px 4px; background: var(--bg-card); color: var(--text-color);">
+                        <img src="{{ auth()->user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="User" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
+                        <span class="fw-bold fs-6">{{ auth()->user()->name }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-2" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 200px; background: var(--bg-card); border-color: var(--border) !important;">
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-decoration-none" href="#" style="color: var(--text-color);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span class="ms-1">{{ __('View Profile') }}</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color: var(--border);"></li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item py-2 text-danger d-flex align-items-center gap-2">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                    <span class="ms-1">{{ __('Logout') }}</span>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                @endauth
+                
                 @yield('actions')
             </div>
         </div>

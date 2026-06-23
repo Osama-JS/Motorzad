@@ -29,40 +29,76 @@ class AuctionController extends Controller
 
     public function getData(Request $request)
     {
-        $auctions = Auction::with(['vehicle', 'creator', 'winner'])->latest()->get();
+        $query = Auction::with(['vehicle', 'creator', 'winner'])->latest();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('title_ar', 'like', "%{$request->search}%")
+                  ->orWhere('title_en', 'like', "%{$request->search}%")
+                  ->orWhereHas('vehicle', function($vq) use ($request) {
+                      $vq->where('make', 'like', "%{$request->search}%")
+                         ->orWhere('model', 'like', "%{$request->search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $perPage = $request->per_page ?? 10;
+        $auctions = $query->paginate($perPage);
+
+        $data = [];
+        foreach ($auctions as $auction) {
+            $statusBadge = match($auction->status) {
+                'live' => '<span class="badge bg-success text-white px-3 py-2 rounded-pill"><i class="fa-solid fa-circle me-1" style="font-size:0.5rem;"></i> '.__('Live').'</span>',
+                'scheduled' => '<span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="fa-solid fa-clock me-1" style="font-size:0.8rem;"></i> '.__('Scheduled').'</span>',
+                'completed', 'sold', 'ended' => '<span class="badge bg-primary text-white px-3 py-2 rounded-pill"><i class="fa-solid fa-check-circle me-1" style="font-size:0.8rem;"></i> '.__('Completed').'</span>',
+                'cancelled' => '<span class="badge bg-danger text-white px-3 py-2 rounded-pill"><i class="fa-solid fa-times-circle me-1" style="font-size:0.8rem;"></i> '.__('Cancelled').'</span>',
+                default => '<span class="badge bg-secondary text-white px-3 py-2 rounded-pill"><i class="fa-solid fa-circle me-1" style="font-size:0.5rem;"></i> '.__($auction->status).'</span>',
+            };
+
+            $imageUrl = $auction->image ? asset('storage/' . $auction->image) : ($auction->vehicle && $auction->vehicle->primary_image_url ? $auction->vehicle->primary_image_url : null);
+            $imageHtml = $imageUrl 
+                            ? '<img src="' . $imageUrl . '" width="60" style="border-radius:12px; object-fit:cover; height:60px; box-shadow:0 2px 5px rgba(0,0,0,0.1);" alt="">' 
+                            : '<div style="width:60px;height:60px;background:#f8f9fa;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#adb5bd;font-size:24px;"><i class="fa-solid fa-car"></i></div>';
+
+            $actions = '<div class="dropdown action-dropdown">
+                <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
+                    <li><a class="dropdown-item text-info" href="' . route('admin.auctions.show', $auction->id) . '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>' . __('View') . '</a></li>
+                    <li><a class="dropdown-item text-primary" href="' . route('admin.auctions.edit', $auction->id) . '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>' . __('Edit') . '</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteAuction(' . $auction->id . ')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' . __('Delete') . '</a></li>
+                </ul>
+            </div>';
+
+            $data[] = [
+                'id' => $auction->id,
+                'image' => $imageHtml,
+                'image_url' => $imageUrl,
+                'title' => '<strong>' . $auction->title . '</strong>',
+                'raw_title' => $auction->title,
+                'vehicle' => $auction->vehicle ? $auction->vehicle->title : 'N/A',
+                'start_price' => '<span class="fw-bold text-success">' . number_format($auction->start_price, 2) . '</span>',
+                'status' => $statusBadge,
+                'start_time' => $auction->start_time ? '<span dir="ltr" class="text-muted"><i class="fa-regular fa-calendar-alt me-1"></i> ' . $auction->start_time->format('Y-m-d H:i') . '</span>' : '-',
+                'end_time' => $auction->end_time ? '<span dir="ltr" class="text-muted"><i class="fa-regular fa-calendar-check me-1"></i> ' . $auction->end_time->format('Y-m-d H:i') . '</span>' : '-',
+                'actions' => $actions
+            ];
+        }
 
         return response()->json([
-            'data' => $auctions->map(function($auction) {
-                $statusBadge = match($auction->status) {
-                    'live' => '<span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Live').'</span>',
-                    'scheduled' => '<span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Scheduled').'</span>',
-                    'completed', 'sold', 'ended' => '<span class="status-indicator status-completed" style="background:#e0f2fe; color:#0369a1; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Completed').'</span>',
-                    'cancelled' => '<span class="status-indicator status-cancelled" style="background:#fee2e2; color:#b91c1c; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__('Cancelled').'</span>',
-                    default => '<span class="status-indicator status-draft" style="background:#f1f5f9; color:#475569; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> '.__($auction->status).'</span>',
-                };
-
-                $imageUrl = $auction->image ? asset('storage/' . $auction->image) : ($auction->vehicle && $auction->vehicle->primary_image_url ? $auction->vehicle->primary_image_url : null);
-                $imageHtml = $imageUrl 
-                                ? '<img src="' . $imageUrl . '" width="50" style="border-radius:8px; object-fit:cover; height:50px;" alt="">' 
-                                : '<div style="width:50px;height:50px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;">' . __('No Image') . '</div>';
-
-                return [
-                    'id' => $auction->id,
-                    'image' => $imageHtml,
-                    'title' => '<strong>' . $auction->title . '</strong>',
-                    'vehicle' => $auction->vehicle ? $auction->vehicle->title : 'N/A',
-                    'start_price' => number_format($auction->start_price, 2),
-                    'status' => $statusBadge,
-                    'start_time' => $auction->start_time ? $auction->start_time->format('Y-m-d H:i') : '-',
-                    'end_time' => $auction->end_time ? $auction->end_time->format('Y-m-d H:i') : '-',
-                    'actions' => '
-                        <div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">
-                            <a href="' . route('admin.auctions.show', $auction->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i> ' . __('View') . '</a>
-                            <a href="' . route('admin.auctions.edit', $auction->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i> ' . __('Edit') . '</a>
-                            <button onclick="deleteAuction(' . $auction->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i> ' . __('Delete') . '</button>
-                        </div>'
-                ];
-            })
+            'success' => true,
+            'data' => $data,
+            'pagination' => [
+                'total' => $auctions->total(),
+                'current_page' => $auctions->currentPage(),
+                'links' => $auctions->linkCollection()->toArray()
+            ]
         ]);
     }
 
@@ -106,20 +142,28 @@ class AuctionController extends Controller
             'location_en' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
             'is_featured' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
         $validated['deposit_required'] = $request->has('deposit_required');
         $validated['is_featured'] = $request->has('is_featured');
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('auctions', 'public');
-        }
-
         $validated['created_by'] = auth()->id();
 
-        Auction::create($validated);
+        $auction = Auction::create($validated);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $imageFile) {
+                $path = $imageFile->store('auctions', 'public');
+                $auction->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => $index === 0, // First uploaded image is primary
+                    'sort_order' => $index
+                ]);
+            }
+        }
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -150,22 +194,45 @@ class AuctionController extends Controller
             'location_en' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
             'is_featured' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'deleted_images' => 'nullable|array',
+            'deleted_images.*' => 'exists:auction_images,id',
             'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
         $validated['deposit_required'] = $request->has('deposit_required');
         $validated['is_featured'] = $request->has('is_featured');
 
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($auction->image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($auction->image);
+        $auction->update($validated);
+
+        // Handle deleted images
+        if ($request->filled('deleted_images')) {
+            $imagesToDelete = $auction->images()->whereIn('id', $request->deleted_images)->get();
+            foreach ($imagesToDelete as $img) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($img->image_path);
+                $img->delete();
             }
-            $validated['image'] = $request->file('image')->store('auctions', 'public');
         }
 
-        $auction->update($validated);
+        // Handle new images
+        if ($request->hasFile('images')) {
+            $existingCount = $auction->images()->count();
+            foreach ($request->file('images') as $index => $imageFile) {
+                $path = $imageFile->store('auctions', 'public');
+                $auction->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => ($existingCount === 0 && $index === 0),
+                    'sort_order' => $existingCount + $index
+                ]);
+            }
+            
+            // Ensure there is at least one primary image if any images exist
+            if (!$auction->primaryImage && $auction->images()->count() > 0) {
+                $firstImage = $auction->images()->first();
+                $firstImage->update(['is_primary' => true]);
+            }
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

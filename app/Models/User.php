@@ -133,4 +133,15 @@ class User extends Authenticatable implements MustVerifyEmail
             'date_of_birth' => 'date',
         ];
     }
+
+    /**
+     * Route notifications for the FCM channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string|null
+     */
+    public function routeNotificationForFcm($notification)
+    {
+        return $this->fcm_token;
+    }
 }

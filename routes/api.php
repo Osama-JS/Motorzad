@@ -45,11 +45,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // KYC
     Route::prefix('kyc')->group(function () {
-        Route::get('/', [KycController::class, 'show']);
-        Route::post('/', [KycController::class, 'store']);
-        Route::get('status', [\App\Http\Controllers\Api\KycApiController::class, 'status']);
-        Route::post('submit', [\App\Http\Controllers\Api\KycApiController::class, 'submit']);
-        Route::get('history', [\App\Http\Controllers\Api\KycApiController::class, 'history']);
+        Route::get('/',    [KycController::class, 'show']);
+        Route::post('/',   [KycController::class, 'store']);
+    });
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::post('/fcm-token', [\App\Http\Controllers\Api\NotificationController::class, 'updateFcmToken']);
+        Route::post('/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+        Route::post('/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
     });
 
 

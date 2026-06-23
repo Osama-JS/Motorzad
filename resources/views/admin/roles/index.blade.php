@@ -1,95 +1,231 @@
 @extends('layouts.admin')
 
-@section('title', 'الأدوار')
+@section('title', __('Roles Management'))
+
+@section('css')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
+@endsection
 
 @section('content')
+<div id="page-loader"><div class="spinner"></div></div>
 <div class="page-header">
     <div>
         <h1>{{ __('Roles Management') }}</h1>
         <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Roles') }}</div>
     </div>
-    <a href="{{ route('admin.roles.create') }}" class="btn btn-primary">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         {{ __('Add New Role') }}
-    </a>
+    </button>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card gold">
-        <div class="stat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+<div class="row mb-4 g-3">
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-card gold h-100 stat-card-compact shadow-sm border-0">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size: 1.25rem !important;">{{ $rolesCount }}</div>
+                <div class="stat-label" style="font-size: 0.75rem !important;">{{ __('All Roles') }}</div>
+            </div>
         </div>
-        <div class="stat-value">{{ $roles->count() }}</div>
-        <div class="stat-label">{{ __('All Roles') }}</div>
     </div>
-    <div class="stat-card blue">
-        <div class="stat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-card blue h-100 stat-card-compact shadow-sm border-0">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size: 1.25rem !important;">{{ $totalUsers }}</div>
+                <div class="stat-label" style="font-size: 0.75rem !important;">{{ __('Total Users') }}</div>
+            </div>
         </div>
-        <div class="stat-value">{{ $roles->sum(function($role) { return $role->users->count(); }) }}</div>
-        <div class="stat-label">{{ __('Number of Users') }}</div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h2>{{ __('All Roles') }}</h2>
-        <span class="badge badge-info">{{ $roles->count() }} {{ __('Role') }}</span>
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search Roles...') }}">
+                </div>
+            </div>
+            <div class="col-md-8 text-end">
+                <button type="button" class="btn btn-secondary" onclick="fetchRoles(1)">
+                    {{ __('Filter') }}
+                </button>
+            </div>
+        </div>
     </div>
+</div>
+
+<div class="view-toolbar">
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">{{ __('Show:') }}</span>
+            <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchRoles(1)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="table-view-container" class="card shadow-sm border-0">
     <div class="table-responsive">
-        <table class="table table-striped w-100">
-            <thead>
+        <table class="table table-hover table-striped align-middle mb-0 w-100" id="roles-custom-table">
+            <thead class="table-light">
                 <tr>
-                    <th>{{ __('Role Name') }}</th>
-
-                    <th>{{ __('Permissions') }}</th>
-                    <th>{{ __('Number of Users') }}</th>
-                    <th>{{ __('Actions') }}</th>
+                    <th class="border-bottom-0">{{ __('Role Name') }}</th>
+                    <th class="border-bottom-0">{{ __('Permissions') }}</th>
+                    <th class="border-bottom-0">{{ __('Number of Users') }}</th>
+                    <th class="border-bottom-0 text-center" style="width: 100px;">{{ __('Actions') }}</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($roles as $role)
-                <tr>
-                    <td style="font-weight:700;">{{ $role->name }}</td>
-
-                    <td>
-                        <div style="display:flex; flex-wrap:wrap; gap:0.3rem;">
-                            @foreach($role->permissions->take(3) as $perm)
-                                <span class="badge badge-primary">{{ $perm->name }}</span>
-                            @endforeach
-                            @if($role->permissions->count() > 3)
-                                <span class="badge" style="background:rgba(100,116,139,0.1); color:var(--text-muted);">+{{ $role->permissions->count() - 3 }}</span>
-                            @endif
-                        </div>
-                    </td>
-                    <td><span style="color:var(--text-secondary);">{{ $role->users->count() }}</span></td>
-                    <td>
-                        <div class="actions-cell">
-                            <a href="{{ route('admin.roles.edit', $role) }}" class="btn-icon-only edit" title="{{ __('Edit') }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </a>
-                            <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this role?') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-icon-only delete" title="{{ __('Delete') }}">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4">
-                        <div class="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <p>{{ __('No roles defined. Create the first role now.') }}</p>
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
+            <tbody id="custom-roles-tbody">
+                <!-- Data injected via AJAX -->
             </tbody>
         </table>
     </div>
 </div>
+
+<div class="card shadow-sm border-0 mt-3">
+    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+        <!-- Pagination controls will be injected here -->
+    </div>
+</div>
+
+@endsection
+
+@section('modals')
+<!-- Add Role Modal -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg); background: var(--bg-card);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addRoleModalLabel">{{ __('Add New Role') }}</h5>
+                <button type="button" class="btn btn-sm btn-light border-0 shadow-none d-flex align-items-center justify-content-center" data-bs-dismiss="modal" aria-label="Close" style="width:32px; height:32px; border-radius:50%; padding:0; background:transparent;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body p-4 pt-2">
+                <form id="addRoleForm">
+                    <div class="row g-3">
+                        <div class="col-md-12 form-group">
+                            <label>{{ __('Role Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" required style="background: var(--bg-input); color: var(--text-color); border: 1px solid var(--border);">
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>{{ __('Permissions') }} <span class="text-danger">*</span></label>
+                            <div class="checkbox-grid mt-2">
+                                @foreach($permissions as $permission)
+                                    <label class="checkbox-item m-0">
+                                        <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" class="form-check-input mt-0">
+                                        <span class="ms-2" style="font-size: 0.9rem;">{{ $permission->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary px-4">{{ __('Save') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Role Modal -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg); background: var(--bg-card);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="editRoleModalLabel">{{ __('Edit Role') }}</h5>
+                <button type="button" class="btn btn-sm btn-light border-0 shadow-none d-flex align-items-center justify-content-center" data-bs-dismiss="modal" aria-label="Close" style="width:32px; height:32px; border-radius:50%; padding:0; background:transparent;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body p-4 pt-2">
+                <form id="editRoleForm">
+                    <input type="hidden" id="edit_role_id" name="id">
+                    <div class="row g-3">
+                        <div class="col-md-12 form-group">
+                            <label>{{ __('Role Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" id="edit_name" name="name" class="form-control" required style="background: var(--bg-input); color: var(--text-color); border: 1px solid var(--border);">
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>{{ __('Permissions') }} <span class="text-danger">*</span></label>
+                            <div class="checkbox-grid mt-2">
+                                @foreach($permissions as $permission)
+                                    <label class="checkbox-item m-0">
+                                        <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" class="form-check-input mt-0 edit-perm-checkbox" id="edit_perm_{{ $permission->id }}">
+                                        <span class="ms-2" style="font-size: 0.9rem;">{{ $permission->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary px-4">{{ __('Save Changes') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    window.RoleConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.roles.data') }}",
+            update: "{{ route('admin.roles.update', ':id') }}",
+            show: "{{ route('admin.roles.show', ':id') }}",
+            store: "{{ route('admin.roles.store') }}",
+            destroy: "{{ route('admin.roles.destroy', ':id') }}"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading data.') }}",
+            noRecords: "{{ __('No matching records found') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            unexpectedError: "{{ __('Unexpected error occurred.') }}",
+            deleteRole: "{{ __('Delete Role?') }}",
+            deleteDesc: "{{ __('This action cannot be undone!') }}",
+            yesDelete: "{{ __('Yes, delete it!') }}",
+            cancel: "{{ __('Cancel') }}"
+        }
+    };
+    
+    if (typeof window.WJHTAKAdmin === 'undefined') {
+        window.WJHTAKAdmin = {
+            btnLoading: function(btn, isLoading) {
+                if (!btn || !btn.length) return;
+                if (isLoading) {
+                    if(!btn.data('original-text')) btn.data('original-text', btn.html());
+                    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{{ __("Wait...") }}');
+                } else {
+                    btn.prop('disabled', false).html(btn.data('original-text'));
+                }
+            }
+        };
+    }
+</script>
+
+<script src="{{ asset('js/admin/roles.js') }}"></script>
 @endsection

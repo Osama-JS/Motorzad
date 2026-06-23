@@ -4,6 +4,38 @@
 <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/toastr/toastr.min.js') }}"></script>
+<script>
+    if (window.toastr) {
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+        
+        // Override error method to prevent auto close
+        var originalError = toastr.error;
+        toastr.error = function(message, title, optionsOverride) {
+            var options = $.extend({}, toastr.options, {
+                timeOut: 0,
+                extendedTimeOut: 0,
+                closeButton: true
+            }, optionsOverride);
+            return originalError(message, title, options);
+        };
+    }
+</script>
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script>
     (function() {
@@ -110,6 +142,7 @@
             const fromLang = btn.data('from-lang') || 'ar';
             const toLang = btn.data('to-lang') || 'en';
             const isEditor = btn.data('type') === 'editor';
+            const isSummernote = $(fromSelector).next().hasClass('note-editor');
             
             let sourceText = '';
             if (isEditor) {
@@ -117,6 +150,8 @@
                 if (editorInstance) {
                     sourceText = editorInstance.getData();
                 }
+            } else if (isSummernote) {
+                sourceText = $(fromSelector).summernote('code');
             } else {
                 sourceText = $(fromSelector).val();
             }
@@ -141,6 +176,10 @@
                     if (targetEditorInstance) {
                         targetEditorInstance.setData(translated);
                     }
+                } else if (isSummernote) {
+                    translated = await translateHtml(sourceText, fromLang, toLang);
+                    $(toSelector).summernote('code', translated);
+                    $(toSelector).val(translated);
                 } else {
                     translated = await translateText(sourceText, fromLang, toLang);
                     $(toSelector).val(translated);

@@ -53,6 +53,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('pages/data', [\App\Http\Controllers\Admin\PageController::class, 'getData'])->name('pages.data');
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+    Route::get('roles/data', [\App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles.data');
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
     Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
     Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
@@ -95,6 +96,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('deposits', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.index');
     Route::get('deposits/{deposit}', [\App\Http\Controllers\Admin\DepositController::class, 'show'])->name('deposits.show');
     Route::post('deposits/{deposit}/process', [\App\Http\Controllers\Admin\DepositController::class, 'process'])->name('deposits.process');
+
+    // Notifications Management
+    Route::get('notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('notifications/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('notifications.send');
+    Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.mark_read');
+    Route::get('notifications/latest-unread', [\App\Http\Controllers\Admin\NotificationController::class, 'getLatestUnread'])->name('notifications.latest_unread');
 
     // Auctions Management
     Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
@@ -144,5 +151,13 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
 Route::get('/resources', function () {
     return view('resources');
 })->name('resources');
+
+Route::get('/page/{slug}', function ($slug) {
+    $page = \App\Models\Page::where('slug', $slug)->firstOrFail();
+    if (!$page->is_active && (!auth()->check() || !auth()->user()->hasRole('admin'))) {
+        abort(404);
+    }
+    return view('page', compact('page'));
+})->name('page.show');
 
 require __DIR__.'/auth.php';
