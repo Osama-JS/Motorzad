@@ -3,6 +3,7 @@
 @section('title', 'إدارة الاسئلة الشائعة')
 
 @section('css')
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     .dataTables_wrapper { padding: 1rem; color: var(--text-color); }
     .table td { vertical-align: middle; }
@@ -19,6 +20,70 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         {{ __('Add New FAQ') }}
     </button>
+</div>
+
+<div class="row mb-4 g-3">
+    <!-- Total FAQs -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card blue h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['total'] }}</div>
+                <div class="stat-label">{{ __('Total FAQs') }}</div>
+            </div>
+        </div>
+    </div>
+    <!-- Active FAQs -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card green h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['active'] }}</div>
+                <div class="stat-label">{{ __('Active FAQs') }}</div>
+            </div>
+        </div>
+    </div>
+    <!-- Inactive FAQs -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card red h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['inactive'] }}</div>
+                <div class="stat-label">{{ __('Inactive FAQs') }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search FAQs...') }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="filter_status" class="form-select select2-init">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    <option value="active">{{ __('Active') }}</option>
+                    <option value="inactive">{{ __('Inactive') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                    {{ __('Filter') }}
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="card">
@@ -143,9 +208,19 @@
 @endsection
 
 @section('js')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+    let table;
     $(document).ready(function() {
-        var table = $('#faqs-table').DataTable({
+        // Initialize Select2 for filters
+        let dir = $('html').attr('dir') || 'rtl';
+        $('.select2-init').select2({
+            dir: dir,
+            minimumResultsForSearch: 10
+        });
+
+        table = $('#faqs-table').DataTable({
             processing: true,
             serverSide: false,
             ajax: "{{ route('admin.faqs.data') }}",
@@ -168,6 +243,43 @@
                     "sLast": "{{ __('Last') }}"
                 }
             }
+        });
+
+        // Custom search filter for FAQ active state checkboxes in the DOM
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                if (settings.nTable.id !== 'faqs-table') return true;
+                
+                let statusVal = $('#filter_status').val();
+                if (!statusVal) return true;
+                
+                let rowNode = table.row(dataIndex).node();
+                if (!rowNode) return true;
+                
+                let isChecked = $(rowNode).find('.form-check-input').is(':checked');
+                
+                if (statusVal === 'active' && isChecked) return true;
+                if (statusVal === 'inactive' && !isChecked) return true;
+                
+                return false;
+            }
+        );
+
+        // Bind filter search input
+        $('#filter_search').on('keyup keypress change', function() {
+            table.search(this.value).draw();
+        });
+
+        // Bind status filter dropdown
+        $('#filter_status').on('change', function() {
+            table.draw();
+        });
+
+        // Bind filter button
+        $('#btn-filter').on('click', function() {
+            let searchVal = $('#filter_search').val();
+            table.search(searchVal);
+            table.draw();
         });
     });
 

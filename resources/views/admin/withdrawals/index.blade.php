@@ -3,6 +3,7 @@
 @section('title', __('Withdrawal Requests'))
 
 @section('css')
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     .dataTables_wrapper { padding: 1rem; color: var(--text-color); }
     .table td { vertical-align: middle; }
@@ -29,55 +30,125 @@
 
 <div class="row mb-4">
     <div class="col-12 col-sm-6 col-lg-4 mb-3 mb-lg-0">
-        <div class="stat-card gold h-100">
+        <div class="stat-card gold h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <div class="stat-value">{{ $stats['total_pending'] }}</div>
-            <div class="stat-label">{{ __('Pending Requests') }}</div>
+            <div>
+                <div class="stat-value">{{ $stats['total_pending'] }}</div>
+                <div class="stat-label">{{ __('Pending Requests') }}</div>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-4 mb-3 mb-lg-0">
-        <div class="stat-card green h-100">
+        <div class="stat-card green h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="stat-value">{{ number_format($stats['total_approved'], 2) }}</div>
-            <div class="stat-label">{{ __('Total Approved Amount') }}</div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['total_approved'], 2) }}</div>
+                <div class="stat-label">{{ __('Total Approved Amount') }}</div>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-4">
-        <div class="stat-card blue h-100">
+        <div class="stat-card blue h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             </div>
-            <div class="stat-value">{{ $stats['total_requests'] }}</div>
-            <div class="stat-label">{{ __('Total Requests') }}</div>
+            <div>
+                <div class="stat-value">{{ $stats['total_requests'] }}</div>
+                <div class="stat-label">{{ __('Total Requests') }}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h2>{{ __('Withdrawals List') }}</h2>
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search by user, payment method...') }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="filter_status" class="form-select select2-init">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    <option value="pending">{{ __('Pending') }}</option>
+                    <option value="processing">{{ __('Processing') }}</option>
+                    <option value="approved">{{ __('Approved') }}</option>
+                    <option value="completed">{{ __('Completed') }}</option>
+                    <option value="rejected">{{ __('Rejected') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                    {{ __('Filter') }}
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="table-responsive">
-        <table id="withdrawals-table" class="table table-striped w-100">
-            <thead>
-                <tr>
-                    <th>{{ __('Request ID') }}</th>
-                    <th>{{ __('User') }}</th>
-                    <th>{{ __('Requested Amount') }}</th>
-                    <th>{{ __('Approved Amount') }}</th>
-                    <th>{{ __('Status') }}</th>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- DataTables will fill this -->
-            </tbody>
-        </table>
+</div>
+
+<div class="view-toolbar mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">{{ __('Show:') }}</span>
+            <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchWithdrawals(1)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
+</div>
+
+<div id="table-view-container" class="card shadow-sm border-0 mb-4">
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center bg-white">
+        <h6 class="mb-0">{{ __('Withdrawals List') }}</h6>
+    </div>
+    <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-3">
+            <table id="withdrawals-table" class="table align-items-center mb-0 w-100">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Request ID') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('User') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Requested Amount') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Approved Amount') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Status') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Date') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="custom-withdrawals-tbody">
+                    <tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Grid View Container -->
+<div id="grid-view-container" class="row g-3 d-none mb-4">
+    <div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</div>
+</div>
+
+<!-- Pagination Container -->
+<div class="card shadow-sm border-0 mt-3">
+    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+        <!-- Pagination controls will be injected here -->
     </div>
 </div>
 
@@ -157,147 +228,30 @@
 @endsection
 
 @section('js')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    let withdrawalsTable;
-    let currentWithdrawalId = null;
-
-    $(document).ready(function() {
-        withdrawalsTable = $('#withdrawals-table').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: "{{ route('admin.withdrawals.index') }}",
-            columns: [
-                { data: 'id' },
-                { 
-                    data: 'user',
-                    render: function(data) {
-                        return data ? `<strong>${data.name}</strong><br><small class="text-muted">${data.email}</small>` : '---';
-                    }
-                },
-                { 
-                    data: 'requested_amount',
-                    render: function(data) {
-                        return `<strong>${parseFloat(data).toFixed(2)}</strong>`;
-                    }
-                },
-                { 
-                    data: 'approved_amount',
-                    render: function(data) {
-                        return data ? parseFloat(data).toFixed(2) : '---';
-                    }
-                },
-                { 
-                    data: 'status',
-                    render: function(data) {
-                        const statusClasses = {
-                            'pending': 'status-pending',
-                            'processing': 'status-processing',
-                            'approved': 'status-approved',
-                            'completed': 'status-completed',
-                            'rejected': 'status-rejected'
-                        };
-                        const statusLabels = {
-                            'pending': '{{ __("Pending") }}',
-                            'processing': '{{ __("Processing") }}',
-                            'approved': '{{ __("Approved") }}',
-                            'completed': '{{ __("Completed") }}',
-                            'rejected': '{{ __("Rejected") }}'
-                        };
-                        return `<span class="status-badge ${statusClasses[data] || 'status-pending'}">${statusLabels[data] || data}</span>`;
-                    }
-                },
-                { 
-                    data: 'created_at',
-                    render: function(data) {
-                        return new Date(data).toLocaleDateString();
-                    }
-                },
-                { 
-                    data: 'id',
-                    render: function(data, type, row) {
-                        return `
-                            <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-white shadow-sm" onclick="openWithdrawalModal(${data})" title="{{ __('View Details') }}">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                <span>{{ __('View') }}</span>
-                            </button>
-                        `;
-                    }
-                }
-            ],
-            order: [[0, 'desc']],
-            language: {
-                "sProcessing": "{{ __('Loading...') }}",
-                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
-                "sZeroRecords": "{{ __('No matching records found') }}",
-                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
-                "sSearch": "{{ __('Search:') }}",
-                "oPaginate": {
-                    "sFirst": "{{ __('First') }}",
-                    "sPrevious": "{{ __('Previous') }}",
-                    "sNext": "{{ __('Next') }}",
-                    "sLast": "{{ __('Last') }}"
-                }
-            }
-        });
-
-        // Handle Form Submit
-        $('#withdrawalForm').on('submit', function(e) {
-            e.preventDefault();
-            if(!currentWithdrawalId) return;
-
-            const baseUrl = "{{ url('admin/wallets/withdrawals') }}";
-            
-            $.ajax({
-                url: `${baseUrl}/${currentWithdrawalId}/process`,
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        $('#withdrawalModal').modal('hide');
-                        withdrawalsTable.ajax.reload(null, false);
-                        Swal.fire("{{ __('Success') }}", response.message, 'success').then(() => {
-                            window.location.reload(); // Refresh to update top stats
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    let errorMessage = "{{ __('Operation failed') }}";
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
-                    Swal.fire("{{ __('Error') }}", errorMessage, 'error');
-                }
-            });
-        });
-    });
-
-    function openWithdrawalModal(id) {
-        currentWithdrawalId = id;
-        const baseUrl = "{{ url('admin/wallets/withdrawals') }}";
-        
-        // Reset Form
-        $('#withdrawalForm')[0].reset();
-        
-        // Fetch Details
-        $.get(`${baseUrl}/${id}/details`, function(response) {
-            if(response.data) {
-                const data = response.data;
-                
-                $('#view_user_name').text(data.user ? data.user.name : '---');
-                $('#view_requested_amount').text(parseFloat(data.requested_amount).toFixed(2));
-                $('#view_status').text(data.status);
-                $('#view_date').text(new Date(data.created_at).toLocaleString());
-                
-                $('#form_status').val(data.status);
-                $('#form_approved_amount').val(data.approved_amount || data.requested_amount);
-                $('#form_payment_method').val(data.payment_method || '');
-                $('#form_admin_notes').val(data.admin_notes || '');
-                
-                $('#withdrawalModal').modal('show');
-            }
-        }).fail(function() {
-            Swal.fire("{{ __('Error') }}", "{{ __('Could not load withdrawal details.') }}", 'error');
-        });
-    }
+    window.WithdrawalConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.withdrawals.index') }}",
+            details: "{{ url('admin/wallets/withdrawals') }}/:id/details",
+            process: "{{ url('admin/wallets/withdrawals') }}/:id/process"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading data.') }}",
+            noRecords: "{{ __('No matching records found') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            success: "{{ __('Success') }}",
+            error: "{{ __('Error') }}",
+            operationFailed: "{{ __('Operation failed') }}",
+            detailsLoadFailed: "{{ __('Could not load withdrawal details.') }}"
+        }
+    };
 </script>
+<script src="{{ asset('js/admin/withdrawals.js') }}"></script>
 @endsection

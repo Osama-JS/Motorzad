@@ -3,6 +3,8 @@
 @section('title', __('Vehicles'))
 
 @section('css')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     /* Premium UI & Theme Styling */
     :root {
@@ -112,86 +114,27 @@
         padding: 1rem;
     }
 
-    /* DataTable Overrides */
-    .dataTables_wrapper { color: var(--text-color); }
-    .dataTables_wrapper .dataTables_length select, 
-    .dataTables_wrapper .dataTables_filter input {
-        background-color: var(--bg-input) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 10px !important;
-        padding: 8px 14px !important;
-        font-size: 0.85rem !important;
+    /* Card Overrides */
+    .vehicle-grid-card {
         transition: all 0.2s ease;
     }
-    .dataTables_wrapper .dataTables_length select:focus, 
-    .dataTables_wrapper .dataTables_filter input:focus {
-        border-color: #6366f1 !important;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    .vehicle-grid-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
     }
-    
-    .table {
-        border-collapse: separate !important;
-        border-spacing: 0 8px !important;
+    .vehicle-grid-card .quick-actions-overlay {
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(2px);
+        opacity: 0;
+        transition: opacity 0.2s ease;
     }
-    .table thead th {
-        border: none !important;
-        background: transparent !important;
-        color: var(--text-muted) !important;
-        font-weight: 700 !important;
-        font-size: 0.8rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        padding: 12px 16px !important;
+    .vehicle-grid-card:hover .quick-actions-overlay {
+        opacity: 1;
     }
-    .table tbody tr {
-        background: rgba(255,255,255,0.05) !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
-        border-radius: 12px !important;
-        transition: all 0.2s ease;
-    }
-    .table tbody tr:hover {
-        transform: scale(1.005);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
-        background: rgba(255,255,255,0.1) !important;
-    }
-    .table tbody td {
-        border-top: 1px solid var(--border) !important;
-        border-bottom: 1px solid var(--border) !important;
-        padding: 16px !important;
-        vertical-align: middle !important;
-    }
-    .table tbody td:first-child {
-        border-left: 1px solid var(--border) !important;
-        border-radius: 12px 0 0 12px !important;
-    }
-    .table tbody td:last-child {
-        border-right: 1px solid var(--border) !important;
-        border-radius: 0 12px 12px 0 !important;
-    }
-    html[dir="rtl"] .table tbody td:first-child {
-        border-left: none !important;
-        border-right: 1px solid var(--border) !important;
-        border-radius: 0 12px 12px 0 !important;
-    }
-    html[dir="rtl"] .table tbody td:last-child {
-        border-right: none !important;
-        border-left: 1px solid var(--border) !important;
-        border-radius: 12px 0 0 12px !important;
-    }
-
-    .dataTables_wrapper .dataTables_info {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-top: 16px;
-    }
-    .dataTables_wrapper .dataTables_paginate {
-        margin-top: 16px;
-    }
-    .paginate_button {
-        border-radius: 8px !important;
-        padding: 6px 12px !important;
+    .vehicle-card-img-top {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
     }
 </style>
 @endsection
@@ -214,42 +157,106 @@
     </a>
 </div>
 
-<div class="row">
+<div class="row mb-4 g-3">
     <!-- Total Vehicles -->
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-purple">
-            <div class="scg-value">{{ $stats['total'] }}</div>
-            <div class="scg-label">{{ __('Total Vehicles') }}</div>
-            <i class="fa-solid fa-car scg-icon"></i>
+        <div class="stat-card blue h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 1 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['total'] }}</div>
+                <div class="stat-label">{{ __('Total Vehicles') }}</div>
+            </div>
         </div>
     </div>
     <!-- Approved Vehicles -->
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-emerald">
-            <div class="scg-value">{{ $stats['approved'] }}</div>
-            <div class="scg-label">{{ __('Approved Vehicles') }}</div>
-            <i class="fa-solid fa-circle-check scg-icon"></i>
+        <div class="stat-card green h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['approved'] }}</div>
+                <div class="stat-label">{{ __('Approved Vehicles') }}</div>
+            </div>
         </div>
     </div>
     <!-- Pending Vehicles -->
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-amber">
-            <div class="scg-value">{{ $stats['pending'] }}</div>
-            <div class="scg-label">{{ __('Pending Vehicles') }}</div>
-            <i class="fa-solid fa-clock scg-icon"></i>
+        <div class="stat-card gold h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['pending'] }}</div>
+                <div class="stat-label">{{ __('Pending Vehicles') }}</div>
+            </div>
         </div>
     </div>
     <!-- Rejected Vehicles -->
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card-gradient scg-rose">
-            <div class="scg-value">{{ $stats['rejected'] }}</div>
-            <div class="scg-label">{{ __('Rejected Vehicles') }}</div>
-            <i class="fa-solid fa-circle-xmark scg-icon"></i>
+        <div class="stat-card red h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['rejected'] }}</div>
+                <div class="stat-label">{{ __('Rejected Vehicles') }}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="premium-panel mt-2">
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search by title, VIN...') }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="filter_status" class="form-select select2-init">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    <option value="approved">{{ __('Approved') }}</option>
+                    <option value="pending">{{ __('Pending') }}</option>
+                    <option value="rejected">{{ __('Rejected') }}</option>
+                </select>
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                    {{ __('Filter') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="view-toolbar mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">{{ __('Show:') }}</span>
+            <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchVehicles(1)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
+</div>
+
+<div id="table-view-container" class="premium-panel mt-2 mb-4">
     <div class="panel-header-premium">
         <h2><i class="fa-solid fa-list-check me-2"></i> {{ __('Vehicles List') }}</h2>
     </div>
@@ -264,161 +271,70 @@
                     <th style="text-align: center; width: 250px;">{{ __('Actions') }}</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="custom-vehicles-tbody">
+                <tr><td colspan="5" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Grid View Container -->
+<div id="grid-view-container" class="row g-4 d-none mb-4">
+    <div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</div>
+</div>
+
+<!-- Pagination Container -->
+<div class="card shadow-sm border-0 mt-3 mb-5">
+    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+        <!-- Pagination controls will be injected here -->
     </div>
 </div>
 
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    var vehiclesDataUrl = "{{ route('admin.vehicles.data') }}";
+    window.VehicleConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.vehicles.data') }}",
+            destroy: "{{ url('admin/vehicles') }}/:id",
+            approve: "{{ url('admin/vehicles') }}/:id/approve",
+            reject: "{{ url('admin/vehicles') }}/:id/reject"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading data.') }}",
+            noRecords: "{{ __('No matching records found') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            success: "{{ __('Success') }}",
+            error: "{{ __('Error') }}",
+            deleteVehicleTitle: "{{ __('Delete Vehicle?') }}",
+            deleteVehicleText: "{{ __('This action cannot be undone! Make sure this vehicle is not linked to any auction.') }}",
+            deleteVehicleError: "{{ __('Could not delete vehicle, it might be linked to an auction.') }}",
+            approveVehicleTitle: "{{ __('Approve Vehicle?') }}",
+            approveVehicleText: "{{ __('Are you sure you want to approve this vehicle?') }}",
+            rejectVehicleTitle: "{{ __('Reject Vehicle') }}",
+            reasonForRejection: "{{ __('Reason for Rejection') }}",
+            rejectPlaceholder: "{{ __('Please write the reason for rejecting the vehicle...') }}",
+            mustWriteReason: "{{ __('You must write a reason for rejection!') }}",
+            yesDelete: "{{ __('Yes, delete!') }}",
+            yesApprove: "{{ __('Yes, approve!') }}",
+            reject: "{{ __('Reject') }}",
+            cancel: "{{ __('Cancel') }}",
+            view: "{{ __('View') }}",
+            edit: "{{ __('Edit') }}",
+            delete: "{{ __('Delete') }}",
+            make: "{{ __('Make') }}",
+            model: "{{ __('Model') }}",
+            year: "{{ __('Year') }}",
+            vin: "{{ __('VIN Number') }}"
+        }
+    };
 </script>
-
-<script>
-    let vehiclesTable;
-
-    $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        vehiclesTable = $('#vehicles-table').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: vehiclesDataUrl,
-            columns: [
-                { data: 'image', orderable: false, searchable: false },
-                { data: 'title' },
-                { data: 'vin_number' },
-                { data: 'status' },
-                { data: 'actions', orderable: false, searchable: false }
-            ],
-            language: {
-                "sProcessing": "{{ __('Loading...') }}",
-                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
-                "sZeroRecords": "{{ __('No matching records found') }}",
-                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
-                "sSearch": "{{ __('Search:') }}",
-                "oPaginate": {
-                    "sFirst": "{{ __('First') }}",
-                    "sPrevious": "{{ __('Previous') }}",
-                    "sNext": "{{ __('Next') }}",
-                    "sLast": "{{ __('Last') }}"
-                }
-            },
-            drawCallback: function() {
-                // Style pagination buttons in premium theme
-                $('.paginate_button').addClass('btn btn-sm mx-1');
-                $('.paginate_button.current').addClass('btn-primary').css('color', 'white');
-            }
-        });
-    });
-
-    function deleteVehicle(id) {
-        let url = "{{ route('admin.vehicles.destroy', ':id') }}".replace(':id', id);
-        
-        Swal.fire({
-            title: "{{ __('Delete Vehicle?') }}",
-            text: "{{ __('This action cannot be undone! Make sure this vehicle is not linked to any auction.') }}",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: "{{ __('Yes, delete!') }}",
-            cancelButtonText: "{{ __('Cancel') }}"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    data: {
-                        _method: 'DELETE'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            vehiclesTable.ajax.reload(null, false);
-                            toastr.success(response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        toastr.error("{{ __('Could not delete vehicle, it might be linked to an auction.') }}");
-                    }
-                });
-            }
-        });
-    }
-
-    function approveVehicle(id) {
-        let url = "{{ route('admin.vehicles.approve', ':id') }}".replace(':id', id);
-        
-        Swal.fire({
-            title: "{{ __('Approve Vehicle?') }}",
-            text: "{{ __('Are you sure you want to approve this vehicle?') }}",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: "{{ __('Yes, approve!') }}",
-            cancelButtonText: "{{ __('Cancel') }}"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success(response.message);
-                            vehiclesTable.ajax.reload(null, false);
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    function rejectVehicle(id) {
-        let url = "{{ route('admin.vehicles.reject', ':id') }}".replace(':id', id);
-        
-        Swal.fire({
-            title: "{{ __('Reject Vehicle') }}",
-            input: 'textarea',
-            inputLabel: "{{ __('Reason for Rejection') }}",
-            inputPlaceholder: "{{ __('Please write the reason for rejecting the vehicle...') }}",
-            inputAttributes: {
-                'aria-label': "{{ __('Reason for Rejection') }}"
-            },
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: "{{ __('Reject') }}",
-            cancelButtonText: "{{ __('Cancel') }}",
-            inputValidator: (value) => {
-                if (!value) {
-                    return "{{ __('You must write a reason for rejection!') }}";
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    data: {
-                        rejection_reason: result.value
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success(response.message);
-                            vehiclesTable.ajax.reload(null, false);
-                        }
-                    }
-                });
-            }
-        });
-    }
-</script>
+<script src="{{ asset('js/admin/vehicles.js') }}"></script>
 @endsection

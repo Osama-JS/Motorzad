@@ -202,27 +202,74 @@
     </div>
 </div>
 
-{{-- Upgraded Stats Row --}}
-<div class="row mb-4">
-    <div class="col-12 col-md-4">
-        <div class="stat-card-gradient scg-blue">
-            <div class="scg-value">{{ number_format($stats['total']) }}</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'إجمالي المزايدات' : 'Total Bids' }}</div>
-            <i class="fa-solid fa-gavel scg-icon"></i>
+<div class="row mb-4 g-3">
+    <!-- Total Bids -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card blue h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-6M17 22v-9M7 22v-3M2 22h20M22 2H2v4h20V2z"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['total']) }}</div>
+                <div class="stat-label">{{ app()->getLocale() === 'ar' ? 'إجمالي المزايدات' : 'Total Bids' }}</div>
+            </div>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <div class="stat-card-gradient scg-purple">
-            <div class="scg-value">{{ number_format($stats['auto_bids']) }}</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'مزايدات تلقائية (Auto Bids)' : 'Auto Bids Count' }}</div>
-            <i class="fa-solid fa-robot scg-icon"></i>
+    <!-- Auto Bids -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card purple h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['auto_bids']) }}</div>
+                <div class="stat-label">{{ app()->getLocale() === 'ar' ? 'مزايدات تلقائية (Auto Bids)' : 'Auto Bids Count' }}</div>
+            </div>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <div class="stat-card-gradient scg-emerald">
-            <div class="scg-value">{{ number_format($stats['active_bids']) }}</div>
-            <div class="scg-label">{{ app()->getLocale() === 'ar' ? 'مزايدات نشطة حالياً' : 'Active Bids Count' }}</div>
-            <i class="fa-solid fa-circle-check scg-icon"></i>
+    <!-- Active Bids -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card green h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['active_bids']) }}</div>
+                <div class="stat-label">{{ app()->getLocale() === 'ar' ? 'مزايدات نشطة حالياً' : 'Active Bids Count' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search by bidder, vehicle...') }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="filter_type" class="form-select select2-init">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة (الكل)' : 'All Types' }}</option>
+                    <option value="fa-robot">{{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}</option>
+                    <option value="fa-user">{{ app()->getLocale() === 'ar' ? 'يدوي' : 'Manual' }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="filter_status" class="form-select select2-init">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'الحالة (الكل)' : 'All Status' }}</option>
+                    <option value="bg-success">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</option>
+                    <option value="bg-secondary">{{ app()->getLocale() === 'ar' ? 'تخطي' : 'Outbid' }}</option>
+                    <option value="bg-warning">{{ app()->getLocale() === 'ar' ? 'فائز' : 'Winner' }}</option>
+                </select>
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                    {{ __('Filter') }}
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -253,6 +300,8 @@
 @endsection
 
 @section('js')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     var bidsDataUrl = "{{ route('admin.bids.data') }}";
 </script>
@@ -265,6 +314,13 @@
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
+        });
+
+        // Initialize Select2 for filters
+        let dir = $('html').attr('dir') || 'rtl';
+        $('.select2-init').select2({
+            dir: dir,
+            minimumResultsForSearch: 10
         });
 
         bidsTable = $('#bids-table').DataTable({
@@ -294,6 +350,32 @@
                     "sLast": "{{ __('Last') }}"
                 }
             }
+        });
+
+        // Bind filter search input
+        $('#filter_search').on('keyup keypress change', function() {
+            bidsTable.search(this.value).draw();
+        });
+
+        // Bind type filter dropdown
+        $('#filter_type').on('change', function() {
+            bidsTable.column(3).search($(this).val()).draw();
+        });
+
+        // Bind status filter dropdown
+        $('#filter_status').on('change', function() {
+            bidsTable.column(4).search($(this).val()).draw();
+        });
+
+        // Bind filter button
+        $('#btn-filter').on('click', function() {
+            let searchVal = $('#filter_search').val();
+            let typeVal = $('#filter_type').val();
+            let statusVal = $('#filter_status').val();
+            bidsTable.search(searchVal);
+            bidsTable.column(3).search(typeVal);
+            bidsTable.column(4).search(statusVal);
+            bidsTable.draw();
         });
     });
 </script>

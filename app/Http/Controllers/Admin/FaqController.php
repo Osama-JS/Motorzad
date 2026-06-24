@@ -10,7 +10,12 @@ class FaqController extends Controller
 {
     public function index()
     {
-        return view('admin.faqs.index');
+        $stats = [
+            'total' => Faq::count(),
+            'active' => Faq::where('is_active', true)->count(),
+            'inactive' => Faq::where('is_active', false)->count(),
+        ];
+        return view('admin.faqs.index', compact('stats'));
     }
 
     public function getData()

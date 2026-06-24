@@ -3,7 +3,8 @@
 @section('title', __('Bank Accounts Management'))
 
 @section('css')
-
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     .modal-backdrop {
         --bs-backdrop-zindex: 0 !important;
@@ -17,61 +18,65 @@
 @section('content')
 <div class="container-fluid py-4">
     <!-- Stats Row -->
-    <div class="row mb-4">
-        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-uppercase font-weight-bold">{{ __('Total Accounts') }}</p>
-                                <h5 class="font-weight-bolder mb-0">{{ $stats['total'] }}</h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
-                                <i class="fas fa-university text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
+    <div class="row mb-4 g-3">
+        <!-- Total Bank Accounts -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="stat-card blue h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['total'] }}</div>
+                    <div class="stat-label">{{ __('Total Accounts') }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-uppercase font-weight-bold">{{ __('Active Accounts') }}</p>
-                                <h5 class="font-weight-bolder mb-0 text-success">{{ $stats['active'] }}</h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
-                                <i class="fas fa-check-circle text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Active Bank Accounts -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="stat-card green h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['active'] }}</div>
+                    <div class="stat-label">{{ __('Active Accounts') }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-uppercase font-weight-bold">{{ __('Inactive Accounts') }}</p>
-                                <h5 class="font-weight-bolder mb-0 text-danger">{{ $stats['inactive'] }}</h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
-                                <i class="fas fa-times-circle text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
+        <!-- Inactive Bank Accounts -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="stat-card red h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['inactive'] }}</div>
+                    <div class="stat-label">{{ __('Inactive Accounts') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                        <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search by bank, IBAN, beneficiary...') }}">
                     </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filter_status" class="form-select select2-init">
+                        <option value="">{{ __('All Statuses') }}</option>
+                        <option value="active">{{ __('Active') }}</option>
+                        <option value="inactive">{{ __('Inactive') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                        {{ __('Filter') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -80,7 +85,30 @@
     <!-- Main Table -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm border-0 mb-4">
+            <!-- View Toolbar -->
+            <div class="view-toolbar mb-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted small me-2">{{ __('Show:') }}</span>
+                        <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchAccounts(1)">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="table-view-container" class="card shadow-sm border-0 mb-4">
                 <div class="card-header pb-0 d-flex justify-content-between align-items-center bg-white">
                     <h6 class="mb-0">{{ __('Bank Accounts List') }}</h6>
                     <button class="btn btn-primary btn-sm" onclick="openAddModal()">
@@ -100,11 +128,23 @@
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- Loaded via AJAX -->
+                            <tbody id="custom-bank-accounts-tbody">
+                                <tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</td></tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Grid View Container -->
+            <div id="grid-view-container" class="row g-3 d-none mb-4">
+                <div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</div>
+            </div>
+
+            <!-- Pagination Container -->
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+                    <!-- Pagination controls will be injected here -->
                 </div>
             </div>
         </div>
@@ -176,177 +216,39 @@
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    // Explicitly define functions on the window object to ensure they are globally accessible
-    window.openAddModal = function() {
-        $('#bankAccountForm')[0].reset();
-        $('#account_id').val('');
-        $('#modal-title-text').text("{{ __('Add Bank Account') }}");
-        $('#logo-preview').hide();
-        $('#bankAccountModal').modal('show');
-    };
-
-    window.editAccount = function(id) {
-        $.get("{{ url('admin/bank-accounts') }}/" + id + "/edit", function(response) {
-            if (response.success) {
-                let account = response.account;
-                $('#account_id').val(account.id);
-                $('#bank_name').val(account.bank_name);
-                $('#iban').val(account.iban);
-                $('#beneficiary_name').val(account.beneficiary_name);
-                $('#is_active').prop('checked', account.is_active);
-                
-                if (response.logo_url) {
-                    $('#current-logo').attr('src', response.logo_url);
-                    $('#logo-preview').show();
-                } else {
-                    $('#logo-preview').hide();
-                }
-                
-                $('#modal-title-text').text("{{ __('Edit Bank Account') }}");
-                $('#bankAccountModal').modal('show');
-            }
-        });
-    };
-
-    window.toggleAccountStatus = function(id) {
-        Swal.fire({
-            title: '{{ __("Are you sure?") }}',
-            text: '{{ __("You want to change the account status.") }}',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '{{ __("Yes, toggle it!") }}',
-            cancelButtonText: '{{ __("Cancel") }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post("{{ url('admin/bank-accounts') }}/" + id + "/toggle-active", {
-                    _token: "{{ csrf_token() }}"
-                }, function(response) {
-                    if (response.success) {
-                        if (typeof table !== 'undefined' && table !== null) {
-                            table.ajax.reload(null, false);
-                        }
-                        Swal.fire('Updated!', response.message, 'success');
-                    }
-                });
-            }
-        });
-    };
-
-    window.deleteAccount = function(id) {
-        Swal.fire({
-            title: '{{ __("Are you sure?") }}',
-            text: '{{ __("This action cannot be undone!") }}',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '{{ __("Yes, delete it!") }}',
-            cancelButtonText: '{{ __("Cancel") }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "{{ url('admin/bank-accounts') }}/" + id,
-                    type: 'DELETE',
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            if (typeof table !== 'undefined' && table !== null) {
-                                table.ajax.reload(null, false);
-                            }
-                            Swal.fire('Deleted!', response.message, 'success');
-                        }
-                    }
-                });
-            }
-        });
-    };
-
-    let table;
-    $(document).ready(function() {
-        if ($.fn.DataTable.isDataTable('#bankAccountsTable')) {
-            $('#bankAccountsTable').DataTable().destroy();
+    window.BankAccountConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.bank-accounts.data') }}",
+            store: "{{ route('admin.bank-accounts.store') }}",
+            edit: "{{ url('admin/bank-accounts') }}/:id/edit",
+            update: "{{ url('admin/bank-accounts') }}/:id",
+            destroy: "{{ url('admin/bank-accounts') }}/:id",
+            toggle: "{{ url('admin/bank-accounts') }}/:id/toggle-active"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading data.') }}",
+            noRecords: "{{ __('No matching records found') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            areYouSure: "{{ __('Are you sure?') }}",
+            confirmStatusChange: "{{ __('You want to change the account status.') }}",
+            yesToggle: "{{ __('Yes, toggle it!') }}",
+            cancel: "{{ __('Cancel') }}",
+            yesDelete: "{{ __('Yes, delete it!') }}",
+            deleteDesc: "{{ __('This action cannot be undone!') }}",
+            unexpectedError: "{{ __('Unexpected error occurred.') }}",
+            addTitle: "{{ __('Add Bank Account') }}",
+            editTitle: "{{ __('Edit Bank Account') }}",
+            processing: "{{ __('Processing...') }}",
+            saveChanges: "{{ __('Save Changes') }}"
         }
-
-        table = $('#bankAccountsTable').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: {
-                url: "{{ route('admin.bank-accounts.data') }}",
-                error: function(xhr, error, thrown) {
-                    console.error('DataTables Error:', error, thrown);
-                }
-            },
-            columns: [
-                { data: 'logo', className: 'text-center' },
-                { data: 'bank_name' },
-                { data: 'iban' },
-                { data: 'beneficiary_name' },
-                { data: 'status', className: 'text-center' },
-                { data: 'actions', className: 'text-center' }
-            ],
-            language: {
-                "sProcessing": "{{ __('Processing...') }}",
-                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
-                "sZeroRecords": "{{ __('No matching records found') }}",
-                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
-                "sSearch": "{{ __('Search:') }}",
-                "oPaginate": {
-                    "sFirst": "{{ __('First') }}",
-                    "sPrevious": "{{ __('Previous') }}",
-                    "sNext": "{{ __('Next') }}",
-                    "sLast": "{{ __('Last') }}"
-                }
-            }
-        });
-
-        $('#bankAccountForm').on('submit', function(e) {
-            e.preventDefault();
-            let formData = new FormData(this);
-            let id = $('#account_id').val();
-            let url = id ? "{{ url('admin/bank-accounts') }}/" + id : "{{ route('admin.bank-accounts.store') }}";
-            
-            if (id) {
-                formData.append('_method', 'PUT');
-            }
-
-            let $btn = $('#saveBtn');
-            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ __("Processing...") }}');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        $('#bankAccountModal').modal('hide');
-                        if (table) table.ajax.reload(null, false);
-                        Swal.fire('Success', response.message, 'success');
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
-                        let errorMsg = '';
-                        Object.keys(errors).forEach(key => {
-                            errorMsg += errors[key][0] + '<br>';
-                        });
-                        Swal.fire('Validation Error', errorMsg, 'error');
-                    } else {
-                        Swal.fire('Error', 'Something went wrong', 'error');
-                    }
-                },
-                complete: function() {
-                    $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> {{ __("Save Changes") }}');
-                }
-            });
-        });
-    });
+    };
 </script>
+<script src="{{ asset('js/admin/bank_accounts.js') }}"></script>
 @endsection

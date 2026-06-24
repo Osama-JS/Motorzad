@@ -55,6 +55,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
     Route::get('roles/data', [\App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles.data');
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+    Route::get('permissions/data', [\App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions.data');
     Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
     Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
     Route::post('users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');

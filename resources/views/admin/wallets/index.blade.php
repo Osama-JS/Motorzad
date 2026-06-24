@@ -3,6 +3,7 @@
 @section('title', __('Wallet Management'))
 
 @section('css')
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     .dataTables_wrapper { padding: 1rem; color: var(--text-color); }
     .table td { vertical-align: middle; }
@@ -27,64 +28,126 @@
 
 <div class="row mb-4">
     <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
-        <div class="stat-card blue h-100">
+        <div class="stat-card blue h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="stat-value">{{ number_format($stats['total_balance'], 2) }}</div>
-            <div class="stat-label">{{ __('Total Liquidity (Balances)') }}</div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['total_balance'], 2) }}</div>
+                <div class="stat-label">{{ __('Total Liquidity (Balances)') }}</div>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
-        <div class="stat-card green h-100">
+        <div class="stat-card green h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
-            <div class="stat-value">{{ number_format($stats['total_deposits'], 2) }}</div>
-            <div class="stat-label">{{ __('Total Deposits') }}</div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['total_deposits'], 2) }}</div>
+                <div class="stat-label">{{ __('Total Deposits') }}</div>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-sm-0">
-        <div class="stat-card red h-100">
+        <div class="stat-card red h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
             </div>
-            <div class="stat-value">{{ number_format($stats['total_withdrawals'], 2) }}</div>
-            <div class="stat-label">{{ __('Total Withdrawals') }}</div>
+            <div>
+                <div class="stat-value">{{ number_format($stats['total_withdrawals'], 2) }}</div>
+                <div class="stat-label">{{ __('Total Withdrawals') }}</div>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card gold h-100">
+        <div class="stat-card gold h-100 stat-card-compact">
             <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="stat-value">{{ $stats['count'] }}</div>
-            <div class="stat-label">{{ __('Active Wallets Count') }}</div>
+            <div>
+                <div class="stat-value">{{ $stats['count'] }}</div>
+                <div class="stat-label">{{ __('Active Wallets Count') }}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h2>{{ __('Wallets List') }}</h2>
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                    <input type="text" id="filter_search" class="form-control border-start-0 ps-0" placeholder="{{ __('Search by user name, email...') }}">
+                </div>
+            </div>
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn btn-secondary w-100" id="btn-filter">
+                    {{ __('Filter') }}
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="table-responsive">
-        <table id="wallets-table" class="table table-striped w-100">
-            <thead>
-                <tr>
-                    <th>{{ __('User') }}</th>
-                    <th>{{ __('Balance') }}</th>
-                    <th>{{ __('Debt Ceiling') }}</th>
-                    <th>{{ __('Debt Usage') }}</th>
-                    <th>{{ __('Total Deposits') }}</th>
-                    <th>{{ __('Total Withdrawals') }}</th>
-                    <th>{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- DataTables will fill this -->
-            </tbody>
-        </table>
+</div>
+
+<div class="view-toolbar mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">{{ __('Show:') }}</span>
+            <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchWallets(1)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
+</div>
+
+<div id="table-view-container" class="card shadow-sm border-0 mb-4">
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center bg-white">
+        <h6 class="mb-0">{{ __('Wallets List') }}</h6>
+    </div>
+    <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive p-3">
+            <table id="wallets-table" class="table align-items-center mb-0 w-100">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('User') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Balance') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Debt Ceiling') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Debt Usage') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Total Deposits') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Total Withdrawals') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="custom-wallets-tbody">
+                    <tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Grid View Container -->
+<div id="grid-view-container" class="row g-3 d-none mb-4">
+    <div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</div>
+</div>
+
+<!-- Pagination Container -->
+<div class="card shadow-sm border-0 mt-3">
+    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+        <!-- Pagination controls will be injected here -->
     </div>
 </div>
 
@@ -127,101 +190,25 @@
 
 @section('js')
 <script>
-    let walletsTable;
-
-    $(document).ready(function() {
-        walletsTable = $('#wallets-table').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: "{{ route('admin.wallets.data') }}",
-            columns: [
-                { 
-                    data: 'user',
-                    render: function(data) {
-                        return data ? `<strong>${data.name}</strong><br><small class="text-muted">${data.email}</small>` : '---';
-                    }
-                },
-                { 
-                    data: 'balance',
-                    render: function(data) {
-                        const cls = parseFloat(data) >= 0 ? 'balance-positive' : 'balance-negative';
-                        return `<span class="balance-badge ${cls}">${parseFloat(data).toFixed(2)}</span>`;
-                    }
-                },
-                { data: 'debt_ceiling' },
-                { 
-                    data: 'debt_usage',
-                    render: function(data) {
-                        return `<div class="progress" style="height: 10px;">
-                                    <div class="progress-bar ${data > 80 ? 'bg-danger' : 'bg-primary'}" role="progressbar" style="width: ${data}%" aria-valuenow="${data}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <small>${data}%</small>`;
-                    }
-                },
-                { data: 'total_deposits' },
-                { data: 'total_withdrawals' },
-                { 
-                    data: 'id',
-                    render: function(data, type, row) {
-                        const baseUrl = "{{ url('admin/wallets') }}";
-                        return `
-                            <div class="btn-group shadow-sm" style="border-radius: 8px;">
-                                <a href="${baseUrl}/${data}/transactions" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold" title="{{ __('Advanced Transactions History') }}">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4H10a2 2 0 0 1-2-2v-4"/><circle cx="18" cy="12" r="1.5"/></svg>
-                                    <span>{{ __('Transactions') }}</span>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-warning d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-dark" onclick="openDebtModal(${data}, ${row.debt_ceiling})" title="{{ __('Debt Ceiling') }}">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                                    <span>{{ __('Ceiling') }}</span>
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            ],
-            language: {
-                "sProcessing": "{{ __('Loading...') }}",
-                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
-                "sZeroRecords": "{{ __('No matching records found') }}",
-                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
-                "sSearch": "{{ __('Search:') }}",
-                "oPaginate": {
-                    "sFirst": "{{ __('First') }}",
-                    "sPrevious": "{{ __('Previous') }}",
-                    "sNext": "{{ __('Next') }}",
-                    "sLast": "{{ __('Last') }}"
-                }
-            }
-        });
-
-        // Handle Debt Form Submit
-        $('#debtForm').on('submit', function(e) {
-            e.preventDefault();
-            const id = $('#debt_wallet_id').val();
-            const baseUrl = "{{ url('admin/wallets') }}";
-            
-            $.ajax({
-                url: `${baseUrl}/${id}/debt-ceiling`,
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        $('#debtModal').modal('hide');
-                        walletsTable.ajax.reload(null, false);
-                        Swal.fire("{{ __('Success') }}", response.message, 'success');
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire("{{ __('Error') }}", "{{ __('Operation failed') }}", 'error');
-                }
-            });
-        });
-    });
-
-    function openDebtModal(id, currentCeiling) {
-        $('#debt_wallet_id').val(id);
-        $('#debt_ceiling_input').val(currentCeiling);
-        $('#debtModal').modal('show');
-    }
+    window.WalletConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.wallets.data') }}",
+            debtCeiling: "{{ url('admin/wallets') }}/:id/debt-ceiling"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading data.') }}",
+            noRecords: "{{ __('No matching records found') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            success: "{{ __('Success') }}",
+            error: "{{ __('Error') }}",
+            operationFailed: "{{ __('Operation failed') }}"
+        }
+    };
 </script>
+<script src="{{ asset('js/admin/wallets.js') }}"></script>
 @endsection

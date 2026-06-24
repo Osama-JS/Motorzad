@@ -63,7 +63,7 @@
     </div>
 </div>
 
-<div class="view-toolbar">
+<div class="view-toolbar mb-3 d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
         <div class="d-flex align-items-center">
             <span class="text-muted small me-2">{{ __('Show:') }}</span>
@@ -75,9 +75,17 @@
             </select>
         </div>
     </div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
 </div>
 
-<div id="table-view-container" class="card shadow-sm border-0">
+<div id="table-view-container" class="card shadow-sm border-0 mb-4">
     <div class="table-responsive">
         <table class="table table-hover table-striped align-middle mb-0 w-100" id="roles-custom-table">
             <thead class="table-light">
@@ -93,6 +101,11 @@
             </tbody>
         </table>
     </div>
+</div>
+
+<!-- Grid View Container -->
+<div id="grid-view-container" class="row g-3 d-none mb-4">
+    <div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}</div>
 </div>
 
 <div class="card shadow-sm border-0 mt-3">

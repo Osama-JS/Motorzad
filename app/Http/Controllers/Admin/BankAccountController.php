@@ -39,10 +39,32 @@ class BankAccountController extends Controller
     /**
      * Get data for DataTables.
      */
-    public function getData()
+    public function getData(Request $request)
     {
         try {
-            $accounts = BankAccount::all();
+            $query = BankAccount::query();
+
+            // Filtering
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('bank_name', 'like', "%{$search}%")
+                      ->orWhere('iban', 'like', "%{$search}%")
+                      ->orWhere('beneficiary_name', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $status = $request->status;
+                if ($status === 'active') {
+                    $query->where('is_active', true);
+                } elseif ($status === 'inactive') {
+                    $query->where('is_active', false);
+                }
+            }
+
+            $perPage = $request->input('per_page', 10);
+            $accounts = $query->latest()->paginate($perPage);
 
             $data = $accounts->map(function ($account) {
                 return [
@@ -52,7 +74,7 @@ class BankAccountController extends Controller
                     'beneficiary_name' => $account->beneficiary_name,
                     'logo' => $account->logo_path 
                         ? '<img src="' . asset('storage/' . $account->logo_path) . '" alt="' . $account->bank_name . '" class="rounded" width="40">'
-                        : '<span class="badge badge-light">No Logo</span>',
+                        : '<span class="badge badge-light">' . __('No Logo') . '</span>',
                     'status' => $account->is_active
                         ? '<span class="badge badge-success">' . __('Active') . '</span>'
                         : '<span class="badge badge-danger">' . __('Inactive') . '</span>',
@@ -60,7 +82,16 @@ class BankAccountController extends Controller
                 ];
             });
 
-            return response()->json(['data' => $data]);
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'pagination' => [
+                    'current_page' => $accounts->currentPage(),
+                    'last_page' => $accounts->lastPage(),
+                    'total' => $accounts->total(),
+                    'links' => $accounts->linkCollection()->toArray()
+                ]
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

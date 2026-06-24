@@ -18,26 +18,83 @@ class DepositController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $deposits = DepositRequest::with(['user', 'wallet', 'bankAccount'])
-                ->latest()
-                ->get()
-                ->map(function ($deposit) {
+            try {
+                $query = DepositRequest::with(['user', 'wallet', 'bankAccount']);
+
+                // Filtering by search term
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $query->where(function($q) use ($search) {
+                        $q->whereHas('bankAccount', function($qb) use ($search) {
+                            $qb->where('bank_name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('user', function($qu) use ($search) {
+                            $qu->where('first_name', 'like', "%{$search}%")
+                               ->orWhere('last_name', 'like', "%{$search}%")
+                               ->orWhere('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                        });
+                    });
+                }
+
+                // Filtering by status
+                if ($request->filled('status')) {
+                    $status = $request->status;
+                    $query->where('status', $status);
+                }
+
+                $perPage = $request->input('per_page', 10);
+                $deposits = $query->latest()->paginate($perPage);
+
+                $data = $deposits->map(function ($deposit) {
+                    $statusClasses = [
+                        'pending' => 'status-pending',
+                        'approved' => 'status-approved',
+                        'rejected' => 'status-rejected'
+                    ];
+                    $statusLabels = [
+                        'pending' => __('Pending'),
+                        'approved' => __('Approved'),
+                        'rejected' => __('Rejected')
+                    ];
+                    $statusClass = $statusClasses[$deposit->status] ?? 'status-pending';
+                    $statusLabel = $statusLabels[$deposit->status] ?? $deposit->status;
+                    $statusHtml = '<span class="status-badge ' . $statusClass . '">' . $statusLabel . '</span>';
+
+                    $userHtml = $deposit->user 
+                        ? '<strong>' . $deposit->user->full_name . '</strong><br><small class="text-muted">' . $deposit->user->email . '</small>' 
+                        : '---';
+
+                    $actionsHtml = '
+                        <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-white shadow-sm" onclick="openDepositModal(' . $deposit->id . ')" title="' . __('معالجة الطلب') . '">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>' . __('عرض ومعالجة') . '</span>
+                        </button>';
+
                     return [
-                        'id'               => $deposit->id,
-                        'user_name'        => $deposit->user?->full_name,
-                        'user_email'       => $deposit->user?->email,
-                        'bank_name'        => $deposit->bankAccount?->bank_name ?? '---',
-                        'amount'           => number_format($deposit->amount, 2),
-                        'status'           => $deposit->status,
-                        'receipt_url'      => $deposit->receipt_path
-                            ? asset('storage/' . $deposit->receipt_path)
-                            : null,
-                        'processed_at'     => $deposit->processed_at?->format('Y-m-d H:i'),
-                        'created_at'       => $deposit->created_at->format('Y-m-d H:i'),
+                        'id' => $deposit->id,
+                        'user_name' => $userHtml,
+                        'bank_name' => $deposit->bankAccount?->bank_name ?? '---',
+                        'amount' => '<strong class="text-success">' . number_format($deposit->amount, 2) . ' SAR</strong>',
+                        'status' => $statusHtml,
+                        'created_at' => $deposit->created_at->format('Y-m-d H:i'),
+                        'actions' => $actionsHtml
                     ];
                 });
 
-            return response()->json(['data' => $deposits]);
+                return response()->json([
+                    'success' => true,
+                    'data' => $data,
+                    'pagination' => [
+                        'current_page' => $deposits->currentPage(),
+                        'last_page' => $deposits->lastPage(),
+                        'total' => $deposits->total(),
+                        'links' => $deposits->linkCollection()->toArray()
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
         }
 
         $stats = [

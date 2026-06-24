@@ -22,10 +22,29 @@ class VehicleController extends Controller
 
     public function getData(Request $request)
     {
-        $vehicles = Vehicle::with(['submittedBy'])->latest()->get();
+        $query = Vehicle::with(['submittedBy'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('make_ar', 'like', "%{$search}%")
+                  ->orWhere('make_en', 'like', "%{$search}%")
+                  ->orWhere('model_ar', 'like', "%{$search}%")
+                  ->orWhere('model_en', 'like', "%{$search}%")
+                  ->orWhere('vin_number', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $paginator = $query->paginate($perPage);
 
         return response()->json([
-            'data' => $vehicles->map(function($vehicle) {
+            'success' => true,
+            'data' => collect($paginator->items())->map(function($vehicle) {
                 $statusBadge = match($vehicle->status) {
                     'approved' => '<span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-check" style="font-size:0.75rem;"></i> '.__('Approved').'</span>',
                     'pending' => '<span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock" style="font-size:0.75rem;"></i> '.__('Pending').'</span>',
@@ -36,8 +55,8 @@ class VehicleController extends Controller
                 $quickActions = '';
                 if ($vehicle->status === 'pending') {
                     $quickActions = '
-                        <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check" style="font-size:0.75rem;"></i> '.__('Approve').'</button>
-                        <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark" style="font-size:0.75rem;"></i> '.__('Reject').'</button>
+                        <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center flex-grow-1 py-2 rounded-3" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check"></i></button>
+                        <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center flex-grow-1 py-2 rounded-3" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark"></i></button>
                     ';
                 }
 
@@ -48,18 +67,37 @@ class VehicleController extends Controller
                 return [
                     'id' => $vehicle->id,
                     'image' => $imageHtml,
+                    'image_url' => $vehicle->primary_image_url ?? asset('images/placeholder.png'),
                     'title' => '<strong>' . $vehicle->title . '</strong>',
+                    'raw_title' => $vehicle->title,
                     'vin_number' => $vehicle->vin_number ?? 'N/A',
                     'status' => $statusBadge,
+                    'make' => app()->getLocale() == 'ar' ? $vehicle->make_ar : $vehicle->make_en,
+                    'model' => app()->getLocale() == 'ar' ? $vehicle->model_ar : $vehicle->model_en,
+                    'year' => $vehicle->year,
+                    'created_at' => $vehicle->created_at->format('Y-m-d'),
+                    'quick_actions' => $quickActions,
                     'actions' => '
                         <div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">
-                            ' . $quickActions . '
-                            <a href="' . route('admin.vehicles.show', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i> ' . __('View') . '</a>
-                            <a href="' . route('admin.vehicles.edit', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i> ' . __('Edit') . '</a>
-                            <button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i> ' . __('Delete') . '</button>
-                        </div>'
+                            ' . ($vehicle->status === 'pending' ? '
+                                <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check" style="font-size:0.75rem;"></i></button>
+                                <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark" style="font-size:0.75rem;"></i></button>
+                            ' : '') . '
+                            <a href="' . route('admin.vehicles.show', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i></a>
+                            <a href="' . route('admin.vehicles.edit', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i></a>
+                            <button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>
+                        </div>',
+                    'view_url' => route('admin.vehicles.show', $vehicle->id),
+                    'edit_url' => route('admin.vehicles.edit', $vehicle->id)
                 ];
-            })
+            }),
+            'pagination' => [
+                'total' => $paginator->total(),
+                'per_page' => $paginator->perPage(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'links' => $paginator->linkCollection()->toArray()
+            ]
         ]);
     }
 

@@ -16,8 +16,83 @@ class WithdrawalController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $withdrawals = WithdrawalRequest::with(['user', 'wallet'])->latest()->get();
-            return response()->json(['data' => $withdrawals]);
+            try {
+                $query = WithdrawalRequest::with(['user', 'wallet']);
+
+                // Filtering by search term
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $query->where(function($q) use ($search) {
+                        $q->where('payment_method', 'like', "%{$search}%")
+                          ->orWhereHas('user', function($qu) use ($search) {
+                              $qu->where('name', 'like', "%{$search}%")
+                                 ->orWhere('email', 'like', "%{$search}%");
+                          });
+                    });
+                }
+
+                // Filtering by status
+                if ($request->filled('status')) {
+                    $status = $request->status;
+                    $query->where('status', $status);
+                }
+
+                $perPage = $request->input('per_page', 10);
+                $withdrawals = $query->latest()->paginate($perPage);
+
+                $data = $withdrawals->map(function ($withdrawal) {
+                    $statusClasses = [
+                        'pending' => 'status-pending',
+                        'processing' => 'status-processing',
+                        'approved' => 'status-approved',
+                        'completed' => 'status-completed',
+                        'rejected' => 'status-rejected'
+                    ];
+                    $statusLabels = [
+                        'pending' => __('Pending'),
+                        'processing' => __('Processing'),
+                        'approved' => __('Approved'),
+                        'completed' => __('Completed'),
+                        'rejected' => __('Rejected')
+                    ];
+                    $statusClass = $statusClasses[$withdrawal->status] ?? 'status-pending';
+                    $statusLabel = $statusLabels[$withdrawal->status] ?? $withdrawal->status;
+                    $statusHtml = '<span class="status-badge ' . $statusClass . '">' . $statusLabel . '</span>';
+
+                    $userHtml = $withdrawal->user 
+                        ? '<strong>' . $withdrawal->user->name . '</strong><br><small class="text-muted">' . $withdrawal->user->email . '</small>' 
+                        : '---';
+
+                    $actionsHtml = '
+                        <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-white shadow-sm" onclick="openWithdrawalModal(' . $withdrawal->id . ')" title="' . __('View Details') . '">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>' . __('View') . '</span>
+                        </button>';
+
+                    return [
+                        'id' => $withdrawal->id,
+                        'user' => $userHtml,
+                        'requested_amount' => '<strong>' . number_format($withdrawal->requested_amount, 2) . '</strong>',
+                        'approved_amount' => $withdrawal->approved_amount ? number_format($withdrawal->approved_amount, 2) : '---',
+                        'status' => $statusHtml,
+                        'created_at' => $withdrawal->created_at->format('Y-m-d H:i'),
+                        'actions' => $actionsHtml
+                    ];
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $data,
+                    'pagination' => [
+                        'current_page' => $withdrawals->currentPage(),
+                        'last_page' => $withdrawals->lastPage(),
+                        'total' => $withdrawals->total(),
+                        'links' => $withdrawals->linkCollection()->toArray()
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
         }
 
         $stats = [
