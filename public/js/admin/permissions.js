@@ -71,7 +71,35 @@ $(document).ready(function () {
         });
     }
     initSelect2();
+
+    // Handle Column Toggle check/uncheck
+    $('.col-toggle').on('change', function() {
+        let visArray = [];
+        $('.col-toggle:checked').each(function() {
+            visArray.push($(this).val());
+        });
+        localStorage.setItem('permissions_col_visibility', JSON.stringify(visArray));
+        applyColumnVisibility();
+    });
 });
+
+function applyColumnVisibility() {
+    let savedVis = localStorage.getItem('permissions_col_visibility');
+    if (savedVis) {
+        let visArray = JSON.parse(savedVis);
+        $('.col-toggle').each(function() {
+            let colIdx = $(this).val();
+            let isVisible = visArray.includes(colIdx);
+            $(this).prop('checked', isVisible);
+            
+            if (isVisible) {
+                $('.col-toggle-' + colIdx).removeClass('d-none');
+            } else {
+                $('.col-toggle-' + colIdx).addClass('d-none');
+            }
+        });
+    }
+}
 
 window.currentPermissionsData = [];
 
@@ -95,6 +123,7 @@ window.toggleView = function(view) {
             renderPermissionsTable(window.currentPermissionsData);
         }
     }
+    applyColumnVisibility();
 };
 
 window.fetchPermissions = function(page) {
@@ -125,6 +154,7 @@ window.fetchPermissions = function(page) {
                 }
                 
                 renderPagination(res.pagination);
+                applyColumnVisibility();
             }
         },
         error: function() {
@@ -154,10 +184,10 @@ function renderPermissionsTable(data) {
             `;
 
             html += '<tr>';
-            html += '<td class="align-middle text-muted small">' + permission.id + '</td>';
-            html += '<td class="align-middle fw-bold">' + permission.name + '</td>';
-            html += '<td class="align-middle"><span class="badge bg-light text-dark px-3 py-2 border">' + permission.roles_count + ' ' + __('Role', 'أدوار') + '</span></td>';
-            html += '<td class="align-middle">' + actionsHtml + '</td>';
+            html += '<td class="align-middle text-muted small col-toggle-0">' + permission.id + '</td>';
+            html += '<td class="align-middle fw-bold col-toggle-1">' + permission.name + '</td>';
+            html += '<td class="align-middle col-toggle-2"><span class="badge bg-light text-dark px-3 py-2 border">' + permission.roles_count + ' ' + __('Role', 'أدوار') + '</span></td>';
+            html += '<td class="align-middle col-toggle-3">' + actionsHtml + '</td>';
             html += '</tr>';
         });
     }
@@ -174,13 +204,13 @@ function renderPermissionsGrid(data) {
             <div class="col-12 col-sm-6 col-md-4 col-xl-3">
                 <div class="card h-100 border-0 shadow-sm user-grid-card position-relative overflow-hidden">
                     <div class="card-body p-4 text-center">
-                        <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 56px; height: 56px;">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle col-toggle-0" style="width: 56px; height: 56px;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
-                        <h6 class="fw-bold mb-2">${permission.name}</h6>
-                        <span class="badge bg-light text-dark px-3 py-1 border mb-3">${permission.roles_count} ${__('Role', 'أدوار')}</span>
+                        <h6 class="fw-bold mb-2 col-toggle-1">${permission.name}</h6>
+                        <span class="badge bg-light text-dark px-3 py-1 border mb-3 col-toggle-2">${permission.roles_count} ${__('Role', 'أدوار')}</span>
                         
-                        <div class="d-flex justify-content-center mt-auto">
+                        <div class="d-flex justify-content-center mt-auto col-toggle-3">
                             <button class="btn btn-sm btn-outline-danger px-3 w-100" onclick="deletePermission(${permission.id})">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                 ${__('Delete', 'حذف')}

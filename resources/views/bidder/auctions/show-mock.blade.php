@@ -1012,92 +1012,83 @@ function placeBidNow() {
     btn.disabled = true;
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>';
 
-    fetch(`{{ route('bidder.auctions.bid', $auctionData['id']) }}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ 
-            amount: bidAmount,
-            is_auto_bid: isAutoBid,
-            max_auto_bid: maxAutoBid
-        })
-    })
-    .then(async res => {
-        const data = await res.json();
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
+    BidderAjax.post(`{{ route('bidder.auctions.bid', $auctionData['id']) }}`, { 
+        amount: bidAmount,
+        is_auto_bid: isAutoBid,
+        max_auto_bid: maxAutoBid
+    }, {
+        onSuccess: function(data) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
 
-        if (res.ok && data.success) {
-            // Update current price
-            document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
-            
-            // Update quick bid buttons
-            updateQuickBidButtons(data.new_price);
-            
-            // Add to feed list
-            const feedList = document.getElementById('bidsFeedList');
-            const newItem = document.createElement('div');
-            newItem.className = 'feed-item new-bid';
-            newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
-            feedList.insertBefore(newItem, feedList.firstChild);
-
-            // Update counters
-            document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
-
-            // Set next bid recommendation
-            input.value = data.new_price + minIncrement;
-            input.min = data.new_price + minIncrement;
-
-            // Update max auto bid input min
-            const maxInput = document.getElementById('maxAutoBidInput');
-            if (maxInput) {
-                maxInput.min = data.new_price + minIncrement * 2;
-            }
-
-            // Simulate auto-extend if time remaining is less than 2 minutes (120 seconds)
-            if (typeof timeInSec !== 'undefined' && timeInSec > 0 && timeInSec <= 120) {
-                timeInSec = 120;
-                toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد دقيقتين إضافيتين لمنع القنص!" : "Auction extended by 2 minutes to prevent sniping!" }}');
-            }
-
-            toastr.success(data.message);
-
-            // Update chart data
-            priceHistoryData.push({
-                time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-                amount: data.new_price,
-                bidder: '{{ app()->getLocale() === "ar" ? "أنت (مزايد)" : "You (Bidder)" }}'
-            });
-            if (priceChart) {
-                renderPriceHistoryChart();
-            }
-
-            // Simulate other bidder outbidding after 7 seconds if not in auto-bid mode
-            setTimeout(() => {
-                const outbidAmount = data.new_price + minIncrement;
-                document.getElementById('currentPriceVal').textContent = outbidAmount.toLocaleString();
+            if (data.success) {
+                // Update current price
+                document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
                 
-                // Update quick bid buttons dynamically for the new outbid price
-                updateQuickBidButtons(outbidAmount);
+                // Update quick bid buttons
+                updateQuickBidButtons(data.new_price);
                 
-                const outbidItem = document.createElement('div');
-                outbidItem.className = 'feed-item new-bid';
-                outbidItem.innerHTML = `<span style="font-weight: 800;">${outbidAmount.toLocaleString()} SAR</span><span>مزايد #1905</span>`;
-                feedList.insertBefore(outbidItem, feedList.firstChild);
-                
-                document.getElementById('bidsCountBadge').textContent = `${data.bids_count + 1} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
-                
-                input.value = outbidAmount + minIncrement;
-                input.min = outbidAmount + minIncrement;
+                // Add to feed list
+                const feedList = document.getElementById('bidsFeedList');
+                const newItem = document.createElement('div');
+                newItem.className = 'feed-item new-bid';
+                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
+                feedList.insertBefore(newItem, feedList.firstChild);
 
-                // Update chart data for outbid
+                // Update counters
+                document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+
+                // Set next bid recommendation
+                input.value = data.new_price + minIncrement;
+                input.min = data.new_price + minIncrement;
+
+                // Update max auto bid input min
+                const maxInput = document.getElementById('maxAutoBidInput');
+                if (maxInput) {
+                    maxInput.min = data.new_price + minIncrement * 2;
+                }
+
+                // Simulate auto-extend if time remaining is less than 2 minutes (120 seconds)
+                if (typeof timeInSec !== 'undefined' && timeInSec > 0 && timeInSec <= 120) {
+                    timeInSec = 120;
+                    toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد دقيقتين إضافيتين لمنع القنص!" : "Auction extended by 2 minutes to prevent sniping!" }}');
+                }
+
+                toastr.success(data.message);
+
+                // Update chart data
                 priceHistoryData.push({
                     time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-                    amount: outbidAmount,
-                    bidder: '{{ app()->getLocale() === "ar" ? "مزايد #1905" : "Bidder #1905" }}'
+                    amount: data.new_price,
+                    bidder: '{{ app()->getLocale() === "ar" ? "أنت (مزايد)" : "You (Bidder)" }}'
+                });
+                if (priceChart) {
+                    renderPriceHistoryChart();
+                }
+
+                // Simulate other bidder outbidding after 7 seconds if not in auto-bid mode
+                setTimeout(() => {
+                    const outbidAmount = data.new_price + minIncrement;
+                    document.getElementById('currentPriceVal').textContent = outbidAmount.toLocaleString();
+                    
+                    // Update quick bid buttons dynamically for the new outbid price
+                    updateQuickBidButtons(outbidAmount);
+                    
+                    const outbidItem = document.createElement('div');
+                    outbidItem.className = 'feed-item new-bid';
+                    outbidItem.innerHTML = `<span style="font-weight: 800;">${outbidAmount.toLocaleString()} SAR</span><span>مزايد #1905</span>`;
+                    feedList.insertBefore(outbidItem, feedList.firstChild);
+                    
+                    document.getElementById('bidsCountBadge').textContent = `${data.bids_count + 1} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+                    
+                    input.value = outbidAmount + minIncrement;
+                    input.min = outbidAmount + minIncrement;
+
+                    // Update chart data for outbid
+                    priceHistoryData.push({
+                        time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                        amount: outbidAmount,
+                        bidder: '{{ app()->getLocale() === "ar" ? "مزايد #1905" : "Bidder #1905" }}'
                 });
                 if (priceChart) {
                     renderPriceHistoryChart();
@@ -1115,11 +1106,12 @@ function placeBidNow() {
         } else {
             toastr.error(data.message || 'Failed to submit bid');
         }
-    })
-    .catch(err => {
+    },
+    onError: function(xhr) {
         btn.disabled = false;
         btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
         toastr.error('Connection error.');
+    }
     });
 }
 </script>

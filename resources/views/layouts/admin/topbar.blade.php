@@ -5,8 +5,77 @@
                 </button>
                 <div class="search-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" placeholder="{{ __('Quick Search...') }}" class="form-control">
+                    <input type="text" id="header_quick_search" placeholder="{{ __('Quick Search...') }}" class="form-control" autocomplete="off">
+                    <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                 </div>
+                
+                <style>
+                    .search-box {
+                        position: relative;
+                    }
+                    .global-search-dropdown {
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        background: var(--bg-card, #ffffff);
+                        border: 1px solid var(--border, #e2e8f0);
+                        border-radius: 12px;
+                        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+                        z-index: 1050;
+                        max-height: 400px;
+                        overflow-y: auto;
+                        margin-top: 5px;
+                        display: none;
+                        text-align: start;
+                    }
+                    .global-search-category {
+                        font-size: 0.75rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        color: var(--text-muted, #718096);
+                        padding: 10px 15px 5px 15px;
+                        border-bottom: 1px solid var(--border-light, #edf2f7);
+                        background: rgba(0,0,0,0.02);
+                    }
+                    [data-theme="dark"] .global-search-category {
+                        background: rgba(255,255,255,0.02);
+                    }
+                    .global-search-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 10px 15px;
+                        color: var(--text-color, #2d3748);
+                        text-decoration: none;
+                        transition: background 0.15s ease;
+                    }
+                    .global-search-item:hover {
+                        background: var(--bg-input, #f7fafc);
+                        color: var(--primary, #6366f1);
+                    }
+                    [data-theme="dark"] .global-search-item:hover {
+                        background: rgba(255,255,255,0.05);
+                    }
+                    .global-search-item i {
+                        font-size: 1.1rem;
+                        color: var(--primary, #6366f1);
+                        width: 20px;
+                        text-align: center;
+                    }
+                    .global-search-item-info {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .global-search-item-title {
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                    }
+                    .global-search-item-subtitle {
+                        font-size: 0.75rem;
+                        color: var(--text-muted, #718096);
+                    }
+                </style>
             </div>
             <div class="topbar-right" style="display:flex; align-items:center; gap:1rem;">
                 {{-- Language Toggle --}}

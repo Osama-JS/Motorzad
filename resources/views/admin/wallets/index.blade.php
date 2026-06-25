@@ -102,6 +102,44 @@
                 <option value="100">100</option>
             </select>
         </div>
+
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                {{ __('Columns') }}
+            </button>
+            <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_user" value="0" checked disabled>
+                    <label class="form-check-label" for="col_user">{{ __('User') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_balance" value="1" checked>
+                    <label class="form-check-label" for="col_balance">{{ __('Balance') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_debt" value="2" checked>
+                    <label class="form-check-label" for="col_debt">{{ __('Debt Ceiling') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_usage" value="3" checked>
+                    <label class="form-check-label" for="col_usage">{{ __('Debt Usage') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_deposits" value="4" checked>
+                    <label class="form-check-label" for="col_deposits">{{ __('Total Deposits') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_withdrawals" value="5" checked>
+                    <label class="form-check-label" for="col_withdrawals">{{ __('Total Withdrawals') }}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_actions" value="6" checked disabled>
+                    <label class="form-check-label" for="col_actions">{{ __('Actions') }}</label>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
@@ -122,13 +160,13 @@
             <table id="wallets-table" class="table align-items-center mb-0 w-100">
                 <thead>
                     <tr>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('User') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Balance') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Debt Ceiling') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Debt Usage') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Total Deposits') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Total Withdrawals') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Actions') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-0">{{ __('User') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-1">{{ __('Balance') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-2">{{ __('Debt Ceiling') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-3">{{ __('Debt Usage') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-4">{{ __('Total Deposits') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-5">{{ __('Total Withdrawals') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-6">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="custom-wallets-tbody">

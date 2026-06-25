@@ -244,13 +244,13 @@
         <table class="table table-hover table-striped align-middle mb-0 w-100" id="auctions-custom-table">
             <thead class="table-light">
                 <tr>
-                    <th class="border-bottom-0" data-col="0">{{ __('Image') }}</th>
-                    <th class="border-bottom-0" data-col="1">{{ __('Title') }}</th>
-                    <th class="border-bottom-0" data-col="2">{{ __('Vehicle') }}</th>
-                    <th class="border-bottom-0" data-col="3">{{ __('Start Price') }}</th>
-                    <th class="border-bottom-0" data-col="4">{{ __('Status') }}</th>
-                    <th class="border-bottom-0" data-col="5">{{ __('Start Time') }}</th>
-                    <th class="border-bottom-0" data-col="6">{{ __('End Time') }}</th>
+                    <th class="border-bottom-0 col-toggle-0" data-col="0">{{ __('Image') }}</th>
+                    <th class="border-bottom-0 col-toggle-1" data-col="1">{{ __('Title') }}</th>
+                    <th class="border-bottom-0 col-toggle-2" data-col="2">{{ __('Vehicle') }}</th>
+                    <th class="border-bottom-0 col-toggle-3" data-col="3">{{ __('Start Price') }}</th>
+                    <th class="border-bottom-0 col-toggle-4" data-col="4">{{ __('Status') }}</th>
+                    <th class="border-bottom-0 col-toggle-5" data-col="5">{{ __('Start Time') }}</th>
+                    <th class="border-bottom-0 col-toggle-6" data-col="6">{{ __('End Time') }}</th>
                     <th class="border-bottom-0 text-center" style="width: 120px;">{{ __('Actions') }}</th>
                 </tr>
             </thead>

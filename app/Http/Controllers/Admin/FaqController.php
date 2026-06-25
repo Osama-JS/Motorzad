@@ -18,22 +18,53 @@ class FaqController extends Controller
         return view('admin.faqs.index', compact('stats'));
     }
 
-    public function getData()
+    public function getData(Request $request)
     {
-        $faqs = Faq::all();
+        $query = Faq::query();
+
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('question_ar', 'like', "%{$search}%")
+                  ->orWhere('question_en', 'like', "%{$search}%")
+                  ->orWhere('answer_ar', 'like', "%{$search}%")
+                  ->orWhere('answer_en', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->status) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        $perPage = $request->per_page ?? 10;
+        $faqs = $query->paginate($perPage);
+
+        $data = [];
+        foreach ($faqs as $faq) {
+            $data[] = [
+                'id' => $faq->id,
+                'question_ar' => $faq->question_ar,
+                'question_en' => $faq->question_en,
+                'answer_ar' => $faq->answer_ar,
+                'answer_en' => $faq->answer_en,
+                'question' => app()->getLocale() == 'ar' ? $faq->question_ar : $faq->question_en,
+                'answer' => app()->getLocale() == 'ar' ? $faq->answer_ar : $faq->answer_en,
+                'is_active' => (bool)$faq->is_active,
+            ];
+        }
 
         return response()->json([
-            'data' => $faqs->map(function ($faq) {
-                return [
-                    'id' => $faq->id,
-                    'question' => app()->getLocale() == 'ar' ? $faq->question_ar : $faq->question_en,
-                    'is_active' => '<div class="form-check form-switch fs-4"><input class="form-check-input" type="checkbox" onchange="toggleStatus(' . $faq->id . ')" ' . ($faq->is_active ? 'checked' : '') . '></div>',
-                    'actions' => '
-                        <button onclick="editFaq(' . $faq->id . ', \'' . htmlspecialchars(addslashes($faq->question_ar)) . '\', \'' . htmlspecialchars(addslashes($faq->question_en)) . '\', \'' . htmlspecialchars(addslashes($faq->answer_ar)) . '\', \'' . htmlspecialchars(addslashes($faq->answer_en)) . '\', ' . $faq->is_active . ')" class="btn btn-sm btn-primary">' . __('Edit') . '</button>
-                        <button onclick="deleteFaq(' . $faq->id . ')" class="btn btn-sm btn-danger">' . __('Delete') . '</button>
-                    '
-                ];
-            })
+            'success' => true,
+            'data' => $data,
+            'pagination' => [
+                'total' => $faqs->total(),
+                'current_page' => $faqs->currentPage(),
+                'links' => $faqs->linkCollection()->toArray()
+            ]
         ]);
     }
 
@@ -57,7 +88,7 @@ class FaqController extends Controller
             'question_en' => $request->question_en,
             'answer_ar' => $request->answer_ar,
             'answer_en' => $request->answer_en,
-            'is_active' => $request->has('is_active'),
+            'is_active' => $request->has('is_active') || $request->boolean('is_active'),
         ]);
 
         if ($request->ajax()) {
@@ -87,7 +118,7 @@ class FaqController extends Controller
             'question_en' => $request->question_en,
             'answer_ar' => $request->answer_ar,
             'answer_en' => $request->answer_en,
-            'is_active' => $request->has('is_active'),
+            'is_active' => $request->has('is_active') || $request->boolean('is_active'),
         ]);
 
         if ($request->ajax()) {
@@ -102,7 +133,7 @@ class FaqController extends Controller
         $faq->delete();
 
         if (request()->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => __('FAQ deleted successfully.')]);
         }
 
         return redirect()->route('admin.faqs.index')->with('success', __('FAQ deleted successfully.'));

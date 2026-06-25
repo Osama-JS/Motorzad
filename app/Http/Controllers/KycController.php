@@ -11,10 +11,17 @@ class KycController extends Controller
     /**
      * Display the KYC verification page.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $latestRequest = $user->latestKycRequest;
+        
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('kyc.partials.content', compact('user', 'latestRequest'))->render()
+            ]);
+        }
         
         return view('kyc.index', compact('user', 'latestRequest'));
     }
@@ -36,6 +43,12 @@ class KycController extends Controller
 
         // Check if there's a pending request
         if ($user->kycRequests()->where('status', 'pending')->exists()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('لديك طلب قيد المراجعة بالفعل.')
+                ], 422);
+            }
             return back()->with('error', 'لديك طلب قيد المراجعة بالفعل.');
         }
 
@@ -51,6 +64,13 @@ class KycController extends Controller
             'selfie_image' => $selfiePath,
             'status' => 'pending'
         ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('تم إرسال طلب التحقق بنجاح. سيتم مراجعته من قبل الإدارة.')
+            ]);
+        }
 
         return redirect()->route('kyc.index')->with('success', 'تم إرسال طلب التحقق بنجاح. سيتم مراجعته من قبل الإدارة.');
     }

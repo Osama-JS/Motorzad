@@ -29,6 +29,23 @@ class AuctionController extends Controller
         // Check if there are auctions in the DB
         $dbCount = Auction::count();
 
+        // Fetch values for drop-downs
+        if ($dbCount > 0) {
+            $makes = \App\Models\Vehicle::select('make_ar', 'make_en')->distinct()->get()->map(function($v) {
+                return app()->getLocale() === 'ar' ? ($v->make_ar ?: $v->make_en) : ($v->make_en ?: $v->make_ar);
+            })->filter()->unique()->values();
+            
+            $locations = Auction::select('location_ar', 'location_en')->distinct()->get()->map(function($v) {
+                return app()->getLocale() === 'ar' ? ($v->location_ar ?: $v->location_en) : ($v->location_en ?: $v->location_ar);
+            })->filter()->unique()->values();
+            if ($locations->isEmpty()) {
+                $locations = collect(['الرياض', 'جدة', 'الدمام']);
+            }
+        } else {
+            $makes = collect(['Mercedes-Benz', 'Porsche', 'BMW', 'Land Rover', 'Audi', 'Lexus', 'Toyota']);
+            $locations = collect(['الرياض', 'جدة', 'الدمام']);
+        }
+
         if ($dbCount > 0) {
             $query = Auction::with(['vehicle', 'vehicle.images', 'highestBid']);
 
@@ -44,6 +61,39 @@ class AuctionController extends Controller
                             ->orWhere('model_en', 'like', "%{$search}%")
                             ->orWhere('year', 'like', "%{$search}%");
                       });
+                });
+            }
+
+            // Apply Advanced Filters
+            if ($request->filled('make')) {
+                $query->whereHas('vehicle', function($q) use ($request) {
+                    $q->where('make_en', $request->make)
+                      ->orWhere('make_ar', $request->make);
+                });
+            }
+
+            if ($request->filled('location')) {
+                $query->where(function($q) use ($request) {
+                    $q->where('location_ar', 'like', "%{$request->location}%")
+                      ->orWhere('location_en', 'like', "%{$request->location}%");
+                });
+            }
+
+            if ($request->filled('year_from')) {
+                $query->whereHas('vehicle', function($q) use ($request) {
+                    $q->where('year', '>=', intval($request->year_from));
+                });
+            }
+
+            if ($request->filled('year_to')) {
+                $query->whereHas('vehicle', function($q) use ($request) {
+                    $q->where('year', '<=', intval($request->year_to));
+                });
+            }
+
+            if ($request->filled('condition')) {
+                $query->whereHas('vehicle', function($q) use ($request) {
+                    $q->where('condition', $request->condition);
                 });
             }
 
@@ -85,6 +135,33 @@ class AuctionController extends Controller
                 });
             }
 
+            // Apply advanced filters on mock
+            if ($request->filled('make')) {
+                $mockAuctions = array_filter($mockAuctions, function($auc) use ($request) {
+                    return strcasecmp($auc['make'], $request->make) === 0;
+                });
+            }
+            if ($request->filled('location')) {
+                $mockAuctions = array_filter($mockAuctions, function($auc) use ($request) {
+                    return stripos($auc['location'], $request->location) !== false;
+                });
+            }
+            if ($request->filled('year_from')) {
+                $mockAuctions = array_filter($mockAuctions, function($auc) use ($request) {
+                    return $auc['year'] >= intval($request->year_from);
+                });
+            }
+            if ($request->filled('year_to')) {
+                $mockAuctions = array_filter($mockAuctions, function($auc) use ($request) {
+                    return $auc['year'] <= intval($request->year_to);
+                });
+            }
+            if ($request->filled('condition')) {
+                $mockAuctions = array_filter($mockAuctions, function($auc) use ($request) {
+                    return $auc['condition'] === $request->condition;
+                });
+            }
+
             if ($tab === 'live') {
                 $mockAuctions = array_filter($mockAuctions, function($auc) {
                     return $auc['status'] === 'live';
@@ -102,11 +179,18 @@ class AuctionController extends Controller
                 $mockAuctions = array_slice($mockAuctions, 0, 2);
             }
 
-            $auctions = collect($mockAuctions);
+            $auctions = collect(array_values($mockAuctions));
             $usingMock = true;
         }
 
-        return view('bidder.auctions.index', compact('auctions', 'tab', 'search', 'usingMock'));
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('bidder.auctions.partials.grid', compact('auctions', 'tab', 'search', 'usingMock'))->render()
+            ]);
+        }
+
+        return view('bidder.auctions.index', compact('auctions', 'tab', 'search', 'usingMock', 'makes', 'locations'));
     }
 
     /**
@@ -437,39 +521,112 @@ class AuctionController extends Controller
                 ->with('error', __('Please complete identity verification to view your bids.'));
         }
 
+        $status = $request->input('status', 'all'); // all, winning, outbid, won, lost
+
         // Check if user has real bids
         $realBidsCount = Bid::where('user_id', $user->id)->count();
 
         if ($realBidsCount > 0) {
-            // Fetch auctions where user has bid
-            $auctions = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'bids' => function($q) use ($user) {
+            // Calculate overall counts for the widgets
+            $totalCount = Auction::whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->count();
+            
+            $winningCount = Auction::whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->where('status', 'live')
+              ->where('start_time', '<=', now())
+              ->where('end_time', '>=', now())
+              ->where('winner_id', $user->id)
+              ->count();
+
+            $outbidCount = Auction::whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->where('status', 'live')
+              ->where('start_time', '<=', now())
+              ->where('end_time', '>=', now())
+              ->where(function($q) use ($user) {
+                  $q->where('winner_id', '!=', $user->id)
+                    ->orWhereNull('winner_id');
+              })->count();
+
+            $wonCount = Auction::whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->where(function($q) {
+                $q->where('status', 'ended')
+                  ->orWhere('status', 'sold')
+                  ->orWhere('end_time', '<', now());
+            })->where('winner_id', $user->id)->count();
+
+            $lostCount = Auction::whereHas('bids', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->where(function($q) {
+                $q->where('status', 'ended')
+                  ->orWhere('status', 'sold')
+                  ->orWhere('end_time', '<', now());
+            })->where(function($q) use ($user) {
+                $q->where('winner_id', '!=', $user->id)
+                  ->orWhereNull('winner_id');
+            })->count();
+
+            // Main query
+            $query = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'bids' => function($q) use ($user) {
                 $q->where('user_id', $user->id)->latest();
             }])
             ->whereHas('bids', function($q) use ($user) {
                 $q->where('user_id', $user->id);
-            })
-            ->latest()
-            ->paginate(10);
+            });
 
-            // Dynamically calculate status for each auction
+            // Apply filter status
+            if ($status === 'winning') {
+                $query->where('status', 'live')
+                      ->where('start_time', '<=', now())
+                      ->where('end_time', '>=', now())
+                      ->where('winner_id', $user->id);
+            } elseif ($status === 'outbid') {
+                $query->where('status', 'live')
+                      ->where('start_time', '<=', now())
+                      ->where('end_time', '>=', now())
+                      ->where(function($q) use ($user) {
+                          $q->where('winner_id', '!=', $user->id)
+                            ->orWhereNull('winner_id');
+                      });
+            } elseif ($status === 'won') {
+                $query->where(function($q) {
+                    $q->where('status', 'ended')
+                      ->orWhere('status', 'sold')
+                      ->orWhere('end_time', '<', now());
+                })->where('winner_id', $user->id);
+            } elseif ($status === 'lost') {
+                $query->where(function($q) {
+                    $q->where('status', 'ended')
+                      ->orWhere('status', 'sold')
+                      ->orWhere('end_time', '<', now());
+                })->where(function($q) use ($user) {
+                    $q->where('winner_id', '!=', $user->id)
+                      ->orWhereNull('winner_id');
+                });
+            }
+
+            $auctions = $query->latest()->paginate(10)->withQueryString();
+
+            // Calculate user_max_bid and bidder_status for each item
             foreach ($auctions as $auction) {
-                // Get the user's highest bid in this auction
                 $userMaxBid = $auction->bids->first()->amount ?? 0;
                 $auction->user_max_bid = $userMaxBid;
 
                 // Determine Bidder Status
                 if ($auction->status === 'live' && now()->between($auction->start_time, $auction->end_time)) {
                     if ($auction->winner_id == $user->id) {
-                        $auction->bidder_status = 'winning'; // Winning
+                        $auction->bidder_status = 'winning';
                     } else {
-                        $auction->bidder_status = 'outbid'; // Outbid
+                        $auction->bidder_status = 'outbid';
                     }
                 } else {
-                    // Ended
                     if ($auction->winner_id == $user->id) {
-                        $auction->bidder_status = 'won'; // Won
+                        $auction->bidder_status = 'won';
                     } else {
-                        $auction->bidder_status = 'lost'; // Lost
+                        $auction->bidder_status = 'lost';
                     }
                 }
             }
@@ -531,11 +688,132 @@ class AuctionController extends Controller
                 return isset($auc['bidder_status']);
             });
 
+            // Calculate overall counts for widgets on mock
+            $totalCount = count($filteredMock);
+            $winningCount = count(array_filter($filteredMock, function($x){ return $x['bidder_status'] === 'winning'; }));
+            $outbidCount = count(array_filter($filteredMock, function($x){ return $x['bidder_status'] === 'outbid'; }));
+            $wonCount = count(array_filter($filteredMock, function($x){ return $x['bidder_status'] === 'won'; }));
+            $lostCount = count(array_filter($filteredMock, function($x){ return $x['bidder_status'] === 'lost'; }));
+
+            // Apply filter status on mock
+            if ($status !== 'all') {
+                $filteredMock = array_filter($filteredMock, function($auc) use ($status) {
+                    return $auc['bidder_status'] === $status;
+                });
+            }
+
             $auctions = collect(array_values($filteredMock));
             $usingMock = true;
         }
 
-        return view('bidder.auctions.my-bids', compact('auctions', 'usingMock'));
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('bidder.auctions.partials.my-bids-list', compact('auctions', 'usingMock'))->render()
+            ]);
+        }
+
+        return view('bidder.auctions.my-bids', compact('auctions', 'usingMock', 'status', 'totalCount', 'winningCount', 'outbidCount', 'wonCount', 'lostCount'));
+    }
+
+    /**
+     * Display a list of auctions won by the bidder.
+     */
+    public function wonAuctions(Request $request)
+    {
+        $user = auth()->user();
+        if ($user->status !== 'approved') {
+            return redirect()->route('kyc.index')
+                ->with('error', __('Please complete identity verification to view your won auctions.'));
+        }
+
+        $paymentStatusFilter = $request->input('payment_status'); // pending, paid
+
+        // Check if user has real won auctions
+        $realWonCount = Auction::where('winner_id', $user->id)->count();
+        $bankAccounts = \App\Models\BankAccount::where('is_active', true)->get();
+
+        // If no bank accounts in DB, create a mock collection for premium display
+        if ($bankAccounts->isEmpty()) {
+            $bankAccounts = collect([
+                (object)[
+                    'bank_name' => 'البنك الأهلي السعودي (SNB)',
+                    'beneficiary_name' => 'شركة موترزاد للمزادات',
+                    'iban' => 'SA8910000001234567890123',
+                ],
+                (object)[
+                    'bank_name' => 'مصرف الراجحي (Al Rajhi)',
+                    'beneficiary_name' => 'شركة موترزاد للمزادات',
+                    'iban' => 'SA4580000009876543210987',
+                ]
+            ]);
+        }
+
+        if ($realWonCount > 0) {
+            $query = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'order'])
+                ->where('winner_id', $user->id);
+
+            // Apply payment status filter
+            if (!empty($paymentStatusFilter)) {
+                if ($paymentStatusFilter === 'pending') {
+                    $query->where(function($q) {
+                        $q->whereHas('order', function($oq) {
+                            $oq->where('payment_status', 'pending');
+                        })->orWhereDoesntHave('order');
+                    });
+                } elseif ($paymentStatusFilter === 'paid') {
+                    $query->whereHas('order', function($oq) {
+                        $oq->where('payment_status', 'paid');
+                    });
+                }
+            }
+
+            $auctions = $query->latest()->paginate(10)->withQueryString();
+            $usingMock = false;
+        } else {
+            // Fallback mock won auctions
+            $mockAuctions = $this->getMockAuctions();
+            
+            $wonMock = [];
+            // Mock 1: Pending payment
+            $audi = $mockAuctions[4];
+            $audi['id'] = 5;
+            $audi['bidder_status'] = 'won';
+            $audi['user_max_bid'] = 345000;
+            $audi['winning_bid_amount'] = 345000;
+            $audi['payment_status'] = 'pending';
+            $wonMock[] = $audi;
+
+            // Mock 2: Paid/Completed
+            $porsche = $mockAuctions[1];
+            $porsche['id'] = 2;
+            $porsche['title_ar'] = 'بورش 911 كاريرا GTS 2023 - بحالة الوكالة';
+            $porsche['title_en'] = 'Porsche 911 Carrera GTS 2023 - Like New';
+            $porsche['bidder_status'] = 'won';
+            $porsche['user_max_bid'] = 450000;
+            $porsche['winning_bid_amount'] = 450000;
+            $porsche['payment_status'] = 'paid';
+            $wonMock[] = $porsche;
+
+            // Filter mocks
+            if (!empty($paymentStatusFilter)) {
+                $wonMock = array_filter($wonMock, function($auc) use ($paymentStatusFilter) {
+                    return $auc['payment_status'] === $paymentStatusFilter;
+                });
+            }
+
+            $auctions = collect(array_values($wonMock));
+            $usingMock = true;
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('bidder.auctions.partials.won-auctions-list', compact('auctions', 'usingMock', 'bankAccounts', 'paymentStatusFilter'))->render()
+            ]);
+        }
+
+        return view('bidder.auctions.won', compact('auctions', 'usingMock', 'bankAccounts', 'paymentStatusFilter'));
     }
 
     /**
@@ -711,5 +989,131 @@ class AuctionController extends Controller
                 ],
             ]
         ];
+    }
+
+    /**
+     * Perform a global autocomplete search for the bidder header.
+     */
+    public function globalSearch(Request $request)
+    {
+        $term = $request->input('q');
+        if (empty($term) || strlen($term) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        $results = [];
+        $locale = app()->getLocale();
+
+        // 1. Live and Upcoming Auctions
+        $dbCount = Auction::count();
+        if ($dbCount > 0) {
+            $auctions = Auction::with(['vehicle', 'vehicle.images'])
+                ->where('status', '!=', 'ended')
+                ->where('status', '!=', 'sold')
+                ->where(function($q) use ($term) {
+                    $q->where('title_ar', 'like', "%{$term}%")
+                      ->orWhere('title_en', 'like', "%{$term}%")
+                      ->orWhereHas('vehicle', function($vq) use ($term) {
+                          $vq->where('make_ar', 'like', "%{$term}%")
+                            ->orWhere('make_en', 'like', "%{$term}%")
+                            ->orWhere('model_ar', 'like', "%{$term}%")
+                            ->orWhere('model_en', 'like', "%{$term}%")
+                            ->orWhere('year', 'like', "%{$term}%");
+                      });
+                })
+                ->take(5)
+                ->get();
+
+            if ($auctions->isNotEmpty()) {
+                $results[] = [
+                    'category' => $locale === 'ar' ? 'المزادات المتاحة' : 'Available Auctions',
+                    'items' => $auctions->map(function($auc) {
+                        return [
+                            'title' => $auc->title,
+                            'subtitle' => number_format($auc->current_price) . ' SAR - ' . __($auc->status),
+                            'url' => route('bidder.auctions.show', $auc->id),
+                            'image' => $auc->primary_image_url,
+                            'icon' => 'fa-gavel'
+                        ];
+                    })
+                ];
+            }
+        } else {
+            // Search in mock auctions for high fidelity demo
+            $mockAuctions = $this->getMockAuctions();
+            $filtered = array_filter($mockAuctions, function($auc) use ($term) {
+                return stripos($auc['title_ar'], $term) !== false ||
+                       stripos($auc['title_en'], $term) !== false ||
+                       stripos($auc['make'], $term) !== false ||
+                       stripos($auc['model'], $term) !== false;
+            });
+
+            if (!empty($filtered)) {
+                $results[] = [
+                    'category' => $locale === 'ar' ? 'المزادات المتاحة (تجريبي)' : 'Available Auctions (Demo)',
+                    'items' => array_map(function($auc) {
+                        return [
+                            'title' => app()->getLocale() === 'ar' ? $auc['title_ar'] : $auc['title_en'],
+                            'subtitle' => number_format($auc['current_price']) . ' SAR - ' . __($auc['status']),
+                            'url' => route('bidder.auctions.show', $auc['id']),
+                            'image' => $auc['image'],
+                            'icon' => 'fa-gavel'
+                        ];
+                    }, array_slice($filtered, 0, 5))
+                ];
+            }
+        }
+
+        // 2. Static Pages (e.g. Terms of Use, Privacy Policy, Info)
+        $pages = \App\Models\Page::where('is_active', true)
+            ->where(function($q) use ($term) {
+                $q->where('title', 'like', "%{$term}%")
+                  ->orWhere('content', 'like', "%{$term}%");
+            })
+            ->take(3)
+            ->get();
+
+        if ($pages->isNotEmpty()) {
+            $results[] = [
+                'category' => $locale === 'ar' ? 'الصفحات التعريفية' : 'Information Pages',
+                'items' => $pages->map(function($page) {
+                    return [
+                        'title' => $page->title,
+                        'subtitle' => __('صفحة تعريفية للموقع'),
+                        'url' => route('page.show', $page->slug),
+                        'image' => null,
+                        'icon' => 'fa-file-alt'
+                    ];
+                })
+            ];
+        }
+
+        // 3. FAQs
+        $faqs = \App\Models\Faq::where('is_active', true)
+            ->where(function($q) use ($term) {
+                $q->where('question_ar', 'like', "%{$term}%")
+                  ->orWhere('question_en', 'like', "%{$term}%")
+                  ->orWhere('answer_ar', 'like', "%{$term}%")
+                  ->orWhere('answer_en', 'like', "%{$term}%");
+            })
+            ->take(3)
+            ->get();
+
+        if ($faqs->isNotEmpty()) {
+            $results[] = [
+                'category' => $locale === 'ar' ? 'الأسئلة الشائعة' : 'FAQs',
+                'items' => $faqs->map(function($faq) {
+                    return [
+                        'title' => $locale === 'ar' ? $faq->question_ar : $faq->question_en,
+                        'subtitle' => __('مركز الدعم والمساعدة'),
+                        'url' => route('resources') . '#faq-' . $faq->id,
+                        'image' => null,
+                        'icon' => 'fa-question-circle'
+                    ];
+                })
+            ];
+        }
+
+        return response()->json(['results' => $results]);
     }
 }

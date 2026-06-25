@@ -70,19 +70,12 @@ const WJHTAKAdmin = {
     },
 
     toggleColumn: function(colIndex, isVisible, save = true) {
-        const table = document.getElementById('auctions-custom-table');
-        if (!table) return;
-
-        // Toggle Th
-        const th = table.querySelector(`th[data-col="${colIndex}"]`);
-        if (th) th.style.display = isVisible ? '' : 'none';
-
-        // Toggle Td
-        const tbody = document.getElementById('custom-auctions-tbody');
-        const trs = tbody.querySelectorAll('tr');
-        trs.forEach(tr => {
-            const td = tr.children[colIndex];
-            if (td) td.style.display = isVisible ? '' : 'none';
+        document.querySelectorAll('.col-toggle-' + colIndex).forEach(el => {
+            if (isVisible) {
+                el.classList.remove('d-none');
+            } else {
+                el.classList.add('d-none');
+            }
         });
 
         if (save) {
@@ -149,13 +142,13 @@ function renderTable(data) {
     data.forEach(item => {
         html += `
             <tr id="auction-row-${item.id}">
-                <td>${item.image}</td>
-                <td>${item.title}</td>
-                <td><span class="text-muted fw-semibold">${item.vehicle}</span></td>
-                <td>${item.start_price}</td>
-                <td>${item.status}</td>
-                <td>${item.start_time}</td>
-                <td>${item.end_time}</td>
+                <td class="col-toggle-0">${item.image}</td>
+                <td class="col-toggle-1">${item.title}</td>
+                <td class="col-toggle-2"><span class="text-muted fw-semibold">${item.vehicle}</span></td>
+                <td class="col-toggle-3">${item.start_price}</td>
+                <td class="col-toggle-4">${item.status}</td>
+                <td class="col-toggle-5">${item.start_time}</td>
+                <td class="col-toggle-6">${item.end_time}</td>
                 <td class="text-center">${item.actions}</td>
             </tr>
         `;
@@ -177,26 +170,26 @@ function renderGrid(data) {
         html += `
             <div class="col-12 col-md-6 col-xl-4 col-xxl-3" id="auction-card-${item.id}">
                 <div class="data-view-card h-100 d-flex flex-column">
-                    <div class="position-relative">
+                    <div class="position-relative col-toggle-0">
                         ${item.image_url ? `<img src="${item.image_url}" class="card-img-top" alt="">` : `<div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted"><i class="fa-solid fa-car fa-3x"></i></div>`}
-                        <div class="position-absolute top-0 end-0 p-2">
+                        <div class="position-absolute top-0 end-0 p-2 col-toggle-4">
                             ${item.status}
                         </div>
                     </div>
                     <div class="card-body flex-grow-1">
-                        <h5 class="card-title text-truncate mb-1" title="${item.raw_title}">${item.raw_title}</h5>
-                        <p class="text-muted small mb-3"><i class="fa-solid fa-car me-1"></i> ${item.vehicle}</p>
+                        <h5 class="card-title text-truncate mb-1 col-toggle-1" title="${item.raw_title}">${item.raw_title}</h5>
+                        <p class="text-muted small mb-3 col-toggle-2"><i class="fa-solid fa-car me-1"></i> ${item.vehicle}</p>
                         
-                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom col-toggle-3">
                             <span class="text-muted small">Start Price:</span>
                             <span>${item.start_price}</span>
                         </div>
                         
-                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                        <div class="d-flex justify-content-between align-items-center small mb-1 col-toggle-5">
                             <span class="text-muted"><i class="fa-regular fa-clock me-1"></i> Start:</span>
                             <span>${item.start_time}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center small">
+                        <div class="d-flex justify-content-between align-items-center small col-toggle-6">
                             <span class="text-muted"><i class="fa-solid fa-hourglass-end me-1"></i> End:</span>
                             <span>${item.end_time}</span>
                         </div>

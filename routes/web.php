@@ -51,6 +51,7 @@ Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role:admin'])->gro
 // Admin Management Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/global-search', [\App\Http\Controllers\Admin\DashboardController::class, 'globalSearch'])->name('global-search');
     Route::get('pages/data', [\App\Http\Controllers\Admin\PageController::class, 'getData'])->name('pages.data');
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
     Route::get('roles/data', [\App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles.data');
@@ -142,11 +143,18 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
 
     // Auctions Routes
+    Route::get('/global-search', [\App\Http\Controllers\Bidder\AuctionController::class, 'globalSearch'])->name('global-search');
+    Route::get('/won-auctions', [\App\Http\Controllers\Bidder\AuctionController::class, 'wonAuctions'])->name('auctions.won');
     Route::get('/my-bids', [\App\Http\Controllers\Bidder\AuctionController::class, 'myBids'])->name('auctions.my-bids');
     Route::get('/auctions', [\App\Http\Controllers\Bidder\AuctionController::class, 'index'])->name('auctions.index');
     Route::get('/auctions/{id}', [\App\Http\Controllers\Bidder\AuctionController::class, 'show'])->name('auctions.show');
     Route::post('/auctions/{id}/bid', [\App\Http\Controllers\Bidder\AuctionController::class, 'placeBid'])->name('auctions.bid');
     Route::post('/auctions/{id}/watch', [\App\Http\Controllers\Bidder\AuctionController::class, 'toggleWatchlist'])->name('auctions.watch');
+
+    // Notifications Routes
+    Route::get('/notifications/unread-state', [\App\Http\Controllers\Bidder\DashboardController::class, 'getUnreadState'])->name('notifications.unread_state');
+    Route::get('/notifications', [\App\Http\Controllers\Bidder\DashboardController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Bidder\DashboardController::class, 'markNotificationRead'])->name('notifications.read');
 });
 
 Route::get('/resources', function () {

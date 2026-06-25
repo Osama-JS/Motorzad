@@ -44,7 +44,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
 .auc-tabs {
@@ -63,6 +63,7 @@
     border-radius: 10px;
     transition: all 0.3s ease;
     text-decoration: none;
+    cursor: pointer;
 }
 .auc-tab:hover {
     color: var(--text);
@@ -78,7 +79,7 @@
     display: flex;
     gap: 0.75rem;
     flex: 1;
-    max-width: 450px;
+    max-width: 580px;
 }
 .search-input-wrapper {
     position: relative;
@@ -116,7 +117,7 @@ html[dir="rtl"] .search-input-wrapper input {
     outline: none;
     box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
 }
-.btn-search {
+.btn-toggle-filters {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -125,10 +126,161 @@ html[dir="rtl"] .search-input-wrapper input {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.btn-toggle-filters:hover, .btn-toggle-filters.active {
+    background: var(--bg-hover);
+    border-color: var(--brand-red);
+}
+.btn-toggle-filters svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+.btn-toggle-filters.active svg {
+    color: var(--brand-red);
+}
+.active-filter-badge {
+    background: var(--brand-red);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 20px;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+    line-height: 1;
+}
+.btn-search {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0 1.5rem;
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 .btn-search:hover {
     background: var(--bg-hover);
     border-color: var(--text-muted);
+}
+
+/* Advanced Filters Panel */
+.advanced-filters-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: none; /* Controlled by jQuery */
+}
+.adv-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.25rem;
+}
+@media (max-width: 992px) {
+    .adv-filters-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .adv-filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .adv-filters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.filter-group label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+html[dir="rtl"] .filter-group label {
+    letter-spacing: 0;
+}
+.filter-group select {
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    color: var(--text);
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.2rem;
+    padding-right: 2.25rem;
+}
+html[dir="rtl"] .filter-group select {
+    background-position: left 0.75rem center;
+    padding-right: 1rem;
+    padding-left: 2.25rem;
+}
+.filter-group select:focus {
+    border-color: var(--brand-red);
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+.adv-filters-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+.btn-clear-adv-filters {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 700;
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-clear-adv-filters:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+.btn-apply-filters {
+    background: var(--brand-red);
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.65rem 1.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+}
+.btn-apply-filters:hover {
+    background: #dd3b3b;
+    box-shadow: 0 6px 16px rgba(229, 62, 62, 0.3);
+    transform: translateY(-1px);
+}
+.btn-apply-filters:active {
+    transform: translateY(0);
 }
 
 /* Grid & Cards */
@@ -427,162 +579,111 @@ html[dir="rtl"] .timer-floating {
 </div>
 
 {{-- ===== FILTER & SEARCH BAR ===== --}}
-<div class="filters-bar">
-    <div class="auc-tabs">
-        <a href="{{ route('bidder.auctions.index', ['tab' => 'live', 'search' => $search]) }}" class="auc-tab {{ $tab === 'live' ? 'active' : '' }}">
-            {{ app()->getLocale() === 'ar' ? 'المزادات الحية' : 'Live Auctions' }}
-        </a>
-        <a href="{{ route('bidder.auctions.index', ['tab' => 'upcoming', 'search' => $search]) }}" class="auc-tab {{ $tab === 'upcoming' ? 'active' : '' }}">
-            {{ app()->getLocale() === 'ar' ? 'القادمة قريباً' : 'Upcoming' }}
-        </a>
-        <a href="{{ route('bidder.auctions.index', ['tab' => 'ended', 'search' => $search]) }}" class="auc-tab {{ $tab === 'ended' ? 'active' : '' }}">
-            {{ app()->getLocale() === 'ar' ? 'المنتهية' : 'Ended' }}
-        </a>
-        <a href="{{ route('bidder.auctions.index', ['tab' => 'watchlist', 'search' => $search]) }}" class="auc-tab {{ $tab === 'watchlist' ? 'active' : '' }}">
-            {{ app()->getLocale() === 'ar' ? 'المتابعة' : 'Watchlist' }}
-        </a>
+<form id="auctions-filter-form" action="{{ route('bidder.auctions.index') }}" method="GET" style="width: 100%;">
+    <input type="hidden" id="filter-tab" name="tab" value="{{ $tab }}">
+    
+    <div class="filters-bar">
+        <div class="auc-tabs">
+            <a href="#" data-tab="live" class="auc-tab {{ $tab === 'live' ? 'active' : '' }}">
+                {{ app()->getLocale() === 'ar' ? 'المزادات الحية' : 'Live Auctions' }}
+            </a>
+            <a href="#" data-tab="upcoming" class="auc-tab {{ $tab === 'upcoming' ? 'active' : '' }}">
+                {{ app()->getLocale() === 'ar' ? 'القادمة قريباً' : 'Upcoming' }}
+            </a>
+            <a href="#" data-tab="ended" class="auc-tab {{ $tab === 'ended' ? 'active' : '' }}">
+                {{ app()->getLocale() === 'ar' ? 'المنتهية' : 'Ended' }}
+            </a>
+            <a href="#" data-tab="watchlist" class="auc-tab {{ $tab === 'watchlist' ? 'active' : '' }}">
+                {{ app()->getLocale() === 'ar' ? 'المتابعة' : 'Watchlist' }}
+            </a>
+        </div>
+
+        <div class="search-filter-box">
+            <div class="search-input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="filter-search" name="search" value="{{ $search }}" placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث بالشركة، الموديل...' : 'Search by make, model...' }}">
+            </div>
+            
+            <button type="button" class="btn-toggle-filters" title="{{ app()->getLocale() === 'ar' ? 'فلاتر متقدمة' : 'Advanced Filters' }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span class="btn-text">{{ app()->getLocale() === 'ar' ? 'تصفية' : 'Filter' }}</span>
+                <span class="active-filter-badge" style="display: none;">0</span>
+            </button>
+
+            <button type="submit" class="btn-search">{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}</button>
+        </div>
     </div>
 
-    <form action="{{ route('bidder.auctions.index') }}" method="GET" class="search-filter-box">
-        <input type="hidden" name="tab" value="{{ $tab }}">
-        <div class="search-input-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" name="search" value="{{ $search }}" placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث بالشركة، الموديل...' : 'Search by make, model...' }}">
+    <!-- Advanced Filters Panel (initially hidden, expands/slides down) -->
+    <div class="advanced-filters-panel">
+        <div class="adv-filters-grid">
+            <!-- Make -->
+            <div class="filter-group">
+                <label>{{ app()->getLocale() === 'ar' ? 'الماركة' : 'Make' }}</label>
+                <select name="make" id="filter-make">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'كل الماركات' : 'All Makes' }}</option>
+                    @foreach($makes as $m)
+                        <option value="{{ $m }}">{{ $m }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Location -->
+            <div class="filter-group">
+                <label>{{ app()->getLocale() === 'ar' ? 'الموقع' : 'Location' }}</label>
+                <select name="location" id="filter-location">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'كل المواقع' : 'All Locations' }}</option>
+                    @foreach($locations as $loc)
+                        <option value="{{ $loc }}">{{ $loc }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Year From -->
+            <div class="filter-group">
+                <label>{{ app()->getLocale() === 'ar' ? 'سنة الصنع (من)' : 'Year From' }}</label>
+                <select name="year_from" id="filter-year-from">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'من' : 'From' }}</option>
+                    @for($y = date('Y') + 1; $y >= 1990; $y--)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+
+            <!-- Year To -->
+            <div class="filter-group">
+                <label>{{ app()->getLocale() === 'ar' ? 'سنة الصنع (إلى)' : 'Year To' }}</label>
+                <select name="year_to" id="filter-year-to">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'إلى' : 'To' }}</option>
+                    @for($y = date('Y') + 1; $y >= 1990; $y--)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+
+            <!-- Condition -->
+            <div class="filter-group">
+                <label>{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Condition' }}</label>
+                <select name="condition" id="filter-condition">
+                    <option value="">{{ app()->getLocale() === 'ar' ? 'كل الحالات' : 'All Conditions' }}</option>
+                    <option value="new">{{ app()->getLocale() === 'ar' ? 'جديدة' : 'New' }}</option>
+                    <option value="excellent">{{ app()->getLocale() === 'ar' ? 'ممتازة' : 'Excellent' }}</option>
+                    <option value="good">{{ app()->getLocale() === 'ar' ? 'جيدة' : 'Good' }}</option>
+                </select>
+            </div>
         </div>
-        <button type="submit" class="btn-search">{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}</button>
-    </form>
-</div>
+
+        <div class="adv-filters-footer">
+            <button type="button" class="btn-clear-adv-filters">{{ app()->getLocale() === 'ar' ? 'إعادة ضبط' : 'Reset Filters' }}</button>
+            <button type="submit" class="btn-apply-filters">{{ app()->getLocale() === 'ar' ? 'تطبيق الفلاتر' : 'Apply Filters' }}</button>
+        </div>
+    </div>
+</form>
 
 {{-- ===== AUCTIONS GRID ===== --}}
-@if($auctions && $auctions->count() > 0)
-    <div class="auctions-grid">
-        @foreach($auctions as $auc)
-            @php
-                // Standardizing properties between DB models and Mock array
-                $aucId = $usingMock ? $auc['id'] : $auc->id;
-                $aucTitle = $usingMock ? (app()->getLocale() === 'ar' ? $auc['title_ar'] : $auc['title_en']) : $auc->title;
-                $aucMake = $usingMock ? $auc['make'] : $auc->vehicle->make;
-                $aucModel = $usingMock ? $auc['model'] : $auc->vehicle->model;
-                $aucYear = $usingMock ? $auc['year'] : $auc->vehicle->year;
-                $aucTransmission = $usingMock ? $auc['transmission'] : $auc->vehicle->transmission;
-                $aucFuel = $usingMock ? $auc['fuel_type'] : $auc->vehicle->fuel_type;
-                $aucEngine = $usingMock ? $auc['engine_capacity'] : $auc->vehicle->engine_capacity;
-                $aucLocation = $usingMock ? $auc['location'] : $auc->location;
-                $aucPrice = $usingMock ? $auc['current_price'] : $auc->current_price;
-                $aucImage = $usingMock ? $auc['image'] : ($auc->vehicle->primary_image_url ?? 'https://images.unsplash.com/photo-1625231334401-6162a5e0a0d9?w=600&h=400&fit=crop');
-                $aucStatus = $usingMock ? $auc['status'] : $auc->status;
-                $aucBidsCount = $usingMock ? $auc['bids_count'] : $auc->bids_count;
-                
-                // Format Status
-                $statusClass = 'ended';
-                $statusLabel = app()->getLocale() === 'ar' ? 'منتهي' : 'Ended';
-                if ($aucStatus === 'live' || $aucStatus === 'sold') {
-                    $statusClass = $aucStatus === 'live' ? 'live' : 'ended';
-                    $statusLabel = $aucStatus === 'live' ? (app()->getLocale() === 'ar' ? 'مباشر' : 'Live') : (app()->getLocale() === 'ar' ? 'منتهي' : 'Ended');
-                } elseif ($aucStatus === 'scheduled' || $aucStatus === 'upcoming') {
-                    $statusClass = 'upcoming';
-                    $statusLabel = app()->getLocale() === 'ar' ? 'قادم' : 'Upcoming';
-                }
-
-                // Time remaining label
-                $timeLeft = '';
-                if ($usingMock) {
-                    $timeLeft = $aucStatus === 'live' ? '03:14:02' : ($aucStatus === 'upcoming' ? (app()->getLocale() === 'ar' ? 'خلال 24 ساعة' : 'In 24 hours') : (app()->getLocale() === 'ar' ? 'مغلق' : 'Closed'));
-                } else {
-                    $timeLeft = $auc->is_live ? gmdate("H:i:s", $auc->time_remaining) : (app()->getLocale() === 'ar' ? 'مغلق' : 'Closed');
-                }
-            @endphp
-            
-            <div class="auc-card">
-                <div class="auc-image-area">
-                    <img src="{{ $aucImage }}" alt="{{ $aucTitle }}">
-                    
-                    <span class="badge-floating {{ $statusClass }}">
-                        @if($statusClass === 'live')
-                            <span class="pulse-dot"></span>
-                        @endif
-                        {{ $statusLabel }}
-                    </span>
-
-                    <button class="watchlist-btn {{ (isset($isWatched) && $isWatched) ? 'active' : '' }}" onclick="toggleWatch(this, {{ $aucId }})" aria-label="Add to watchlist">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                    </button>
-
-                    @if($statusClass === 'live' || $statusClass === 'upcoming')
-                        <div class="timer-floating">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span>{{ $timeLeft }}</span>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="auc-info">
-                    <div class="auc-title-row">
-                        <h3>{{ $aucTitle }}</h3>
-                    </div>
-
-                    <div class="auc-specs">
-                        <div class="spec-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <span>{{ $aucYear }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            <span>{{ ucfirst($aucTransmission) }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            <span>{{ $aucEngine }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            <span>{{ $aucLocation }}</span>
-                        </div>
-                    </div>
-
-                    <div class="auc-footer">
-                        <div class="price-block">
-                            <span class="price-label">
-                                @if($statusClass === 'live')
-                                    {{ app()->getLocale() === 'ar' ? 'المزايدة الحالية' : 'Current Price' }}
-                                @else
-                                    {{ app()->getLocale() === 'ar' ? 'سعر البدء' : 'Starting Price' }}
-                                @endif
-                            </span>
-                            <span class="price-value">{{ number_format($aucPrice) }} {{ app()->getLocale() === 'ar' ? 'ر.س' : 'SAR' }}</span>
-                        </div>
-
-                        <a href="{{ route('bidder.auctions.show', $aucId) }}" class="btn-auc-action {{ $statusClass === 'live' ? '' : 'secondary' }}">
-                            @if($statusClass === 'live')
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
-                                {{ app()->getLocale() === 'ar' ? 'زايد الآن' : 'Bid Now' }}
-                            @else
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-                                {{ app()->getLocale() === 'ar' ? 'التفاصيل' : 'Details' }}
-                            @endif
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-
-    @if(!$usingMock)
-        <div style="margin-top: 2rem; display: flex; justify-content: center;">
-            {{ $auctions->links() }}
-        </div>
-    @endif
-
-@else
-    <div class="empty-auctions">
-        <div class="empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        </div>
-        <h2>{{ app()->getLocale() === 'ar' ? 'لا توجد مزادات حالياً' : 'No Auctions Found' }}</h2>
-        <p>{{ app()->getLocale() === 'ar' ? 'لم يتم العثور على مزادات في هذا القسم، يرجى التحقق لاحقاً أو تغيير الفلتر.' : 'No auctions found matching this category. Please check again later or try a different filter.' }}</p>
-        <a href="{{ route('bidder.auctions.index') }}" class="btn btn-primary">{{ app()->getLocale() === 'ar' ? 'إعادة ضبط' : 'Reset Filters' }}</a>
-    </div>
-@endif
+<div id="auctions-container">
+    @include('bidder.auctions.partials.grid')
+</div>
 
 @endsection
 
@@ -592,26 +693,176 @@ function toggleWatch(btn, id) {
     btn.disabled = true;
     const currentlyWatched = btn.classList.contains('active');
     
-    fetch(`{{ url('/bidder/auctions') }}/${id}/watch`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    BidderAjax.post(`{{ url('/bidder/auctions') }}/${id}/watch`, { 
+        currently_watched: currentlyWatched 
+    }, {
+        onSuccess: function(data) {
+            btn.disabled = false;
+            if (data.success) {
+                btn.classList.toggle('active');
+                toastr.success(currentlyWatched ? 'Removed from watchlist' : 'Added to watchlist');
+            }
         },
-        body: JSON.stringify({ currently_watched: currentlyWatched })
-    })
-    .then(res => res.json())
-    .then(data => {
-        btn.disabled = false;
-        if (data.success) {
-            btn.classList.toggle('active');
-            toastr.success(currentlyWatched ? 'Removed from watchlist' : 'Added to watchlist');
+        onError: function() {
+            btn.disabled = false;
+            toastr.error('Failed to update watchlist');
         }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        toastr.error('Failed to update watchlist');
     });
 }
+
+$(document).ready(function() {
+    // Sync inputs initially on page load matching current URL query params
+    syncFormInputs(window.location.href);
+
+    // Advanced Filters Panel Toggle
+    $(document).on('click', '.btn-toggle-filters', function(e) {
+        e.preventDefault();
+        $(this).toggleClass('active');
+        $('.advanced-filters-panel').slideToggle(300);
+    });
+
+    // Tab switching via unified form
+    $(document).on('click', '.auc-tab', function(e) {
+        e.preventDefault();
+        const tab = $(this).data('tab');
+        if (!tab) return;
+
+        // Visual feedback
+        $('.auc-tab').removeClass('active');
+        $(this).addClass('active');
+
+        // Update hidden input and submit the form
+        $('#filter-tab').val(tab);
+        $('#auctions-filter-form').submit();
+    });
+
+    // Pagination links click handler via AJAX
+    $(document).on('click', '#auctions-container .pagination-wrapper a, #auctions-container .pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        if (url) {
+            loadAuctions(url);
+        }
+    });
+
+    // Unified form submission handler via AJAX
+    $('#auctions-filter-form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const action = form.attr('action') || window.location.pathname;
+        const serialized = form.serialize();
+        const url = action + (action.includes('?') ? '&' : '?') + serialized;
+        loadAuctions(url);
+    });
+
+    // Reset advanced filters inside the panel
+    $(document).on('click', '.btn-clear-adv-filters', function(e) {
+        e.preventDefault();
+        
+        // Reset all select dropdowns and search inputs
+        $('#filter-search').val('');
+        $('#filter-make').val('');
+        $('#filter-location').val('');
+        $('#filter-year-from').val('');
+        $('#filter-year-to').val('');
+        $('#filter-condition').val('');
+        
+        // Submit form to fetch default state
+        $('#auctions-filter-form').submit();
+    });
+
+    // Reset filters click handler from empty-state view
+    $(document).on('click', '.btn-reset-filters', function(e) {
+        e.preventDefault();
+        
+        // Reset all inputs
+        $('#filter-search').val('');
+        $('#filter-make').val('');
+        $('#filter-location').val('');
+        $('#filter-year-from').val('');
+        $('#filter-year-to').val('');
+        $('#filter-condition').val('');
+        
+        // Submit form to fetch default state
+        $('#auctions-filter-form').submit();
+    });
+
+    function loadAuctions(url) {
+        // Show loading state
+        $('#auctions-container').css('opacity', '0.5');
+
+        BidderAjax.get(url, {}, {
+            onSuccess: function(response) {
+                $('#auctions-container').css('opacity', '1');
+                if (response.success && response.html) {
+                    $('#auctions-container').html(response.html);
+                    
+                    // Update URL browser history
+                    window.history.pushState(null, null, url);
+
+                    // Sync inputs with the new URL state
+                    syncFormInputs(url);
+                } else {
+                    toastr.error('Failed to load auctions.');
+                }
+            },
+            onError: function() {
+                $('#auctions-container').css('opacity', '1');
+                toastr.error('Failed to load auctions.');
+            }
+        });
+    }
+
+    function syncFormInputs(url) {
+        try {
+            const urlObj = new URL(url, window.location.origin);
+            const tabParam = urlObj.searchParams.get('tab') || 'live';
+            const searchParam = urlObj.searchParams.get('search') || '';
+            const makeParam = urlObj.searchParams.get('make') || '';
+            const locationParam = urlObj.searchParams.get('location') || '';
+            const yearFromParam = urlObj.searchParams.get('year_from') || '';
+            const yearToParam = urlObj.searchParams.get('year_to') || '';
+            const conditionParam = urlObj.searchParams.get('condition') || '';
+
+            // Update DOM fields
+            $('#filter-tab').val(tabParam);
+            $('#filter-search').val(searchParam);
+            $('#filter-make').val(makeParam);
+            $('#filter-location').val(locationParam);
+            $('#filter-year-from').val(yearFromParam);
+            $('#filter-year-to').val(yearToParam);
+            $('#filter-condition').val(conditionParam);
+
+            // Sync tab active class
+            $('.auc-tab').removeClass('active');
+            $(`.auc-tab[data-tab="${tabParam}"]`).addClass('active');
+
+            // Count active advanced filters
+            let activeFilters = 0;
+            if (makeParam) activeFilters++;
+            if (locationParam) activeFilters++;
+            if (yearFromParam) activeFilters++;
+            if (yearToParam) activeFilters++;
+            if (conditionParam) activeFilters++;
+
+            // Update filter button badge
+            if (activeFilters > 0) {
+                $('.active-filter-badge').text(activeFilters).show();
+                $('.btn-toggle-filters').addClass('active');
+            } else {
+                $('.active-filter-badge').hide();
+                $('.btn-toggle-filters').removeClass('active');
+            }
+        } catch(err) {
+            console.error('syncFormInputs failed', err);
+        }
+    }
+
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', function() {
+        const currentUrl = window.location.href;
+        loadAuctions(currentUrl);
+    });
+});
 </script>
 @endsection

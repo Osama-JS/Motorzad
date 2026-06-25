@@ -31,6 +31,7 @@ $(document).ready(function() {
                     currentData = response.data;
                     renderCurrentView();
                     renderPagination(response.pagination);
+                    applyColumnVisibility();
                 } else {
                     $('#custom-vehicles-tbody').html('<tr><td colspan="5" class="text-center py-4 text-danger">' + window.VehicleConfig.trans.errorLoading + '</td></tr>');
                     $('#grid-view-container').html('<div class="col-12 text-center py-4 text-danger">' + window.VehicleConfig.trans.errorLoading + '</div>');
@@ -68,6 +69,7 @@ $(document).ready(function() {
         }
         
         renderCurrentView();
+        applyColumnVisibility();
     };
 
     function renderGrid(data) {
@@ -83,29 +85,29 @@ $(document).ready(function() {
             let card = `
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                     <div class="vehicle-grid-card border-0 bg-white rounded-4 overflow-hidden position-relative" style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); display:flex; flex-direction:column; height: 100%;">
-                        <div class="position-relative">
+                        <div class="position-relative col-toggle-0">
                             <img src="${vehicle.image_url}" class="w-100 vehicle-card-img-top" alt="${vehicle.raw_title}">
-                            <div class="position-absolute top-0 end-0 p-3">
+                            <div class="position-absolute top-0 end-0 p-3 col-toggle-3">
                                 ${vehicle.status}
                             </div>
-                            <div class="quick-actions-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-center align-items-center gap-2">
+                            <div class="quick-actions-overlay position-absolute w-100 h-100 top-0 start-0 d-flex justify-content-center align-items-center gap-2 col-toggle-4">
                                 <a href="${vehicle.view_url}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#0ea5e9;" title="${window.VehicleConfig.trans.view}"><i class="fa-solid fa-eye"></i></a>
                                 <a href="${vehicle.edit_url}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--primary);" title="${window.VehicleConfig.trans.edit}"><i class="fa-solid fa-pen-to-square"></i></a>
                                 <button onclick="deleteVehicle(${vehicle.id})" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#ef4444;" title="${window.VehicleConfig.trans.delete}"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="p-3 d-flex flex-column flex-grow-1">
-                            <h5 class="mb-1 text-truncate fw-bold" style="font-size: 1.1rem; color: var(--text-color);">${vehicle.raw_title}</h5>
-                            <div class="text-muted small mb-3">
+                            <h5 class="mb-1 text-truncate fw-bold col-toggle-1" style="font-size: 1.1rem; color: var(--text-color);">${vehicle.raw_title}</h5>
+                            <div class="text-muted small mb-3 col-toggle-1">
                                 <i class="fa-solid fa-car me-1"></i> ${vehicle.make} ${vehicle.model} &bull; ${vehicle.year}
                             </div>
-                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center col-toggle-2">
                                 <div class="text-muted small">
                                     <span class="d-block" style="font-size:0.75rem;">${window.VehicleConfig.trans.vin}</span>
                                     <span class="fw-medium text-dark" dir="ltr">${vehicle.vin_number}</span>
                                 </div>
                             </div>
-                            ${vehicle.quick_actions ? `<div class="mt-3 d-flex gap-2">${vehicle.quick_actions}</div>` : ''}
+                            ${vehicle.quick_actions ? `<div class="mt-3 d-flex gap-2 col-toggle-4">${vehicle.quick_actions}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -126,16 +128,16 @@ $(document).ready(function() {
         data.forEach(vehicle => {
             let tr = `
                 <tr>
-                    <td>${vehicle.image}</td>
-                    <td>
+                    <td class="col-toggle-0">${vehicle.image}</td>
+                    <td class="col-toggle-1">
                         <div class="d-flex flex-column">
                             <span class="fw-bold">${vehicle.title}</span>
                             <span class="text-muted small">${vehicle.make} ${vehicle.model} - ${vehicle.year}</span>
                         </div>
                     </td>
-                    <td dir="ltr" class="text-end">${vehicle.vin_number}</td>
-                    <td>${vehicle.status}</td>
-                    <td class="text-center">${vehicle.actions}</td>
+                    <td dir="ltr" class="text-end col-toggle-2">${vehicle.vin_number}</td>
+                    <td class="col-toggle-3">${vehicle.status}</td>
+                    <td class="text-center col-toggle-4">${vehicle.actions}</td>
                 </tr>
             `;
             tbody.append(tr);
@@ -181,6 +183,34 @@ $(document).ready(function() {
         });
     }
     initSelect2();
+
+    // Handle Column Toggle check/uncheck
+    $('.col-toggle').on('change', function() {
+        let visArray = [];
+        $('.col-toggle:checked').each(function() {
+            visArray.push($(this).val());
+        });
+        localStorage.setItem('vehicles_col_visibility', JSON.stringify(visArray));
+        applyColumnVisibility();
+    });
+
+    function applyColumnVisibility() {
+        let savedVis = localStorage.getItem('vehicles_col_visibility');
+        if (savedVis) {
+            let visArray = JSON.parse(savedVis);
+            $('.col-toggle').each(function() {
+                let colIdx = $(this).val();
+                let isVisible = visArray.includes(colIdx);
+                $(this).prop('checked', isVisible);
+                
+                if (isVisible) {
+                    $('.col-toggle-' + colIdx).removeClass('d-none');
+                } else {
+                    $('.col-toggle-' + colIdx).addClass('d-none');
+                }
+            });
+        }
+    }
 
     // Bind filters
     $('#filter_status').on('change', function() {

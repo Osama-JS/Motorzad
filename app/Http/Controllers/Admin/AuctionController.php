@@ -143,7 +143,8 @@ class AuctionController extends Controller
             'commission_rate' => 'nullable|numeric|min:0|max:100',
             'is_featured' => 'boolean',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'primary_image_index' => 'nullable|integer',
             'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
@@ -155,11 +156,12 @@ class AuctionController extends Controller
         $auction = Auction::create($validated);
 
         if ($request->hasFile('images')) {
+            $primaryIndex = (int) $request->input('primary_image_index', 0);
             foreach ($request->file('images') as $index => $imageFile) {
                 $path = $imageFile->store('auctions', 'public');
                 $auction->images()->create([
                     'image_path' => $path,
-                    'is_primary' => $index === 0, // First uploaded image is primary
+                    'is_primary' => ($index == $primaryIndex),
                     'sort_order' => $index
                 ]);
             }

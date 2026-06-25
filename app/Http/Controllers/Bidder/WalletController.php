@@ -14,17 +14,20 @@ class WalletController extends Controller
     /**
      * Display the bidder's wallet profile page.
      */
-    public function index(): View
+    public function index(Request $request)
     {
         $user = auth()->user();
         $wallet = $user->wallet;
 
-        // Wallet transactions (latest 20)
-        $transactions = $wallet->transactions()
-            ->with('creator')
-            ->latest()
-            ->take(20)
-            ->get();
+        // Type filter
+        $type = $request->input('type', 'all');
+        $txQuery = $wallet->transactions()->with('creator')->latest();
+        if ($type !== 'all') {
+            $txQuery->where('type', $type);
+        }
+
+        // Wallet transactions (paginated by 10)
+        $transactions = $txQuery->paginate(10)->withQueryString();
 
         // Withdrawal requests
         $withdrawals = WithdrawalRequest::where('user_id', $user->id)
@@ -39,7 +42,7 @@ class WalletController extends Controller
             $monthStart = $date->copy()->startOfMonth();
             $monthEnd = $date->copy()->endOfMonth();
 
-            $deposits = $wallet->transactions()
+            $depositsAmount = $wallet->transactions()
                 ->where('type', 'credit')
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
                 ->sum('amount');
@@ -51,7 +54,7 @@ class WalletController extends Controller
 
             $monthlyStats[] = [
                 'month' => $date->translatedFormat('M'),
-                'deposits' => (float) $deposits,
+                'deposits' => (float) $depositsAmount,
                 'withdrawals' => (float) $withdrawalsAmount,
             ];
         }
@@ -73,7 +76,20 @@ class WalletController extends Controller
         }
         $platformBanks = BankAccount::where('is_active', true)->get();
 
-        return view('bidder.wallet.index', compact('user', 'wallet', 'transactions', 'withdrawals', 'deposits', 'platformBanks', 'monthlyStats'));
+        if ($request->ajax()) {
+            if ($request->has('page') || $request->has('type')) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('bidder.wallet.partials.transactions-list', compact('transactions'))->render()
+                ]);
+            }
+            return response()->json([
+                'success' => true,
+                'html' => view('bidder.wallet.partials.content', compact('user', 'wallet', 'transactions', 'withdrawals', 'deposits', 'platformBanks', 'monthlyStats', 'type'))->render()
+            ]);
+        }
+
+        return view('bidder.wallet.index', compact('user', 'wallet', 'transactions', 'withdrawals', 'deposits', 'platformBanks', 'monthlyStats', 'type'));
     }
 
     /**

@@ -324,13 +324,19 @@
 
                     <div class="form-group mb-0">
                         <label class="form-label">{{ __('Auction Images') }}</label>
-                        <div class="file-upload-zone" onclick="document.getElementById('images').click()">
-                            <input type="file" name="images[]" id="images" class="form-control d-none" accept="image/*" multiple onchange="handleFilePreview(this, 'preview_image')">
-                            <div class="upload-icon">
-                                <div class="preview-size"></div>
+                        <div class="file-upload-zone">
+                            <input type="file" name="images[]" id="images" accept="image/*" multiple onchange="handleMultipleFilesPreview(this, 'auctionImagesPreview', 'primary_image_index')">
+                            <input type="hidden" name="primary_image_index" id="primary_image_index" value="0">
+                            <div class="file-upload-content">
+                                <div class="upload-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <div class="upload-text">{{ __('Drag the images here or') }} <span class="upload-highlight">{{ __('click to choose') }}</span></div>
+                                <div class="upload-hint">{{ __('PNG, JPG, WEBP — Max size 2MB per image') }}</div>
                             </div>
                         </div>
-                        <div class="invalid-feedback error-image d-block mt-2"></div>
+                        <div class="row g-2 mt-3" id="auctionImagesPreview"></div>
+                        <div class="invalid-feedback error-images error-image d-block mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -593,58 +599,60 @@
         });
     });
 
-    function handleFilePreview(input, previewId) {
+    // Multiple Images Preview Handler
+    function handleMultipleFilesPreview(input, previewId, primaryInputId) {
         const previewContainer = document.getElementById(previewId);
         if (!previewContainer) return;
-
         previewContainer.innerHTML = '';
-        previewContainer.style.display = 'flex';
 
-        if (input.files && input.files.length > 0) {
-            Array.from(input.files).forEach((file, index) => {
+        const files = input.files;
+        if (files && files.length > 0) {
+            document.getElementById(primaryInputId).value = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
-                    const thumbDiv = document.createElement('div');
-                    thumbDiv.style.position = 'relative';
-                    thumbDiv.style.width = '80px';
-                    thumbDiv.style.height = '80px';
-                    thumbDiv.style.borderRadius = '8px';
-                    thumbDiv.style.overflow = 'hidden';
-                    thumbDiv.style.border = '1px solid var(--border)';
-                    thumbDiv.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    
-                    if (index === 0) {
-                        const badge = document.createElement('span');
-                        badge.innerText = 'Primary';
-                        badge.style.position = 'absolute';
-                        badge.style.bottom = '0';
-                        badge.style.left = '0';
-                        badge.style.right = '0';
-                        badge.style.background = 'rgba(59, 130, 246, 0.8)';
-                        badge.style.color = '#fff';
-                        badge.style.fontSize = '10px';
-                        badge.style.textAlign = 'center';
-                        badge.style.padding = '2px 0';
-                        thumbDiv.appendChild(badge);
-                    }
+                    const col = document.createElement('div');
+                    col.className = 'col-6 col-sm-4 col-md-3 auction-img-preview-col';
+                    col.dataset.index = i;
+                    col.style.position = 'relative';
+                    col.style.cursor = 'pointer';
 
-                    thumbDiv.appendChild(img);
-                    previewContainer.appendChild(thumbDiv);
+                    const borderStyle = (i === 0) ? '3px solid #3b82f6' : '1px solid #e2e8f0';
+                    const badgeDisplay = (i === 0) ? 'block' : 'none';
+
+                    col.innerHTML = `
+                        <div class="card p-1 text-center bg-dark" style="border: ${borderStyle}; border-radius: 8px; position: relative; overflow: hidden; height:120px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                            <img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius: 6px;" alt="">
+                            <span class="badge bg-primary primary-badge" style="position:absolute; top:8px; right:8px; display: ${badgeDisplay}; font-size:10px;">{{ __('Primary') }}</span>
+                            <div class="hover-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:0.2s;">
+                                <span class="text-white" style="font-size:11px; font-weight:bold;">{{ __('Set Primary') }}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    const card = col.querySelector('.card');
+                    const overlay = col.querySelector('.hover-overlay');
+                    col.addEventListener('mouseenter', () => overlay.style.opacity = '1');
+                    col.addEventListener('mouseleave', () => overlay.style.opacity = '0');
+
+                    col.addEventListener('click', function() {
+                        document.getElementById(primaryInputId).value = i;
+                        previewContainer.querySelectorAll('.auction-img-preview-col').forEach(el => {
+                            el.querySelector('.card').style.border = '1px solid #e2e8f0';
+                            el.querySelector('.primary-badge').style.display = 'none';
+                        });
+                        card.style.border = '3px solid #3b82f6';
+                        col.querySelector('.primary-badge').style.display = 'block';
+                    });
+
+                    previewContainer.appendChild(col);
                 };
 
                 reader.readAsDataURL(file);
-            });
-            previewContainer.classList.add('has-file');
-        } else {
-            previewContainer.style.display = 'none';
-            previewContainer.classList.remove('has-file');
+            }
         }
     }
 </script>

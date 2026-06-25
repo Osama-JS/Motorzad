@@ -41,7 +41,7 @@
             </a>
 
             <div class="nav-section-title">{{ __('Activity') }}</div>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.won') ? 'active' : '' }}">
+            <a href="{{ route('bidder.auctions.won') }}" class="nav-item {{ request()->routeIs('bidder.auctions.won') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/><path d="M18 9v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 7v14"/></svg>
                 <span>{{ __('Won Auctions') }}</span>
             </a>
@@ -49,10 +49,17 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 <span>{{ __('Watchlist') }}</span>
             </a>
-            <a href="#" class="nav-item {{ request()->routeIs('bidder.notifications') ? 'active' : '' }}">
+            <a href="{{ route('bidder.notifications') }}" class="nav-item {{ request()->routeIs('bidder.notifications') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span>{{ __('Notifications') }}</span>
-                <span class="nav-count">3</span>
+                @php
+                    $realUnreadCount = auth()->user()->unreadNotifications->count();
+                    $hasNotifications = auth()->user()->notifications()->exists();
+                    $unreadCount = $hasNotifications ? $realUnreadCount : 2;
+                @endphp
+                @if($unreadCount > 0)
+                    <span class="nav-count" id="sidebarNotifCount">{{ $unreadCount }}</span>
+                @endif
             </a>
 
             <div class="nav-section-title">{{ __('Account') }}</div>

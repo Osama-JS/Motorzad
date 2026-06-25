@@ -12,21 +12,44 @@
 </div>
 
 {{-- Stats Cards --}}
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
-    <div class="stat-card red">
-        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-        <div class="stat-value">{{ $stats['total_settings'] }}</div>
-        <div class="stat-label">{{ __('Total Settings') }}</div>
+<div class="row mb-4 g-3">
+    <!-- Total Settings -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card red h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            <div>
+                <div class="stat-value">{{ $stats['total_settings'] }}</div>
+                <div class="stat-label">{{ __('Total Settings') }}</div>
+            </div>
+        </div>
     </div>
-    <div class="stat-card gold">
-        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <div class="stat-value" style="font-size:1rem;">{{ $stats['last_updated'] }}</div>
-        <div class="stat-label">{{ __('Last Updated') }}</div>
+    
+    <!-- Last Updated -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card gold h-100 stat-card-compact">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size: 1.4rem;">{{ $stats['last_updated'] }}</div>
+                <div class="stat-label">{{ __('Last Updated') }}</div>
+            </div>
+        </div>
     </div>
-    <div class="stat-card {{ \App\Models\Setting::get('maintenance_mode')=='1' ? 'blue' : 'green' }}">
-        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-        <div class="stat-value" style="font-size:1rem;">{{ \App\Models\Setting::get('maintenance_mode')=='1' ? __('Maintenance') : __('Active') }}</div>
-        <div class="stat-label">{{ __('Site Status') }}</div>
+    
+    <!-- Site Status -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="stat-card {{ \App\Models\Setting::get('maintenance_mode')=='1' ? 'blue' : 'green' }} h-100 stat-card-compact" id="status-stat-card">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size: 1.4rem;" id="status-card-value">{{ \App\Models\Setting::get('maintenance_mode')=='1' ? __('Maintenance') : __('Active') }}</div>
+                <div class="stat-label">{{ __('Site Status') }}</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -354,9 +377,26 @@ $(function(){
         btn.prop('disabled',true);$('#saveBtnText').addClass('d-none');$('#saveBtnLoading').removeClass('d-none');
         $.ajax({url:$(this).attr('action'),method:'POST',data:fd,processData:false,contentType:false,
             success:function(r){
-                if(r.success){Swal.fire({icon:'success',title:'تم بنجاح',text:r.message,timer:2000,showConfirmButton:false});
-                if(r.logo_url)$('#logo-preview').attr('src',r.logo_url);if(r.favicon_url)$('#favicon-preview').attr('src',r.favicon_url);}
-                else Swal.fire({icon:'error',title:'خطأ',text:r.message});
+                if(r.success){
+                    Swal.fire({icon:'success',title:'تم بنجاح',text:r.message,timer:2000,showConfirmButton:false});
+                    if(r.logo_url)$('#logo-preview').attr('src',r.logo_url);
+                    if(r.favicon_url)$('#favicon-preview').attr('src',r.favicon_url);
+                    
+                    // Dynamically update site status statistics card
+                    let isMaintenance = $('input[name="maintenance_mode"]').is(':checked');
+                    let card = $('#status-stat-card');
+                    let val = $('#status-card-value');
+                    let dir = $('html').attr('dir') || 'rtl';
+                    if (isMaintenance) {
+                        card.removeClass('green').addClass('blue');
+                        val.text(dir === 'rtl' ? 'صيانة' : 'Maintenance');
+                    } else {
+                        card.removeClass('blue').addClass('green');
+                        val.text(dir === 'rtl' ? 'نشط' : 'Active');
+                    }
+                } else {
+                    Swal.fire({icon:'error',title:'خطأ',text:r.message});
+                }
             },
             error:function(x){Swal.fire({icon:'error',title:'خطأ',text:x.responseJSON?.message||'حدث خطأ'});},
             complete:function(){btn.prop('disabled',false);$('#saveBtnText').removeClass('d-none');$('#saveBtnLoading').addClass('d-none');}

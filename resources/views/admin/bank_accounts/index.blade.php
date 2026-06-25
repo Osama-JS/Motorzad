@@ -97,6 +97,40 @@
                             <option value="100">100</option>
                         </select>
                     </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                            {{ __('Columns') }}
+                        </button>
+                        <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                            <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_logo" value="0" checked>
+                                <label class="form-check-label" for="col_logo">{{ __('Logo') }}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_bank" value="1" checked disabled>
+                                <label class="form-check-label" for="col_bank">{{ __('Bank Name') }}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_iban" value="2" checked>
+                                <label class="form-check-label" for="col_iban">{{ __('IBAN') }}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_beneficiary" value="3" checked>
+                                <label class="form-check-label" for="col_beneficiary">{{ __('Beneficiary') }}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_status" value="4" checked>
+                                <label class="form-check-label" for="col_status">{{ __('Status') }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input col-toggle" type="checkbox" id="col_actions" value="5" checked disabled>
+                                <label class="form-check-label" for="col_actions">{{ __('Actions') }}</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
@@ -120,12 +154,12 @@
                         <table class="table align-items-center mb-0" id="bankAccountsTable">
                             <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Logo') }}</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Bank Name') }}</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{{ __('IBAN') }}</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{{ __('Beneficiary') }}</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Status') }}</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('Actions') }}</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-0">{{ __('Logo') }}</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-1">{{ __('Bank Name') }}</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-toggle-2">{{ __('IBAN') }}</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-toggle-3">{{ __('Beneficiary') }}</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-4">{{ __('Status') }}</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-5">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="custom-bank-accounts-tbody">

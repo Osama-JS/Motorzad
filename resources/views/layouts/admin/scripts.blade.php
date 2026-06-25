@@ -37,6 +37,12 @@
     }
 </script>
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
+<script src="{{ asset('js/admin/ajax-helper.js') }}"></script>
+<script>
+    if (typeof BidderAjax !== 'undefined') {
+        BidderAjax.init($('meta[name="csrf-token"]').attr('content'));
+    }
+</script>
 <script>
     (function() {
         var toggle = document.getElementById('themeToggle');
@@ -198,4 +204,99 @@
             }
         });
     })();
+</script>
+
+<script>
+    $(document).ready(function() {
+        let globalSearchTimeout;
+        const dropdown = $('#globalSearchDropdown');
+
+        $('#header_quick_search').on('keyup input', function(e) {
+            let val = $(this).val().trim();
+            
+            // 1. Keep local search in sync (if present on page)
+            let localSearch = $('#filter_search');
+            if (localSearch.length) {
+                localSearch.val($(this).val());
+                if (e.key === 'Enter') {
+                    let pressEvent = $.Event('keypress', { which: 13 });
+                    localSearch.trigger(pressEvent);
+                    
+                    let filterBtn = $('#btn-filter');
+                    if (filterBtn.length) {
+                        filterBtn.trigger('click');
+                    } else if (typeof window.fetchUsers === 'function') {
+                        window.fetchUsers(1);
+                    } else if (typeof window.fetchFaqs === 'function') {
+                        window.fetchFaqs(1);
+                    } else if (typeof window.fetchBids === 'function') {
+                        window.fetchBids(1);
+                    }
+                } else {
+                    // Let the page do its local filtering if needed
+                    localSearch.trigger('input').trigger('keyup');
+                }
+            }
+
+            // 2. Perform global search for autocomplete dropdown suggestions
+            if (val.length < 2) {
+                dropdown.hide().empty();
+                return;
+            }
+
+            clearTimeout(globalSearchTimeout);
+            globalSearchTimeout = setTimeout(function() {
+                $.ajax({
+                    url: "{{ route('admin.global-search') }}",
+                    data: { q: val },
+                    success: function(res) {
+                        dropdown.empty();
+                        if (res.results && res.results.length > 0) {
+                            res.results.forEach(category => {
+                                dropdown.append(`<div class="global-search-category">${category.category}</div>`);
+                                category.items.forEach(item => {
+                                    dropdown.append(`
+                                        <a href="${item.url}" class="global-search-item">
+                                            <i class="fa-solid ${item.icon}"></i>
+                                            <div class="global-search-item-info">
+                                                <span class="global-search-item-title">${item.title}</span>
+                                                <span class="global-search-item-subtitle">${item.subtitle}</span>
+                                            </div>
+                                        </a>
+                                    `);
+                                });
+                            });
+                            dropdown.show();
+                        } else {
+                            let emptyMsg = $('html').attr('dir') === 'rtl' ? 'لا توجد نتائج مطابقة' : 'No matching results found';
+                            dropdown.html(`<div class="p-3 text-center text-muted small">${emptyMsg}</div>`).show();
+                        }
+                    },
+                    error: function() {
+                        dropdown.hide().empty();
+                    }
+                });
+            }, 300);
+        });
+
+        // Close suggestions dropdown when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-box').length) {
+                dropdown.hide();
+            }
+        });
+
+        // Show suggestions dropdown again if input is refocused with valid text
+        $('#header_quick_search').on('focus', function() {
+            if ($(this).val().trim().length >= 2) {
+                dropdown.show();
+            }
+        });
+
+        // Initialize header search input value from local page search (if pre-filled)
+        let initialSearchVal = $('#filter_search').val();
+        if (initialSearchVal) {
+            $('#header_quick_search').val(initialSearchVal);
+        }
+    });
 </script>

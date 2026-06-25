@@ -30,6 +30,7 @@ $(document).ready(function() {
                     currentData = response.data;
                     renderCurrentView();
                     renderPagination(response.pagination);
+                    applyColumnVisibility();
                 } else {
                     $('#custom-withdrawals-tbody').html('<tr><td colspan="7" class="text-center py-4 text-danger">' + window.WithdrawalConfig.trans.errorLoading + '</td></tr>');
                 }
@@ -66,6 +67,7 @@ $(document).ready(function() {
         }
         
         renderCurrentView();
+        applyColumnVisibility();
     };
 
     function renderGrid(data) {
@@ -81,27 +83,27 @@ $(document).ready(function() {
             let card = `
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                     <div class="user-grid-card border border-light bg-white shadow-sm rounded p-3 h-100 position-relative">
-                        <div class="position-absolute top-0 end-0 p-3">
+                        <div class="position-absolute top-0 end-0 p-3 col-toggle-6">
                             ${withdrawal.actions}
                         </div>
                         <div class="card-info mb-3 pe-5">
-                            <strong class="d-block mb-1">#${withdrawal.id}</strong>
-                            <div class="mb-2">${withdrawal.user}</div>
+                            <strong class="d-block mb-1 col-toggle-0">#${withdrawal.id}</strong>
+                            <div class="mb-2 col-toggle-1">${withdrawal.user}</div>
                         </div>
                         <div class="card-details border-top pt-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2 col-toggle-4">
                                 <span class="text-muted small">${window.WithdrawalConfig.trans.status || 'Status'}:</span>
                                 <span>${withdrawal.status}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-2">
                                 <span class="text-muted small">${window.WithdrawalConfig.trans.requestedAmount || 'Requested Amount'}:</span>
                                 <span class="fw-medium small">${withdrawal.requested_amount} SAR</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-3">
                                 <span class="text-muted small">${window.WithdrawalConfig.trans.approvedAmount || 'Approved Amount'}:</span>
                                 <span class="fw-medium small">${withdrawal.approved_amount} ${withdrawal.approved_amount !== '---' ? 'SAR' : ''}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-5">
                                 <span class="text-muted small">${window.WithdrawalConfig.trans.date || 'Date'}:</span>
                                 <span class="fw-medium small">${withdrawal.created_at}</span>
                             </div>
@@ -125,13 +127,13 @@ $(document).ready(function() {
         data.forEach(withdrawal => {
             let tr = `
                 <tr>
-                    <td>${withdrawal.id}</td>
-                    <td>${withdrawal.user}</td>
-                    <td>${withdrawal.requested_amount} SAR</td>
-                    <td>${withdrawal.approved_amount} ${withdrawal.approved_amount !== '---' ? 'SAR' : ''}</td>
-                    <td>${withdrawal.status}</td>
-                    <td>${withdrawal.created_at}</td>
-                    <td>${withdrawal.actions}</td>
+                    <td class="col-toggle-0">${withdrawal.id}</td>
+                    <td class="col-toggle-1">${withdrawal.user}</td>
+                    <td class="col-toggle-2">${withdrawal.requested_amount} SAR</td>
+                    <td class="col-toggle-3">${withdrawal.approved_amount} ${withdrawal.approved_amount !== '---' ? 'SAR' : ''}</td>
+                    <td class="col-toggle-4">${withdrawal.status}</td>
+                    <td class="col-toggle-5">${withdrawal.created_at}</td>
+                    <td class="col-toggle-6">${withdrawal.actions}</td>
                 </tr>
             `;
             tbody.append(tr);
@@ -177,6 +179,34 @@ $(document).ready(function() {
         });
     }
     initSelect2();
+
+    // Handle Column Toggle check/uncheck
+    $('.col-toggle').on('change', function() {
+        let visArray = [];
+        $('.col-toggle:checked').each(function() {
+            visArray.push($(this).val());
+        });
+        localStorage.setItem('withdrawals_col_visibility', JSON.stringify(visArray));
+        applyColumnVisibility();
+    });
+
+    function applyColumnVisibility() {
+        let savedVis = localStorage.getItem('withdrawals_col_visibility');
+        if (savedVis) {
+            let visArray = JSON.parse(savedVis);
+            $('.col-toggle').each(function() {
+                let colIdx = $(this).val();
+                let isVisible = visArray.includes(colIdx);
+                $(this).prop('checked', isVisible);
+                
+                if (isVisible) {
+                    $('.col-toggle-' + colIdx).removeClass('d-none');
+                } else {
+                    $('.col-toggle-' + colIdx).addClass('d-none');
+                }
+            });
+        }
+    }
 
     // Bind filters
     $('#filter_status').on('change', function() {

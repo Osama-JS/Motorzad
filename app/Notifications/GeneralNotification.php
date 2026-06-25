@@ -11,7 +11,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class GeneralNotification extends Notification implements ShouldQueue, ShouldBroadcast
+class GeneralNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
 

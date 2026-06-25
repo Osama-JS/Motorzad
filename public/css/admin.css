@@ -450,7 +450,7 @@ body::after {
     padding: 1.75rem 1.5rem 1.5rem;
     border-bottom: 1px solid var(--border);
     position: relative;
-    overflow: hidden;
+
 }
 
 /* Red accent line at top of sidebar */
@@ -547,9 +547,9 @@ body::after {
     text-decoration: none;
     border-radius: 12px;
     margin-bottom: 5px;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
-                background-color 0.3s ease, 
-                color 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+        background-color 0.3s ease,
+        color 0.3s ease;
     position: relative;
     font-weight: 600;
     font-size: 0.92rem;
@@ -558,6 +558,7 @@ body::after {
 html[dir="ltr"] .nav-item:hover {
     transform: translateX(6px);
 }
+
 html[dir="rtl"] .nav-item:hover {
     transform: translateX(-6px);
 }
@@ -630,7 +631,7 @@ html[dir="rtl"] .nav-item:hover {
 
 [data-theme="light"] .sidebar-user {
     background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .sidebar-user:hover {
@@ -1076,8 +1077,15 @@ tr:hover td {
 }
 
 @keyframes modalSlideIn {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .modal-header {
@@ -1514,12 +1522,12 @@ tr:hover td {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
     background: linear-gradient(135deg, var(--brand-red), var(--brand-red-light));
     box-shadow: 0 0 12px rgba(229, 62, 62, 0.3);
 }
 
-.toggle-switch input:checked + .toggle-slider::before {
+.toggle-switch input:checked+.toggle-slider::before {
     inset-inline-start: calc(100% - 21px);
 }
 
@@ -1550,8 +1558,8 @@ tr:hover td {
     padding-inline-start: 2.5rem;
 }
 
-.input-icon-wrapper .form-control:focus ~ .input-icon,
-.input-icon-wrapper .form-control:focus + .input-icon {
+.input-icon-wrapper .form-control:focus~.input-icon,
+.input-icon-wrapper .form-control:focus+.input-icon {
     color: var(--brand-red-light);
 }
 
@@ -1988,7 +1996,7 @@ table.dataTable tbody td:last-child {
     border-color: var(--border-light);
 }
 
-table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before, 
+table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before,
 table.dataTable.dtr-inline.collapsed>tbody>tr>th.dtr-control:before {
     background-color: var(--brand-blue);
     box-shadow: none;

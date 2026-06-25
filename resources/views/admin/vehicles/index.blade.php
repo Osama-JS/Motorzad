@@ -245,6 +245,36 @@
                 <option value="100">100</option>
             </select>
         </div>
+
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                {{ __('Columns') }}
+            </button>
+            <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_image" value="0" checked>
+                    <label class="form-check-label" for="col_image">{{ __('Image') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_title" value="1" checked disabled>
+                    <label class="form-check-label" for="col_title">{{ __('Title') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_vin" value="2" checked>
+                    <label class="form-check-label" for="col_vin">{{ __('VIN Number') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_status" value="3" checked>
+                    <label class="form-check-label" for="col_status">{{ __('Status') }}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_actions" value="4" checked disabled>
+                    <label class="form-check-label" for="col_actions">{{ __('Actions') }}</label>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
@@ -264,11 +294,11 @@
         <table id="vehicles-table" class="table w-100">
             <thead>
                 <tr>
-                    <th style="width: 80px;">{{ __('Image') }}</th>
-                    <th>{{ __('Title') }}</th>
-                    <th>{{ __('VIN Number') }}</th>
-                    <th>{{ __('Status') }}</th>
-                    <th style="text-align: center; width: 250px;">{{ __('Actions') }}</th>
+                    <th class="col-toggle-0" style="width: 80px;">{{ __('Image') }}</th>
+                    <th class="col-toggle-1">{{ __('Title') }}</th>
+                    <th class="col-toggle-2">{{ __('VIN Number') }}</th>
+                    <th class="col-toggle-3">{{ __('Status') }}</th>
+                    <th class="col-toggle-4" style="text-align: center; width: 250px;">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody id="custom-vehicles-tbody">

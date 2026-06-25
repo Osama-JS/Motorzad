@@ -3,6 +3,8 @@
 @section('title', app()->getLocale() === 'ar' ? 'سجل المزايدات العامة' : 'Global Bids Log')
 
 @section('css')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
     /* Premium UI & Theme Styling */
     :root {
@@ -76,57 +78,6 @@
         left: 20px;
     }
 
-    /* Premium Table Card Panel */
-    .premium-panel {
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        backdrop-filter: blur(12px);
-        border-radius: 20px;
-        box-shadow: var(--shadow-premium);
-        overflow: hidden;
-        transition: box-shadow 0.3s ease;
-    }
-    .panel-header-premium {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 24px 28px;
-        border-bottom: 1px solid var(--glass-border);
-        background: rgba(248, 250, 252, 0.4);
-    }
-    [data-theme="dark"] .panel-header-premium {
-        background: rgba(15, 23, 42, 0.3);
-    }
-    .panel-header-premium h2 {
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: var(--text-color);
-        margin: 0;
-    }
-
-    .table-responsive {
-        padding: 1rem;
-    }
-
-    /* DataTable Overrides */
-    .dataTables_wrapper { color: var(--text-color); }
-    .dataTables_wrapper .dataTables_length select, 
-    .dataTables_wrapper .dataTables_filter input {
-        background-color: var(--bg-input) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 10px !important;
-        padding: 8px 14px !important;
-        font-size: 0.85rem !important;
-        transition: all 0.2s ease;
-    }
-    .dataTables_wrapper .dataTables_length select:focus, 
-    .dataTables_wrapper .dataTables_filter input:focus {
-        border-color: #6366f1 !important;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
-    }
-    
     .table {
         border-collapse: separate !important;
         border-spacing: 0 8px !important;
@@ -175,19 +126,6 @@
         border-right: none !important;
         border-left: 1px solid var(--border) !important;
         border-radius: 12px 0 0 12px !important;
-    }
-
-    .dataTables_wrapper .dataTables_info {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-top: 16px;
-    }
-    .dataTables_wrapper .dataTables_paginate {
-        margin-top: 16px;
-    }
-    .paginate_button {
-        border-radius: 8px !important;
-        padding: 6px 12px !important;
     }
 </style>
 @endsection
@@ -253,16 +191,17 @@
             <div class="col-md-3">
                 <select id="filter_type" class="form-select select2-init">
                     <option value="">{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة (الكل)' : 'All Types' }}</option>
-                    <option value="fa-robot">{{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}</option>
-                    <option value="fa-user">{{ app()->getLocale() === 'ar' ? 'يدوي' : 'Manual' }}</option>
+                    <option value="auto">{{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}</option>
+                    <option value="manual">{{ app()->getLocale() === 'ar' ? 'يدوي' : 'Manual' }}</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <select id="filter_status" class="form-select select2-init">
                     <option value="">{{ app()->getLocale() === 'ar' ? 'الحالة (الكل)' : 'All Status' }}</option>
-                    <option value="bg-success">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</option>
-                    <option value="bg-secondary">{{ app()->getLocale() === 'ar' ? 'تخطي' : 'Outbid' }}</option>
-                    <option value="bg-warning">{{ app()->getLocale() === 'ar' ? 'فائز' : 'Winner' }}</option>
+                    <option value="active">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</option>
+                    <option value="outbid">{{ app()->getLocale() === 'ar' ? 'تخطي' : 'Outbid' }}</option>
+                    <option value="winner">{{ app()->getLocale() === 'ar' ? 'فائز' : 'Winner' }}</option>
+                    <option value="cancelled">{{ app()->getLocale() === 'ar' ? 'ملغي' : 'Cancelled' }}</option>
                 </select>
             </div>
             <div class="col-md-2 text-end">
@@ -274,27 +213,104 @@
     </div>
 </div>
 
-{{-- Table Panel Container --}}
-<div class="premium-panel">
-    <div class="panel-header-premium">
-        <h2>{{ app()->getLocale() === 'ar' ? 'قائمة المزايدات الحية على المنصة' : 'Platform Live Bids List' }}</h2>
+<div class="view-toolbar">
+    <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-2">{{ __('Show:') }}</span>
+            <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchBids(1)">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                {{ __('Columns') }}
+            </button>
+            <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_bidder" value="0" checked disabled>
+                    <label class="form-check-label" for="col_bidder">{{ app()->getLocale() === 'ar' ? 'المزايد' : 'Bidder' }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_auction" value="1" checked>
+                    <label class="form-check-label" for="col_auction">{{ app()->getLocale() === 'ar' ? 'المزاد / المركبة' : 'Auction / Vehicle' }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_amount" value="2" checked>
+                    <label class="form-check-label" for="col_amount">{{ app()->getLocale() === 'ar' ? 'مبلغ المزايدة' : 'Bid Amount' }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_type" value="3" checked>
+                    <label class="form-check-label" for="col_type">{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة' : 'Type' }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_status" value="4" checked>
+                    <label class="form-check-label" for="col_status">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_time" value="5" checked>
+                    <label class="form-check-label" for="col_time">{{ app()->getLocale() === 'ar' ? 'التوقيت' : 'Time' }}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_ip" value="6" checked>
+                    <label class="form-check-label" for="col_ip">{{ app()->getLocale() === 'ar' ? 'عنوان IP' : 'IP Address' }}</label>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+    </div>
+</div>
+
+{{-- Table Panel Container --}}
+<div id="table-view-container" class="card shadow-sm border-0">
     <div class="table-responsive">
-        <table id="bids-table" class="table w-100">
-            <thead>
+        <table id="bids-custom-table" class="table table-hover table-striped align-middle mb-0 w-100">
+            <thead class="table-light">
                 <tr>
-                    <th>{{ app()->getLocale() === 'ar' ? 'المزايد' : 'Bidder' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'المزاد / المركبة' : 'Auction / Vehicle' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'مبلغ المزايدة' : 'Bid Amount' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة' : 'Type' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'التوقيت' : 'Time' }}</th>
-                    <th>{{ app()->getLocale() === 'ar' ? 'عنوان IP' : 'IP Address' }}</th>
+                    <th class="border-bottom-0 col-toggle-0">{{ app()->getLocale() === 'ar' ? 'المزايد' : 'Bidder' }}</th>
+                    <th class="border-bottom-0 col-toggle-1">{{ app()->getLocale() === 'ar' ? 'المزاد / المركبة' : 'Auction / Vehicle' }}</th>
+                    <th class="border-bottom-0 col-toggle-2">{{ app()->getLocale() === 'ar' ? 'مبلغ المزايدة' : 'Bid Amount' }}</th>
+                    <th class="border-bottom-0 col-toggle-3">{{ app()->getLocale() === 'ar' ? 'طريقة المزايدة' : 'Type' }}</th>
+                    <th class="border-bottom-0 col-toggle-4">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
+                    <th class="border-bottom-0 col-toggle-5">{{ app()->getLocale() === 'ar' ? 'التوقيت' : 'Time' }}</th>
+                    <th class="border-bottom-0 col-toggle-6">{{ app()->getLocale() === 'ar' ? 'عنوان IP' : 'IP Address' }}</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="custom-bids-tbody">
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}
+                    </td>
+                </tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Grid View Container -->
+<div id="grid-view-container" class="row g-3 d-none">
+    <div class="col-12 text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}
+    </div>
+</div>
+
+<!-- Pagination Container (Shared) -->
+<div class="card shadow-sm border-0 mt-3">
+    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+        <!-- Pagination controls will be injected here -->
     </div>
 </div>
 @endsection
@@ -303,80 +319,28 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    var bidsDataUrl = "{{ route('admin.bids.data') }}";
+    window.BidConfig = {
+        csrf: '{{ csrf_token() }}',
+        urls: {
+            data: "{{ route('admin.bids.data') }}"
+        },
+        trans: {
+            loading: "{{ __('Loading...') }}",
+            errorLoading: "{{ __('Error loading bids data.') }}",
+            noRecords: "{{ __('No bids found.') }}",
+            showing: "{{ __('Showing') }}",
+            to: "{{ __('to') }}",
+            of: "{{ __('of') }}",
+            entries: "{{ __('entries') }}",
+            bidder: "{{ __('Bidder') }}",
+            auctionVehicle: "{{ __('Auction / Vehicle') }}",
+            amount: "{{ __('Bid Amount') }}",
+            type: "{{ __('Type') }}",
+            status: "{{ __('Status') }}",
+            time: "{{ __('Time') }}",
+            ipAddress: "{{ __('IP Address') }}"
+        }
+    };
 </script>
-
-<script>
-    let bidsTable;
-
-    $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        // Initialize Select2 for filters
-        let dir = $('html').attr('dir') || 'rtl';
-        $('.select2-init').select2({
-            dir: dir,
-            minimumResultsForSearch: 10
-        });
-
-        bidsTable = $('#bids-table').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: bidsDataUrl,
-            columns: [
-                { data: 'user' },
-                { data: 'auction' },
-                { data: 'amount' },
-                { data: 'type' },
-                { data: 'status' },
-                { data: 'time' },
-                { data: 'ip' }
-            ],
-            order: [[5, 'desc']], // Sort by time column descending
-            language: {
-                "sProcessing": "{{ __('Loading...') }}",
-                "sLengthMenu": "{{ __('Show _MENU_ entries') }}",
-                "sZeroRecords": "{{ __('No matching records found') }}",
-                "sInfo": "{{ __('Showing _START_ to _END_ of _TOTAL_ entries') }}",
-                "sSearch": "{{ __('Search:') }}",
-                "oPaginate": {
-                    "sFirst": "{{ __('First') }}",
-                    "sPrevious": "{{ __('Previous') }}",
-                    "sNext": "{{ __('Next') }}",
-                    "sLast": "{{ __('Last') }}"
-                }
-            }
-        });
-
-        // Bind filter search input
-        $('#filter_search').on('keyup keypress change', function() {
-            bidsTable.search(this.value).draw();
-        });
-
-        // Bind type filter dropdown
-        $('#filter_type').on('change', function() {
-            bidsTable.column(3).search($(this).val()).draw();
-        });
-
-        // Bind status filter dropdown
-        $('#filter_status').on('change', function() {
-            bidsTable.column(4).search($(this).val()).draw();
-        });
-
-        // Bind filter button
-        $('#btn-filter').on('click', function() {
-            let searchVal = $('#filter_search').val();
-            let typeVal = $('#filter_type').val();
-            let statusVal = $('#filter_status').val();
-            bidsTable.search(searchVal);
-            bidsTable.column(3).search(typeVal);
-            bidsTable.column(4).search(statusVal);
-            bidsTable.draw();
-        });
-    });
-</script>
+<script src="{{ asset('js/admin/bids.js') }}"></script>
 @endsection

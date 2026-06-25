@@ -5,77 +5,92 @@
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/wallet-profile.css') }}">
 <style>
-/* ===== PREMIUM PROFILE STYLES ===== */
+/* ===== PREMIUM PROFILE MASTERPIECE STYLES ===== */
 .profile-grid {
     display: grid;
     grid-template-columns: 2fr 1.1fr;
-    gap: 2rem;
-    margin-bottom: 3rem;
+    gap: 2.5rem;
+    margin-bottom: 4rem;
 }
 .profile-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     overflow: hidden;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+.profile-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+    border-color: var(--border-light);
 }
 .profile-card-header {
-    padding: 1.5rem;
+    padding: 1.75rem 2rem;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(135deg, rgba(229, 62, 62, 0.05), rgba(245, 158, 11, 0.03));
+    background: linear-gradient(135deg, rgba(229, 62, 62, 0.04), rgba(245, 158, 11, 0.02));
 }
 .profile-card-header h2 {
-    font-size: 1.15rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    color: var(--text);
 }
 .profile-card-header h2 svg {
     color: var(--brand-red);
 }
 .profile-card-body {
-    padding: 2rem;
+    padding: 2.5rem;
 }
 
 /* Photo Upload Trigger */
 .avatar-upload-container {
     position: relative;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 1.5rem;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 2.5rem;
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border: 4px solid var(--bg-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.avatar-upload-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(229, 62, 62, 0.25);
 }
 .avatar-preview {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    background: #0b0f19;
 }
 .avatar-edit-btn {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 32px;
-    height: 32px;
+    bottom: 2px;
+    right: 2px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--brand-red);
     color: white;
-    border: 2px solid var(--bg-card);
+    border: 3px solid var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.3s;
 }
 html[dir="rtl"] .avatar-edit-btn {
     right: auto;
-    left: 0;
+    left: 2px;
 }
 .avatar-edit-btn:hover {
     transform: scale(1.1);
@@ -86,12 +101,12 @@ html[dir="rtl"] .avatar-edit-btn {
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 .form-group-full {
     grid-column: 1 / -1;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 .form-field {
     display: flex;
@@ -99,63 +114,117 @@ html[dir="rtl"] .avatar-edit-btn {
 }
 .form-field label {
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+    transition: color 0.3s;
+}
+.form-field:focus-within label {
+    color: var(--brand-red-light);
 }
 .form-field input, .form-field select, .form-field textarea {
     width: 100%;
     background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    padding: 0.85rem 1.1rem;
     color: var(--text);
-    font-size: 0.9rem;
-    transition: all 0.3s;
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
 }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
     outline: none;
     border-color: var(--brand-red);
-    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.12), inset 0 2px 4px rgba(0,0,0,0.01);
+}
+
+/* Custom dropdown chevron aligned with language dir */
+.form-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    background-size: 0.85rem;
+    padding-right: 2.75rem;
+}
+html[dir="rtl"] .form-field select {
+    background-position: left 1.1rem center;
+    padding-left: 2.75rem;
+    padding-right: 1.1rem;
+}
+
+/* Section divider titles */
+.profile-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 2.25rem 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--brand-red-light);
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.profile-section-title svg {
+    color: var(--brand-red-light);
+    opacity: 0.85;
+}
+.profile-section-title:first-of-type {
+    margin-top: 1rem;
 }
 
 .submit-btn {
     background: linear-gradient(135deg, var(--brand-red), #991b1b);
     color: white;
     border: none;
-    padding: 0.85rem 2.5rem;
-    border-radius: 10px;
+    padding: 0.9rem 3rem;
+    border-radius: 12px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s;
+    gap: 0.6rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 15px rgba(229, 62, 62, 0.25);
 }
 .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4);
 }
+.submit-btn:active {
+    transform: translateY(0);
+}
 
 .delete-zone {
-    background: rgba(239, 68, 68, 0.03);
-    border: 1px dashed rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.02);
+    border: 1px dashed rgba(239, 68, 68, 0.2);
     border-radius: 14px;
     padding: 1.5rem;
+    transition: all 0.3s;
+}
+.delete-zone:hover {
+    background: rgba(239, 68, 68, 0.04);
+    border-color: rgba(239, 68, 68, 0.35);
 }
 
 @media(max-width: 992px) {
     .profile-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
 }
 @media(max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 }
 </style>
@@ -221,18 +290,10 @@ html[dir="rtl"] .avatar-edit-btn {
                         <input type="file" name="profile_photo" id="avatarInput" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="first_name">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
-                            <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $user->first_name) }}" placeholder="{{ __('First Name') }}">
-                            @error('first_name')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="last_name">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
-                            <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $user->last_name) }}" placeholder="{{ __('Last Name') }}">
-                            @error('last_name')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
-                        </div>
+                    {{-- Section 1: Core Details --}}
+                    <div class="profile-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>{{ app()->getLocale() === 'ar' ? 'معلومات الحساب الأساسية' : 'Core Account Details' }}</span>
                     </div>
 
                     <div class="form-row">
@@ -249,6 +310,51 @@ html[dir="rtl"] .avatar-edit-btn {
                         </div>
                     </div>
 
+                    {{-- Section 2: Personal Details --}}
+                    <div class="profile-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>{{ app()->getLocale() === 'ar' ? 'البيانات الشخصية والتعريفية' : 'Personal Details' }}</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="first_name">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
+                            <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $user->first_name) }}" placeholder="{{ __('First Name') }}">
+                            @error('first_name')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="last_name">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
+                            <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $user->last_name) }}" placeholder="{{ __('Last Name') }}">
+                            @error('last_name')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="date_of_birth">{{ app()->getLocale() === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth' }}</label>
+                            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $user->date_of_birth ? $user->date_of_birth->format('Y-m-d') : '') }}">
+                            @error('date_of_birth')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="form-field">
+                            <label for="gender">{{ app()->getLocale() === 'ar' ? 'الجنس' : 'Gender' }}</label>
+                            <select name="gender" id="gender">
+                                <option value="" disabled selected>{{ app()->getLocale() === 'ar' ? 'اختر الجنس' : 'Select Gender' }}</option>
+                                <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'ذكر' : 'Male' }}</option>
+                                <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'أنثى' : 'Female' }}</option>
+                                <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'آخر' : 'Other' }}</option>
+                            </select>
+                            @error('gender')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    {{-- Section 3: Contact & Address --}}
+                    <div class="profile-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <span>{{ app()->getLocale() === 'ar' ? 'معلومات الاتصال والموقع' : 'Contact & Location' }}</span>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-field">
                             <label for="phone">{{ app()->getLocale() === 'ar' ? 'رقم الهاتف' : 'Phone' }}</label>
@@ -257,9 +363,9 @@ html[dir="rtl"] .avatar-edit-btn {
                         </div>
 
                         <div class="form-field">
-                            <label for="date_of_birth">{{ app()->getLocale() === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth' }}</label>
-                            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $user->date_of_birth ? $user->date_of_birth->format('Y-m-d') : '') }}">
-                            @error('date_of_birth')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
+                            <label for="address">{{ app()->getLocale() === 'ar' ? 'العنوان' : 'Address' }}</label>
+                            <input type="text" name="address" id="address" value="{{ old('address', $user->address) }}" placeholder="{{ __('Address') }}">
+                            @error('address')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
                         </div>
                     </div>
 
@@ -274,25 +380,6 @@ html[dir="rtl"] .avatar-edit-btn {
                             <label for="city">{{ app()->getLocale() === 'ar' ? 'المدينة' : 'City' }}</label>
                             <input type="text" name="city" id="city" value="{{ old('city', $user->city) }}" placeholder="{{ __('City') }}">
                             @error('city')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="gender">{{ app()->getLocale() === 'ar' ? 'الجنس' : 'Gender' }}</label>
-                            <select name="gender" id="gender">
-                                <option value="" disabled selected>{{ app()->getLocale() === 'ar' ? 'اختر الجنس' : 'Select Gender' }}</option>
-                                <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'ذكر' : 'Male' }}</option>
-                                <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'أنثى' : 'Female' }}</option>
-                                <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'آخر' : 'Other' }}</option>
-                            </select>
-                            @error('gender')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div class="form-field">
-                            <label for="address">{{ app()->getLocale() === 'ar' ? 'العنوان' : 'Address' }}</label>
-                            <input type="text" name="address" id="address" value="{{ old('address', $user->address) }}" placeholder="{{ __('Address') }}">
-                            @error('address')<span style="color:#ef4444; font-size:.75rem; margin-top:0.25rem;">{{ $message }}</span>@enderror
                         </div>
                     </div>
 
@@ -319,7 +406,7 @@ html[dir="rtl"] .avatar-edit-btn {
             </div>
             
             <div class="profile-card-body">
-                <form method="POST" action="{{ route('password.update') }}">
+                <form method="POST" action="{{ route('password.update') }}" id="passwordUpdateForm">
                     @csrf
                     @method('put')
 
@@ -462,6 +549,128 @@ function closeDeleteModal() {
         confirmDeleteAccount();
     });
 @endif
+
+$(document).ready(function() {
+    const savingText = "{{ app()->getLocale() === 'ar' ? 'جاري الحفظ...' : 'Saving...' }}";
+
+    // AJAX Profile Form Update
+    $('#profileUpdateForm').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const submitBtn = $('#updateProfileBtn');
+        const originalHtml = submitBtn.html();
+
+        // Show loading state
+        submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> ' + savingText);
+
+        // Clear error highlights & messages
+        form.find('span[style*="#ef4444"], .error-msg').remove();
+        form.find('input, select, textarea').css('border-color', '');
+
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                submitBtn.prop('disabled', false).html(originalHtml);
+                if (response.success) {
+                    toastr.success(response.message || 'Profile updated successfully.');
+                    
+                    // Update user info across UI
+                    if (response.user) {
+                        $('.wallet-hero-info h1').text(response.user.full_name);
+                        $('.wallet-hero-email').text(response.user.email);
+                        $('#bannerAvatar').attr('src', response.user.profile_photo_url);
+                        $('#avatarPreview').attr('src', response.user.profile_photo_url);
+                        
+                        // Update topbar & sidebar user display
+                        $('.topbar .user-name, .sidebar-user .name').text(response.user.full_name);
+                        $('.topbar .avatar, .sidebar-user .avatar').each(function() {
+                            if ($(this).find('img').length) {
+                                $(this).find('img').attr('src', response.user.profile_photo_url);
+                            } else {
+                                $(this).text(response.user.full_name.charAt(0).toUpperCase());
+                            }
+                        });
+                    }
+                } else {
+                    toastr.error('Failed to update profile.');
+                }
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).html(originalHtml);
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    $.each(errors, function(field, messages) {
+                        const input = form.find(`[name="${field}"]`);
+                        if (input.length) {
+                            input.css('border-color', '#ef4444');
+                            input.after(`<span class="error-msg text-danger mt-1 small" style="color:#ef4444; font-size:.75rem; margin-top:0.25rem; display:block;">${messages[0]}</span>`);
+                        }
+                    });
+                    toastr.error("{{ __('Please correct the errors below.') }}");
+                } else {
+                    toastr.error('An error occurred. Please try again.');
+                }
+            }
+        });
+    });
+
+    // AJAX Password Form Update
+    $('#passwordUpdateForm').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const submitBtn = form.find('button[type="submit"]');
+        const originalHtml = submitBtn.html();
+
+        // Show loading state
+        submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> ' + savingText);
+
+        // Clear error highlights & messages
+        form.find('span[style*="#ef4444"], .error-msg').remove();
+        form.find('input').css('border-color', '');
+
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                submitBtn.prop('disabled', false).html(originalHtml);
+                if (response.success) {
+                    toastr.success(response.message || 'Password updated successfully.');
+                    // Clear inputs
+                    form.find('input[type="password"]').val('');
+                } else {
+                    toastr.error('Failed to update password.');
+                }
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).html(originalHtml);
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    $.each(errors, function(field, messages) {
+                        const input = form.find(`[name="${field}"]`);
+                        if (input.length) {
+                            input.css('border-color', '#ef4444');
+                            input.after(`<span class="error-msg text-danger mt-1 small" style="color:#ef4444; font-size:.75rem; margin-top:0.25rem; display:block;">${messages[0]}</span>`);
+                        }
+                    });
+                    toastr.error("{{ __('Please correct the errors below.') }}");
+                } else {
+                    toastr.error('An error occurred. Please try again.');
+                }
+            }
+        });
+    });
+});
 </script>
 <style>
 .modal-open { overflow: hidden; }

@@ -86,6 +86,11 @@ class Auction extends Model
         return $this->hasMany(AuctionWatchlist::class);
     }
 
+    public function order()
+    {
+        return $this->hasOne(Order::class);
+    }
+
     // ── Accessors & Helpers ────────────────────────────────────────────────
 
     public function getTitleAttribute(): string

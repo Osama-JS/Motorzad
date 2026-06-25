@@ -7,9 +7,15 @@ use Illuminate\Http\Request;
 
 class BankDetailController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('bidder.bank-details.partials.content', compact('user'))->render()
+            ]);
+        }
         return view('bidder.bank-details.index', compact('user'));
     }
 

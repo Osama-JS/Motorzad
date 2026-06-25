@@ -24,7 +24,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $user = $request->user();
         $user->fill($request->validated());
@@ -42,6 +42,18 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('Profile updated successfully.'),
+                'user' => [
+                    'full_name' => $user->full_name,
+                    'email' => $user->email,
+                    'profile_photo_url' => $user->profile_photo_url,
+                ]
+            ]);
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

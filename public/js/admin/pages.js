@@ -40,6 +40,34 @@ $(document).ready(function () {
     }
     initSelect2();
 
+    // Handle Column Toggle check/uncheck
+    $('.col-toggle').on('change', function() {
+        let visArray = [];
+        $('.col-toggle:checked').each(function() {
+            visArray.push($(this).val());
+        });
+        localStorage.setItem('pages_col_visibility', JSON.stringify(visArray));
+        applyColumnVisibility();
+    });
+
+    window.applyColumnVisibility = function() {
+        let savedVis = localStorage.getItem('pages_col_visibility');
+        if (savedVis) {
+            let visArray = JSON.parse(savedVis);
+            $('.col-toggle').each(function() {
+                let colIdx = $(this).val();
+                let isVisible = visArray.includes(colIdx);
+                $(this).prop('checked', isVisible);
+                
+                if (isVisible) {
+                    $('.col-toggle-' + colIdx).removeClass('d-none');
+                } else {
+                    $('.col-toggle-' + colIdx).addClass('d-none');
+                }
+            });
+        }
+    };
+
     // Initialize Summernote
     function initSummernote() {
         let config = {
@@ -146,6 +174,7 @@ window.fetchPages = function(page) {
             if(res.success) {
                 renderPagesTable(res.data);
                 renderPagination(res.pagination);
+                if (window.applyColumnVisibility) window.applyColumnVisibility();
             }
         },
         error: function() {
@@ -161,12 +190,12 @@ function renderPagesTable(data) {
     } else {
         data.forEach(page => {
             html += '<tr>';
-            html += '<td class="align-middle">' + page.title_ar + '</td>';
-            html += '<td class="align-middle">' + page.title_en + '</td>';
-            html += '<td class="align-middle">' + page.slug + '</td>';
-            html += '<td class="align-middle">' + page.is_active + '</td>';
-            html += '<td class="align-middle">' + page.show_in_footer + '</td>';
-            html += '<td class="align-middle text-center">' + page.actions + '</td>';
+            html += '<td class="align-middle col-toggle-0">' + page.title_ar + '</td>';
+            html += '<td class="align-middle col-toggle-1">' + page.title_en + '</td>';
+            html += '<td class="align-middle col-toggle-2">' + page.slug + '</td>';
+            html += '<td class="align-middle col-toggle-3">' + page.is_active + '</td>';
+            html += '<td class="align-middle col-toggle-4">' + page.show_in_footer + '</td>';
+            html += '<td class="align-middle text-center col-toggle-5">' + page.actions + '</td>';
             html += '</tr>';
         });
     }

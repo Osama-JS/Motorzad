@@ -30,6 +30,7 @@ $(document).ready(function() {
                     currentData = response.data;
                     renderCurrentView();
                     renderPagination(response.pagination);
+                    applyColumnVisibility();
                 } else {
                     $('#custom-deposits-tbody').html('<tr><td colspan="7" class="text-center py-4 text-danger">' + window.DepositConfig.trans.errorLoading + '</td></tr>');
                 }
@@ -66,6 +67,7 @@ $(document).ready(function() {
         }
         
         renderCurrentView();
+        applyColumnVisibility();
     };
 
     function renderGrid(data) {
@@ -81,27 +83,27 @@ $(document).ready(function() {
             let card = `
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                     <div class="user-grid-card border border-light bg-white shadow-sm rounded p-3 h-100 position-relative">
-                        <div class="position-absolute top-0 end-0 p-3">
+                        <div class="position-absolute top-0 end-0 p-3 col-toggle-6">
                             ${deposit.actions}
                         </div>
                         <div class="card-info mb-3 pe-5">
-                            <strong class="d-block mb-1">#${deposit.id}</strong>
-                            <div class="mb-2">${deposit.user_name}</div>
+                            <strong class="d-block mb-1 col-toggle-0">#${deposit.id}</strong>
+                            <div class="mb-2 col-toggle-1">${deposit.user_name}</div>
                         </div>
                         <div class="card-details border-top pt-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2 col-toggle-4">
                                 <span class="text-muted small">حالة الطلب:</span>
                                 <span>${deposit.status}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-3">
                                 <span class="text-muted small">المبلغ:</span>
                                 <span class="fw-medium small text-success">${deposit.amount}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-2">
                                 <span class="text-muted small">البنك المحوّل إليه:</span>
                                 <span class="fw-medium small">${deposit.bank_name}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2 col-toggle-5">
                                 <span class="text-muted small">تاريخ الطلب:</span>
                                 <span class="fw-medium small">${deposit.created_at}</span>
                             </div>
@@ -125,13 +127,13 @@ $(document).ready(function() {
         data.forEach(deposit => {
             let tr = `
                 <tr>
-                    <td>${deposit.id}</td>
-                    <td>${deposit.user_name}</td>
-                    <td>${deposit.bank_name}</td>
-                    <td>${deposit.amount}</td>
-                    <td>${deposit.status}</td>
-                    <td>${deposit.created_at}</td>
-                    <td>${deposit.actions}</td>
+                    <td class="col-toggle-0">${deposit.id}</td>
+                    <td class="col-toggle-1">${deposit.user_name}</td>
+                    <td class="col-toggle-2">${deposit.bank_name}</td>
+                    <td class="col-toggle-3">${deposit.amount}</td>
+                    <td class="col-toggle-4">${deposit.status}</td>
+                    <td class="col-toggle-5">${deposit.created_at}</td>
+                    <td class="col-toggle-6">${deposit.actions}</td>
                 </tr>
             `;
             tbody.append(tr);
@@ -177,6 +179,34 @@ $(document).ready(function() {
         });
     }
     initSelect2();
+
+    // Handle Column Toggle check/uncheck
+    $('.col-toggle').on('change', function() {
+        let visArray = [];
+        $('.col-toggle:checked').each(function() {
+            visArray.push($(this).val());
+        });
+        localStorage.setItem('deposits_col_visibility', JSON.stringify(visArray));
+        applyColumnVisibility();
+    });
+
+    function applyColumnVisibility() {
+        let savedVis = localStorage.getItem('deposits_col_visibility');
+        if (savedVis) {
+            let visArray = JSON.parse(savedVis);
+            $('.col-toggle').each(function() {
+                let colIdx = $(this).val();
+                let isVisible = visArray.includes(colIdx);
+                $(this).prop('checked', isVisible);
+                
+                if (isVisible) {
+                    $('.col-toggle-' + colIdx).removeClass('d-none');
+                } else {
+                    $('.col-toggle-' + colIdx).addClass('d-none');
+                }
+            });
+        }
+    }
 
     // Bind filters
     $('#filter_status').on('change', function() {

@@ -1014,84 +1014,76 @@ function placeBidNow() {
     btn.disabled = true;
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>';
 
-    fetch(`{{ route('bidder.auctions.bid', $auction->id) }}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ 
-            amount: bidAmount,
-            is_auto_bid: isAutoBid,
-            max_auto_bid: maxAutoBid
-        })
-    })
-    .then(async res => {
-        const data = await res.json();
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
+    BidderAjax.post(`{{ route('bidder.auctions.bid', $auction->id) }}`, { 
+        amount: bidAmount,
+        is_auto_bid: isAutoBid,
+        max_auto_bid: maxAutoBid
+    }, {
+        onSuccess: function(data) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
 
-        if (res.ok && data.success) {
-            // Update current price
-            document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
-            
-            // Update price history array and redraw chart
-            priceHistoryData.push({
-                time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-                amount: data.new_price,
-                bidder: '{{ __("You") }}'
-            });
-            if (priceChart) {
-                renderPriceHistoryChart();
-            }
-
-            // Update quick bid buttons
-            updateQuickBidButtons(data.new_price);
-            
-            // Add to feed list
-            const feedList = document.getElementById('bidsFeedList');
-            const noBidsMsg = document.getElementById('noBidsMsg');
-            if (noBidsMsg) noBidsMsg.remove();
-            
-            const newItem = document.createElement('div');
-            newItem.className = 'feed-item';
-            newItem.style.animation = 'highlight-green 2s ease-out';
-            newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
-            feedList.insertBefore(newItem, feedList.firstChild);
-
-            // Update counters
-            document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
-
-            // Set next bid recommendation
-            const minIncrement = {{ $auction->min_bid_increment }};
-            input.value = data.new_price + minIncrement;
-            input.min = data.new_price + minIncrement;
-
-            // Update max auto bid input min
-            const maxInput = document.getElementById('maxAutoBidInput');
-            if (maxInput) {
-                maxInput.min = data.new_price + minIncrement * 2;
-            }
-
-            // Update time remaining if returned (e.g. on auto-extension)
-            if (data.time_left_seconds !== undefined && typeof timeInSec !== 'undefined') {
-                const oldTime = timeInSec;
-                timeInSec = data.time_left_seconds;
-                if (timeInSec > oldTime) {
-                    toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد تلقائياً لمنع القنص!" : "Auction auto-extended to prevent sniping!" }}');
+            if (data.success) {
+                // Update current price
+                document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
+                
+                // Update price history array and redraw chart
+                priceHistoryData.push({
+                    time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    amount: data.new_price,
+                    bidder: '{{ __("You") }}'
+                });
+                if (priceChart) {
+                    renderPriceHistoryChart();
                 }
-            }
 
-            toastr.success(data.message);
-        } else {
-            toastr.error(data.message || 'Failed to submit bid');
+                // Update quick bid buttons
+                updateQuickBidButtons(data.new_price);
+                
+                // Add to feed list
+                const feedList = document.getElementById('bidsFeedList');
+                const noBidsMsg = document.getElementById('noBidsMsg');
+                if (noBidsMsg) noBidsMsg.remove();
+                
+                const newItem = document.createElement('div');
+                newItem.className = 'feed-item';
+                newItem.style.animation = 'highlight-green 2s ease-out';
+                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
+                feedList.insertBefore(newItem, feedList.firstChild);
+
+                // Update counters
+                document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+
+                // Set next bid recommendation
+                const minIncrement = {{ $auction->min_bid_increment }};
+                input.value = data.new_price + minIncrement;
+                input.min = data.new_price + minIncrement;
+
+                // Update max auto bid input min
+                const maxInput = document.getElementById('maxAutoBidInput');
+                if (maxInput) {
+                    maxInput.min = data.new_price + minIncrement * 2;
+                }
+
+                // Update time remaining if returned (e.g. on auto-extension)
+                if (data.time_left_seconds !== undefined && typeof timeInSec !== 'undefined') {
+                    const oldTime = timeInSec;
+                    timeInSec = data.time_left_seconds;
+                    if (timeInSec > oldTime) {
+                        toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد تلقائياً لمنع القنص!" : "Auction auto-extended to prevent sniping!" }}');
+                    }
+                }
+
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message || 'Failed to submit bid');
+            }
+        },
+        onError: function(xhr) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
+            toastr.error('Connection error.');
         }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
-        toastr.error('Connection error.');
     });
 }
 </script>

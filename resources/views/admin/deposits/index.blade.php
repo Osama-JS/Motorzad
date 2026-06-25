@@ -113,6 +113,44 @@
                 <option value="100">100</option>
             </select>
         </div>
+
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                {{ __('Columns') }}
+            </button>
+            <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_id" value="0" checked>
+                    <label class="form-check-label" for="col_id">{{ __('ID') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_bidder" value="1" checked disabled>
+                    <label class="form-check-label" for="col_bidder">{{ __('المزايد') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_bank" value="2" checked>
+                    <label class="form-check-label" for="col_bank">{{ __('البنك المحوّل إليه') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_amount" value="3" checked>
+                    <label class="form-check-label" for="col_amount">{{ __('المبلغ') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_status" value="4" checked>
+                    <label class="form-check-label" for="col_status">{{ __('حالة الطلب') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_date" value="5" checked>
+                    <label class="form-check-label" for="col_date">{{ __('تاريخ الطلب') }}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_actions" value="6" checked disabled>
+                    <label class="form-check-label" for="col_actions">{{ __('الإجراءات') }}</label>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
@@ -133,13 +171,13 @@
             <table id="deposits-table" class="table align-items-center mb-0 w-100">
                 <thead>
                     <tr>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('ID') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('المزايد') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('البنك المحوّل إليه') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('المبلغ') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('حالة الطلب') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('تاريخ الطلب') }}</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">{{ __('الإجراءات') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-0">{{ __('ID') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-1">{{ __('المزايد') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-2">{{ __('البنك المحوّل إليه') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-3">{{ __('المبلغ') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-4">{{ __('حالة الطلب') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-5">{{ __('تاريخ الطلب') }}</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 col-toggle-6">{{ __('الإجراءات') }}</th>
                     </tr>
                 </thead>
                 <tbody id="custom-deposits-tbody">

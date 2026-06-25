@@ -129,6 +129,40 @@
                 <option value="100">100</option>
             </select>
         </div>
+
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                {{ __('Columns') }}
+            </button>
+            <div class="dropdown-menu shadow-sm p-3" style="min-width: 200px;">
+                <h6 class="dropdown-header px-0 text-primary">{{ __('Toggle Columns') }}</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_title_ar" value="0" checked disabled>
+                    <label class="form-check-label" for="col_title_ar">{{ __('Title (Arabic)') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_title_en" value="1" checked>
+                    <label class="form-check-label" for="col_title_en">{{ __('Title (English)') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_slug" value="2" checked>
+                    <label class="form-check-label" for="col_slug">{{ __('Slug') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_status" value="3" checked>
+                    <label class="form-check-label" for="col_status">{{ __('Status') }}</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_footer" value="4" checked>
+                    <label class="form-check-label" for="col_footer">{{ __('Show in Footer') }}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input col-toggle" type="checkbox" id="col_actions" value="5" checked disabled>
+                    <label class="form-check-label" for="col_actions">{{ __('Actions') }}</label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -137,12 +171,12 @@
         <table class="table table-hover table-striped align-middle mb-0 w-100" id="pages-custom-table">
             <thead class="table-light">
                 <tr>
-                    <th class="border-bottom-0">{{ __('Title (Arabic)') }}</th>
-                    <th class="border-bottom-0">{{ __('Title (English)') }}</th>
-                    <th class="border-bottom-0">{{ __('Slug') }}</th>
-                    <th class="border-bottom-0">{{ __('Status') }}</th>
-                    <th class="border-bottom-0">{{ __('Show in Footer') }}</th>
-                    <th class="border-bottom-0 text-center" style="width: 100px;">{{ __('Actions') }}</th>
+                    <th class="border-bottom-0 col-toggle-0">{{ __('Title (Arabic)') }}</th>
+                    <th class="border-bottom-0 col-toggle-1">{{ __('Title (English)') }}</th>
+                    <th class="border-bottom-0 col-toggle-2">{{ __('Slug') }}</th>
+                    <th class="border-bottom-0 col-toggle-3">{{ __('Status') }}</th>
+                    <th class="border-bottom-0 col-toggle-4">{{ __('Show in Footer') }}</th>
+                    <th class="border-bottom-0 text-center col-toggle-5" style="width: 100px;">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody id="custom-pages-tbody">
