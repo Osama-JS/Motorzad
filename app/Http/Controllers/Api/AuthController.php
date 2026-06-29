@@ -822,4 +822,48 @@ class AuthController extends Controller
             'data' => $dataPayload,
         ]);
     }
+
+    /**
+     * Update auto bid settings for the user.
+     */
+    #[OA\Post(
+        path: "/api/auth/auto-bid-settings",
+        summary: "Update Auto Bid Settings",
+        operationId: "updateAutoBidSettings",
+        description: "Enables or disables auto bidding for the user's account.",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "Accept-Language", in: "header", required: false, schema: new OA\Schema(type: "string", default: "en", enum: ["en", "ar"]))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["auto_bid_enabled"],
+                properties: [
+                    new OA\Property(property: "auto_bid_enabled", type: "boolean", example: true)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Settings updated successfully")
+        ]
+    )]
+    public function updateAutoBidSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'auto_bid_enabled' => 'required|boolean',
+        ]);
+
+        $user = $request->user();
+        $user->update(['auto_bid_enabled' => $validated['auto_bid_enabled']]);
+
+        return response()->json([
+            'error' => false,
+            'message' => __('Auto bid settings updated successfully.'),
+            'data' => [
+                'auto_bid_enabled' => $user->auto_bid_enabled
+            ],
+        ]);
+    }
 }

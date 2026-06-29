@@ -29,6 +29,13 @@ Route::prefix('otp')->group(function () {
     Route::post('verify', [\App\Http\Controllers\Api\OtpController::class, 'verifyOtp']);
 });
 
+// General App Data
+Route::prefix('general')->group(function () {
+    Route::get('settings', [\App\Http\Controllers\Api\GeneralController::class, 'settings']);
+    Route::get('faqs', [\App\Http\Controllers\Api\GeneralController::class, 'faqs']);
+    Route::get('vehicle-options', [\App\Http\Controllers\Api\GeneralController::class, 'vehicleOptions']);
+});
+
 // ─── Authenticated Routes ──────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -41,6 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('photo', [AuthController::class, 'uploadPhoto']);
         Route::post('email/verify', [AuthController::class, 'verifyEmail']);
         Route::post('email/resend', [AuthController::class, 'resendVerificationEmail']);
+        
+        // Auto Bid Settings
+        Route::post('auto-bid-settings', [AuthController::class, 'updateAutoBidSettings']);
     });
 
     // KYC
@@ -77,11 +87,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', [BankDetailController::class, 'update']);
     });
 
+    // Vehicles
+    Route::prefix('vehicles')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\VehicleController::class, 'store']);
+        Route::get('/my', [\App\Http\Controllers\Api\VehicleController::class, 'index']);
+        Route::get('/{vehicle}', [\App\Http\Controllers\Api\VehicleController::class, 'show']);
+        Route::put('/{vehicle}', [\App\Http\Controllers\Api\VehicleController::class, 'update']);
+        Route::delete('/{vehicle}', [\App\Http\Controllers\Api\VehicleController::class, 'destroy']);
+        Route::post('/{vehicle}/images', [\App\Http\Controllers\Api\VehicleController::class, 'uploadImages']);
+        Route::delete('/{vehicle}/images/{image}', [\App\Http\Controllers\Api\VehicleController::class, 'deleteImage']);
+    });
+
     // Auctions
     Route::prefix('auctions')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\AuctionController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\AuctionController::class, 'store']);
+        Route::get('/my', [\App\Http\Controllers\Api\AuctionController::class, 'myAuctions']);
         Route::get('/watchlist', [\App\Http\Controllers\Api\AuctionController::class, 'watchlist']);
         Route::get('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'show']);
+        Route::put('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'update']);
+        Route::delete('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'destroy']);
+        Route::post('/{auction}/images', [\App\Http\Controllers\Api\AuctionController::class, 'uploadImages']);
+        Route::delete('/{auction}/images/{image}', [\App\Http\Controllers\Api\AuctionController::class, 'deleteImage']);
+        
         Route::get('/{auction}/bids', [\App\Http\Controllers\Api\AuctionController::class, 'bids']);
         Route::post('/{auction}/watch', [\App\Http\Controllers\Api\AuctionController::class, 'toggleWatch']);
         Route::post('/{auction}/bid', [\App\Http\Controllers\Api\BidController::class, 'store']);
@@ -92,6 +120,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('my')->group(function () {
         Route::get('/bids', [\App\Http\Controllers\Api\BidController::class, 'myBids']);
         Route::get('/won', [\App\Http\Controllers\Api\BidController::class, 'wonAuctions']);
+    });
+
+    // Orders (Post Auction Checkout)
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\OrderController::class, 'index']);
+        Route::get('/{order}', [\App\Http\Controllers\Api\OrderController::class, 'show']);
+        Route::put('/{order}/checkout', [\App\Http\Controllers\Api\OrderController::class, 'checkout']);
+    });
+
+    // Support Tickets
+    Route::prefix('support')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\SupportController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\SupportController::class, 'store']);
+        Route::get('/{ticket}', [\App\Http\Controllers\Api\SupportController::class, 'show']);
+        Route::post('/{ticket}/reply', [\App\Http\Controllers\Api\SupportController::class, 'reply']);
     });
 });
 

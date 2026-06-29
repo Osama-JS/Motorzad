@@ -181,4 +181,177 @@ class AuctionController extends Controller
             ],
         ]);
     }
+
+    /**
+     * List auctions created by the current user.
+     */
+    public function myAuctions(Request $request): JsonResponse
+    {
+        $auctions = Auction::where('created_by', $request->user()->id)
+            ->with(['vehicle.images', 'highestBid'])
+            ->withCount('bids')
+            ->latest()
+            ->paginate($request->input('per_page', 12));
+
+        return response()->json([
+            'success' => true,
+            'data'    => AuctionResource::collection($auctions->items()),
+            'meta'    => [
+                'current_page' => $auctions->currentPage(),
+                'last_page'    => $auctions->lastPage(),
+                'total'        => $auctions->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Create a new auction.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'vehicle_id' => 'required|exists:vehicles,id',
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'description_ar' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'start_price' => 'required|numeric|min:0',
+            'reserve_price' => 'nullable|numeric|min:0',
+            'min_bid_increment' => 'required|numeric|min:1',
+            'buy_now_price' => 'nullable|numeric|min:0',
+            'deposit_amount' => 'required|numeric|min:0',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'location_ar' => 'nullable|string|max:255',
+            'location_en' => 'nullable|string|max:255',
+            'auto_extend_minutes' => 'nullable|integer|min:0'
+        ]);
+
+        $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
+
+        // Authorize vehicle ownership and check if approved
+        \Illuminate\Support\Facades\Gate::authorize('update', $vehicle); // Ensures they own it
+        if ($vehicle->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => __('Vehicle must be approved before creating an auction.')
+            ], 422);
+        }
+
+        $validated['created_by'] = $request->user()->id;
+        $validated['status'] = 'draft'; // Always draft initially
+        $validated['deposit_required'] = $request->has('deposit_required') ? $request->boolean('deposit_required') : ($validated['deposit_amount'] > 0);
+
+        $auction = Auction::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction created successfully as a draft. It is pending admin review.'),
+            'data' => new AuctionResource($auction)
+        ], 201);
+    }
+
+    /**
+     * Update an existing draft auction.
+     */
+    public function update(Request $request, Auction $auction): JsonResponse
+    {
+        \Illuminate\Support\Facades\Gate::authorize('update', $auction);
+
+        $validated = $request->validate([
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'description_ar' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'start_price' => 'required|numeric|min:0',
+            'reserve_price' => 'nullable|numeric|min:0',
+            'min_bid_increment' => 'required|numeric|min:1',
+            'buy_now_price' => 'nullable|numeric|min:0',
+            'deposit_amount' => 'required|numeric|min:0',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'location_ar' => 'nullable|string|max:255',
+            'location_en' => 'nullable|string|max:255',
+            'auto_extend_minutes' => 'nullable|integer|min:0'
+        ]);
+
+        $validated['deposit_required'] = $request->has('deposit_required') ? $request->boolean('deposit_required') : ($validated['deposit_amount'] > 0);
+        $validated['status'] = 'draft';
+
+        $auction->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction updated successfully. It remains in draft status pending review.'),
+            'data' => new AuctionResource($auction)
+        ]);
+    }
+
+    /**
+     * Delete an auction.
+     */
+    public function destroy(Request $request, Auction $auction): JsonResponse
+    {
+        \Illuminate\Support\Facades\Gate::authorize('delete', $auction);
+
+        $auction->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Auction deleted successfully.')
+        ]);
+    }
+
+    /**
+     * Upload images for an auction.
+     */
+    public function uploadImages(Request $request, Auction $auction): JsonResponse
+    {
+        \Illuminate\Support\Facades\Gate::authorize('update', $auction);
+
+        $request->validate([
+            'images' => 'required|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('images')) {
+            $existingCount = $auction->images()->count();
+            foreach ($request->file('images') as $index => $imageFile) {
+                $path = $imageFile->store('auctions', 'public');
+                $auction->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => ($existingCount === 0 && $index === 0),
+                    'sort_order' => $existingCount + $index
+                ]);
+            }
+            
+            if (!$auction->primaryImage && $auction->images()->count() > 0) {
+                $firstImage = $auction->images()->first();
+                $firstImage->update(['is_primary' => true]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Images uploaded successfully.'),
+            'data' => new AuctionResource($auction->load('images'))
+        ]);
+    }
+    
+    /**
+     * Delete an image from an auction.
+     */
+    public function deleteImage(Request $request, Auction $auction, $imageId): JsonResponse
+    {
+        \Illuminate\Support\Facades\Gate::authorize('update', $auction);
+        
+        $image = $auction->images()->findOrFail($imageId);
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($image->image_path);
+        $image->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => __('Image deleted successfully.')
+        ]);
+    }
 }

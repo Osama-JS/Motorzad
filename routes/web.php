@@ -8,6 +8,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Mobile Developer Documentation
+Route::get('/docs', function () {
+    return view('docs.index');
+})->name('docs.index');
+
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ar'])) {
         session()->put('locale', $locale);

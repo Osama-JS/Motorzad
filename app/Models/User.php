@@ -64,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'check_bank',
         'bank_name',
         'account_number',
+        'auto_bid_enabled',
     ];
 
     public function wallet()
@@ -130,6 +131,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'identity_verified_at' => 'datetime',
             'password' => 'hashed',
             'check_bank' => 'boolean',
+            'auto_bid_enabled' => 'boolean',
             'date_of_birth' => 'date',
         ];
     }

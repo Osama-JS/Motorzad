@@ -103,6 +103,14 @@ class BidController extends Controller
             }
         }
 
+        // 6. Check user auto_bid setting if trying to auto bid
+        if ($request->boolean('is_auto_bid') && !$user->auto_bid_enabled) {
+            return response()->json([
+                'success' => false,
+                'message' => __('You must enable auto-bidding in your account settings first.'),
+            ], 422);
+        }
+
         // ── Place Bid ──────────────────────────────────────────────────────
 
         DB::transaction(function () use ($request, $auction, $user) {
