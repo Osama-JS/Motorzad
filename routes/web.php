@@ -9,7 +9,7 @@ Route::get('/', function () {
 });
 
 // Mobile Developer Documentation
-Route::get('/docs', function () {
+Route::get('/mobile-docs', function () {
     return view('docs.index');
 })->name('docs.index');
 
