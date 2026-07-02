@@ -55,8 +55,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // KYC
     Route::prefix('kyc')->group(function () {
-        Route::get('/',    [KycController::class, 'show']);
-        Route::post('/',   [KycController::class, 'store']);
+        Route::get('/status', [\App\Http\Controllers\Api\KycApiController::class, 'status']);
+        Route::get('/history', [\App\Http\Controllers\Api\KycApiController::class, 'history']);
+        Route::post('/submit', [\App\Http\Controllers\Api\KycApiController::class, 'submit']);
     });
 
     // Notifications

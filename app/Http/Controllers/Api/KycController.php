@@ -68,4 +68,26 @@ class KycController extends Controller
             'data'    => new KycRequestResource($kycRequest),
         ], 201);
     }
+
+    /**
+     * Get user's KYC history.
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $perPage = $request->query('per_page', 10);
+
+        $kycRequests = $user->kycRequests()->latest()->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data'    => KycRequestResource::collection($kycRequests->items()),
+            'pagination' => [
+                'total'        => $kycRequests->total(),
+                'per_page'     => $kycRequests->perPage(),
+                'current_page' => $kycRequests->currentPage(),
+                'last_page'    => $kycRequests->lastPage(),
+            ],
+        ]);
+    }
 }

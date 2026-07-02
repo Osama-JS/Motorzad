@@ -23,52 +23,52 @@
 </button>
 </div>
 
-<div class="row mb-4 g-3">
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card blue h-100 stat-card-compact">
-            <div class="stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div class="row mb-4 g-3">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="stat-card blue h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['total'] }}</div>
+                    <div class="stat-label">{{ __('Total Users') }}</div>
+                </div>
             </div>
-            <div>
-                <div class="stat-value">{{ $stats['total'] }}</div>
-                <div class="stat-label">{{ __('Total Users') }}</div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="stat-card green h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['approved'] }}</div>
+                    <div class="stat-label">{{ __('Approved Users') }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="stat-card gold h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['pending'] }}</div>
+                    <div class="stat-label">{{ __('Pending Verification') }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="stat-card red h-100 stat-card-compact">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $stats['rejected'] }}</div>
+                    <div class="stat-label">{{ __('Rejected') }}</div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card green h-100 stat-card-compact">
-            <div class="stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div>
-                <div class="stat-value">{{ $stats['approved'] }}</div>
-                <div class="stat-label">{{ __('Approved Users') }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card gold h-100 stat-card-compact">
-            <div class="stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </div>
-            <div>
-                <div class="stat-value">{{ $stats['pending'] }}</div>
-                <div class="stat-label">{{ __('Pending Verification') }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="stat-card red h-100 stat-card-compact">
-            <div class="stat-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-            </div>
-            <div>
-                <div class="stat-value">{{ $stats['rejected'] }}</div>
-                <div class="stat-label">{{ __('Rejected') }}</div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="card mb-4 shadow-sm border-0">
     <div class="card-body">
@@ -95,8 +95,9 @@
                     <option value="rejected">{{ __('Rejected') }}</option>
                 </select>
             </div>
-            <div class="col-md-2 text-end">
+            <div class="col-md-2">
                 <button type="button" class="btn btn-secondary w-100" onclick="fetchUsers(1)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
                     {{ __('Filter') }}
                 </button>
             </div>
@@ -104,8 +105,8 @@
     </div>
 </div>
 
-<div class="view-toolbar">
-    <div class="d-flex align-items-center gap-3">
+<div class="view-toolbar d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 w-100 w-sm-auto">
         <div class="d-flex align-items-center">
             <span class="text-muted small me-2">{{ __('Show:') }}</span>
             <select id="filter_per_page" class="form-select form-select-sm select2-init" style="width: 80px;" onchange="fetchUsers(1)">
@@ -159,12 +160,14 @@
         </div>
     </div>
 
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
+    <div class="btn-group w-100 w-sm-auto" role="group">
+        <button type="button" class="btn btn-sm btn-outline-primary active w-50" id="btn-view-table" onclick="toggleView('table')" title="{{ __('Table View') }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span class="d-inline d-sm-none ms-2">{{ __('Table') }}</span>
         </button>
-        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
+        <button type="button" class="btn btn-sm btn-outline-primary w-50" id="btn-view-grid" onclick="toggleView('grid')" title="{{ __('Grid View') }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span class="d-inline d-sm-none ms-2">{{ __('Grid') }}</span>
         </button>
     </div>
 </div>
@@ -198,7 +201,7 @@
 
 <!-- Pagination Container (Shared) -->
 <div class="card shadow-sm border-0 mt-3">
-    <div class="card-body bg-white d-flex justify-content-between align-items-center py-3" id="custom-pagination">
+    <div class="card-body bg-white d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center py-3 gap-3" id="custom-pagination">
         <!-- Pagination controls will be injected here -->
     </div>
 </div>
@@ -377,19 +380,19 @@
                     </div>
                 
                     <!-- Wizard Navigation Buttons (Inside Body to avoid theme footer hiding) -->
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top" id="wizardButtonsContainer">
-                        <button type="button" class="btn btn-secondary px-4" id="wizardPrevBtn" onclick="nextPrev(-1)" disabled style="display: inline-block;">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3 mt-4 pt-3 border-top" id="wizardButtonsContainer">
+                        <button type="button" class="btn btn-secondary px-4 w-100 w-sm-auto order-2 order-sm-1" id="wizardPrevBtn" onclick="nextPrev(-1)" disabled style="display: inline-block;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="15 18 9 12 15 6"></polyline></svg>
                             {{ __('Previous') }}
                         </button>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                            <button type="button" class="btn btn-primary px-4" id="wizardNextBtn" onclick="nextPrev(1)" style="display: inline-block;">
+                        <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto order-1 order-sm-2">
+                            <button type="button" class="btn btn-outline-secondary px-4 w-100 w-sm-auto" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                            <button type="button" class="btn btn-primary px-4 w-100 w-sm-auto" id="wizardNextBtn" onclick="nextPrev(1)" style="display: inline-block;">
                                 {{ __('Next') }}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-1"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </button>
-                            <button type="submit" class="btn btn-success px-4" id="wizardSubmitBtn" style="display: none;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <button type="submit" class="btn btn-success px-4 w-100 w-sm-auto" id="wizardSubmitBtn" style="display: none;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                                 {{ __('Save User') }}
                             </button>
                         </div>
@@ -574,18 +577,18 @@
                 </div>
                 
                 <!-- Wizard Navigation Buttons -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top px-4 pb-4" id="editWizardButtonsContainer">
-                    <button type="button" class="btn btn-secondary px-4" id="editWizardPrevBtn" onclick="nextEditPrev(-1)" disabled style="display: inline-block;">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3 mt-4 pt-3 border-top px-4 pb-4" id="editWizardButtonsContainer">
+                    <button type="button" class="btn btn-secondary px-4 w-100 w-sm-auto order-2 order-sm-1" id="editWizardPrevBtn" onclick="nextEditPrev(-1)" disabled style="display: inline-block;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         {{ __('Previous') }}
                     </button>
-                    <div>
-                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                        <button type="button" class="btn btn-primary px-4" id="editWizardNextBtn" onclick="nextEditPrev(1)" style="display: inline-block;">
+                    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto order-1 order-sm-2">
+                        <button type="button" class="btn btn-outline-secondary px-4 w-100 w-sm-auto" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="button" class="btn btn-primary px-4 w-100 w-sm-auto" id="editWizardNextBtn" onclick="nextEditPrev(1)" style="display: inline-block;">
                             {{ __('Next') }}
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-1"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
-                        <button type="submit" class="btn btn-success px-4" id="editWizardSubmitBtn" style="display: none;">
+                        <button type="submit" class="btn btn-success px-4 w-100 w-sm-auto" id="editWizardSubmitBtn" style="display: none;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             {{ __('Update User') }}
                         </button>

@@ -185,26 +185,6 @@ html[dir="rtl"] .select2-container--default .select2-selection--single .select2-
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive Adjustments for User Table */
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-    .page-header .btn {
-        width: 100%;
-    }
-    
-    /* Modal adjustments */
-    .modal-body {
-        padding: 1rem;
-    }
-    
-    .row > [class^="col-"] {
-        margin-bottom: 0.5rem;
-    }
-}
 
 /* Fix for horizontal scroll in small tables */
 .table-responsive {
@@ -385,7 +365,6 @@ html[dir="rtl"] .user-grid-card .action-menu {
     font-weight: 500;
 }
 
-/* Toolbar Styling */
 .view-toolbar {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
@@ -398,3 +377,274 @@ html[dir="rtl"] .user-grid-card .action-menu {
     justify-content: space-between;
     gap: 1rem;
 }
+
+/* ==========================================================================
+   DATA-VIEWS RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+/* ===== MOBILE (max-width: 768px) ===== */
+@media (max-width: 768px) {
+
+    /* --- Wizard steps: Compact --- */
+    .wizard-steps {
+        margin-bottom: 1.25rem;
+        gap: 0.25rem;
+    }
+
+    .wizard-step-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+
+    .wizard-step-label {
+        font-size: 0.65rem;
+        margin-top: 0.3rem;
+    }
+
+    /* --- DataTables wrapper --- */
+    .dataTables_wrapper {
+        padding: 0.5rem;
+    }
+
+    /* --- Stat card compact --- */
+    .stat-card-compact {
+        padding: 0.75rem 1rem !important;
+        gap: 0.75rem;
+    }
+
+    .stat-card-compact .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    .stat-card-compact .stat-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .stat-card-compact .stat-value {
+        font-size: 1.25rem !important;
+    }
+
+    .stat-card-compact .stat-label {
+        font-size: 0.78rem !important;
+    }
+
+    /* --- View toolbar: Stack --- */
+    .view-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.65rem 0.85rem;
+        gap: 0.65rem;
+    }
+
+    .view-toolbar .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .view-toolbar .btn-group {
+        width: 100%;
+    }
+
+    .view-toolbar .btn-group .btn {
+        flex: 1;
+    }
+
+    /* --- User grid card: Compact --- */
+    .user-grid-card {
+        padding: 1rem;
+        border-radius: var(--radius);
+    }
+
+    .user-grid-card .card-avatar {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 0.75rem;
+    }
+
+    .user-grid-card .card-info strong {
+        font-size: 0.95rem;
+    }
+
+    .user-grid-card .card-details {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .user-grid-card .card-details .detail-row {
+        margin-bottom: 0.35rem;
+    }
+
+    /* --- Checkbox grid --- */
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.4rem;
+    }
+
+    .checkbox-item {
+        padding: 0.55rem 0.65rem;
+        font-size: 0.8rem;
+    }
+
+    /* --- Custom pagination --- */
+    .custom-pagination .page-item {
+        margin: 0 2px;
+    }
+
+    .custom-pagination .page-link {
+        padding: 0.3rem 0.65rem;
+        font-size: 0.78rem;
+    }
+
+    /* --- Table header --- */
+    .table th {
+        padding-top: 0.65rem;
+        padding-bottom: 0.65rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.3px;
+    }
+
+    /* --- Responsive row spacing for filters --- */
+    .row > [class^="col-"] {
+        margin-bottom: 0.35rem;
+    }
+
+    /* --- Filter form stack on mobile --- */
+    .card-body > .row.g-3 > [class*="col-md"],
+    .card-body > .row.g-3 > [class*="col-lg"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ===== SMALL MOBILE (max-width: 480px) ===== */
+@media (max-width: 480px) {
+
+    /* --- Wizard steps: Ultra compact --- */
+    .wizard-steps {
+        margin-bottom: 1rem;
+    }
+
+    .wizard-step-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.68rem;
+    }
+
+    .wizard-step-label {
+        font-size: 0.6rem;
+    }
+
+    /* --- Stat card compact --- */
+    .stat-card-compact {
+        padding: 0.65rem 0.85rem !important;
+        gap: 0.6rem;
+    }
+
+    .stat-card-compact .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+    }
+
+    .stat-card-compact .stat-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .stat-card-compact .stat-value {
+        font-size: 1.1rem !important;
+    }
+
+    .stat-card-compact .stat-label {
+        font-size: 0.72rem !important;
+    }
+
+    /* --- View toolbar --- */
+    .view-toolbar {
+        padding: 0.5rem 0.65rem;
+        border-radius: var(--radius);
+    }
+
+    /* --- User grid card --- */
+    .user-grid-card {
+        padding: 0.85rem;
+    }
+
+    .user-grid-card .card-avatar {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-grid-card .card-info strong {
+        font-size: 0.85rem;
+    }
+
+    .user-grid-card .card-info small {
+        font-size: 0.72rem;
+    }
+
+    .user-grid-card .card-details {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* --- Checkbox grid --- */
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.3rem;
+    }
+
+    .checkbox-item {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.72rem;
+        border-radius: 6px;
+    }
+
+    /* --- Custom pagination --- */
+    .custom-pagination .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.72rem;
+    }
+
+    /* --- Select2 compact --- */
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 0.6rem + 2px) !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        font-size: 0.8rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+/* ===== EXTRA SMALL (max-width: 360px) ===== */
+@media (max-width: 360px) {
+
+    .stat-card-compact .stat-value {
+        font-size: 1rem !important;
+    }
+
+    .stat-card-compact .stat-label {
+        font-size: 0.68rem !important;
+    }
+
+    .wizard-step-label {
+        display: none;
+    }
+
+    .user-grid-card .card-avatar {
+        width: 38px;
+        height: 38px;
+    }
+
+    .view-toolbar {
+        padding: 0.4rem 0.5rem;
+    }
+}
+

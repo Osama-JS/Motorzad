@@ -1,17 +1,18 @@
-        <div class="topbar">
-            <div style="display:flex; align-items:center; gap:1rem;">
+        <div class="topbar d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3">
+            <div class="topbar-left d-flex align-items-center gap-3 w-100">
                 <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Toggle Menu">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
-                <div class="search-box">
+                <div class="search-box flex-grow-1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" id="header_quick_search" placeholder="{{ __('Quick Search...') }}" class="form-control" autocomplete="off">
+                    <input type="text" id="header_quick_search" placeholder="{{ __('Quick Search...') }}" class="form-control w-100" autocomplete="off">
                     <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                 </div>
                 
                 <style>
                     .search-box {
                         position: relative;
+                        min-width: 150px;
                     }
                     .global-search-dropdown {
                         position: absolute;
@@ -77,25 +78,25 @@
                     }
                 </style>
             </div>
-            <div class="topbar-right" style="display:flex; align-items:center; gap:1rem;">
+            <div class="topbar-right d-flex align-items-center justify-content-center justify-content-md-end gap-3 gap-md-4 w-100 w-md-auto mt-2 mt-md-0">
                 {{-- Language Toggle --}}
-                <div style="display:flex; align-items:center;">
+                <div class="d-flex align-items-center">
                     @if (app()->getLocale() == 'ar')
                         <a href="{{ route('lang.switch', 'en') }}" class="btn btn-ghost btn-sm" style="font-weight:700; border:1px solid var(--border-light); display:flex; align-items:center; gap:0.5rem;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            English
+                            <span class="d-none d-sm-inline">English</span>
                         </a>
                     @else
                         <a href="{{ route('lang.switch', 'ar') }}" class="btn btn-ghost btn-sm" style="font-weight:700; border:1px solid var(--border-light); font-family:'Tajawal',sans-serif; display:flex; align-items:center; gap:0.5rem;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            عربي
+                            <span class="d-none d-sm-inline">عربي</span>
                         </a>
                     @endif
                 </div>
                 
                 {{-- Theme Toggle --}}
-                <div style="display:flex; align-items:center; gap:0.6rem;">
-                    <span class="theme-label" id="themeLabel">{{ __('Dark Mode') }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="theme-label d-none d-md-inline" id="themeLabel">{{ __('Dark Mode') }}</span>
                     <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل المظهر">
                         <div class="theme-toggle-track">
                             {{-- Stars (visible in dark) --}}
@@ -129,10 +130,10 @@
                 
                 {{-- User Dropdown --}}
                 @auth
-                <div class="dropdown ms-2">
+                <div class="dropdown">
                     <button class="btn btn-ghost dropdown-toggle d-flex align-items-center gap-2 border" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 20px; padding: 4px 12px 4px 4px; background: var(--bg-card); color: var(--text-color);">
                         <img src="{{ auth()->user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&color=7F9CF5&background=EBF4FF' }}" alt="User" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
-                        <span class="fw-bold fs-6">{{ auth()->user()->name }}</span>
+                        <span class="fw-bold fs-6 d-none d-sm-inline">{{ auth()->user()->name }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-2" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 200px; background: var(--bg-card); border-color: var(--border) !important;">
                         <li>
@@ -154,7 +155,6 @@
                     </ul>
                 </div>
                 @endauth
-                
                 @yield('actions')
             </div>
         </div>
