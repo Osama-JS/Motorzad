@@ -76,6 +76,29 @@
 .btn-kyc-submit:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(229,62,62,.4); }
 
 @media(max-width:768px){ .kyc-grid,.upload-zones{grid-template-columns:1fr;} .kyc-steps{flex-direction:column;} .kyc-steps .kyc-step{border-right:none; border-bottom:1px solid var(--border);} }
+@media(max-width:480px){
+    .kyc-hero { padding: 1.5rem 1rem; }
+    .kyc-hero-text h1 { font-size: 1.5rem; }
+    .kyc-hero-text p { font-size: 0.85rem; }
+    .kyc-level-badge { padding: 1rem 1.5rem; }
+    .kyc-level-num { font-size: 2.2rem; }
+    .kyc-status-card { padding: 2rem 1rem; }
+    .kyc-status-icon { width: 70px; height: 70px; margin-bottom: 1rem; }
+    .kyc-status-icon svg { width: 32px; height: 32px; }
+    .kyc-status-card h2 { font-size: 1.3rem; }
+    .kyc-form-header { padding: 1.25rem 1rem; }
+    .kyc-form-body { padding: 1.5rem 1rem; }
+    .upload-zone { padding: 1.5rem 1rem; }
+    .upload-zone-icon { width: 48px; height: 48px; margin-bottom: 0.75rem; }
+    .upload-zone-icon svg { width: 24px; height: 24px; }
+    .kyc-submit { padding: 1.25rem 1rem; flex-direction: column; text-align: center; }
+    .btn-kyc-submit { width: 100%; justify-content: center; }
+}
+@media(max-width:360px){
+    .kyc-hero-text h1 { font-size: 1.3rem; }
+    .kyc-level-num { font-size: 1.8rem; }
+    .kyc-step { font-size: 0.75rem; padding: 1rem 0.5rem; }
+}
 </style>
 @endsection
 

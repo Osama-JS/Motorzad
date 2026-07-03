@@ -256,3 +256,39 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);lin
     .nav-container{padding:0 1rem}
     .section-container{padding:0 1rem}
 }
+@media(max-width:480px){
+    .hero{padding-top:4rem}
+    .hero-title{font-size:1.8rem;margin-bottom:1rem}
+    .hero-desc{font-size:0.95rem;margin-bottom:2rem}
+    .hero-stats{gap:1rem}
+    .hero-stat .stat-num{font-size:1.4rem}
+    .hero-stat .stat-label{font-size:0.75rem}
+    .section{padding:4rem 0}
+    .section-title{font-size:1.5rem}
+    .section-desc{font-size:0.95rem}
+    .feature-card{padding:1.5rem}
+    .auction-card{border-radius:var(--radius)}
+    .auction-img{height:180px}
+    .auction-body{padding:1rem}
+    .btn-lg{width:100%;text-align:center;justify-content:center}
+    .stats-row{grid-template-columns:1fr;gap:1.5rem}
+    .stat-item{padding:1rem}
+    .testimonial-card{padding:1.5rem}
+    .cta-content h2{font-size:1.5rem}
+    .faq-question{padding:1rem}
+    .faq-item.open .faq-answer{padding:0 1rem 1rem}
+    .footer{padding:3rem 0 1.5rem}
+    .hero-image img{border-radius:var(--radius-lg)}
+    .hero-badge{font-size:0.7rem;padding:0.3rem 0.8rem}
+}
+@media(max-width:360px){
+    .hero-title{font-size:1.5rem}
+    .hero-desc{font-size:0.85rem}
+    .hero-stat .stat-num{font-size:1.2rem}
+    .nav-container{padding:0 0.75rem}
+    .section-title{font-size:1.35rem}
+    .feature-card{padding:1.2rem}
+    .step-num{width:50px;height:50px;font-size:1rem}
+    .auction-img{height:160px}
+    .cta-content h2{font-size:1.3rem}
+}

@@ -24,9 +24,15 @@
             </div>
         </div>
         <div class="wallet-hero-balance">
-            <span class="balance-label">{{ __('Total Balance') }}</span>
-            <span class="balance-amount">{{ number_format($wallet->balance, 2) }}</span>
+            <span class="balance-label">{{ __('Available Balance') }}</span>
+            <span class="balance-amount">{{ number_format($wallet->available_balance, 2) }}</span>
             <span class="balance-currency">{{ __('SAR') }}</span>
+            <div style="font-size: 0.85rem; opacity: 0.85; margin-top: 8px; display: flex; gap: 10px; justify-content: flex-end;">
+                <span>{{ __('Total:') }} {{ number_format($wallet->balance, 2) }}</span>
+                @if($wallet->frozen_balance > 0)
+                <span style="color: #ffd700;" title="{{ __('Frozen in active bids') }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top:-2px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> {{ __('Frozen:') }} {{ number_format($wallet->frozen_balance, 2) }}</span>
+                @endif
+            </div>
         </div>
     </div>
 </div>

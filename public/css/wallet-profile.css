@@ -481,3 +481,30 @@ code {
     .wallet-stats-grid { grid-template-columns: 1fr; }
     .balance-amount { font-size: 1.8rem; }
 }
+
+@media (max-width: 480px) {
+    .wallet-hero-content { padding: 1.5rem 1rem; }
+    .wallet-hero-avatar img { width: 64px; height: 64px; }
+    .wallet-hero-info h1 { font-size: 1.3rem; }
+    .wallet-hero-email { font-size: 0.8rem; }
+    .balance-label { font-size: 0.75rem; }
+    .balance-amount { font-size: 1.5rem; }
+    .stat-card { padding: 1.25rem 1rem; }
+    .stat-value { font-size: 1.2rem; }
+    .chart-container { height: 160px; padding: 1rem; }
+    .chart-bars { gap: 0.5rem; }
+    .chart-legend { flex-direction: column; gap: 0.5rem; align-items: center; padding: 0 1rem 1rem; }
+    .withdrawal-list { padding: 0.5rem 1rem 1rem; }
+    .wd-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .wd-status { align-self: flex-start; }
+    .info-card-content { padding: 1.5rem 1rem; }
+    .withdrawal-balance-info { flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+
+@media (max-width: 360px) {
+    .wallet-hero-info h1 { font-size: 1.1rem; }
+    .balance-amount { font-size: 1.35rem; }
+    .stat-value { font-size: 1.1rem; }
+    .wallet-hero-left { gap: 1rem; }
+    .chart-container { height: 140px; }
+}

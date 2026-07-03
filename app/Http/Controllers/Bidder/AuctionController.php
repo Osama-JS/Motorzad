@@ -294,12 +294,23 @@ class AuctionController extends Controller
                 ], 200);
             }
 
-            // Wallet Check: Let's assume the user has a wallet
+            // Wallet Check: User must have enough available balance for the bid amount
             $wallet = $user->wallet;
-            if (!$wallet || $wallet->balance < $auction->deposit_amount) {
+            $newTotalRequired = $isAutoBid ? $maxAutoBid : $amount;
+            
+            // If the user already has an active bid on this auction, we only need the difference
+            $currentActiveBid = $auction->bids()->where('user_id', $user->id)->where('status', 'active')->first();
+            $currentActiveBidAmount = 0;
+            if ($currentActiveBid) {
+                $currentActiveBidAmount = $currentActiveBid->is_auto_bid ? max($currentActiveBid->amount, $currentActiveBid->max_auto_bid) : $currentActiveBid->amount;
+            }
+            
+            $additionalRequired = max(0, $newTotalRequired - $currentActiveBidAmount);
+            
+            if (!$wallet || $wallet->available_balance < $additionalRequired) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Insufficient wallet balance. You need at least :amount SAR deposit.', ['amount' => number_format($auction->deposit_amount)])
+                    'message' => __('Insufficient available balance. You need at least :amount SAR available in your wallet to place this bid.', ['amount' => number_format($additionalRequired)])
                 ], 200);
             }
 

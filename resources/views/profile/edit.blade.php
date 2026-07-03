@@ -227,6 +227,21 @@ html[dir="rtl"] .form-field select {
         gap: 1.25rem;
     }
 }
+@media(max-width: 480px) {
+    .profile-card-header { padding: 1.25rem 1rem; }
+    .profile-card-header h2 { font-size: 1.1rem; }
+    .profile-card-body { padding: 1.5rem 1rem; }
+    .avatar-upload-container { width: 100px; height: 100px; margin-bottom: 2rem; }
+    .avatar-edit-btn { width: 32px; height: 32px; }
+    .form-field input, .form-field select, .form-field textarea { padding: 0.75rem 1rem; font-size: 0.85rem; }
+    .submit-btn { width: 100%; justify-content: center; padding: 0.85rem; }
+    .delete-zone { padding: 1.25rem 1rem; }
+}
+@media(max-width: 360px) {
+    .profile-card-header h2 { font-size: 1rem; }
+    .avatar-upload-container { width: 85px; height: 85px; }
+    .form-field label { font-size: 0.75rem; }
+}
 </style>
 @endsection
 
