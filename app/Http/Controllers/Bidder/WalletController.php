@@ -204,4 +204,15 @@ class WalletController extends Controller
             'message' => __('Deposit request submitted successfully. It will be reviewed soon.'),
         ]);
     }
+
+    /**
+     * Display a printable invoice for a specific transaction.
+     */
+    public function invoice($id)
+    {
+        $user = auth()->user();
+        $transaction = \App\Models\WalletTransaction::where('wallet_id', $user->wallet->id)->findOrFail($id);
+
+        return view('bidder.wallet.invoice', compact('user', 'transaction'));
+    }
 }

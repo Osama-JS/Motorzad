@@ -65,4 +65,21 @@ class Wallet extends Model
     {
         return max(0, $this->balance - $this->frozen_balance);
     }
+
+    /**
+     * Get the list of active bids that contribute to the frozen balance.
+     */
+    public function getFrozenBidsAttribute()
+    {
+        return Bid::where('user_id', $this->user_id)
+            ->where('status', 'active')
+            ->whereHas('auction', function ($query) {
+                $query->where('status', 'live')
+                      ->where('start_time', '<=', now())
+                      ->where('end_time', '>=', now())
+                      ->where('is_paused', false);
+            })
+            ->with('auction')
+            ->get();
+    }
 }

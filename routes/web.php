@@ -144,6 +144,7 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     // Wallet Routes
     Route::get('/wallet', [\App\Http\Controllers\Bidder\WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/transactions', [\App\Http\Controllers\Bidder\WalletController::class, 'transactions'])->name('wallet.transactions');
+    Route::get('/wallet/transactions/{id}/invoice', [\App\Http\Controllers\Bidder\WalletController::class, 'invoice'])->name('wallet.invoice');
     Route::post('/wallet/withdraw', [\App\Http\Controllers\Bidder\WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
 
