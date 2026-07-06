@@ -48,7 +48,7 @@ class GeneralController extends Controller
     )]
     public function faqs(): JsonResponse
     {
-        $faqs = Faq::where('is_active', true)->orderBy('sort_order')->get();
+        $faqs = Faq::where('is_active', true)->latest()->get();
         
         return response()->json([
             'success' => true,
