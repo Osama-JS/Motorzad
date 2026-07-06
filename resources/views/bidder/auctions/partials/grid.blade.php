@@ -30,10 +30,19 @@
 
                 // Time remaining label
                 $timeLeft = '';
+                $countdownTarget = '';
                 if ($usingMock) {
                     $timeLeft = $aucStatus === 'live' ? '03:14:02' : ($aucStatus === 'upcoming' ? (app()->getLocale() === 'ar' ? 'خلال 24 ساعة' : 'In 24 hours') : (app()->getLocale() === 'ar' ? 'مغلق' : 'Closed'));
                 } else {
-                    $timeLeft = $auc->is_live ? gmdate("H:i:s", $auc->time_remaining) : (app()->getLocale() === 'ar' ? 'مغلق' : 'Closed');
+                    if ($statusClass === 'live') {
+                        $countdownTarget = $auc->end_time->toIso8601String();
+                        $timeLeft = app()->getLocale() === 'ar' ? 'جاري الحساب...' : 'Calculating...';
+                    } elseif ($statusClass === 'upcoming') {
+                        $countdownTarget = $auc->start_time->toIso8601String();
+                        $timeLeft = app()->getLocale() === 'ar' ? 'جاري الحساب...' : 'Calculating...';
+                    } else {
+                        $timeLeft = app()->getLocale() === 'ar' ? 'مغلق' : 'Closed';
+                    }
                 }
             @endphp
             
@@ -55,7 +64,7 @@
                     @if($statusClass === 'live' || $statusClass === 'upcoming')
                         <div class="timer-floating">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span>{{ $timeLeft }}</span>
+                            <span class="auction-countdown" data-target="{{ $countdownTarget }}" data-status="{{ $statusClass }}">{{ $timeLeft }}</span>
                         </div>
                     @endif
                 </div>

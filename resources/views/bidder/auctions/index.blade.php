@@ -561,6 +561,170 @@ html[dir="rtl"] .timer-floating {
     color: var(--text-muted);
     margin-bottom: 1.5rem;
 }
+
+/* ===== AUCTION BROWSE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .auc-header {
+        padding: 1.75rem 1.25rem;
+        margin-bottom: 1.25rem;
+        border-radius: var(--radius-lg);
+    }
+    .auc-header h1 {
+        font-size: 1.5rem;
+    }
+    .auc-header p {
+        font-size: 0.85rem;
+    }
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    .auc-tabs {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+    }
+    .auc-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    .auc-tab {
+        padding: 0.55rem 1rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .search-filter-box {
+        max-width: 100%;
+        flex-direction: column;
+    }
+    .search-input-wrapper input {
+        font-size: 0.85rem;
+    }
+    .btn-toggle-filters,
+    .btn-search {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1rem;
+    }
+    .advanced-filters-panel {
+        padding: 1rem;
+    }
+    .adv-filters-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .btn-clear-adv-filters,
+    .btn-apply-filters {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    .auctions-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .auc-info {
+        padding: 1rem;
+    }
+    .auc-title-row h3 {
+        font-size: 1rem;
+    }
+    .auc-specs {
+        gap: 0.5rem;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    .spec-item {
+        font-size: 0.72rem;
+    }
+    .price-value {
+        font-size: 1.05rem;
+    }
+    .btn-auc-action {
+        padding: 0.6rem 1rem;
+        font-size: 0.78rem;
+    }
+    .empty-auctions {
+        padding: 3rem 1.5rem;
+    }
+    .empty-auctions h2 {
+        font-size: 1.2rem;
+    }
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+    }
+    .empty-icon svg {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auc-header {
+        padding: 1.25rem 1rem;
+    }
+    .auc-header h1 {
+        font-size: 1.2rem;
+    }
+    .auc-header p {
+        font-size: 0.78rem;
+    }
+    .auc-tab {
+        padding: 0.45rem 0.85rem;
+        font-size: 0.72rem;
+    }
+    .auctions-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+    .auc-image-area {
+        padding-top: 50%;
+    }
+    .auc-info {
+        padding: 0.85rem;
+    }
+    .auc-title-row h3 {
+        font-size: 0.9rem;
+    }
+    .auc-specs {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+    }
+    .spec-item {
+        font-size: 0.68rem;
+    }
+    .price-value {
+        font-size: 0.95rem;
+    }
+    .btn-auc-action {
+        padding: 0.5rem 0.85rem;
+        font-size: 0.75rem;
+    }
+    .badge-floating {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.65rem;
+    }
+    .watchlist-btn {
+        width: 32px;
+        height: 32px;
+    }
+    .timer-floating {
+        font-size: 0.68rem;
+        padding: 0.3rem 0.6rem;
+    }
+    .empty-auctions {
+        padding: 2rem 1rem;
+        margin: 1.5rem auto;
+    }
+    .empty-auctions h2 {
+        font-size: 1rem;
+    }
+}
 </style>
 @endsection
 
@@ -795,7 +959,9 @@ $(document).ready(function() {
             onSuccess: function(response) {
                 $('#auctions-container').css('opacity', '1');
                 if (response.success && response.html) {
+                    clearCountdowns();
                     $('#auctions-container').html(response.html);
+                    initCountdowns();
                     
                     // Update URL browser history
                     window.history.pushState(null, null, url);
@@ -863,6 +1029,59 @@ $(document).ready(function() {
         const currentUrl = window.location.href;
         loadAuctions(currentUrl);
     });
+
+    // Countdown logic
+    function clearCountdowns() {
+        $('.auction-countdown').each(function() {
+            const timerId = $(this).data('timer-id');
+            if (timerId) clearInterval(timerId);
+        });
+    }
+
+    function initCountdowns() {
+        $('.auction-countdown').each(function() {
+            const el = $(this);
+            const targetStr = el.data('target');
+            if (!targetStr) return;
+            
+            const targetTime = new Date(targetStr).getTime();
+            if (isNaN(targetTime)) return;
+            
+            const isAr = '{{ app()->getLocale() }}' === 'ar';
+            const status = el.data('status'); // 'live' or 'upcoming'
+            
+            const timerId = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = targetTime - now;
+                
+                if (distance < 0) {
+                    clearInterval(timerId);
+                    el.text(isAr ? (status === 'live' ? 'انتهى' : 'بدأ المزاد') : (status === 'live' ? 'Ended' : 'Started'));
+                    return;
+                }
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                let output = '';
+                if (days > 0) {
+                    output += days + (isAr ? ' ي ' : ' d ');
+                }
+                output += (hours < 10 ? '0' : '') + hours + ':';
+                output += (minutes < 10 ? '0' : '') + minutes + ':';
+                output += (seconds < 10 ? '0' : '') + seconds;
+                
+                el.text(output);
+            }, 1000);
+            
+            el.data('timer-id', timerId);
+        });
+    }
+
+    // Initial countdowns start
+    initCountdowns();
 });
 </script>
 @endsection

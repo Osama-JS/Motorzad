@@ -88,6 +88,22 @@
             background: linear-gradient(90deg, var(--brand-red), var(--brand-gold), var(--brand-red));
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         }
+
+        @media (max-width: 480px) {
+            body { padding: 0.5rem; }
+            .auth-card { padding: 1.5rem; border-radius: var(--radius); }
+            .auth-logo { margin-bottom: 1.5rem; }
+            .auth-logo .logo-icon { width: 48px; height: 48px; }
+            .auth-logo .logo-icon svg { width: 24px; height: 24px; }
+            .auth-logo .logo-text { font-size: 1.2rem; }
+            .auth-logo .subtitle { font-size: 0.8rem; }
+            .form-label { font-size: 0.8rem; }
+        }
+
+        @media (max-width: 360px) {
+            .auth-card { padding: 1.25rem 1rem; }
+            .auth-logo .logo-text { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>

@@ -139,11 +139,11 @@ class WalletController extends Controller
             'payment_method' => 'required|string|in:bank_transfer,wallet',
         ]);
 
-        // Check if user has sufficient balance
-        if ($validated['amount'] > $wallet->balance) {
+        // Check if user has sufficient available balance
+        if ($validated['amount'] > $wallet->available_balance) {
             return response()->json([
                 'success' => false,
-                'message' => __('Insufficient balance for this withdrawal.'),
+                'message' => __('Insufficient available balance for this withdrawal. Some of your funds may be frozen in active bids.'),
             ], 422);
         }
 
@@ -203,5 +203,16 @@ class WalletController extends Controller
             'success' => true,
             'message' => __('Deposit request submitted successfully. It will be reviewed soon.'),
         ]);
+    }
+
+    /**
+     * Display a printable invoice for a specific transaction.
+     */
+    public function invoice($id)
+    {
+        $user = auth()->user();
+        $transaction = \App\Models\WalletTransaction::where('wallet_id', $user->wallet->id)->findOrFail($id);
+
+        return view('bidder.wallet.invoice', compact('user', 'transaction'));
     }
 }

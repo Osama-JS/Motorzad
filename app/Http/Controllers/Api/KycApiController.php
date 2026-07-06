@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\KycRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -15,29 +15,6 @@ use OpenApi\Attributes as OA;
 
 class KycApiController extends Controller
 {
-    /**
-     * Set local language dynamically from the Accept-Language header
-     */
-    protected function setLocale(Request $request): void
-    {
-        $locale = $request->header('Accept-Language', 'en');
-        if (in_array($locale, ['ar', 'en'])) {
-            app()->setLocale($locale);
-        }
-    }
-
-    /**
-     * Standard API response helper
-     */
-    protected function apiResponse(bool $error, string $message, $data = null, $extra = null, int $statusCode = 200)
-    {
-        return response()->json([
-            'error' => $error,
-            'message' => $message,
-            'data' => $data
-        ], $statusCode);
-    }
-
     #[OA\Get(
         path: "/api/kyc/status",
         summary: "Get current user KYC status",
@@ -60,7 +37,7 @@ class KycApiController extends Controller
                 description: "Verification status retrieved successfully",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "error", type: "boolean", example: false),
+                        new OA\Property(property: "success", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Verification status retrieved successfully."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "kyc_status", type: "string", example: "pending", enum: ["not_submitted", "pending", "approved", "rejected"]),
@@ -83,9 +60,8 @@ class KycApiController extends Controller
             )
         ]
     )]
-    public function status(Request $request)
+    public function status(Request $request): JsonResponse
     {
-        $this->setLocale($request);
         $user = $request->user();
         $latestRequest = $user->latestKycRequest;
 
@@ -108,7 +84,11 @@ class KycApiController extends Controller
             ] : null
         ];
 
-        return $this->apiResponse(false, __('Verification status retrieved successfully.'), $data);
+        return response()->json([
+            'success' => true,
+            'message' => __('Verification status retrieved successfully.'),
+            'data' => $data
+        ]);
     }
 
     #[OA\Post(
@@ -149,7 +129,7 @@ class KycApiController extends Controller
                 description: "Identity verification request submitted successfully",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "error", type: "boolean", example: false),
+                        new OA\Property(property: "success", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Identity verification request submitted successfully."),
                         new OA\Property(property: "data", type: "object")
                     ]
@@ -160,7 +140,7 @@ class KycApiController extends Controller
                 description: "Duplicate request or already verified",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "success", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "You already have a pending verification request.")
                     ]
                 )
@@ -170,20 +150,16 @@ class KycApiController extends Controller
                 description: "Validation failed",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "error", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "Validation failed."),
-                        new OA\Property(property: "data", type: "object")
+                        new OA\Property(property: "message", type: "string", example: "The given data was invalid."),
+                        new OA\Property(property: "errors", type: "object")
                     ]
                 )
             )
         ]
     )]
-    public function submit(Request $request)
+    public function submit(Request $request): JsonResponse
     {
-        $this->setLocale($request);
-        $user = $request->user();
-
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'id_number' => 'required|string|max:50',
@@ -191,20 +167,23 @@ class KycApiController extends Controller
             'selfie_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return $this->apiResponse(true, __('Validation failed.'), $validator->errors(), null, 422);
-        }
-
+        $user = $request->user();
         $latestRequest = $user->latestKycRequest;
 
         // Prevent submission if already approved
         if ($user->status === 'approved' || ($latestRequest && $latestRequest->status === 'approved')) {
-            return $this->apiResponse(true, __('Your identity is already verified.'), null, null, 400);
+            return response()->json([
+                'success' => false,
+                'message' => __('Your identity is already verified.')
+            ], 400);
         }
 
         // Prevent submission if there's a pending request
         if ($latestRequest && $latestRequest->status === 'pending') {
-            return $this->apiResponse(true, __('You already have a pending verification request.'), null, null, 400);
+            return response()->json([
+                'success' => false,
+                'message' => __('You already have a pending verification request.')
+            ], 400);
         }
 
         // Upload and store the files
@@ -214,9 +193,9 @@ class KycApiController extends Controller
         // Create the KYC request
         $kycRequest = KycRequest::create([
             'user_id' => $user->id,
-            'full_name' => $request->full_name,
-            'country' => $request->country,
-            'id_number' => $request->id_number,
+            'full_name' => $validated['full_name'],
+            'country' => $validated['country'],
+            'id_number' => $validated['id_number'],
             'id_image' => $idPath,
             'selfie_image' => $selfiePath,
             'status' => 'pending'
@@ -238,13 +217,11 @@ class KycApiController extends Controller
             'created_at' => $kycRequest->created_at->toIso8601String(),
         ];
 
-        return $this->apiResponse(
-            false,
-            __('Identity verification request submitted successfully.'),
-            $responseData,
-            null,
-            201
-        );
+        return response()->json([
+            'success' => true,
+            'message' => __('Identity verification request submitted successfully.'),
+            'data' => $responseData
+        ], 201);
     }
 
     #[OA\Get(
@@ -283,7 +260,7 @@ class KycApiController extends Controller
                 description: "Verification history retrieved successfully",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "error", type: "boolean", example: false),
+                        new OA\Property(property: "success", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Verification history retrieved successfully."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "requests", type: "array", items: new OA\Items(type: "object")),
@@ -303,9 +280,8 @@ class KycApiController extends Controller
             )
         ]
     )]
-    public function history(Request $request)
+    public function history(Request $request): JsonResponse
     {
-        $this->setLocale($request);
         $user = $request->user();
 
         $requests = $user->kycRequests()
@@ -337,7 +313,10 @@ class KycApiController extends Controller
             ]
         ];
 
-        return $this->apiResponse(false, __('Verification history retrieved successfully.'), $data);
+        return response()->json([
+            'success' => true,
+            'message' => __('Verification history retrieved successfully.'),
+            'data' => $data
+        ]);
     }
 }
-
