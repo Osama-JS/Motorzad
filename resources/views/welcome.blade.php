@@ -129,21 +129,45 @@
             <p class="section-desc">{{ __('Browse the latest cars listed in our live auctions') }}</p>
         </div>
         <div class="auctions-grid">
-            @php $cars = [['name'=>__('Mercedes AMG GT'),'year'=>'2024','price'=>'185,000','bids'=>23,'color'=>'#c0392b'],['name'=>__('BMW M4'),'year'=>'2025','price'=>'142,500','bids'=>18,'color'=>'#2980b9'],['name'=>__('Porsche Cayenne'),'year'=>'2024','price'=>'225,000','bids'=>31,'color'=>'#f39c12']]; @endphp
-            @foreach($cars as $i => $car)
+            @forelse($featuredAuctions as $i => $auction)
+            @php
+                $colors = ['#c0392b', '#2980b9', '#f39c12', '#27ae60', '#8e44ad'];
+                $color = $colors[$i % count($colors)];
+            @endphp
             <div class="auction-card animate-on-scroll">
-                <div class="auction-img" style="background:linear-gradient(135deg,{{ $car['color'] }}22,#0e1421)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 17h2l2-4h6l2 4h2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/><path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/></svg>
+                <div class="auction-img" style="background: linear-gradient(135deg, {{ $color }}22, #0e1421); {{ $auction->primary_image_url ? 'background-image: url('.$auction->primary_image_url.'); background-size: cover; background-position: center;' : '' }}">
+                    @if(!$auction->primary_image_url)
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 17h2l2-4h6l2 4h2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/><path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/></svg>
+                    @endif
                     <div class="auction-live"><span class="pulse"></span> {{ __('Live') }}</div>
-                    <div class="auction-timer">02:{{ 45-$i*12 }}:{{ 30+$i*7 }}</div>
+                    @if($auction->is_featured)
+                    <div class="auction-featured" title="{{ app()->getLocale() == 'ar' ? 'مزاد مميز' : 'Featured Auction' }}">
+                        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        {{ app()->getLocale() == 'ar' ? 'مميز' : 'Featured' }}
+                    </div>
+                    @endif
+                    <div class="auction-timer countdown-timer" data-end-time="{{ $auction->end_time->format('Y-m-d\TH:i:s') }}">--:--:--</div>
                 </div>
                 <div class="auction-body">
-                    <h3>{{ $car['name'] }}</h3>
-                    <div class="auction-meta"><span>{{ $car['year'] }}</span><span class="auction-bids">{{ $car['bids'] }} {{ __('bids') }}</span></div>
-                    <div class="auction-price"><div><div class="label">{{ __('Highest Bid') }}</div><div class="price">{{ $car['price'] }} {{ __('SAR Landing') }}</div></div><a href="{{ route('register') }}" class="btn btn-primary btn-sm">{{ __('Bid Now Landing') }}</a></div>
+                    <h3>{{ $auction->title }}</h3>
+                    <div class="auction-meta">
+                        <span>{{ $auction->vehicle->year ?? '-' }}</span>
+                        <span class="auction-bids">{{ $auction->bids_count }} {{ __('bids') }}</span>
+                    </div>
+                    <div class="auction-price">
+                        <div>
+                            <div class="label">{{ __('Highest Bid') }}</div>
+                            <div class="price">{{ number_format($auction->current_price) }} {{ __('SAR Landing') }}</div>
+                        </div>
+                        <a href="{{ route('bidder.auctions.show', $auction->id) }}" class="btn btn-primary btn-sm">{{ __('Bid Now Landing') }}</a>
+                    </div>
                 </div>
             </div>
-            @endforeach
+            @empty
+                <div style="text-align: center; grid-column: 1 / -1; padding: 2rem;">
+                    <p style="color: var(--text-muted);">{{ app()->getLocale() == 'ar' ? 'لا توجد مزادات مميزة حالياً' : 'No featured auctions available right now' }}</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -265,6 +289,19 @@ document.getElementById('themeToggle')?.addEventListener('click',()=>{
 });
 // Mobile menu
 document.getElementById('mobileToggle')?.addEventListener('click',()=>{const l=document.querySelector('.nav-links');l.style.display=l.style.display==='flex'?'none':'flex';l.style.flexDirection='column';l.style.position='absolute';l.style.top='100%';l.style.right='0';l.style.left='0';l.style.background='var(--bg-card-solid)';l.style.padding='1rem 2rem';l.style.borderBottom='1px solid var(--border)'});
+// Countdown timers
+document.querySelectorAll('.countdown-timer').forEach(el => {
+    const end = new Date(el.getAttribute('data-end-time')).getTime();
+    setInterval(() => {
+        const now = new Date().getTime();
+        const dist = end - now;
+        if(dist < 0) { el.innerText = "00:00:00"; return; }
+        const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((dist % (1000 * 60)) / 1000);
+        el.innerText = [h,m,s].map(v => v.toString().padStart(2, '0')).join(':');
+    }, 1000);
+});
 </script>
 </body>
 </html>

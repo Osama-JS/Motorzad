@@ -55,7 +55,7 @@ class AuctionResource extends JsonResource
                 'fuel_type'       => $this->vehicle->fuel_type,
                 'transmission'    => $this->vehicle->transmission,
                 'primary_image_url'=> $this->vehicle->primary_image_url,
-                'images'          => $this->vehicle->whenLoaded('images', fn () =>
+                'images'          => $this->when($this->vehicle->relationLoaded('images'), fn () =>
                     $this->vehicle->images->map(fn ($img) => [
                         'id'  => $img->id,
                         'url' => $img->url,

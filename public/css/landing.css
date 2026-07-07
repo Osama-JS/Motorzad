@@ -149,6 +149,8 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);lin
 .auction-img{height:200px;background:var(--auction-img-bg);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .auction-img svg{width:80px;height:80px;color:var(--text-muted);opacity:0.3}
 .auction-live{position:absolute;top:1rem;right:1rem;background:var(--red);color:#fff;padding:0.25rem 0.75rem;border-radius:100px;font-size:0.72rem;font-weight:700;display:flex;align-items:center;gap:0.35rem;animation:pulse 2s ease-in-out infinite}
+.auction-featured{position:absolute;top:1rem;left:1rem;background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;padding:0.25rem 0.6rem;border-radius:100px;font-size:0.72rem;font-weight:700;display:flex;align-items:center;gap:0.35rem;box-shadow:0 4px 15px rgba(245,158,11,0.4);z-index:10;animation:float 3s ease-in-out infinite}
+.auction-featured svg{width:14px;height:14px;fill:currentColor}
 .auction-timer{position:absolute;bottom:1rem;right:1rem;background:var(--auction-timer-bg);backdrop-filter:blur(10px);color:var(--gold-light);padding:0.3rem 0.75rem;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:0.8rem;font-weight:600}
 .auction-body{padding:1.25rem}
 .auction-body h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}

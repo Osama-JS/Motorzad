@@ -1123,6 +1123,21 @@
                 }
             }
         },
+        "/api/general/featured-auctions": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Featured Auctions",
+                "description": "Returns a list of featured live auctions for the mobile app home screen.",
+                "operationId": "588d5e3b96aadac0d9d2b7e152e6f42a",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
         "/api/kyc/status": {
             "get": {
                 "tags": [
@@ -1154,9 +1169,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "success": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
@@ -1302,9 +1317,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "success": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
@@ -1325,9 +1340,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "success": {
                                             "type": "boolean",
-                                            "example": true
+                                            "example": false
                                         },
                                         "message": {
                                             "type": "string",
@@ -1345,15 +1360,11 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Validation failed."
+                                            "example": "The given data was invalid."
                                         },
-                                        "data": {
+                                        "errors": {
                                             "type": "object"
                                         }
                                     },
@@ -1421,9 +1432,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "success": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",

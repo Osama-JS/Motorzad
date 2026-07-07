@@ -5,7 +5,14 @@ use App\Http\Controllers\WalletTransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $featuredAuctions = \App\Models\Auction::with(['vehicle', 'highestBid'])
+        ->live()
+        ->featured()
+        ->latest()
+        ->take(3)
+        ->get();
+
+    return view('welcome', compact('featuredAuctions'));
 });
 
 // Mobile Developer Documentation

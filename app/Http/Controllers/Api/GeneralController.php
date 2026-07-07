@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AuctionResource;
+use App\Models\Auction;
 use App\Models\Faq;
 use App\Models\Setting;
 use App\Models\VehicleMake;
@@ -96,6 +98,34 @@ class GeneralController extends Controller
                 'makes' => $makes,
                 'colors' => $colors,
             ]
+        ]);
+    }
+
+    /**
+     * Get Featured Auctions.
+     */
+    #[OA\Get(
+        path: "/api/general/featured-auctions",
+        summary: "Get Featured Auctions",
+        description: "Returns a list of featured live auctions for the mobile app home screen.",
+        tags: ["General"],
+        responses: [
+            new OA\Response(response: 200, description: "Successful response")
+        ]
+    )]
+    public function featuredAuctions(): JsonResponse
+    {
+        $auctions = Auction::with(['vehicle.images', 'highestBid'])
+            ->withCount('bids')
+            ->live()
+            ->featured()
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => AuctionResource::collection($auctions)
         ]);
     }
 }
