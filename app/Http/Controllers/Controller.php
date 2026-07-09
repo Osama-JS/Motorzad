@@ -32,5 +32,5 @@ use OpenApi\Attributes as OA;
 )]
 abstract class Controller
 {
-    //
+    use \App\Traits\ApiResponse;
 }

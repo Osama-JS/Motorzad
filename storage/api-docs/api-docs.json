@@ -23,6 +23,58 @@
         }
     ],
     "paths": {
+        "/api/auctions": {
+            "get": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Get Available Auctions",
+                "description": "Returns a paginated list of available auctions (live and scheduled by default). Requires Bearer Token.",
+                "operationId": "b0e23ed4d0fc72297ab86eb1e1203358",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status (e.g. live, scheduled, ended)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/register": {
             "post": {
                 "tags": [
@@ -2025,6 +2077,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Auctions",
+            "description": "Auctions"
+        },
         {
             "name": "Authentication",
             "description": "Authentication"

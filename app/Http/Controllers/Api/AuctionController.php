@@ -8,12 +8,35 @@ use App\Models\Auction;
 use App\Models\AuctionWatchlist;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class AuctionController extends Controller
 {
     /**
      * List auctions with filtering & pagination.
      */
+    #[OA\Get(
+        path: '/api/auctions',
+        summary: 'Get Available Auctions',
+        description: 'Returns a paginated list of available auctions (live and scheduled by default). Requires Bearer Token.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, description: 'Filter by status (e.g. live, scheduled, ended)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated'
+            )
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $query = Auction::with(['vehicle.images', 'highestBid'])
@@ -62,16 +85,17 @@ class AuctionController extends Controller
             });
         }
 
-        return response()->json([
-            'success' => true,
-            'data'    => AuctionResource::collection($auctions->items()),
-            'meta'    => [
+        return $this->successResponse(
+            AuctionResource::collection($auctions->items()),
+            null,
+            200,
+            [
                 'current_page' => $auctions->currentPage(),
                 'last_page'    => $auctions->lastPage(),
                 'total'        => $auctions->total(),
                 'per_page'     => $auctions->perPage(),
-            ],
-        ]);
+            ]
+        );
     }
 
     /**
@@ -96,10 +120,7 @@ class AuctionController extends Controller
                 ->exists();
         }
 
-        return response()->json([
-            'success' => true,
-            'data'    => new AuctionResource($auction),
-        ]);
+        return $this->successResponse(new AuctionResource($auction));
     }
 
     /**
@@ -112,9 +133,8 @@ class AuctionController extends Controller
             ->where('status', 'active')
             ->paginate($request->input('per_page', 20));
 
-        return response()->json([
-            'success' => true,
-            'data'    => $bids->items() ? array_map(fn ($bid) => [
+        return $this->successResponse(
+            $bids->items() ? array_map(fn ($bid) => [
                 'id'         => $bid->id,
                 'amount'     => $bid->amount,
                 'bidder'     => [
@@ -124,12 +144,14 @@ class AuctionController extends Controller
                 ],
                 'created_at' => $bid->created_at->toISOString(),
             ], $bids->items()) : [],
-            'meta'    => [
+            null,
+            200,
+            [
                 'current_page' => $bids->currentPage(),
                 'last_page'    => $bids->lastPage(),
                 'total'        => $bids->total(),
-            ],
-        ]);
+            ]
+        );
     }
 
     /**
@@ -155,11 +177,7 @@ class AuctionController extends Controller
             $message  = __('Added to watchlist.');
         }
 
-        return response()->json([
-            'success'    => true,
-            'watching'   => $watching,
-            'message'    => $message,
-        ]);
+        return $this->successResponse(['watching' => $watching], $message);
     }
 
     /**
@@ -171,15 +189,16 @@ class AuctionController extends Controller
             ->whereHas('watchlist', fn ($q) => $q->where('user_id', $request->user()->id))
             ->paginate($request->input('per_page', 12));
 
-        return response()->json([
-            'success' => true,
-            'data'    => AuctionResource::collection($auctions->items()),
-            'meta'    => [
+        return $this->successResponse(
+            AuctionResource::collection($auctions->items()),
+            null,
+            200,
+            [
                 'current_page' => $auctions->currentPage(),
                 'last_page'    => $auctions->lastPage(),
                 'total'        => $auctions->total(),
-            ],
-        ]);
+            ]
+        );
     }
 
     /**
@@ -193,15 +212,16 @@ class AuctionController extends Controller
             ->latest()
             ->paginate($request->input('per_page', 12));
 
-        return response()->json([
-            'success' => true,
-            'data'    => AuctionResource::collection($auctions->items()),
-            'meta'    => [
+        return $this->successResponse(
+            AuctionResource::collection($auctions->items()),
+            null,
+            200,
+            [
                 'current_page' => $auctions->currentPage(),
                 'last_page'    => $auctions->lastPage(),
                 'total'        => $auctions->total(),
-            ],
-        ]);
+            ]
+        );
     }
 
     /**
@@ -232,10 +252,7 @@ class AuctionController extends Controller
         // Authorize vehicle ownership and check if approved
         \Illuminate\Support\Facades\Gate::authorize('update', $vehicle); // Ensures they own it
         if ($vehicle->status !== 'approved') {
-            return response()->json([
-                'success' => false,
-                'message' => __('Vehicle must be approved before creating an auction.')
-            ], 422);
+            return $this->errorResponse(__('Vehicle must be approved before creating an auction.'), 422);
         }
 
         $validated['created_by'] = $request->user()->id;
@@ -244,11 +261,11 @@ class AuctionController extends Controller
 
         $auction = Auction::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Auction created successfully as a draft. It is pending admin review.'),
-            'data' => new AuctionResource($auction)
-        ], 201);
+        return $this->successResponse(
+            new AuctionResource($auction),
+            __('Auction created successfully as a draft. It is pending admin review.'),
+            201
+        );
     }
 
     /**
@@ -280,11 +297,10 @@ class AuctionController extends Controller
 
         $auction->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Auction updated successfully. It remains in draft status pending review.'),
-            'data' => new AuctionResource($auction)
-        ]);
+        return $this->successResponse(
+            new AuctionResource($auction),
+            __('Auction updated successfully. It remains in draft status pending review.')
+        );
     }
 
     /**
@@ -296,10 +312,7 @@ class AuctionController extends Controller
 
         $auction->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Auction deleted successfully.')
-        ]);
+        return $this->successResponse(null, __('Auction deleted successfully.'));
     }
 
     /**
@@ -331,11 +344,10 @@ class AuctionController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Images uploaded successfully.'),
-            'data' => new AuctionResource($auction->load('images'))
-        ]);
+        return $this->successResponse(
+            new AuctionResource($auction->load('images')),
+            __('Images uploaded successfully.')
+        );
     }
     
     /**
@@ -349,9 +361,6 @@ class AuctionController extends Controller
         \Illuminate\Support\Facades\Storage::disk('public')->delete($image->image_path);
         $image->delete();
         
-        return response()->json([
-            'success' => true,
-            'message' => __('Image deleted successfully.')
-        ]);
+        return $this->successResponse(null, __('Image deleted successfully.'));
     }
 }
