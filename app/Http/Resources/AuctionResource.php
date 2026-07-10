@@ -85,6 +85,9 @@ class AuctionResource extends JsonResource
                 fn () => $this->has_deposited
             ),
 
+            // Bids History
+            'bids'                => BidResource::collection($this->whenLoaded('bids')),
+
             'created_at'          => $this->created_at?->toISOString(),
         ];
     }

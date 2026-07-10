@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuctionResource;
+use App\Http\Resources\BidResource;
 use App\Models\Auction;
 use App\Models\AuctionWatchlist;
 use Illuminate\Http\JsonResponse;
@@ -101,24 +102,51 @@ class AuctionController extends Controller
     /**
      * Get auction details.
      */
+    #[OA\Get(
+        path: '/api/auctions/{auction}',
+        summary: 'Get Auction Details',
+        description: 'Returns the full details of a specific auction. Optionally uses Bearer Token to return user-specific context (is_watching, user_highest_bid).',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden - KYC not approved'),
+            new OA\Response(response: 404, description: 'Auction Not Found')
+        ]
+    )]
     public function show(Request $request, Auction $auction): JsonResponse
     {
-        $auction->load(['vehicle.images', 'vehicle.primaryImage', 'winner', 'highestBid']);
+        $user = $request->user();
+
+        // Check if user is approved (KYC) just like in the bidder dashboard
+        if ($user->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => __('Please complete identity verification to view auctions.'),
+            ], 403);
+        }
+
+        // Load relations including bids.user just like bidder dashboard
+        $auction->load(['vehicle.images', 'vehicle.primaryImage', 'winner', 'highestBid', 'bids' => function ($query) {
+            $query->where('status', 'active')->with('user:id,first_name,last_name,profile_photo');
+        }]);
         $auction->increment('views_count');
 
         // Attach user context
-        $userId = auth('sanctum')->id();
-        if ($userId) {
-            $auction->is_watching = AuctionWatchlist::where('auction_id', $auction->id)
-                ->where('user_id', $userId)->exists();
-            $auction->user_highest_bid = $auction->bids()
-                ->where('user_id', $userId)
-                ->max('amount');
-            $auction->has_deposited = $auction->deposits()
-                ->where('user_id', $userId)
-                ->where('status', 'held')
-                ->exists();
-        }
+        $userId = $user->id;
+        $auction->is_watching = AuctionWatchlist::where('auction_id', $auction->id)
+            ->where('user_id', $userId)->exists();
+        $auction->user_highest_bid = $auction->bids()
+            ->where('user_id', $userId)
+            ->max('amount');
+        $auction->has_deposited = $auction->deposits()
+            ->where('user_id', $userId)
+            ->where('status', 'held')
+            ->exists();
 
         return $this->successResponse(new AuctionResource($auction));
     }
@@ -126,30 +154,49 @@ class AuctionController extends Controller
     /**
      * Get auction bid history.
      */
+    #[OA\Get(
+        path: '/api/auctions/{auction}/bids',
+        summary: 'Get Auction Bids',
+        description: 'Returns a paginated list of active bids for a specific auction. Requires Bearer Token.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden - KYC not approved'),
+            new OA\Response(response: 404, description: 'Auction Not Found')
+        ]
+    )]
     public function bids(Request $request, Auction $auction): JsonResponse
     {
+        $user = $request->user();
+
+        if ($user->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => __('Please complete identity verification to view auction bids.'),
+            ], 403);
+        }
+
         $bids = $auction->bids()
             ->with('user:id,first_name,last_name,profile_photo')
             ->where('status', 'active')
             ->paginate($request->input('per_page', 20));
 
         return $this->successResponse(
-            $bids->items() ? array_map(fn ($bid) => [
-                'id'         => $bid->id,
-                'amount'     => $bid->amount,
-                'bidder'     => [
-                    'id'       => $bid->user->id,
-                    'name'     => $bid->user->full_name,
-                    'photo'    => $bid->user->profile_photo_url,
-                ],
-                'created_at' => $bid->created_at->toISOString(),
-            ], $bids->items()) : [],
+            BidResource::collection($bids->items()),
             null,
             200,
             [
                 'current_page' => $bids->currentPage(),
                 'last_page'    => $bids->lastPage(),
                 'total'        => $bids->total(),
+                'per_page'     => $bids->perPage(),
             ]
         );
     }
@@ -157,6 +204,21 @@ class AuctionController extends Controller
     /**
      * Toggle watchlist (add/remove).
      */
+    #[OA\Post(
+        path: '/api/auctions/{auction}/watch',
+        summary: 'Toggle Watchlist',
+        description: 'Adds or removes the specified auction from the user\'s watchlist.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Auction Not Found')
+        ]
+    )]
     public function toggleWatch(Request $request, Auction $auction): JsonResponse
     {
         $userId = $request->user()->id;
@@ -183,6 +245,21 @@ class AuctionController extends Controller
     /**
      * Get user's watchlist.
      */
+    #[OA\Get(
+        path: '/api/auctions/watchlist',
+        summary: 'Get Watchlist',
+        description: 'Returns a paginated list of auctions that the user has added to their watchlist.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(response: 401, description: 'Unauthenticated')
+        ]
+    )]
     public function watchlist(Request $request): JsonResponse
     {
         $auctions = Auction::with(['vehicle.primaryImage', 'highestBid'])
@@ -204,6 +281,21 @@ class AuctionController extends Controller
     /**
      * List auctions created by the current user.
      */
+    #[OA\Get(
+        path: '/api/auctions/my',
+        summary: 'Get My Auctions',
+        description: 'Returns a paginated list of auctions created by the current user.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(response: 401, description: 'Unauthenticated')
+        ]
+    )]
     public function myAuctions(Request $request): JsonResponse
     {
         $auctions = Auction::where('created_by', $request->user()->id)
