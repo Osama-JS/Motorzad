@@ -35,7 +35,7 @@ class BidResource extends JsonResource
                 'current_price' => $this->auction->current_price,
                 'status'        => $this->auction->status,
                 'end_time'      => $this->auction->end_time?->toISOString(),
-                'image_url'     => clone $this->auction->vehicle?->primary_image_url ?? null,
+                'image_url'     => $this->auction->vehicle?->primary_image_url ?? null,
             ]),
             'created_at'   => $this->created_at?->toISOString(),
         ];

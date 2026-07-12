@@ -114,14 +114,14 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/{auction}/bids', [\App\Http\Controllers\Api\AuctionController::class, 'bids']);
         Route::post('/{auction}/watch', [\App\Http\Controllers\Api\AuctionController::class, 'toggleWatch']);
-        Route::post('/{auction}/bid', [\App\Http\Controllers\Api\BidController::class, 'store']);
-        Route::put('/{auction}/bids/{bid}', [\App\Http\Controllers\Api\BidController::class, 'update']);
+        Route::post('/{auction}/bid', [\App\Http\Controllers\Api\AuctionController::class, 'placeBid']);
+        Route::put('/{auction}/bids/{bid}', [\App\Http\Controllers\Api\AuctionController::class, 'updateBid']);
     });
 
     // My Bids & Won Auctions
     Route::prefix('my')->group(function () {
-        Route::get('/bids', [\App\Http\Controllers\Api\BidController::class, 'myBids']);
-        Route::get('/won', [\App\Http\Controllers\Api\BidController::class, 'wonAuctions']);
+        Route::get('/bids', [\App\Http\Controllers\Api\AuctionController::class, 'myBids']);
+        Route::get('/won', [\App\Http\Controllers\Api\AuctionController::class, 'wonAuctions']);
     });
 
     // Orders (Post Auction Checkout)

@@ -296,6 +296,226 @@
                 ]
             }
         },
+        "/api/auctions/{auction}/bid": {
+            "post": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Place a bid",
+                "description": "Place a new bid or proxy bid on a live auction.",
+                "operationId": "dd0e8d7c43b94e29e7169f78deb56ef5",
+                "parameters": [
+                    {
+                        "name": "auction",
+                        "in": "path",
+                        "description": "Auction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "description": "Bid amount",
+                                        "type": "number"
+                                    },
+                                    "is_auto_bid": {
+                                        "description": "Enable auto/proxy bidding",
+                                        "type": "boolean"
+                                    },
+                                    "max_auto_bid": {
+                                        "description": "Maximum amount for proxy bidding",
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bid placed successfully"
+                    },
+                    "422": {
+                        "description": "Validation error or business logic failure"
+                    },
+                    "403": {
+                        "description": "Unauthorized or blocked"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auctions/{auction}/bids/{bid}": {
+            "put": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Update a bid",
+                "description": "Modify an active bid amount or auto-bid settings.",
+                "operationId": "36306fdb7088a619a3a6264a9ef2cd06",
+                "parameters": [
+                    {
+                        "name": "auction",
+                        "in": "path",
+                        "description": "Auction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bid",
+                        "in": "path",
+                        "description": "Bid ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "amount": {
+                                        "description": "New bid amount",
+                                        "type": "number"
+                                    },
+                                    "is_auto_bid": {
+                                        "description": "Enable auto/proxy bidding",
+                                        "type": "boolean"
+                                    },
+                                    "max_auto_bid": {
+                                        "description": "Maximum amount for proxy bidding",
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bid updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/my/bids": {
+            "get": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Get My Bids",
+                "description": "Returns a paginated list of the current user's bidding history.",
+                "operationId": "dca84173a5af1dd2ca0cc452004efad4",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/my/won": {
+            "get": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Get Won Auctions",
+                "description": "Returns a paginated list of auctions that the current user has won.",
+                "operationId": "d2417e7970b438ce8556d0a781e80799",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/register": {
             "post": {
                 "tags": [
