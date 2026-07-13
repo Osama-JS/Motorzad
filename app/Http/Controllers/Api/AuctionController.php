@@ -814,30 +814,56 @@ class AuctionController extends Controller
     /**
      * Get auctions won by current user.
      */
-    #[OA\Get(
-        path: '/api/my/won',
-        summary: 'Get Won Auctions',
-        description: 'Returns a paginated list of auctions that the current user has won.',
-        security: [['bearerAuth' => []]],
-        tags: ['Auctions'],
-        parameters: [
-            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
-            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated')
-        ]
-    )]
+    #[OA\Get(path: '/api/my/won', summary: 'Get Won Auctions', description: 'Returns a paginated list of auctions that the current user has won, with payment status filtering and bank accounts for transfer.', security: [['bearerAuth' => []]], tags: ['Auctions'])]
+    #[OA\Parameter(name: 'payment_status', in: 'query', required: false, description: 'Filter by payment status: pending, paid')]
+    #[OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number')]
+    #[OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page')]
+    #[OA\Response(response: 200, description: 'Successful Response')]
     public function wonAuctions(Request $request): JsonResponse
     {
-        $auctions = Auction::where('winner_id', $request->user()->id)
-            ->with(['vehicle.primaryImage'])
-            ->latest()
-            ->paginate($request->input('per_page', 15));
+        $paymentStatusFilter = $request->input('payment_status');
+
+        $query = Auction::where('winner_id', $request->user()->id)
+            ->with(['vehicle.primaryImage', 'order', 'highestBid']);
+
+        if (!empty($paymentStatusFilter)) {
+            if ($paymentStatusFilter === 'pending') {
+                $query->where(function($q) {
+                    $q->whereHas('order', function($oq) {
+                        $oq->where('payment_status', 'pending');
+                    })->orWhereDoesntHave('order');
+                });
+            } elseif ($paymentStatusFilter === 'paid') {
+                $query->whereHas('order', function($oq) {
+                    $oq->where('payment_status', 'paid');
+                });
+            }
+        }
+
+        $auctions = $query->latest()->paginate($request->input('per_page', 15));
+
+        $bankAccounts = \App\Models\BankAccount::where('is_active', true)->get();
+
+        if ($bankAccounts->isEmpty()) {
+            $bankAccounts = collect([
+                (object)[
+                    'bank_name' => 'البنك الأهلي السعودي (SNB)',
+                    'beneficiary_name' => 'شركة موترزاد للمزادات',
+                    'iban' => 'SA8910000001234567890123',
+                ],
+                (object)[
+                    'bank_name' => 'مصرف الراجحي (Al Rajhi)',
+                    'beneficiary_name' => 'شركة موترزاد للمزادات',
+                    'iban' => 'SA4580000009876543210987',
+                ]
+            ]);
+        }
 
         return $this->successResponse(
-            AuctionResource::collection($auctions->items()),
+            [
+                'auctions' => AuctionResource::collection($auctions->items()),
+                'bank_accounts' => $bankAccounts
+            ],
             null,
             200,
             [

@@ -128,4 +128,101 @@ class GeneralController extends Controller
             'data'    => AuctionResource::collection($auctions)
         ]);
     }
+
+    /**
+     * Global Quick Search.
+     */
+    #[OA\Get(path: "/api/general/search", summary: "Global Quick Search", description: "Returns categorized search results for auctions, pages, and FAQs.", tags: ["General"])]
+    #[OA\Parameter(name: "q", in: "query", required: true, description: "Search term")]
+    #[OA\Response(response: 200, description: "Successful response")]
+    public function search(Request $request): JsonResponse
+    {
+        $term = $request->input('q');
+        if (empty($term) || strlen($term) < 2) {
+            return response()->json(['success' => true, 'data' => []]);
+        }
+
+        $results = [];
+        $locale = app()->getLocale();
+
+        // 1. Live and Upcoming Auctions
+        $auctions = Auction::with(['vehicle.images', 'highestBid'])
+            ->whereNotIn('status', ['ended', 'sold', 'draft'])
+            ->where(function($q) use ($term) {
+                $q->where('title_ar', 'like', "%{$term}%")
+                  ->orWhere('title_en', 'like', "%{$term}%")
+                  ->orWhereHas('vehicle', function($vq) use ($term) {
+                      $vq->where('make_ar', 'like', "%{$term}%")
+                        ->orWhere('make_en', 'like', "%{$term}%")
+                        ->orWhere('model_ar', 'like', "%{$term}%")
+                        ->orWhere('model_en', 'like', "%{$term}%")
+                        ->orWhere('year', 'like', "%{$term}%");
+                  });
+            })
+            ->take(5)
+            ->get();
+
+        if ($auctions->isNotEmpty()) {
+            $results[] = [
+                'category' => $locale === 'ar' ? 'المزادات المتاحة' : 'Available Auctions',
+                'type' => 'auctions',
+                'items' => AuctionResource::collection($auctions)
+            ];
+        }
+
+        // 2. Static Pages
+        $pages = \App\Models\Page::where('is_active', true)
+            ->where(function($q) use ($term) {
+                $q->where('title_ar', 'like', "%{$term}%")
+                  ->orWhere('title_en', 'like', "%{$term}%")
+                  ->orWhere('content_ar', 'like', "%{$term}%")
+                  ->orWhere('content_en', 'like', "%{$term}%");
+            })
+            ->take(3)
+            ->get();
+
+        if ($pages->isNotEmpty()) {
+            $results[] = [
+                'category' => $locale === 'ar' ? 'الصفحات التعريفية' : 'Information Pages',
+                'type' => 'pages',
+                'items' => $pages->map(function($page) {
+                    return [
+                        'id' => $page->id,
+                        'title' => $page->title,
+                        'slug' => $page->slug
+                    ];
+                })
+            ];
+        }
+
+        // 3. FAQs
+        $faqs = \App\Models\Faq::where('is_active', true)
+            ->where(function($q) use ($term) {
+                $q->where('question_ar', 'like', "%{$term}%")
+                  ->orWhere('question_en', 'like', "%{$term}%")
+                  ->orWhere('answer_ar', 'like', "%{$term}%")
+                  ->orWhere('answer_en', 'like', "%{$term}%");
+            })
+            ->take(3)
+            ->get();
+
+        if ($faqs->isNotEmpty()) {
+            $results[] = [
+                'category' => $locale === 'ar' ? 'الأسئلة الشائعة' : 'FAQs',
+                'type' => 'faqs',
+                'items' => $faqs->map(function($faq) {
+                    return [
+                        'id' => $faq->id,
+                        'question' => $faq->{'question_' . app()->getLocale()} ?? $faq->question_en,
+                        'answer' => $faq->{'answer_' . app()->getLocale()} ?? $faq->answer_en
+                    ];
+                })
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $results
+        ]);
+    }
 }

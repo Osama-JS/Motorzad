@@ -479,34 +479,31 @@
                     "Auctions"
                 ],
                 "summary": "Get Won Auctions",
-                "description": "Returns a paginated list of auctions that the current user has won.",
+                "description": "Returns a paginated list of auctions that the current user has won, with payment status filtering and bank accounts for transfer.",
                 "operationId": "d2417e7970b438ce8556d0a781e80799",
                 "parameters": [
+                    {
+                        "name": "payment_status",
+                        "in": "query",
+                        "description": "Filter by payment status: pending, paid",
+                        "required": false
+                    },
                     {
                         "name": "page",
                         "in": "query",
                         "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "required": false
                     },
                     {
                         "name": "per_page",
                         "in": "query",
                         "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "required": false
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Successful Response"
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -1624,6 +1621,29 @@
                 "summary": "Get Featured Auctions",
                 "description": "Returns a list of featured live auctions for the mobile app home screen.",
                 "operationId": "588d5e3b96aadac0d9d2b7e152e6f42a",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/api/general/search": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Global Quick Search",
+                "description": "Returns categorized search results for auctions, pages, and FAQs.",
+                "operationId": "41bcc099d358ea1eb9755b455502bc22",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful response"
