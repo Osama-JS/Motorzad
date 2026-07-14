@@ -23,7 +23,25 @@ class GeneralController extends Controller
         description: "Returns platform settings like terms, about us, etc.",
         tags: ["General"],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'site_name_ar' => 'موترزاد',
+                            'site_name_en' => 'Motorzad',
+                            'support_email' => 'support@motorzad.com',
+                            'support_phone' => '+966500000000',
+                            'terms_ar' => 'شروط وأحكام المنصة...',
+                            'terms_en' => 'Platform terms and conditions...',
+                            'about_ar' => 'من نحن...',
+                            'about_en' => 'About us...'
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function settings(): JsonResponse
@@ -45,7 +63,37 @@ class GeneralController extends Controller
         description: "Returns a list of active Frequently Asked Questions.",
         tags: ["General"],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'question_ar' => 'كيف يمكنني التسجيل في المزاد؟',
+                                'question_en' => 'How can I register for the auction?',
+                                'answer_ar' => 'يمكنك التسجيل عبر الضغط على زر إنشاء حساب وتعبئة بياناتك...',
+                                'answer_en' => 'You can register by clicking the sign-up button and filling in your details...',
+                                'is_active' => 1,
+                                'created_at' => '2023-10-01T10:00:00.000000Z',
+                                'updated_at' => '2023-10-01T10:00:00.000000Z'
+                            ],
+                            [
+                                'id' => 2,
+                                'question_ar' => 'ما هي طرق الدفع المتاحة؟',
+                                'question_en' => 'What payment methods are available?',
+                                'answer_ar' => 'نحن نقبل التحويل البنكي والبطاقات الائتمانية...',
+                                'answer_en' => 'We accept bank transfers and credit cards...',
+                                'is_active' => 1,
+                                'created_at' => '2023-10-02T12:00:00.000000Z',
+                                'updated_at' => '2023-10-02T12:00:00.000000Z'
+                            ]
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function faqs(): JsonResponse
@@ -67,7 +115,47 @@ class GeneralController extends Controller
         description: "Returns a list of active Vehicle Makes, Models, and standard Colors for dropdowns.",
         tags: ["General"],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'makes' => [
+                                [
+                                    'id' => 1,
+                                    'name_ar' => 'تويوتا',
+                                    'name_en' => 'Toyota',
+                                    'logo_url' => 'https://example.com/storage/makes/toyota.png',
+                                    'models' => [
+                                        [
+                                            'id' => 10,
+                                            'name_ar' => 'كامري',
+                                            'name_en' => 'Camry'
+                                        ],
+                                        [
+                                            'id' => 11,
+                                            'name_ar' => 'كورولا',
+                                            'name_en' => 'Corolla'
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            'colors' => [
+                                [
+                                    'ar' => 'أبيض',
+                                    'en' => 'White'
+                                ],
+                                [
+                                    'ar' => 'أسود',
+                                    'en' => 'Black'
+                                ]
+                            ]
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function vehicleOptions(): JsonResponse
@@ -110,7 +198,63 @@ class GeneralController extends Controller
         description: "Returns a list of featured live auctions for the mobile app home screen.",
         tags: ["General"],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة وخالية من الصدمات...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'min_bid_increment' => 500,
+                                'buy_now_price' => 70000,
+                                'reserve_met' => true,
+                                'deposit_required' => true,
+                                'deposit_amount' => 1000,
+                                'start_time' => '2023-11-01T10:00:00.000000Z',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'time_remaining' => 777600,
+                                'is_live' => true,
+                                'status' => 'live',
+                                'is_featured' => true,
+                                'bids_count' => 6,
+                                'views_count' => 350,
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'make' => 'Toyota',
+                                    'model' => 'Camry',
+                                    'year' => 2022,
+                                    'mileage' => 45000,
+                                    'color' => 'أبيض',
+                                    'condition' => 'used',
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 25,
+                                            'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                            'is_primary' => true
+                                        ]
+                                    ]
+                                ],
+                                'winner' => null,
+                                'winning_bid_amount' => null,
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function featuredAuctions(): JsonResponse
@@ -134,7 +278,62 @@ class GeneralController extends Controller
      */
     #[OA\Get(path: "/api/general/search", summary: "Global Quick Search", description: "Returns categorized search results for auctions, pages, and FAQs.", tags: ["General"])]
     #[OA\Parameter(name: "q", in: "query", required: true, description: "Search term")]
-    #[OA\Response(response: 200, description: "Successful response")]
+    #[OA\Response(
+        response: 200, 
+        description: "Successful response",
+        content: new OA\JsonContent(
+            example: [
+                'success' => true,
+                'data' => [
+                    [
+                        'category' => 'المزادات المتاحة',
+                        'type' => 'auctions',
+                        'items' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'status' => 'live',
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg'
+                                ],
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ]
+                    ],
+                    [
+                        'category' => 'الصفحات التعريفية',
+                        'type' => 'pages',
+                        'items' => [
+                            [
+                                'id' => 1,
+                                'title' => 'الشروط والأحكام',
+                                'slug' => 'terms-and-conditions'
+                            ]
+                        ]
+                    ],
+                    [
+                        'category' => 'الأسئلة الشائعة',
+                        'type' => 'faqs',
+                        'items' => [
+                            [
+                                'id' => 1,
+                                'question' => 'كيف يمكنني المشاركة في المزاد؟',
+                                'answer' => 'يمكنك المشاركة من خلال التسجيل ودفع العربون المطلوب.'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        )
+    )]
     public function search(Request $request): JsonResponse
     {
         $term = $request->input('q');

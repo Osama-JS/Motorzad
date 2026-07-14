@@ -26,17 +26,92 @@ class AuctionController extends Controller
         tags: ['Auctions'],
         parameters: [
             new OA\Parameter(name: 'status', in: 'query', required: false, description: 'Filter by status (e.g. live, scheduled, ended)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'search', in: 'query', required: false, description: 'Search term (title, make, model)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'make', in: 'query', required: false, description: 'Filter by vehicle make', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'location', in: 'query', required: false, description: 'Filter by location', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'condition', in: 'query', required: false, description: 'Filter by condition (e.g. new, used)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'year_min', in: 'query', required: false, description: 'Minimum year', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'year_max', in: 'query', required: false, description: 'Maximum year', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'price_min', in: 'query', required: false, description: 'Minimum start price', schema: new OA\Schema(type: 'number')),
+            new OA\Parameter(name: 'price_max', in: 'query', required: false, description: 'Maximum start price', schema: new OA\Schema(type: 'number')),
             new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Successful Response'
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة وخالية من الصدمات...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'min_bid_increment' => 500,
+                                'buy_now_price' => 70000,
+                                'reserve_met' => true,
+                                'deposit_required' => true,
+                                'deposit_amount' => 1000,
+                                'start_time' => '2023-11-01T10:00:00.000000Z',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'time_remaining' => 777600,
+                                'is_live' => true,
+                                'status' => 'live',
+                                'is_featured' => true,
+                                'bids_count' => 6,
+                                'views_count' => 350,
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'make' => 'Toyota',
+                                    'model' => 'Camry',
+                                    'year' => 2022,
+                                    'mileage' => 45000,
+                                    'color' => 'أبيض',
+                                    'condition' => 'used',
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 25,
+                                            'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                            'is_primary' => true
+                                        ]
+                                    ]
+                                ],
+                                'winner' => null,
+                                'winning_bid_amount' => null,
+                                'user_highest_bid' => 52000,
+                                'is_watching' => true,
+                                'has_deposited' => true,
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ],
+                        'meta' => [
+                            'current_page' => 1,
+                            'last_page' => 5,
+                            'total' => 52,
+                            'per_page' => 12
+                        ]
+                    ]
+                )
             ),
             new OA\Response(
                 response: 401,
-                description: 'Unauthenticated'
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'Unauthenticated.'
+                    ]
+                )
             )
         ]
     )]
@@ -57,8 +132,39 @@ class AuctionController extends Controller
             $query->where('is_featured', true);
         }
 
+        // Search in title (auction), make, and model (vehicle)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title_ar', 'like', '%' . $search . '%')
+                  ->orWhere('title_en', 'like', '%' . $search . '%')
+                  ->orWhereHas('vehicle', function ($vq) use ($search) {
+                      $vq->where('make_ar', 'like', '%' . $search . '%')
+                         ->orWhere('make_en', 'like', '%' . $search . '%')
+                         ->orWhere('model_ar', 'like', '%' . $search . '%')
+                         ->orWhere('model_en', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
         if ($request->filled('make')) {
             $query->whereHas('vehicle', fn ($q) => $q->where(fn ($sub) => $sub->where('make_ar', 'like', '%' . $request->make . '%')->orWhere('make_en', 'like', '%' . $request->make . '%')));
+        }
+
+        if ($request->filled('location')) {
+            $query->where('location', 'like', '%' . $request->location . '%');
+        }
+
+        if ($request->filled('condition')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('condition', $request->condition));
+        }
+
+        if ($request->filled('year_min')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('year', '>=', $request->year_min));
+        }
+
+        if ($request->filled('year_max')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('year', '<=', $request->year_max));
         }
 
         if ($request->filled('price_min')) {
@@ -114,10 +220,93 @@ class AuctionController extends Controller
             new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 403, description: 'Forbidden - KYC not approved'),
-            new OA\Response(response: 404, description: 'Auction Not Found')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'id' => 1,
+                            'title' => 'تويوتا كامري 2022',
+                            'title_ar' => 'تويوتا كامري 2022',
+                            'title_en' => 'Toyota Camry 2022',
+                            'description' => 'سيارة بحالة ممتازة وخالية من الصدمات...',
+                            'location' => 'الرياض',
+                            'start_price' => 50000,
+                            'current_price' => 53000,
+                            'min_bid_increment' => 500,
+                            'buy_now_price' => 70000,
+                            'reserve_met' => true,
+                            'deposit_required' => true,
+                            'deposit_amount' => 1000,
+                            'start_time' => '2023-11-01T10:00:00.000000Z',
+                            'end_time' => '2023-11-10T10:00:00.000000Z',
+                            'time_remaining' => 777600,
+                            'is_live' => true,
+                            'status' => 'live',
+                            'is_featured' => true,
+                            'bids_count' => 6,
+                            'views_count' => 350,
+                            'vehicle' => [
+                                'id' => 10,
+                                'title' => 'Toyota Camry',
+                                'make' => 'Toyota',
+                                'model' => 'Camry',
+                                'year' => 2022,
+                                'mileage' => 45000,
+                                'color' => 'أبيض',
+                                'condition' => 'used',
+                                'fuel_type' => 'petrol',
+                                'transmission' => 'automatic',
+                                'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                'images' => [
+                                    [
+                                        'id' => 25,
+                                        'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                        'is_primary' => true
+                                    ]
+                                ]
+                            ],
+                            'winner' => null,
+                            'winning_bid_amount' => null,
+                            'user_highest_bid' => 52000,
+                            'is_watching' => true,
+                            'has_deposited' => true,
+                            'bids' => [
+                                [
+                                    'id' => 1,
+                                    'amount' => 53000,
+                                    'status' => 'active',
+                                    'is_auto_bid' => false,
+                                    'bidder' => [
+                                        'id' => 5,
+                                        'name' => 'محمد أحمد',
+                                        'photo' => 'https://example.com/storage/avatars/default.png'
+                                    ],
+                                    'created_at' => '2023-11-05T12:00:00.000000Z'
+                                ]
+                            ],
+                            'created_at' => '2023-10-25T14:30:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Forbidden - KYC not approved',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Please complete identity verification to view auctions.'])
+            ),
+            new OA\Response(
+                response: 404, 
+                description: 'Auction Not Found',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Record not found.'])
+            )
         ]
     )]
     public function show(Request $request, Auction $auction): JsonResponse
@@ -168,10 +357,62 @@ class AuctionController extends Controller
             new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 403, description: 'Forbidden - KYC not approved'),
-            new OA\Response(response: 404, description: 'Auction Not Found')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'amount' => 53000,
+                                'status' => 'active',
+                                'is_auto_bid' => false,
+                                'bidder' => [
+                                    'id' => 5,
+                                    'name' => 'محمد أحمد',
+                                    'photo' => 'https://example.com/storage/avatars/default.png'
+                                ],
+                                'created_at' => '2023-11-05T12:00:00.000000Z'
+                            ],
+                            [
+                                'id' => 2,
+                                'amount' => 52000,
+                                'status' => 'active',
+                                'is_auto_bid' => false,
+                                'bidder' => [
+                                    'id' => 6,
+                                    'name' => 'علي صالح',
+                                    'photo' => 'https://example.com/storage/avatars/ali.png'
+                                ],
+                                'created_at' => '2023-11-05T11:50:00.000000Z'
+                            ]
+                        ],
+                        'meta' => [
+                            'current_page' => 1,
+                            'last_page' => 2,
+                            'total' => 30,
+                            'per_page' => 20
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Forbidden - KYC not approved',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Please complete identity verification to view auctions.'])
+            ),
+            new OA\Response(
+                response: 404, 
+                description: 'Auction Not Found',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Record not found.'])
+            )
         ]
     )]
     public function bids(Request $request, Auction $auction): JsonResponse
@@ -216,9 +457,29 @@ class AuctionController extends Controller
             new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 404, description: 'Auction Not Found')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'watching' => true
+                        ],
+                        'message' => 'Added to watchlist.'
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            ),
+            new OA\Response(
+                response: 404, 
+                description: 'Auction Not Found',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Record not found.'])
+            )
         ]
     )]
     public function toggleWatch(Request $request, Auction $auction): JsonResponse
@@ -258,8 +519,74 @@ class AuctionController extends Controller
             new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة وخالية من الصدمات...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'min_bid_increment' => 500,
+                                'buy_now_price' => 70000,
+                                'reserve_met' => true,
+                                'deposit_required' => true,
+                                'deposit_amount' => 1000,
+                                'start_time' => '2023-11-01T10:00:00.000000Z',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'time_remaining' => 777600,
+                                'is_live' => true,
+                                'status' => 'live',
+                                'is_featured' => true,
+                                'bids_count' => 6,
+                                'views_count' => 350,
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'make' => 'Toyota',
+                                    'model' => 'Camry',
+                                    'year' => 2022,
+                                    'mileage' => 45000,
+                                    'color' => 'أبيض',
+                                    'condition' => 'used',
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 25,
+                                            'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                            'is_primary' => true
+                                        ]
+                                    ]
+                                ],
+                                'winner' => null,
+                                'winning_bid_amount' => null,
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ],
+                        'meta' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'total' => 1,
+                            'per_page' => 12
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
         ]
     )]
     public function watchlist(Request $request): JsonResponse
@@ -294,8 +621,74 @@ class AuctionController extends Controller
             new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة وخالية من الصدمات...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'min_bid_increment' => 500,
+                                'buy_now_price' => 70000,
+                                'reserve_met' => true,
+                                'deposit_required' => true,
+                                'deposit_amount' => 1000,
+                                'start_time' => '2023-11-01T10:00:00.000000Z',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'time_remaining' => 777600,
+                                'is_live' => true,
+                                'status' => 'live',
+                                'is_featured' => true,
+                                'bids_count' => 6,
+                                'views_count' => 350,
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'make' => 'Toyota',
+                                    'model' => 'Camry',
+                                    'year' => 2022,
+                                    'mileage' => 45000,
+                                    'color' => 'أبيض',
+                                    'condition' => 'used',
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 25,
+                                            'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                            'is_primary' => true
+                                        ]
+                                    ]
+                                ],
+                                'winner' => null,
+                                'winning_bid_amount' => null,
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ],
+                        'meta' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'total' => 1,
+                            'per_page' => 12
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
         ]
     )]
     public function myAuctions(Request $request): JsonResponse
@@ -482,9 +875,35 @@ class AuctionController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: 'Bid placed successfully'),
-            new OA\Response(response: 422, description: 'Validation error or business logic failure'),
-            new OA\Response(response: 403, description: 'Unauthorized or blocked')
+            new OA\Response(
+                response: 201, 
+                description: 'Bid placed successfully',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'new_price' => 53000,
+                            'current_price' => 53000,
+                            'bids_count' => 7,
+                            'end_time' => '2023-11-10T10:00:00.000000Z',
+                            'time_left_seconds' => 777600,
+                            'time_remaining' => 777600,
+                            'bid_status' => 'success'
+                        ],
+                        'message' => 'Your bid has been placed successfully!'
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation error or business logic failure',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Your bid must be at least 55000.', 'minimum_bid' => 55000])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Unauthorized or blocked',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'You have been blocked from participating in this auction.'])
+            )
         ]
     )]
     public function placeBid(Request $request, Auction $auction): JsonResponse
@@ -731,8 +1150,16 @@ class AuctionController extends Controller
         ),
         responses: [
             new OA\Response(response: 200, description: 'Bid updated successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
-            new OA\Response(response: 403, description: 'Unauthorized')
+            new OA\Response(
+                response: 422, 
+                description: 'Validation error',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'You can only update an active bid.'])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Unauthorized',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Unauthorized.'])
+            )
         ]
     )]
     public function updateBid(Request $request, Auction $auction, Bid $bid): JsonResponse
@@ -774,39 +1201,177 @@ class AuctionController extends Controller
         ], __('Bid updated successfully.'));
     }
 
-    /**
-     * Get the current user's bids.
-     */
-    #[OA\Get(
-        path: '/api/my/bids',
-        summary: 'Get My Bids',
-        description: 'Returns a paginated list of the current user\'s bidding history.',
-        security: [['bearerAuth' => []]],
-        tags: ['Auctions'],
-        parameters: [
-            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
-            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 401, description: 'Unauthenticated')
-        ]
+
+    #[OA\Get(path: '/api/my/bids', summary: 'Get My Bids', description: 'Returns a paginated list of auctions the current user bid on, with bidder status and stats.', security: [['bearerAuth' => []]], tags: ['Auctions'])]
+    #[OA\Parameter(name: 'status', in: 'query', required: false, description: 'Filter by bidder status: winning, outbid, won, lost')]
+    #[OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number')]
+    #[OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page')]
+    #[OA\Response(
+        response: 200, 
+        description: 'Successful Response',
+        content: new OA\JsonContent(
+            example: [
+                'success' => true,
+                'data' => [
+                    [
+                        'id' => 1,
+                        'title' => 'تويوتا كامري 2022',
+                        'title_ar' => 'تويوتا كامري 2022',
+                        'title_en' => 'Toyota Camry 2022',
+                        'current_price' => 55000,
+                        'status' => 'live',
+                        'end_time' => '2023-11-10T10:00:00.000000Z',
+                        'user_highest_bid' => 55000,
+                        'bidder_status' => 'winning',
+                        'vehicle' => [
+                            'id' => 10,
+                            'title' => 'Toyota Camry',
+                            'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg'
+                        ]
+                    ]
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 1,
+                    'statistics' => [
+                        'total_count' => 10,
+                        'winning_count' => 3,
+                        'outbid_count' => 2,
+                        'won_count' => 1,
+                        'lost_count' => 4
+                    ]
+                ]
+            ]
+        )
     )]
     public function myBids(Request $request): JsonResponse
     {
-        $bids = Bid::where('user_id', $request->user()->id)
-            ->with(['auction.vehicle.primaryImage'])
-            ->latest()
-            ->paginate($request->input('per_page', 15));
+        $user = $request->user();
+        $status = $request->input('status', 'all'); // all, winning, outbid, won, lost
+
+        // Calculate overall counts for the widgets
+        $totalCount = Auction::whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->count();
+        
+        $winningCount = Auction::whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->where('status', 'live')
+          ->where('start_time', '<=', now())
+          ->where('end_time', '>=', now())
+          ->where('winner_id', $user->id)
+          ->count();
+
+        $outbidCount = Auction::whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->where('status', 'live')
+          ->where('start_time', '<=', now())
+          ->where('end_time', '>=', now())
+          ->where(function($q) use ($user) {
+              $q->where('winner_id', '!=', $user->id)
+                ->orWhereNull('winner_id');
+          })->count();
+
+        $wonCount = Auction::whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->where(function($q) {
+            $q->where('status', 'ended')
+              ->orWhere('status', 'sold')
+              ->orWhere('end_time', '<', now());
+        })->where('winner_id', $user->id)->count();
+
+        $lostCount = Auction::whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->where(function($q) {
+            $q->where('status', 'ended')
+              ->orWhere('status', 'sold')
+              ->orWhere('end_time', '<', now());
+        })->where(function($q) use ($user) {
+            $q->where('winner_id', '!=', $user->id)
+              ->orWhereNull('winner_id');
+        })->count();
+
+        // Main query
+        $query = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'bids' => function($q) use ($user) {
+            $q->where('user_id', $user->id)->latest();
+        }])
+        ->whereHas('bids', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+
+        // Apply filter status
+        if ($status === 'winning') {
+            $query->where('status', 'live')
+                  ->where('start_time', '<=', now())
+                  ->where('end_time', '>=', now())
+                  ->where('winner_id', $user->id);
+        } elseif ($status === 'outbid') {
+            $query->where('status', 'live')
+                  ->where('start_time', '<=', now())
+                  ->where('end_time', '>=', now())
+                  ->where(function($q) use ($user) {
+                      $q->where('winner_id', '!=', $user->id)
+                        ->orWhereNull('winner_id');
+                  });
+        } elseif ($status === 'won') {
+            $query->where(function($q) {
+                $q->where('status', 'ended')
+                  ->orWhere('status', 'sold')
+                  ->orWhere('end_time', '<', now());
+            })->where('winner_id', $user->id);
+        } elseif ($status === 'lost') {
+            $query->where(function($q) {
+                $q->where('status', 'ended')
+                  ->orWhere('status', 'sold')
+                  ->orWhere('end_time', '<', now());
+            })->where(function($q) use ($user) {
+                $q->where('winner_id', '!=', $user->id)
+                  ->orWhereNull('winner_id');
+            });
+        }
+
+        $auctions = $query->latest()->paginate($request->input('per_page', 15));
+
+        // Calculate user_max_bid and bidder_status for each item
+        foreach ($auctions as $auction) {
+            $userMaxBid = 0;
+            if ($auction->bids->isNotEmpty()) {
+                $userMaxBid = $auction->bids->first()->is_auto_bid ? max($auction->bids->first()->amount, $auction->bids->first()->max_auto_bid) : $auction->bids->first()->amount;
+            }
+            $auction->user_highest_bid = $userMaxBid;
+
+            // Determine Bidder Status
+            if ($auction->status === 'live' && now()->between($auction->start_time, $auction->end_time)) {
+                if ($auction->winner_id == $user->id) {
+                    $auction->bidder_status = 'winning';
+                } else {
+                    $auction->bidder_status = 'outbid';
+                }
+            } else {
+                if ($auction->winner_id == $user->id) {
+                    $auction->bidder_status = 'won';
+                } else {
+                    $auction->bidder_status = 'lost';
+                }
+            }
+        }
 
         return $this->successResponse(
-            BidResource::collection($bids->items()),
+            AuctionResource::collection($auctions->items()),
             null,
             200,
             [
-                'current_page' => $bids->currentPage(),
-                'last_page'    => $bids->lastPage(),
-                'total'        => $bids->total(),
+                'current_page' => $auctions->currentPage(),
+                'last_page'    => $auctions->lastPage(),
+                'total'        => $auctions->total(),
+                'statistics'   => [
+                    'total_count'   => $totalCount,
+                    'winning_count' => $winningCount,
+                    'outbid_count'  => $outbidCount,
+                    'won_count'     => $wonCount,
+                    'lost_count'    => $lostCount,
+                ]
             ]
         );
     }
@@ -818,7 +1383,54 @@ class AuctionController extends Controller
     #[OA\Parameter(name: 'payment_status', in: 'query', required: false, description: 'Filter by payment status: pending, paid')]
     #[OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number')]
     #[OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page')]
-    #[OA\Response(response: 200, description: 'Successful Response')]
+    #[OA\Response(
+        response: 200, 
+        description: 'Successful Response',
+        content: new OA\JsonContent(
+            example: [
+                'success' => true,
+                'data' => [
+                    'auctions' => [
+                        [
+                            'id' => 1,
+                            'title' => 'تويوتا كامري 2022',
+                            'title_ar' => 'تويوتا كامري 2022',
+                            'title_en' => 'Toyota Camry 2022',
+                            'description' => 'سيارة بحالة ممتازة...',
+                            'location' => 'الرياض',
+                            'start_price' => 50000,
+                            'current_price' => 55000,
+                            'winning_bid_amount' => 55000,
+                            'status' => 'ended',
+                            'vehicle' => [
+                                'id' => 10,
+                                'title' => 'Toyota Camry',
+                                'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                            ]
+                        ]
+                    ],
+                    'bank_accounts' => [
+                        [
+                            'bank_name' => 'البنك الأهلي السعودي (SNB)',
+                            'beneficiary_name' => 'شركة موترزاد للمزادات',
+                            'iban' => 'SA8910000001234567890123'
+                        ],
+                        [
+                            'bank_name' => 'مصرف الراجحي (Al Rajhi)',
+                            'beneficiary_name' => 'شركة موترزاد للمزادات',
+                            'iban' => 'SA4580000009876543210987'
+                        ]
+                    ]
+                ],
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 1,
+                    'per_page' => 15
+                ]
+            ]
+        )
+    )]
     public function wonAuctions(Request $request): JsonResponse
     {
         $paymentStatusFilter = $request->input('payment_status');

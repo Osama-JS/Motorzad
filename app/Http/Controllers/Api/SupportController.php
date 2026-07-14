@@ -20,7 +20,37 @@ class SupportController extends Controller
         tags: ["Support"],
         security: [["bearerAuth" => []]],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'current_page' => 1,
+                            'data' => [
+                                [
+                                    'id' => 1,
+                                    'user_id' => 5,
+                                    'subject' => 'I have an issue with my deposit',
+                                    'status' => 'open',
+                                    'created_at' => '2023-11-10T12:00:00.000000Z',
+                                    'updated_at' => '2023-11-10T12:00:00.000000Z',
+                                    'messages_count' => 3
+                                ]
+                            ],
+                            'last_page' => 1,
+                            'per_page' => 15,
+                            'total' => 1
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthenticated",
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -56,7 +86,45 @@ class SupportController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "Ticket created successfully")
+            new OA\Response(
+                response: 201, 
+                description: "Ticket created successfully",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Ticket created successfully.',
+                        'data' => [
+                            'id' => 1,
+                            'user_id' => 5,
+                            'subject' => 'I have an issue with my deposit',
+                            'status' => 'open',
+                            'created_at' => '2023-11-10T12:00:00.000000Z',
+                            'updated_at' => '2023-11-10T12:00:00.000000Z',
+                            'messages' => [
+                                [
+                                    'id' => 1,
+                                    'ticket_id' => 1,
+                                    'user_id' => 5,
+                                    'message' => 'Please help, my deposit is not showing.',
+                                    'is_admin' => false,
+                                    'created_at' => '2023-11-10T12:00:00.000000Z',
+                                    'updated_at' => '2023-11-10T12:00:00.000000Z'
+                                ]
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Validation error",
+                content: new OA\JsonContent(example: ['message' => 'The subject field is required.', 'errors' => ['subject' => ['The subject field is required.']]])
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthenticated",
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
         ]
     )]
     public function store(Request $request): JsonResponse
@@ -98,8 +166,45 @@ class SupportController extends Controller
             new OA\Parameter(name: "ticket", in: "path", required: true, description: "Ticket ID", schema: new OA\Schema(type: "integer"))
         ],
         responses: [
-            new OA\Response(response: 200, description: "Successful response"),
-            new OA\Response(response: 403, description: "Unauthorized")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'id' => 1,
+                            'user_id' => 5,
+                            'subject' => 'I have an issue with my deposit',
+                            'status' => 'open',
+                            'created_at' => '2023-11-10T12:00:00.000000Z',
+                            'updated_at' => '2023-11-10T12:00:00.000000Z',
+                            'messages' => [
+                                [
+                                    'id' => 1,
+                                    'ticket_id' => 1,
+                                    'user_id' => 5,
+                                    'message' => 'Please help, my deposit is not showing.',
+                                    'is_admin' => false,
+                                    'created_at' => '2023-11-10T12:00:00.000000Z',
+                                    'updated_at' => '2023-11-10T12:00:00.000000Z',
+                                    'sender' => [
+                                        'id' => 5,
+                                        'first_name' => 'محمد',
+                                        'last_name' => 'أحمد',
+                                        'profile_photo' => null
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403, 
+                description: "Unauthorized",
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Unauthorized.'])
+            )
         ]
     )]
     public function show(Request $request, Ticket $ticket): JsonResponse
@@ -138,8 +243,41 @@ class SupportController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Message sent successfully"),
-            new OA\Response(response: 403, description: "Unauthorized")
+            new OA\Response(
+                response: 200, 
+                description: "Message sent successfully",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Message sent successfully.',
+                        'data' => [
+                            'id' => 2,
+                            'ticket_id' => 1,
+                            'user_id' => 5,
+                            'message' => 'Thank you for the help.',
+                            'is_admin' => false,
+                            'created_at' => '2023-11-10T12:05:00.000000Z',
+                            'updated_at' => '2023-11-10T12:05:00.000000Z',
+                            'sender' => [
+                                'id' => 5,
+                                'first_name' => 'محمد',
+                                'last_name' => 'أحمد',
+                                'profile_photo' => null
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Validation error",
+                content: new OA\JsonContent(example: ['message' => 'The message field is required.', 'errors' => ['message' => ['The message field is required.']]])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: "Unauthorized",
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Unauthorized.'])
+            )
         ]
     )]
     public function reply(Request $request, Ticket $ticket): JsonResponse

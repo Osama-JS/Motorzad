@@ -20,7 +20,49 @@ class OrderController extends Controller
         tags: ["Orders"],
         security: [["bearerAuth" => []]],
         responses: [
-            new OA\Response(response: 200, description: "Successful response")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'current_page' => 1,
+                            'data' => [
+                                [
+                                    'id' => 1,
+                                    'user_id' => 5,
+                                    'auction_id' => 10,
+                                    'vehicle_id' => 15,
+                                    'winning_bid' => 55000,
+                                    'deposit_amount' => 1000,
+                                    'commission_amount' => 2750,
+                                    'total_amount' => 56750,
+                                    'payment_status' => 'pending',
+                                    'status' => 'pending_payment',
+                                    'created_at' => '2023-11-10T12:00:00.000000Z',
+                                    'auction' => [
+                                        'id' => 10,
+                                        'title_ar' => 'تويوتا كامري 2022',
+                                        'title_en' => 'Toyota Camry 2022',
+                                        'end_time' => '2023-11-10T10:00:00.000000Z'
+                                    ],
+                                    'vehicle' => [
+                                        'id' => 15,
+                                        'make_ar' => 'تويوتا',
+                                        'make_en' => 'Toyota',
+                                        'model_ar' => 'كامري',
+                                        'model_en' => 'Camry'
+                                    ]
+                                ]
+                            ],
+                            'last_page' => 1,
+                            'per_page' => 15,
+                            'total' => 1
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -49,8 +91,48 @@ class OrderController extends Controller
             new OA\Parameter(name: "order", in: "path", required: true, description: "Order ID", schema: new OA\Schema(type: "integer"))
         ],
         responses: [
-            new OA\Response(response: 200, description: "Successful response"),
-            new OA\Response(response: 403, description: "Unauthorized")
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'id' => 1,
+                            'user_id' => 5,
+                            'auction_id' => 10,
+                            'vehicle_id' => 15,
+                            'winning_bid' => 55000,
+                            'deposit_amount' => 1000,
+                            'commission_amount' => 2750,
+                            'total_amount' => 56750,
+                            'payment_status' => 'pending',
+                            'status' => 'pending_payment',
+                            'created_at' => '2023-11-10T12:00:00.000000Z',
+                            'auction' => [
+                                'id' => 10,
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'deposit_amount' => 1000
+                            ],
+                            'vehicle' => [
+                                'id' => 15,
+                                'make_ar' => 'تويوتا',
+                                'make_en' => 'Toyota',
+                                'model_ar' => 'كامري',
+                                'model_en' => 'Camry',
+                                'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg'
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403, 
+                description: "Unauthorized",
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Unauthorized.'])
+            )
         ]
     )]
     public function show(Request $request, Order $order): JsonResponse
@@ -93,9 +175,45 @@ class OrderController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Checkout details updated successfully"),
-            new OA\Response(response: 403, description: "Unauthorized"),
-            new OA\Response(response: 422, description: "Validation error or already paid")
+            new OA\Response(
+                response: 200, 
+                description: "Checkout details updated successfully",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Checkout details updated successfully. Pending admin confirmation.',
+                        'data' => [
+                            'id' => 1,
+                            'user_id' => 5,
+                            'auction_id' => 10,
+                            'vehicle_id' => 15,
+                            'winning_bid' => 55000,
+                            'deposit_amount' => 1000,
+                            'commission_amount' => 2750,
+                            'total_amount' => 56750,
+                            'payment_status' => 'pending',
+                            'status' => 'processing',
+                            'delivery_type' => 'delivery',
+                            'delivery_address' => 'Riyadh, Saudi Arabia',
+                            'delivery_phone' => '+966500000000',
+                            'payment_method' => 'wallet',
+                            'notes' => 'Please deliver before 5 PM.',
+                            'created_at' => '2023-11-10T12:00:00.000000Z',
+                            'updated_at' => '2023-11-10T12:05:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403, 
+                description: "Unauthorized",
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Unauthorized.'])
+            ),
+            new OA\Response(
+                response: 422, 
+                description: "Validation error or already paid",
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Order is already paid.'])
+            )
         ]
     )]
     public function checkout(Request $request, Order $order): JsonResponse

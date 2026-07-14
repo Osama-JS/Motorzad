@@ -42,6 +42,78 @@
                         }
                     },
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term (title, make, model)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "make",
+                        "in": "query",
+                        "description": "Filter by vehicle make",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "location",
+                        "in": "query",
+                        "description": "Filter by location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "condition",
+                        "in": "query",
+                        "description": "Filter by condition (e.g. new, used)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "year_min",
+                        "in": "query",
+                        "description": "Minimum year",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "year_max",
+                        "in": "query",
+                        "description": "Maximum year",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "price_min",
+                        "in": "query",
+                        "description": "Minimum start price",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "price_max",
+                        "in": "query",
+                        "description": "Maximum start price",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Page number",
@@ -62,10 +134,83 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "description": "سيارة بحالة ممتازة وخالية من الصدمات...",
+                                            "location": "الرياض",
+                                            "start_price": 50000,
+                                            "current_price": 53000,
+                                            "min_bid_increment": 500,
+                                            "buy_now_price": 70000,
+                                            "reserve_met": true,
+                                            "deposit_required": true,
+                                            "deposit_amount": 1000,
+                                            "start_time": "2023-11-01T10:00:00.000000Z",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "time_remaining": 777600,
+                                            "is_live": true,
+                                            "status": "live",
+                                            "is_featured": true,
+                                            "bids_count": 6,
+                                            "views_count": 350,
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "make": "Toyota",
+                                                "model": "Camry",
+                                                "year": 2022,
+                                                "mileage": 45000,
+                                                "color": "أبيض",
+                                                "condition": "used",
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 25,
+                                                        "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                        "is_primary": true
+                                                    }
+                                                ]
+                                            },
+                                            "winner": null,
+                                            "winning_bid_amount": null,
+                                            "user_highest_bid": 52000,
+                                            "is_watching": true,
+                                            "has_deposited": true,
+                                            "created_at": "2023-10-25T14:30:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 5,
+                                        "total": 52,
+                                        "per_page": 12
+                                    }
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -96,16 +241,113 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "id": 1,
+                                        "title": "تويوتا كامري 2022",
+                                        "title_ar": "تويوتا كامري 2022",
+                                        "title_en": "Toyota Camry 2022",
+                                        "description": "سيارة بحالة ممتازة وخالية من الصدمات...",
+                                        "location": "الرياض",
+                                        "start_price": 50000,
+                                        "current_price": 53000,
+                                        "min_bid_increment": 500,
+                                        "buy_now_price": 70000,
+                                        "reserve_met": true,
+                                        "deposit_required": true,
+                                        "deposit_amount": 1000,
+                                        "start_time": "2023-11-01T10:00:00.000000Z",
+                                        "end_time": "2023-11-10T10:00:00.000000Z",
+                                        "time_remaining": 777600,
+                                        "is_live": true,
+                                        "status": "live",
+                                        "is_featured": true,
+                                        "bids_count": 6,
+                                        "views_count": 350,
+                                        "vehicle": {
+                                            "id": 10,
+                                            "title": "Toyota Camry",
+                                            "make": "Toyota",
+                                            "model": "Camry",
+                                            "year": 2022,
+                                            "mileage": 45000,
+                                            "color": "أبيض",
+                                            "condition": "used",
+                                            "fuel_type": "petrol",
+                                            "transmission": "automatic",
+                                            "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                            "images": [
+                                                {
+                                                    "id": 25,
+                                                    "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                    "is_primary": true
+                                                }
+                                            ]
+                                        },
+                                        "winner": null,
+                                        "winning_bid_amount": null,
+                                        "user_highest_bid": 52000,
+                                        "is_watching": true,
+                                        "has_deposited": true,
+                                        "bids": [
+                                            {
+                                                "id": 1,
+                                                "amount": 53000,
+                                                "status": "active",
+                                                "is_auto_bid": false,
+                                                "bidder": {
+                                                    "id": 5,
+                                                    "name": "محمد أحمد",
+                                                    "photo": "https://example.com/storage/avatars/default.png"
+                                                },
+                                                "created_at": "2023-11-05T12:00:00.000000Z"
+                                            }
+                                        ],
+                                        "created_at": "2023-10-25T14:30:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Forbidden - KYC not approved"
+                        "description": "Forbidden - KYC not approved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Please complete identity verification to view auctions."
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Auction Not Found"
+                        "description": "Auction Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Record not found."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -154,16 +396,82 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "amount": 53000,
+                                            "status": "active",
+                                            "is_auto_bid": false,
+                                            "bidder": {
+                                                "id": 5,
+                                                "name": "محمد أحمد",
+                                                "photo": "https://example.com/storage/avatars/default.png"
+                                            },
+                                            "created_at": "2023-11-05T12:00:00.000000Z"
+                                        },
+                                        {
+                                            "id": 2,
+                                            "amount": 52000,
+                                            "status": "active",
+                                            "is_auto_bid": false,
+                                            "bidder": {
+                                                "id": 6,
+                                                "name": "علي صالح",
+                                                "photo": "https://example.com/storage/avatars/ali.png"
+                                            },
+                                            "created_at": "2023-11-05T11:50:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 2,
+                                        "total": 30,
+                                        "per_page": 20
+                                    }
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Forbidden - KYC not approved"
+                        "description": "Forbidden - KYC not approved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Please complete identity verification to view auctions."
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Auction Not Found"
+                        "description": "Auction Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Record not found."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -194,13 +502,42 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "watching": true
+                                    },
+                                    "message": "Added to watchlist."
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Auction Not Found"
+                        "description": "Auction Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Record not found."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -240,10 +577,80 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "description": "سيارة بحالة ممتازة وخالية من الصدمات...",
+                                            "location": "الرياض",
+                                            "start_price": 50000,
+                                            "current_price": 53000,
+                                            "min_bid_increment": 500,
+                                            "buy_now_price": 70000,
+                                            "reserve_met": true,
+                                            "deposit_required": true,
+                                            "deposit_amount": 1000,
+                                            "start_time": "2023-11-01T10:00:00.000000Z",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "time_remaining": 777600,
+                                            "is_live": true,
+                                            "status": "live",
+                                            "is_featured": true,
+                                            "bids_count": 6,
+                                            "views_count": 350,
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "make": "Toyota",
+                                                "model": "Camry",
+                                                "year": 2022,
+                                                "mileage": 45000,
+                                                "color": "أبيض",
+                                                "condition": "used",
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 25,
+                                                        "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                        "is_primary": true
+                                                    }
+                                                ]
+                                            },
+                                            "winner": null,
+                                            "winning_bid_amount": null,
+                                            "created_at": "2023-10-25T14:30:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "per_page": 12
+                                    }
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -283,10 +690,80 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "description": "سيارة بحالة ممتازة وخالية من الصدمات...",
+                                            "location": "الرياض",
+                                            "start_price": 50000,
+                                            "current_price": 53000,
+                                            "min_bid_increment": 500,
+                                            "buy_now_price": 70000,
+                                            "reserve_met": true,
+                                            "deposit_required": true,
+                                            "deposit_amount": 1000,
+                                            "start_time": "2023-11-01T10:00:00.000000Z",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "time_remaining": 777600,
+                                            "is_live": true,
+                                            "status": "live",
+                                            "is_featured": true,
+                                            "bids_count": 6,
+                                            "views_count": 350,
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "make": "Toyota",
+                                                "model": "Camry",
+                                                "year": 2022,
+                                                "mileage": 45000,
+                                                "color": "أبيض",
+                                                "condition": "used",
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 25,
+                                                        "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                        "is_primary": true
+                                                    }
+                                                ]
+                                            },
+                                            "winner": null,
+                                            "winning_bid_amount": null,
+                                            "created_at": "2023-10-25T14:30:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "per_page": 12
+                                    }
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -344,13 +821,50 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Bid placed successfully"
+                        "description": "Bid placed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "new_price": 53000,
+                                        "current_price": 53000,
+                                        "bids_count": 7,
+                                        "end_time": "2023-11-10T10:00:00.000000Z",
+                                        "time_left_seconds": 777600,
+                                        "time_remaining": 777600,
+                                        "bid_status": "success"
+                                    },
+                                    "message": "Your bid has been placed successfully!"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error or business logic failure"
+                        "description": "Validation error or business logic failure",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Your bid must be at least 55000.",
+                                    "minimum_bid": 55000
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized or blocked"
+                        "description": "Unauthorized or blocked",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "You have been blocked from participating in this auction."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -417,10 +931,28 @@
                         "description": "Bid updated successfully"
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "You can only update an active bid."
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -436,34 +968,69 @@
                     "Auctions"
                 ],
                 "summary": "Get My Bids",
-                "description": "Returns a paginated list of the current user's bidding history.",
+                "description": "Returns a paginated list of auctions the current user bid on, with bidder status and stats.",
                 "operationId": "dca84173a5af1dd2ca0cc452004efad4",
                 "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by bidder status: winning, outbid, won, lost",
+                        "required": false
+                    },
                     {
                         "name": "page",
                         "in": "query",
                         "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "required": false
                     },
                     {
                         "name": "per_page",
                         "in": "query",
                         "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "required": false
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "current_price": 55000,
+                                            "status": "live",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "user_highest_bid": 55000,
+                                            "bidder_status": "winning",
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg"
+                                            }
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "statistics": {
+                                            "total_count": 10,
+                                            "winning_count": 3,
+                                            "outbid_count": 2,
+                                            "won_count": 1,
+                                            "lost_count": 4
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -503,7 +1070,54 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "auctions": [
+                                            {
+                                                "id": 1,
+                                                "title": "تويوتا كامري 2022",
+                                                "title_ar": "تويوتا كامري 2022",
+                                                "title_en": "Toyota Camry 2022",
+                                                "description": "سيارة بحالة ممتازة...",
+                                                "location": "الرياض",
+                                                "start_price": 50000,
+                                                "current_price": 55000,
+                                                "winning_bid_amount": 55000,
+                                                "status": "ended",
+                                                "vehicle": {
+                                                    "id": 10,
+                                                    "title": "Toyota Camry",
+                                                    "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg"
+                                                }
+                                            }
+                                        ],
+                                        "bank_accounts": [
+                                            {
+                                                "bank_name": "البنك الأهلي السعودي (SNB)",
+                                                "beneficiary_name": "شركة موترزاد للمزادات",
+                                                "iban": "SA8910000001234567890123"
+                                            },
+                                            {
+                                                "bank_name": "مصرف الراجحي (Al Rajhi)",
+                                                "beneficiary_name": "شركة موترزاد للمزادات",
+                                                "iban": "SA4580000009876543210987"
+                                            }
+                                        ]
+                                    },
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "per_page": 15
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -615,7 +1229,20 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The email has already been taken.",
+                                    "errors": {
+                                        "email": [
+                                            "The email has already been taken."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1578,7 +2205,25 @@
                 "operationId": "a57940461321035006cb21b8d1cb30ad",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "site_name_ar": "موترزاد",
+                                        "site_name_en": "Motorzad",
+                                        "support_email": "support@motorzad.com",
+                                        "support_phone": "+966500000000",
+                                        "terms_ar": "شروط وأحكام المنصة...",
+                                        "terms_en": "Platform terms and conditions...",
+                                        "about_ar": "من نحن...",
+                                        "about_en": "About us..."
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1593,7 +2238,37 @@
                 "operationId": "068d73f8937c7403eb6d8727142cf5e6",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "question_ar": "كيف يمكنني التسجيل في المزاد؟",
+                                            "question_en": "How can I register for the auction?",
+                                            "answer_ar": "يمكنك التسجيل عبر الضغط على زر إنشاء حساب وتعبئة بياناتك...",
+                                            "answer_en": "You can register by clicking the sign-up button and filling in your details...",
+                                            "is_active": 1,
+                                            "created_at": "2023-10-01T10:00:00.000000Z",
+                                            "updated_at": "2023-10-01T10:00:00.000000Z"
+                                        },
+                                        {
+                                            "id": 2,
+                                            "question_ar": "ما هي طرق الدفع المتاحة؟",
+                                            "question_en": "What payment methods are available?",
+                                            "answer_ar": "نحن نقبل التحويل البنكي والبطاقات الائتمانية...",
+                                            "answer_en": "We accept bank transfers and credit cards...",
+                                            "is_active": 1,
+                                            "created_at": "2023-10-02T12:00:00.000000Z",
+                                            "updated_at": "2023-10-02T12:00:00.000000Z"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1608,7 +2283,47 @@
                 "operationId": "639e072a9e2e90b3a79837cee2ae5c6b",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "makes": [
+                                            {
+                                                "id": 1,
+                                                "name_ar": "تويوتا",
+                                                "name_en": "Toyota",
+                                                "logo_url": "https://example.com/storage/makes/toyota.png",
+                                                "models": [
+                                                    {
+                                                        "id": 10,
+                                                        "name_ar": "كامري",
+                                                        "name_en": "Camry"
+                                                    },
+                                                    {
+                                                        "id": 11,
+                                                        "name_ar": "كورولا",
+                                                        "name_en": "Corolla"
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "colors": [
+                                            {
+                                                "ar": "أبيض",
+                                                "en": "White"
+                                            },
+                                            {
+                                                "ar": "أسود",
+                                                "en": "Black"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1623,7 +2338,63 @@
                 "operationId": "588d5e3b96aadac0d9d2b7e152e6f42a",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "description": "سيارة بحالة ممتازة وخالية من الصدمات...",
+                                            "location": "الرياض",
+                                            "start_price": 50000,
+                                            "current_price": 53000,
+                                            "min_bid_increment": 500,
+                                            "buy_now_price": 70000,
+                                            "reserve_met": true,
+                                            "deposit_required": true,
+                                            "deposit_amount": 1000,
+                                            "start_time": "2023-11-01T10:00:00.000000Z",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "time_remaining": 777600,
+                                            "is_live": true,
+                                            "status": "live",
+                                            "is_featured": true,
+                                            "bids_count": 6,
+                                            "views_count": 350,
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "make": "Toyota",
+                                                "model": "Camry",
+                                                "year": 2022,
+                                                "mileage": 45000,
+                                                "color": "أبيض",
+                                                "condition": "used",
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 25,
+                                                        "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                        "is_primary": true
+                                                    }
+                                                ]
+                                            },
+                                            "winner": null,
+                                            "winning_bid_amount": null,
+                                            "created_at": "2023-10-25T14:30:00.000000Z"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1646,7 +2417,62 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "category": "المزادات المتاحة",
+                                            "type": "auctions",
+                                            "items": [
+                                                {
+                                                    "id": 1,
+                                                    "title": "تويوتا كامري 2022",
+                                                    "title_ar": "تويوتا كامري 2022",
+                                                    "title_en": "Toyota Camry 2022",
+                                                    "description": "سيارة بحالة ممتازة...",
+                                                    "location": "الرياض",
+                                                    "start_price": 50000,
+                                                    "current_price": 53000,
+                                                    "status": "live",
+                                                    "vehicle": {
+                                                        "id": 10,
+                                                        "title": "Toyota Camry",
+                                                        "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg"
+                                                    },
+                                                    "created_at": "2023-10-25T14:30:00.000000Z"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "category": "الصفحات التعريفية",
+                                            "type": "pages",
+                                            "items": [
+                                                {
+                                                    "id": 1,
+                                                    "title": "الشروط والأحكام",
+                                                    "slug": "terms-and-conditions"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "category": "الأسئلة الشائعة",
+                                            "type": "faqs",
+                                            "items": [
+                                                {
+                                                    "id": 1,
+                                                    "question": "كيف يمكنني المشاركة في المزاد؟",
+                                                    "answer": "يمكنك المشاركة من خلال التسجيل ودفع العربون المطلوب."
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2007,7 +2833,49 @@
                 "operationId": "955bb77a45ae173a485fadb8befed93f",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "current_page": 1,
+                                        "data": [
+                                            {
+                                                "id": 1,
+                                                "user_id": 5,
+                                                "auction_id": 10,
+                                                "vehicle_id": 15,
+                                                "winning_bid": 55000,
+                                                "deposit_amount": 1000,
+                                                "commission_amount": 2750,
+                                                "total_amount": 56750,
+                                                "payment_status": "pending",
+                                                "status": "pending_payment",
+                                                "created_at": "2023-11-10T12:00:00.000000Z",
+                                                "auction": {
+                                                    "id": 10,
+                                                    "title_ar": "تويوتا كامري 2022",
+                                                    "title_en": "Toyota Camry 2022",
+                                                    "end_time": "2023-11-10T10:00:00.000000Z"
+                                                },
+                                                "vehicle": {
+                                                    "id": 15,
+                                                    "make_ar": "تويوتا",
+                                                    "make_en": "Toyota",
+                                                    "model_ar": "كامري",
+                                                    "model_en": "Camry"
+                                                }
+                                            }
+                                        ],
+                                        "last_page": 1,
+                                        "per_page": 15,
+                                        "total": 1
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2038,10 +2906,55 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "id": 1,
+                                        "user_id": 5,
+                                        "auction_id": 10,
+                                        "vehicle_id": 15,
+                                        "winning_bid": 55000,
+                                        "deposit_amount": 1000,
+                                        "commission_amount": 2750,
+                                        "total_amount": 56750,
+                                        "payment_status": "pending",
+                                        "status": "pending_payment",
+                                        "created_at": "2023-11-10T12:00:00.000000Z",
+                                        "auction": {
+                                            "id": 10,
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "deposit_amount": 1000
+                                        },
+                                        "vehicle": {
+                                            "id": 15,
+                                            "make_ar": "تويوتا",
+                                            "make_en": "Toyota",
+                                            "model_ar": "كامري",
+                                            "model_en": "Camry",
+                                            "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2116,13 +3029,59 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Checkout details updated successfully"
+                        "description": "Checkout details updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Checkout details updated successfully. Pending admin confirmation.",
+                                    "data": {
+                                        "id": 1,
+                                        "user_id": 5,
+                                        "auction_id": 10,
+                                        "vehicle_id": 15,
+                                        "winning_bid": 55000,
+                                        "deposit_amount": 1000,
+                                        "commission_amount": 2750,
+                                        "total_amount": 56750,
+                                        "payment_status": "pending",
+                                        "status": "processing",
+                                        "delivery_type": "delivery",
+                                        "delivery_address": "Riyadh, Saudi Arabia",
+                                        "delivery_phone": "+966500000000",
+                                        "payment_method": "wallet",
+                                        "notes": "Please deliver before 5 PM.",
+                                        "created_at": "2023-11-10T12:00:00.000000Z",
+                                        "updated_at": "2023-11-10T12:05:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error or already paid"
+                        "description": "Validation error or already paid",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Order is already paid."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2386,7 +3345,43 @@
                 "operationId": "bb7d5b3020c6d56f0b8405c288cb7679",
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "current_page": 1,
+                                        "data": [
+                                            {
+                                                "id": 1,
+                                                "user_id": 5,
+                                                "subject": "I have an issue with my deposit",
+                                                "status": "open",
+                                                "created_at": "2023-11-10T12:00:00.000000Z",
+                                                "updated_at": "2023-11-10T12:00:00.000000Z",
+                                                "messages_count": 3
+                                            }
+                                        ],
+                                        "last_page": 1,
+                                        "per_page": 15,
+                                        "total": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2428,7 +3423,62 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Ticket created successfully"
+                        "description": "Ticket created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Ticket created successfully.",
+                                    "data": {
+                                        "id": 1,
+                                        "user_id": 5,
+                                        "subject": "I have an issue with my deposit",
+                                        "status": "open",
+                                        "created_at": "2023-11-10T12:00:00.000000Z",
+                                        "updated_at": "2023-11-10T12:00:00.000000Z",
+                                        "messages": [
+                                            {
+                                                "id": 1,
+                                                "ticket_id": 1,
+                                                "user_id": 5,
+                                                "message": "Please help, my deposit is not showing.",
+                                                "is_admin": false,
+                                                "created_at": "2023-11-10T12:00:00.000000Z",
+                                                "updated_at": "2023-11-10T12:00:00.000000Z"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The subject field is required.",
+                                    "errors": {
+                                        "subject": [
+                                            "The subject field is required."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2459,10 +3509,52 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "id": 1,
+                                        "user_id": 5,
+                                        "subject": "I have an issue with my deposit",
+                                        "status": "open",
+                                        "created_at": "2023-11-10T12:00:00.000000Z",
+                                        "updated_at": "2023-11-10T12:00:00.000000Z",
+                                        "messages": [
+                                            {
+                                                "id": 1,
+                                                "ticket_id": 1,
+                                                "user_id": 5,
+                                                "message": "Please help, my deposit is not showing.",
+                                                "is_admin": false,
+                                                "created_at": "2023-11-10T12:00:00.000000Z",
+                                                "updated_at": "2023-11-10T12:00:00.000000Z",
+                                                "sender": {
+                                                    "id": 5,
+                                                    "first_name": "محمد",
+                                                    "last_name": "أحمد",
+                                                    "profile_photo": null
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2512,10 +3604,59 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Message sent successfully"
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Message sent successfully.",
+                                    "data": {
+                                        "id": 2,
+                                        "ticket_id": 1,
+                                        "user_id": 5,
+                                        "message": "Thank you for the help.",
+                                        "is_admin": false,
+                                        "created_at": "2023-11-10T12:05:00.000000Z",
+                                        "updated_at": "2023-11-10T12:05:00.000000Z",
+                                        "sender": {
+                                            "id": 5,
+                                            "first_name": "محمد",
+                                            "last_name": "أحمد",
+                                            "profile_photo": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The message field is required.",
+                                    "errors": {
+                                        "message": [
+                                            "The message field is required."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

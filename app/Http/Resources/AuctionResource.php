@@ -76,6 +76,10 @@ class AuctionResource extends JsonResource
                 isset($this->user_highest_bid),
                 fn () => $this->user_highest_bid
             ),
+            'bidder_status'       => $this->when(
+                isset($this->bidder_status),
+                fn () => $this->bidder_status
+            ),
             'is_watching'         => $this->when(
                 isset($this->is_watching),
                 fn () => $this->is_watching

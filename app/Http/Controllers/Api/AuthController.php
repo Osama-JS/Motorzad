@@ -69,7 +69,11 @@ class AuthController extends Controller
                     ]
                 )
             ),
-            new OA\Response(response: 422, description: "Validation error")
+            new OA\Response(
+                response: 422,
+                description: "Validation error",
+                content: new OA\JsonContent(example: ['message' => 'The email has already been taken.', 'errors' => ['email' => ['The email has already been taken.']]])
+            )
         ]
     )]
     public function register(Request $request): JsonResponse
