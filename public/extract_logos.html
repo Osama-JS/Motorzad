@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>استخراج الشعارات (PNG)</title>
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; text-align: center; padding: 50px; background: #f8fafc; }
+        .card { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: inline-block; max-width: 900px; width: 100%; }
+        h1 { color: #1e293b; }
+        p { color: #64748b; margin-bottom: 20px; line-height: 1.6; }
+        .btn { background: #e11d48; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; font-size: 16px; margin: 10px; transition: 0.2s; }
+        .btn:hover { background: #be123c; }
+        .preview { margin-top: 30px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        .preview-box { padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; max-width: 600px; box-sizing: border-box; }
+        .bg-light { background: #ffffff; }
+        .bg-dark { background: #0f172a; border-color: #1e293b; }
+        canvas { width: 100%; max-width: 400px; height: auto; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>أداة تحميل الشعار (PNG)</h1>
+        <p>لقد قمت ببرمجة هذه الأداة البسيطة لك لتقوم بتحويل الشعار المكتوب بالكود إلى صور حقيقية بصيغة PNG بدقة عالية جداً.<br>يمكنك معاينة الشعارات وتحميلها بنقرة واحدة.</p>
+        
+        <div class="preview">
+            <!-- الوضع النهاري -->
+            <div class="preview-box bg-light">
+                <h3 style="color:#1e293b; margin-top:0;">الوضع النهاري (لخلفية فاتحة)</h3>
+                <canvas id="canvas-light" width="1600" height="400"></canvas>
+                <br>
+                <button class="btn" onclick="downloadLogo('light')">تحميل بصيغة PNG</button>
+            </div>
+
+            <!-- الوضع الليلي -->
+            <div class="preview-box bg-dark">
+                <h3 style="color:#f8fafc; margin-top:0;">الوضع الليلي (لخلفية داكنة)</h3>
+                <canvas id="canvas-dark" width="1600" height="400"></canvas>
+                <br>
+                <button class="btn" onclick="downloadLogo('dark')">تحميل بصيغة PNG</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const lightSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="1600" height="400">
+            <g transform="translate(10, 13)" stroke="#e11d48" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 17h2l2-4h6l2 4h2"/>
+                <circle cx="7.5" cy="17.5" r="2.5"/>
+                <circle cx="16.5" cy="17.5" r="2.5"/>
+                <path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/>
+            </g>
+            <text x="45" y="32" font-family="sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">
+                <tspan fill="#1e293b">MOTOR</tspan><tspan fill="#e11d48">AZAD</tspan>
+            </text>
+        </svg>`;
+
+        const darkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="1600" height="400">
+            <g transform="translate(10, 13)" stroke="#e11d48" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 17h2l2-4h6l2 4h2"/>
+                <circle cx="7.5" cy="17.5" r="2.5"/>
+                <circle cx="16.5" cy="17.5" r="2.5"/>
+                <path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/>
+            </g>
+            <text x="45" y="32" font-family="sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5">
+                <tspan fill="#f8fafc">MOTOR</tspan><tspan fill="#e11d48">AZAD</tspan>
+            </text>
+        </svg>`;
+
+        function renderToCanvas(svgString, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            const svg = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svg);
+            
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+
+        window.onload = function() {
+            renderToCanvas(lightSvg, 'canvas-light');
+            renderToCanvas(darkSvg, 'canvas-dark');
+        };
+
+        function downloadLogo(type) {
+            const canvasId = type === 'light' ? 'canvas-light' : 'canvas-dark';
+            const canvas = document.getElementById(canvasId);
+            const filename = type === 'light' ? 'motorzad-logo-light.png' : 'motorzad-logo-dark.png';
+            
+            const a = document.createElement('a');
+            a.download = filename;
+            a.href = canvas.toDataURL('image/png');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

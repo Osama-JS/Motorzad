@@ -3665,6 +3665,572 @@
                     }
                 ]
             }
+        },
+        "/api/wallet": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Wallet Summary",
+                "description": "Returns the authenticated user's wallet balance, total deposits, total withdrawals, and debt ceiling information.",
+                "operationId": "e38cf877a4ab9e4edb0e615b86e5caaf",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "id": 1,
+                                        "balance": 12500.5,
+                                        "total_deposits": 15000,
+                                        "total_withdrawals": 2500,
+                                        "debt_ceiling": 5000,
+                                        "debt_usage": 0,
+                                        "currency": "SAR",
+                                        "user": {
+                                            "id": 5,
+                                            "first_name": "محمد",
+                                            "last_name": "أحمد"
+                                        }
+                                    },
+                                    "message": null
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/transactions": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Wallet Transactions",
+                "description": "Returns a paginated list of wallet transactions for the authenticated user.",
+                "operationId": "d60cbc6b2a46dae08c52d8e128eb5c95",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by transaction type (credit, debit)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "credit",
+                                "debit"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Filter from date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "Filter to date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "current_page": 1,
+                                        "data": [
+                                            {
+                                                "id": 1,
+                                                "wallet_id": 1,
+                                                "type": "credit",
+                                                "amount": 500,
+                                                "balance_after": 1500,
+                                                "description": "Deposit via Bank Transfer",
+                                                "reference_id": "TRX-12345",
+                                                "created_at": "2023-11-10T12:00:00.000000Z"
+                                            }
+                                        ],
+                                        "last_page": 1,
+                                        "per_page": 15,
+                                        "total": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/withdraw": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Request Withdrawal",
+                "description": "Submits a request to withdraw funds from the wallet.",
+                "operationId": "54860847ec1fff92dd9240fe50915fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 500
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "bank_transfer",
+                                        "enum": [
+                                            "bank_transfer",
+                                            "wallet"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Withdrawal request submitted",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Withdrawal request submitted successfully. It will be reviewed soon.",
+                                    "data": {
+                                        "id": 1,
+                                        "wallet_id": 1,
+                                        "requested_amount": 500,
+                                        "status": "pending",
+                                        "payment_method": "bank_transfer",
+                                        "created_at": "2023-11-10T12:00:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or insufficient balance",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Insufficient available balance for this withdrawal. Some of your funds may be frozen in active bids."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/deposit": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Request Deposit",
+                "description": "Submits a deposit request by uploading a bank transfer receipt.",
+                "operationId": "6dd5d403abe40f4d21402320f8a03466",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "bank_account_id",
+                                    "receipt"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 1500
+                                    },
+                                    "bank_account_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "receipt": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Deposit request submitted",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Deposit request submitted successfully. It will be reviewed soon.",
+                                    "data": {
+                                        "id": 1,
+                                        "wallet_id": 1,
+                                        "amount": 1500,
+                                        "status": "pending",
+                                        "receipt_url": "https://example.com/storage/receipts/123.jpg",
+                                        "bank_account": {
+                                            "id": 1,
+                                            "bank_name_ar": "بنك الراجحي",
+                                            "bank_name_en": "Al Rajhi Bank",
+                                            "account_name": "Motorzad Corp",
+                                            "account_number": "1234567890",
+                                            "iban": "SA12345678901234567890"
+                                        },
+                                        "created_at": "2023-11-10T12:00:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The receipt field is required.",
+                                    "errors": {
+                                        "receipt": [
+                                            "The receipt field is required."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/deposits": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Deposit History",
+                "description": "Returns a paginated list of deposit requests for the authenticated user.",
+                "operationId": "d30912ad1f2e2c6c7ffafd08c68e0c34",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "wallet_id": 1,
+                                            "amount": 1500,
+                                            "status": "pending",
+                                            "receipt_url": "https://example.com/storage/receipts/123.jpg",
+                                            "bank_account": {
+                                                "id": 1,
+                                                "bank_name_ar": "بنك الراجحي",
+                                                "bank_name_en": "Al Rajhi Bank",
+                                                "account_name": "Motorzad Corp",
+                                                "account_number": "1234567890",
+                                                "iban": "SA12345678901234567890"
+                                            },
+                                            "created_at": "2023-11-10T12:00:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "per_page": 15
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/withdrawals": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Withdrawal History",
+                "description": "Returns a paginated list of withdrawal requests for the authenticated user.",
+                "operationId": "942372ff348e1faab4453230596b236d",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "wallet_id": 1,
+                                            "requested_amount": 500,
+                                            "status": "pending",
+                                            "payment_method": "bank_transfer",
+                                            "created_at": "2023-11-10T12:00:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 1,
+                                        "total": 1,
+                                        "per_page": 15
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bank-accounts": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Platform Bank Accounts",
+                "description": "Returns a list of active platform bank accounts that users can transfer deposits to.",
+                "operationId": "57f9da41a58a23fd557602919d65b655",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "bank_name": "بنك الراجحي",
+                                            "iban": "SA12345678901234567890",
+                                            "beneficiary_name": "شركة موترزاد",
+                                            "logo_url": "https://example.com/storage/banks/alrajhi.png"
+                                        },
+                                        {
+                                            "id": 2,
+                                            "bank_name": "البنك الأهلي",
+                                            "iban": "SA09876543210987654321",
+                                            "beneficiary_name": "شركة موترزاد",
+                                            "logo_url": null
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -3698,6 +4264,10 @@
         {
             "name": "Support",
             "description": "Support"
+        },
+        {
+            "name": "Wallet",
+            "description": "Wallet"
         }
     ]
 }
