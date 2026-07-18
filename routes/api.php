@@ -35,6 +35,7 @@ Route::prefix('general')->group(function () {
     Route::get('faqs', [\App\Http\Controllers\Api\GeneralController::class, 'faqs']);
     Route::get('vehicle-options', [\App\Http\Controllers\Api\GeneralController::class, 'vehicleOptions']);
     Route::get('featured-auctions', [\App\Http\Controllers\Api\GeneralController::class, 'featuredAuctions']);
+    Route::get('auctions', [\App\Http\Controllers\Api\GeneralController::class, 'auctions']);
     Route::get('search', [\App\Http\Controllers\Api\GeneralController::class, 'search']);
 });
 

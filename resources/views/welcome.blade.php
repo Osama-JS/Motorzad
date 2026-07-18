@@ -2,7 +2,7 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="{{ __('Motorzad — Car Auctions') }}">
     <title>{{ __('Motorzad — Car Auctions') }}</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
@@ -18,38 +18,54 @@
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
     <div class="nav-container">
+        <!-- Logo -->
         <a href="/" class="nav-logo">
             <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h2l2-4h6l2 4h2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/><path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/></svg></div>
             <div class="logo-text"><span class="brand-motor">MOTOR</span><span class="brand-azad">AZAD</span></div>
         </a>
-        <ul class="nav-links">
-            <li><a href="#features">{{ __('Features') }}</a></li>
-            <li><a href="#auctions">{{ __('auctions landing') }}</a></li>
-            <li><a href="#how">{{ __('How it works?') }}</a></li>
-            <li><a href="#faq">{{ __('Questions') }}</a></li>
-        </ul>
+
+        <!-- Nav Drawer: on desktop = inline links + auth, on mobile = slide-in panel -->
+        <div class="nav-drawer" id="navDrawer">
+            <ul class="nav-links">
+                <li><a href="#features" class="nav-link-item">{{ __('Features') }}</a></li>
+                <li><a href="#auctions" class="nav-link-item">{{ __('auctions landing') }}</a></li>
+                <li><a href="#how" class="nav-link-item">{{ __('How it works?') }}</a></li>
+                <li><a href="#faq" class="nav-link-item">{{ __('Questions') }}</a></li>
+            </ul>
+            <div class="nav-auth">
+                @if(Route::has('login'))
+                    @auth
+                        <a href="{{ url('/') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-ghost">{{ __('Log In') }}</a>
+                        @if(Route::has('register'))
+                            <a href="{{ route('register') }}" class="btn btn-primary">{{ __('Create Account') }}</a>
+                        @endif
+                    @endauth
+                @endif
+            </div>
+        </div>
+
+        <!-- Theme & Language (always visible) -->
         <div class="nav-actions">
-            <!-- Language Switcher -->
             <a href="{{ route('lang.switch', app()->getLocale() == 'ar' ? 'en' : 'ar') }}" class="theme-toggle" aria-label="Switch Language" title="{{ app()->getLocale() == 'ar' ? 'English' : 'العربية' }}">
                 <span style="font-weight:700;font-size:0.8rem">{{ app()->getLocale() == 'ar' ? 'EN' : 'ع' }}</span>
             </a>
-            <!-- Theme Toggle -->
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
                 <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
-            @if(Route::has('login'))
-                @auth
-                    <a href="{{ url('/') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost">{{ __('Log In') }}</a>
-                    @if(Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn btn-primary">{{ __('Create Account') }}</a>
-                    @endif
-                @endauth
-            @endif
         </div>
-        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+
+        <!-- Mobile Hamburger -->
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
     </div>
 </nav>
 
@@ -128,7 +144,7 @@
             <h2 class="section-title">{{ __('Latest') }} <span class="highlight">{{ __('auctions landing') }}</span></h2>
             <p class="section-desc">{{ __('Browse the latest cars listed in our live auctions') }}</p>
         </div>
-        <div class="auctions-grid">
+        <div class="auctions-grid" id="auctionsGrid">
             @forelse($featuredAuctions as $i => $auction)
             @php
                 $colors = ['#c0392b', '#2980b9', '#f39c12', '#27ae60', '#8e44ad'];
@@ -216,19 +232,13 @@
             <h2 class="section-title">{{ __('Frequently Asked Questions') }}</h2>
         </div>
         <div class="faq-list">
-            @php $faqs = [
-                ['q'=>__('How do I register?'),'a'=>__('You can register for free through the create account page. You will need to provide basic info and complete identity verification.')],
-                ['q'=>__('Is the platform secure?'),'a'=>__('Yes, we use the highest security and encryption standards to protect your data and financial transactions.')],
-                ['q'=>__('How do I participate in an auction?'),'a'=>__('After registering and verifying your account, you can browse available auctions and submit your bids directly.')],
-                ['q'=>__('What payment methods are available?'),'a'=>__('We support direct bank transfer through approved bank accounts to ensure transaction security.')]
-            ]; @endphp
             @foreach($faqs as $faq)
             <div class="faq-item animate-on-scroll">
                 <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                    <span>{{ $faq['q'] }}</span>
+                    <span>{{ app()->getLocale() == 'ar' ? ($faq->question_ar ?? $faq->question_en) : ($faq->question_en ?? $faq->question_ar) }}</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
-                <div class="faq-answer"><p>{{ $faq['a'] }}</p></div>
+                <div class="faq-answer"><p>{!! nl2br(e(app()->getLocale() == 'ar' ? ($faq->answer_ar ?? $faq->answer_en) : ($faq->answer_en ?? $faq->answer_ar))) !!}</p></div>
             </div>
             @endforeach
         </div>
@@ -274,34 +284,92 @@
 </footer>
 
 <script>
-// Navbar scroll
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
-// Scroll animations
-const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.1});
-document.querySelectorAll('.animate-on-scroll').forEach(el=>obs.observe(el));
-// Theme toggle
-document.getElementById('themeToggle')?.addEventListener('click',()=>{
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const newTheme = isDark ? 'light' : 'dark';
-    if (newTheme === 'light') { document.documentElement.removeAttribute('data-theme'); }
-    else { document.documentElement.setAttribute('data-theme', 'dark'); }
-    localStorage.setItem('motorzad-landing-theme', newTheme);
-});
-// Mobile menu
-document.getElementById('mobileToggle')?.addEventListener('click',()=>{const l=document.querySelector('.nav-links');l.style.display=l.style.display==='flex'?'none':'flex';l.style.flexDirection='column';l.style.position='absolute';l.style.top='100%';l.style.right='0';l.style.left='0';l.style.background='var(--bg-card-solid)';l.style.padding='1rem 2rem';l.style.borderBottom='1px solid var(--border)'});
-// Countdown timers
-document.querySelectorAll('.countdown-timer').forEach(el => {
-    const end = new Date(el.getAttribute('data-end-time')).getTime();
-    setInterval(() => {
-        const now = new Date().getTime();
-        const dist = end - now;
-        if(dist < 0) { el.innerText = "00:00:00"; return; }
-        const h = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((dist % (1000 * 60)) / 1000);
-        el.innerText = [h,m,s].map(v => v.toString().padStart(2, '0')).join(':');
-    }, 1000);
-});
+(function() {
+    'use strict';
+
+    // === Navbar scroll effect ===
+    const navbar = document.getElementById('navbar');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        navbar.classList.toggle('scrolled', scrollY > 50);
+        lastScroll = scrollY;
+    }, { passive: true });
+
+    // === Scroll animations ===
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                obs.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.animate-on-scroll').forEach(el => obs.observe(el));
+
+    // === Theme toggle ===
+    document.getElementById('themeToggle')?.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        if (newTheme === 'light') document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('motorzad-landing-theme', newTheme);
+    });
+
+    // === Mobile Menu ===
+    const mobileToggle = document.getElementById('mobileToggle');
+    const navDrawer = document.getElementById('navDrawer');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const body = document.body;
+
+    function openMenu() {
+        mobileToggle.classList.add('active');
+        navDrawer.classList.add('open');
+        mobileOverlay.classList.add('open');
+        body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+        mobileToggle.classList.remove('active');
+        navDrawer.classList.remove('open');
+        mobileOverlay.classList.remove('open');
+        body.style.overflow = '';
+    }
+
+    mobileToggle?.addEventListener('click', () => {
+        if (navDrawer.classList.contains('open')) closeMenu();
+        else openMenu();
+    });
+
+    mobileOverlay?.addEventListener('click', closeMenu);
+
+    // Close menu when clicking a nav link
+    document.querySelectorAll('.nav-link-item').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) closeMenu();
+        });
+    });
+
+    // Close menu on resize to desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) closeMenu();
+    });
+
+    // === Countdown timers ===
+    document.querySelectorAll('.countdown-timer').forEach(el => {
+        const end = new Date(el.getAttribute('data-end-time')).getTime();
+        function updateTimer() {
+            const dist = end - Date.now();
+            if (dist < 0) { el.innerText = '00:00:00'; return; }
+            const h = Math.floor((dist % 86400000) / 3600000);
+            const m = Math.floor((dist % 3600000) / 60000);
+            const s = Math.floor((dist % 60000) / 1000);
+            el.innerText = [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
+})();
 </script>
 </body>
 </html>

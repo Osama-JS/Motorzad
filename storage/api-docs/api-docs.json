@@ -2399,6 +2399,113 @@
                 }
             }
         },
+        "/api/general/auctions": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Auctions List",
+                "description": "Returns a paginated list of auctions. Public endpoint, no authentication required.",
+                "operationId": "1589b013aa7b795e57bc94a2a8ae0053",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: live, scheduled, ended, sold (default: live,scheduled)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "live"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (default: 12, max: 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "title": "تويوتا كامري 2022",
+                                            "title_ar": "تويوتا كامري 2022",
+                                            "title_en": "Toyota Camry 2022",
+                                            "description": "سيارة بحالة ممتازة...",
+                                            "location": "الرياض",
+                                            "start_price": 50000,
+                                            "current_price": 53000,
+                                            "min_bid_increment": 500,
+                                            "buy_now_price": 70000,
+                                            "reserve_met": true,
+                                            "deposit_required": true,
+                                            "deposit_amount": 1000,
+                                            "start_time": "2023-11-01T10:00:00.000000Z",
+                                            "end_time": "2023-11-10T10:00:00.000000Z",
+                                            "time_remaining": 777600,
+                                            "is_live": true,
+                                            "status": "live",
+                                            "is_featured": true,
+                                            "bids_count": 6,
+                                            "views_count": 350,
+                                            "vehicle": {
+                                                "id": 10,
+                                                "title": "Toyota Camry",
+                                                "make": "Toyota",
+                                                "model": "Camry",
+                                                "year": 2022,
+                                                "mileage": 45000,
+                                                "color": "أبيض",
+                                                "condition": "used",
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "primary_image_url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 25,
+                                                        "url": "https://example.com/storage/auctions/camry-main.jpg",
+                                                        "is_primary": true
+                                                    }
+                                                ]
+                                            },
+                                            "created_at": "2023-10-25T14:30:00.000000Z"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "current_page": 1,
+                                        "last_page": 5,
+                                        "total": 52,
+                                        "per_page": 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/general/search": {
             "get": {
                 "tags": [

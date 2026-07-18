@@ -12,7 +12,9 @@ Route::get('/', function () {
         ->take(3)
         ->get();
 
-    return view('welcome', compact('featuredAuctions'));
+    $faqs = \App\Models\Faq::where('is_active', true)->latest()->get();
+
+    return view('welcome', compact('featuredAuctions', 'faqs'));
 });
 
 // Mobile Developer Documentation

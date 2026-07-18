@@ -274,6 +274,119 @@ class GeneralController extends Controller
     }
 
     /**
+     * Get Auctions List with Filters & Pagination (Public).
+     */
+    #[OA\Get(
+        path: "/api/general/auctions",
+        summary: "Get Auctions List",
+        description: "Returns a paginated list of auctions. Public endpoint, no authentication required.",
+        tags: ["General"],
+        parameters: [
+            new OA\Parameter(name: "status", in: "query", required: false, description: "Filter by status: live, scheduled, ended, sold (default: live,scheduled)", schema: new OA\Schema(type: "string", example: "live")),
+            new OA\Parameter(name: "per_page", in: "query", required: false, description: "Items per page (default: 12, max: 50)", schema: new OA\Schema(type: "integer", example: 12)),
+            new OA\Parameter(name: "page", in: "query", required: false, description: "Page number", schema: new OA\Schema(type: "integer", example: 1)),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            [
+                                'id' => 1,
+                                'title' => 'تويوتا كامري 2022',
+                                'title_ar' => 'تويوتا كامري 2022',
+                                'title_en' => 'Toyota Camry 2022',
+                                'description' => 'سيارة بحالة ممتازة...',
+                                'location' => 'الرياض',
+                                'start_price' => 50000,
+                                'current_price' => 53000,
+                                'min_bid_increment' => 500,
+                                'buy_now_price' => 70000,
+                                'reserve_met' => true,
+                                'deposit_required' => true,
+                                'deposit_amount' => 1000,
+                                'start_time' => '2023-11-01T10:00:00.000000Z',
+                                'end_time' => '2023-11-10T10:00:00.000000Z',
+                                'time_remaining' => 777600,
+                                'is_live' => true,
+                                'status' => 'live',
+                                'is_featured' => true,
+                                'bids_count' => 6,
+                                'views_count' => 350,
+                                'vehicle' => [
+                                    'id' => 10,
+                                    'title' => 'Toyota Camry',
+                                    'make' => 'Toyota',
+                                    'model' => 'Camry',
+                                    'year' => 2022,
+                                    'mileage' => 45000,
+                                    'color' => 'أبيض',
+                                    'condition' => 'used',
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'primary_image_url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 25,
+                                            'url' => 'https://example.com/storage/auctions/camry-main.jpg',
+                                            'is_primary' => true
+                                        ]
+                                    ]
+                                ],
+                                'created_at' => '2023-10-25T14:30:00.000000Z'
+                            ]
+                        ],
+                        'meta' => [
+                            'current_page' => 1,
+                            'last_page' => 5,
+                            'total' => 52,
+                            'per_page' => 12
+                        ]
+                    ]
+                )
+            )
+        ]
+    )]
+    public function auctions(Request $request): JsonResponse
+    {
+        $query = Auction::with(['vehicle.images', 'highestBid'])
+            ->withCount('bids');
+
+        // ── Status Filter ─────────────────────────────────────────────────
+        if ($request->filled('status')) {
+            $statuses = explode(',', $request->status);
+            $allowed = ['live', 'scheduled', 'ended', 'sold'];
+            $statuses = array_intersect($statuses, $allowed);
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
+        } else {
+            $query->whereIn('status', ['live', 'scheduled']);
+        }
+
+        // Default sorting
+        $query->latest();
+
+        // ── Pagination ───────────────────────────────────────────────────
+        $perPage = min((int) $request->input('per_page', 12), 50);
+        $auctions = $query->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data'    => AuctionResource::collection($auctions->items()),
+            'meta'    => [
+                'current_page' => $auctions->currentPage(),
+                'last_page'    => $auctions->lastPage(),
+                'total'        => $auctions->total(),
+                'per_page'     => $auctions->perPage(),
+            ]
+        ]);
+    }
+
+    /**
      * Global Quick Search.
      */
     #[OA\Get(path: "/api/general/search", summary: "Global Quick Search", description: "Returns categorized search results for auctions, pages, and FAQs.", tags: ["General"])]
