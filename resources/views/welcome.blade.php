@@ -74,8 +74,8 @@
     <div class="hero-container">
         <div>
             <div class="hero-badge"><span class="pulse"></span> {{ __('The #1 auction platform in the region') }}</div>
-            <h1 class="hero-title">{{ __('Discover the world of') }} <span class="highlight">{{ __('car auctions') }}</span> {{ __('with an unmatched experience') }}</h1>
-            <p class="hero-desc">{{ __('Join thousands of bidders and get your dream car at the best price. Motorzad provides you with a safe, transparent, and fast bidding experience.') }}</p>
+            <h1 class="hero-title">{{ \App\Models\Setting::get('hero_title_' . app()->getLocale(), __('Discover the world of car auctions with an unmatched experience')) }}</h1>
+            <p class="hero-desc">{{ \App\Models\Setting::get('hero_desc_' . app()->getLocale(), __('Join thousands of bidders and get your dream car at the best price. Motorzad provides you with a safe, transparent, and fast bidding experience.')) }}</p>
             <div class="hero-actions">
                 @auth
                     @if(auth()->user()->status === 'approved')
@@ -90,11 +90,19 @@
                 @endauth
                 <a href="#how" class="btn btn-ghost btn-lg">{{ __('How it works?') }}</a>
             </div>
+            @if(\App\Models\Setting::get('show_homepage_stats', '1') == '1')
             <div class="hero-stats">
-                <div class="hero-stat"><div class="stat-num">5<span>K+</span></div><div class="stat-label">{{ __('Active Bidder') }}</div></div>
-                <div class="hero-stat"><div class="stat-num">12<span>K+</span></div><div class="stat-label">{{ __('Cars Sold') }}</div></div>
-                <div class="hero-stat"><div class="stat-num">98<span>%</span></div><div class="stat-label">{{ __('Customer Satisfaction') }}</div></div>
+                @if(\App\Models\Setting::get('show_stat_bidders', '1') == '1')
+                <div class="hero-stat"><div class="stat-num">{{ \App\Models\Setting::get('stats_active_bidders', '5') }}<span>{{ \App\Models\Setting::get('stats_active_bidders_unit', 'K+') }}</span></div><div class="stat-label">{{ __('Active Bidder') }}</div></div>
+                @endif
+                @if(\App\Models\Setting::get('show_stat_cars', '1') == '1')
+                <div class="hero-stat"><div class="stat-num">{{ \App\Models\Setting::get('stats_cars_sold', '12') }}<span>{{ \App\Models\Setting::get('stats_cars_sold_unit', 'K+') }}</span></div><div class="stat-label">{{ __('Cars Sold') }}</div></div>
+                @endif
+                @if(\App\Models\Setting::get('show_stat_satisfaction', '1') == '1')
+                <div class="hero-stat"><div class="stat-num">{{ \App\Models\Setting::get('stats_satisfaction', '98') }}<span>{{ \App\Models\Setting::get('stats_satisfaction_unit', '%') }}</span></div><div class="stat-label">{{ __('Customer Satisfaction') }}</div></div>
+                @endif
             </div>
+            @endif
         </div>
         <div class="hero-image"><img src="{{ asset('images/hero-car.png') }}" alt="{{ __('car auctions') }}"></div>
     </div>
@@ -267,14 +275,38 @@
                 <div class="logo"><div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h2l2-4h6l2 4h2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/><path d="M3 17V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/></svg></div><div class="logo-text"><span class="brand-motor" style="color:var(--text)">MOTOR</span><span class="brand-azad" style="color:var(--red)">AZAD</span></div></div>
                 <p>{{ __('Motorzad — The #1 destination for car auctions in the region. We provide you with a safe and transparent bidding experience.') }}</p>
                 <div class="footer-social">
-                    <a href="#" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                    <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
-                    <a href="#" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+                    @if(\App\Models\Setting::get('show_facebook', '1') == '1' && \App\Models\Setting::get('facebook_url'))
+                    <a href="{{ \App\Models\Setting::get('facebook_url') }}" aria-label="Facebook" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_twitter', '1') == '1' && \App\Models\Setting::get('twitter_url'))
+                    <a href="{{ \App\Models\Setting::get('twitter_url') }}" aria-label="Twitter" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_instagram', '1') == '1' && \App\Models\Setting::get('instagram_url'))
+                    <a href="{{ \App\Models\Setting::get('instagram_url') }}" aria-label="Instagram" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_linkedin', '1') == '1' && \App\Models\Setting::get('linkedin_url'))
+                    <a href="{{ \App\Models\Setting::get('linkedin_url') }}" aria-label="LinkedIn" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_tiktok', '1') == '1' && \App\Models\Setting::get('tiktok_url'))
+                    <a href="{{ \App\Models\Setting::get('tiktok_url') }}" aria-label="TikTok" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.12-3.44-3.17-3.65-5.46-.02-.14-.02-.29-.02-.44.02-2.31 1.25-4.48 3.23-5.65 1.17-.67 2.53-1.04 3.88-1.03v4.06c-1.3.06-2.52.79-3.2 1.86-.4.65-.63 1.4-.64 2.17-.03 1.17.65 2.27 1.67 2.75 1.05.47 2.34.42 3.32-.23.77-.52 1.25-1.39 1.25-2.32.02-5.46.01-10.92.02-16.38h4.08z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_snapchat', '1') == '1' && \App\Models\Setting::get('snapchat_url'))
+                    <a href="{{ \App\Models\Setting::get('snapchat_url') }}" aria-label="Snapchat" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.65 0 4.9 1.83 5.4 4.41.22 1.16.22 2.36 0 3.52-.35 1.85-1.48 3.4-3.13 4.31a6.11 6.11 0 0 1-4.54 0c-1.65-.91-2.78-2.46-3.13-4.31a6.3 6.3 0 0 1 0-3.52C7.1 3.83 9.35 2 12 2m0-2C8.69 0 5.85 2.38 5.17 5.64a8.3 8.3 0 0 0 0 4.63c.47 2.45 2 4.49 4.14 5.68-1.74 1.16-2.9 2.92-3.1 4.97A3.33 3.33 0 0 1 5 19.8c-.85.35-1.84.44-2.75.24-.9-.2-1.7-.68-2.25-1.34V18c0-.79.52-1.46 1.25-1.71a4.34 4.34 0 0 0 2.46-1.75C3.33 13.9.72 12.01.27 9.87.1 9-.04 8.1 0 7.21c.14-3.3 1.94-6.3 4.79-7.96C6.73-.24 9.32-.4 12 0c2.68.4 5.27.56 7.21.75 2.85 1.66 4.65 4.66 4.79 7.96.04.89-.1 1.79-.27 2.66-.45 2.14-3.06 4.03-3.44 4.67a4.34 4.34 0 0 0 2.46 1.75c.73.25 1.25.92 1.25 1.71v.68c-.55.66-1.35 1.14-2.25 1.34-.91.2-1.9.11-2.75-.24a3.33 3.33 0 0 1-1.21 1.12c-.2.13-.42.22-.65.26a1.36 1.36 0 0 1-1.07-.36c-.47-.46-.66-1.12-.51-1.76a4.83 4.83 0 0 0-1.87-4.14c2.14-1.19 3.67-3.23 4.14-5.68a8.3 8.3 0 0 0 0-4.63C18.15 2.38 15.31 0 12 0z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_youtube', '1') == '1' && \App\Models\Setting::get('youtube_url'))
+                    <a href="{{ \App\Models\Setting::get('youtube_url') }}" aria-label="YouTube" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.1c.3-1.6 1.4-2.8 2.9-3.2 2.6-.5 5.5-.6 6.6-.6 1.1 0 4 .1 6.6.6 1.5.4 2.6 1.6 2.9 3.2.4 2 .4 4.3.4 4.9s0 2.9-.4 4.9c-.3 1.6-1.4 2.8-2.9 3.2-2.6.5-5.5.6-6.6.6-1.1 0-4-.1-6.6-.6-1.5-.4-2.6-1.6-2.9-3.2-.4-2-.4-4.3-.4-4.9s0-2.9.4-4.9z"/><path d="m10 15 5-3-5-3v6z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_telegram', '1') == '1' && \App\Models\Setting::get('telegram_url'))
+                    <a href="{{ \App\Models\Setting::get('telegram_url') }}" aria-label="Telegram" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21.18 3.51a1.5 1.5 0 0 0-1.77-.28l-16.5 7A1.5 1.5 0 0 0 2.8 12.92l3.43 1.1 1.7 5.16a1.5 1.5 0 0 0 2.76.24l2.84-3.4 4.92 3.65a1.5 1.5 0 0 0 2.39-1l1.5-13.5a1.5 1.5 0 0 0-1.16-1.66zm-12.7 8l8.9-5.66-7.38 6.65-1.52.95zm-1 2.32l-.93-2.83 9.46-5.88z"/></svg></a>
+                    @endif
+                    @if(\App\Models\Setting::get('show_whatsapp', '1') == '1' && \App\Models\Setting::get('whatsapp_number'))
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\Setting::get('whatsapp_number')) }}" aria-label="WhatsApp" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+                    @endif
                 </div>
             </div>
             <div class="footer-col"><h4>{{ __('Quick Links') }}</h4><ul><li><a href="#features">{{ __('Features') }}</a></li><li><a href="#auctions">{{ __('auctions landing') }}</a></li><li><a href="#how">{{ __('How it works?') }}</a></li><li><a href="#faq">{{ __('Questions') }}</a></li></ul></div>
             <div class="footer-col"><h4>{{ __('Account') }}</h4><ul><li><a href="{{ route('login') }}">{{ __('Log In') }}</a></li><li><a href="{{ route('register') }}">{{ __('Create Account') }}</a></li></ul></div>
-            <div class="footer-col"><h4>{{ __('Contact Us') }}</h4><ul><li><a href="mailto:support@motorzad.com">support@motorzad.com</a></li><li><a href="tel:+966500000000">+966 500 000 000</a></li></ul></div>
+            <div class="footer-col"><h4>{{ __('Contact Us') }}</h4><ul><li><a href="mailto:{{ \App\Models\Setting::get('contact_email', 'support@motorzad.com') }}">{{ \App\Models\Setting::get('contact_email', 'support@motorzad.com') }}</a></li><li><a href="tel:{{ preg_replace('/[^0-9+]/', '', \App\Models\Setting::get('contact_phone', '+966500000000')) }}" dir="ltr">{{ \App\Models\Setting::get('contact_phone', '+966 500 000 000') }}</a></li></ul></div>
         </div>
         <div class="footer-bottom">
             <span>© {{ date('Y') }} موتورزاد. {{ __('All rights reserved.') }}</span>

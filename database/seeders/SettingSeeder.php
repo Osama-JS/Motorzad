@@ -43,6 +43,33 @@ class SettingSeeder extends Seeder
             'vision_en' => 'To become the leading tourism platform in the Middle East, known for innovation, reliability, and our commitment to making travel accessible to all.',
             'vision_ar' => 'أن نصبح المنصة السياحية الرائدة في الشرق الأوسط، والمعروفة بالابتكار والموثوقية والتزامنا بجعل السفر متاحاً للجميع.',
             
+            // Hero Section Settings
+            'hero_title_en' => 'Discover the world of car auctions with an unmatched experience',
+            'hero_title_ar' => 'اكتشف عالم مزادات السيارات بتجربة لا مثيل لها',
+            'hero_desc_en' => 'Join thousands of bidders and get your dream car at the best price. Motorzad provides you with a safe, transparent, and fast bidding experience.',
+            'hero_desc_ar' => 'انضم لآلاف المزايدين واحصل على سيارة أحلامك بأفضل سعر. موتورزاد توفر لك تجربة مزايدة آمنة، شفافة وسريعة.',
+            // Stats Settings
+            'show_homepage_stats' => '1',
+            'show_stat_bidders' => '1',
+            'show_stat_cars' => '1',
+            'show_stat_satisfaction' => '1',
+            'stats_active_bidders' => '5',
+            'stats_active_bidders_unit' => 'K+',
+            'stats_cars_sold' => '12',
+            'stats_cars_sold_unit' => 'K+',
+            'stats_satisfaction' => '98',
+            'stats_satisfaction_unit' => '%',
+            
+            // Social Media Toggles
+            'show_facebook' => '1',
+            'show_twitter' => '1',
+            'show_instagram' => '1',
+            'show_linkedin' => '1',
+            'show_tiktok' => '1',
+            'show_snapchat' => '1',
+            'show_youtube' => '1',
+            'show_whatsapp' => '1',
+            'show_telegram' => '1',
         ];
 
         foreach ($settings as $key => $value) {

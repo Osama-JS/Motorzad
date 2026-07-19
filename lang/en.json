@@ -453,5 +453,21 @@
     "Issues / Defects - English": "Issues / Defects - English",
     "Location (Arabic)": "Location (Arabic)",
     "Location (English)": "Location (English)",
-    "Translate to Arabic": "Translate to Arabic"
+    "Translate to Arabic": "Translate to Arabic",
+    "Statistics": "Statistics",
+    "Homepage Statistics": "Homepage Statistics",
+    "Active Bidders Number": "Active Bidders Number",
+    "Active Bidders Unit": "Active Bidders Unit",
+    "Cars Sold Number": "Cars Sold Number",
+    "Cars Sold Unit": "Cars Sold Unit",
+    "Satisfaction Rate Number": "Satisfaction Rate Number",
+    "Satisfaction Rate Unit": "Satisfaction Rate Unit",
+    "Settings Updated Successfully.": "Settings Updated Successfully.",
+    "Error! Not Authorized.": "Error! Not Authorized.",
+    "Error! Failed to update settings.": "Error! Failed to update settings.",
+    "Show Homepage Statistics": "Show Homepage Statistics",
+    "Display the statistics section on the main landing page": "Display the statistics section on the main landing page",
+    "Show Active Bidders": "Show Active Bidders",
+    "Show Cars Sold": "Show Cars Sold",
+    "Show Satisfaction Rate": "Show Satisfaction Rate"
 }

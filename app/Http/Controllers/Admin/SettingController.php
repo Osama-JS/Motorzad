@@ -28,6 +28,10 @@ class SettingController extends Controller
                 'site_name_ar' => 'nullable|string|max:255',
                 'site_description_en' => 'nullable|string',
                 'site_description_ar' => 'nullable|string',
+                'hero_title_en' => 'nullable|string',
+                'hero_title_ar' => 'nullable|string',
+                'hero_desc_en' => 'nullable|string',
+                'hero_desc_ar' => 'nullable|string',
                 'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'site_favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,ico|max:1024',
                 'hero_bg' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -55,9 +59,41 @@ class SettingController extends Controller
                 'mission_ar' => 'nullable|string',
                 'vision_en' => 'nullable|string',
                 'vision_ar' => 'nullable|string',
+                'show_homepage_stats' => 'nullable|in:0,1',
+                'show_stat_bidders' => 'nullable|in:0,1',
+                'show_stat_cars' => 'nullable|in:0,1',
+                'show_stat_satisfaction' => 'nullable|in:0,1',
+                'show_facebook' => 'nullable|in:0,1',
+                'show_twitter' => 'nullable|in:0,1',
+                'show_instagram' => 'nullable|in:0,1',
+                'show_linkedin' => 'nullable|in:0,1',
+                'show_tiktok' => 'nullable|in:0,1',
+                'show_snapchat' => 'nullable|in:0,1',
+                'show_youtube' => 'nullable|in:0,1',
+                'show_whatsapp' => 'nullable|in:0,1',
+                'show_telegram' => 'nullable|in:0,1',
+                'stats_active_bidders' => 'nullable|string|max:50',
+                'stats_active_bidders_unit' => 'nullable|string|max:20',
+                'stats_cars_sold' => 'nullable|string|max:50',
+                'stats_cars_sold_unit' => 'nullable|string|max:20',
+                'stats_satisfaction' => 'nullable|string|max:50',
+                'stats_satisfaction_unit' => 'nullable|string|max:20',
             ]);
 
             $data = $request->except(['_token', 'site_logo', 'site_favicon', 'hero_bg', 'page_header_bg']);
+
+            // Explicitly handle checkboxes that might be unchecked
+            $checkboxes = [
+                'maintenance_mode', 'show_hotels_page', 'show_homepage_stats',
+                'show_stat_bidders', 'show_stat_cars', 'show_stat_satisfaction',
+                'show_facebook', 'show_twitter', 'show_instagram', 'show_linkedin',
+                'show_tiktok', 'show_snapchat', 'show_youtube', 'show_whatsapp', 'show_telegram'
+            ];
+            foreach ($checkboxes as $checkbox) {
+                if (!array_key_exists($checkbox, $data)) {
+                    $data[$checkbox] = '0';
+                }
+            }
 
             // Update text settings
             foreach ($data as $key => $value) {

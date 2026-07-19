@@ -689,5 +689,21 @@
     "You have no notifications at the moment. We will notify you when there is activity on your account.": "لا توجد أي إشعارات جديدة حالياً. سنقوم بإعلامك فور حدوث أي نشاط في حسابك.",
     "All notifications marked as read": "تم تحديد جميع الإشعارات كمقروءة",
     "Failed to load notifications.": "فشل في تحميل الإشعارات.",
-    "Failed to mark notifications.": "فشل في تحديد حالة الإشعارات."
+    "Failed to mark notifications.": "فشل في تحديد حالة الإشعارات.",
+    "Homepage Statistics": "إحصائيات الصفحة الرئيسية",
+    "Active Bidders Number": "عدد المزايدين النشطين",
+    "Active Bidders Unit": "وحدة عدد المزايدين النشطين",
+    "Cars Sold Number": "عدد السيارات المباعة",
+    "Cars Sold Unit": "وحدة عدد السيارات المباعة",
+    "Satisfaction Rate Number": "نسبة الرضا",
+    "Satisfaction Rate Unit": "وحدة نسبة الرضا",
+    "Statistics": "الإحصائيات",
+    "Settings Updated Successfully.": "تم تحديث الإعدادات بنجاح.",
+    "Error! Not Authorized.": "خطأ! غير مصرح.",
+    "Error! Failed to update settings.": "خطأ! فشل تحديث الإعدادات.",
+    "Display the statistics section on the main landing page": "عرض قسم الإحصائيات في الصفحة الرئيسية",
+    "Show Active Bidders": "عرض المزايدين النشطين",
+    "Show Cars Sold": "عرض السيارات المباعة",
+    "Show Satisfaction Rate": "عرض نسبة الرضا",
+    "Show Homepage Statistics": "عرض إحصائيات الصفحة الرئيسية"
 }

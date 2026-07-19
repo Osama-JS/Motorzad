@@ -77,6 +77,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
                         <span>{{ __('Mobile Apps') }}</span>
                     </a>
+                    <a href="#" class="settings-nav-item" data-tab="stats">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>{{ __('Statistics') }}</span>
+                    </a>
                     <a href="#" class="settings-nav-item" data-tab="system">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                         <span>{{ __('System') }}</span>
@@ -113,6 +117,29 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('Site Description (English)') }}</label>
                         <textarea name="site_description_en" id="site_description_en" class="form-control" rows="2" dir="ltr">{{ \App\Models\Setting::get('site_description_en') }}</textarea>
+                    </div>
+
+                    <div class="row"><div class="col-md-6 mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Hero Title (Arabic)') }}</span>
+                            <x-translate-button from="#hero_title_ar" to="#hero_title_en" />
+                        </label>
+                        <input type="text" name="hero_title_ar" id="hero_title_ar" class="form-control" value="{{ \App\Models\Setting::get('hero_title_ar') }}">
+                    </div><div class="col-md-6 mb-3">
+                        <label class="form-label">{{ __('Hero Title (English)') }}</label>
+                        <input type="text" name="hero_title_en" id="hero_title_en" class="form-control" value="{{ \App\Models\Setting::get('hero_title_en') }}" dir="ltr">
+                    </div></div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center w-100">
+                            <span>{{ __('Hero Description (Arabic)') }}</span>
+                            <x-translate-button from="#hero_desc_ar" to="#hero_desc_en" />
+                        </label>
+                        <textarea name="hero_desc_ar" id="hero_desc_ar" class="form-control" rows="2">{{ \App\Models\Setting::get('hero_desc_ar') }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ __('Hero Description (English)') }}</label>
+                        <textarea name="hero_desc_en" id="hero_desc_en" class="form-control" rows="2" dir="ltr">{{ \App\Models\Setting::get('hero_desc_en') }}</textarea>
                     </div>
                     <div class="row"><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Email Address') }}</label>
@@ -204,47 +231,101 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Facebook') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Facebook') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_facebook" value="1" {{ \App\Models\Setting::get('show_facebook', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#1877f2;"><i class="fa-brands fa-facebook-f"></i></span>
                             <input type="url" name="facebook_url" class="form-control" value="{{ \App\Models\Setting::get('facebook_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Twitter (X)') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Twitter (X)') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_twitter" value="1" {{ \App\Models\Setting::get('show_twitter', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#1da1f2;"><i class="fa-brands fa-x-twitter"></i></span>
                             <input type="url" name="twitter_url" class="form-control" value="{{ \App\Models\Setting::get('twitter_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Instagram') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Instagram') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_instagram" value="1" {{ \App\Models\Setting::get('show_instagram', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#e4405f;"><i class="fa-brands fa-instagram"></i></span>
                             <input type="url" name="instagram_url" class="form-control" value="{{ \App\Models\Setting::get('instagram_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('LinkedIn') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('LinkedIn') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_linkedin" value="1" {{ \App\Models\Setting::get('show_linkedin', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#0a66c2;"><i class="fa-brands fa-linkedin-in"></i></span>
                             <input type="url" name="linkedin_url" class="form-control" value="{{ \App\Models\Setting::get('linkedin_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('TikTok') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('TikTok') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_tiktok" value="1" {{ \App\Models\Setting::get('show_tiktok', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#000000;"><i class="fa-brands fa-tiktok"></i></span>
                             <input type="url" name="tiktok_url" class="form-control" value="{{ \App\Models\Setting::get('tiktok_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Snapchat') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Snapchat') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_snapchat" value="1" {{ \App\Models\Setting::get('show_snapchat', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#FFFC00; text-shadow: 0px 0px 1px #000;"><i class="fa-brands fa-snapchat"></i></span>
                             <input type="url" name="snapchat_url" class="form-control" value="{{ \App\Models\Setting::get('snapchat_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('YouTube') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('YouTube') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_youtube" value="1" {{ \App\Models\Setting::get('show_youtube', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#FF0000;"><i class="fa-brands fa-youtube"></i></span>
                             <input type="url" name="youtube_url" class="form-control" value="{{ \App\Models\Setting::get('youtube_url') }}" dir="ltr"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('WhatsApp') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('WhatsApp') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_whatsapp" value="1" {{ \App\Models\Setting::get('show_whatsapp', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#25D366;"><i class="fa-brands fa-whatsapp"></i></span>
                             <input type="text" name="whatsapp_number" class="form-control" value="{{ \App\Models\Setting::get('whatsapp_number') }}" dir="ltr" placeholder="Example: +966500000000"></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Telegram') }}</label>
+                            <label class="form-label d-flex justify-content-between align-items-center w-100">
+                                <span>{{ __('Telegram') }}</span>
+                                <label class="switch switch-sm m-0">
+                                    <input type="checkbox" name="show_telegram" value="1" {{ \App\Models\Setting::get('show_telegram', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
                             <div class="input-with-icon"><span class="input-icon" style="color:#0088cc;"><i class="fa-brands fa-telegram"></i></span>
                             <input type="url" name="telegram_url" class="form-control" value="{{ \App\Models\Setting::get('telegram_url') }}" dir="ltr"></div>
                         </div>
@@ -269,6 +350,74 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('App Store Link (iOS)') }}</label>
                         <input type="url" name="ios_url" class="form-control" value="{{ \App\Models\Setting::get('ios_url') }}" dir="ltr">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Stats --}}
+        <div class="settings-panel" id="panel-stats">
+            <div class="card">
+                <div class="card-header"><h2>{{ __('Homepage Statistics') }}</h2></div>
+                <div class="card-body">
+                    <div class="toggle-row mb-4">
+                        <div class="toggle-info">
+                            <strong>{{ __('Show Homepage Statistics') }}</strong>
+                            <span>{{ __('Display the statistics section on the main landing page') }}</span>
+                        </div>
+                        <label class="switch"><input type="checkbox" name="show_homepage_stats" value="1" {{ \App\Models\Setting::get('show_homepage_stats', '1')=='1'?'checked':'' }}><span class="slider"></span></label>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2">
+                            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fa; border-radius:8px;">
+                                <div>
+                                    <strong>{{ __('Show Active Bidders') }}</strong>
+                                </div>
+                                <label class="switch mb-0"><input type="checkbox" name="show_stat_bidders" value="1" {{ \App\Models\Setting::get('show_stat_bidders', '1')=='1'?'checked':'' }}><span class="slider"></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Active Bidders Number') }}</label>
+                            <input type="text" name="stats_active_bidders" class="form-control" value="{{ \App\Models\Setting::get('stats_active_bidders', '5') }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Active Bidders Unit') }}</label>
+                            <input type="text" name="stats_active_bidders_unit" class="form-control" value="{{ \App\Models\Setting::get('stats_active_bidders_unit', 'K+') }}" dir="ltr">
+                        </div>
+                        
+                        <div class="col-12 mt-3 mb-2">
+                            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fa; border-radius:8px;">
+                                <div>
+                                    <strong>{{ __('Show Cars Sold') }}</strong>
+                                </div>
+                                <label class="switch mb-0"><input type="checkbox" name="show_stat_cars" value="1" {{ \App\Models\Setting::get('show_stat_cars', '1')=='1'?'checked':'' }}><span class="slider"></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Cars Sold Number') }}</label>
+                            <input type="text" name="stats_cars_sold" class="form-control" value="{{ \App\Models\Setting::get('stats_cars_sold', '12') }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Cars Sold Unit') }}</label>
+                            <input type="text" name="stats_cars_sold_unit" class="form-control" value="{{ \App\Models\Setting::get('stats_cars_sold_unit', 'K+') }}" dir="ltr">
+                        </div>
+                        
+                        <div class="col-12 mt-3 mb-2">
+                            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fa; border-radius:8px;">
+                                <div>
+                                    <strong>{{ __('Show Satisfaction Rate') }}</strong>
+                                </div>
+                                <label class="switch mb-0"><input type="checkbox" name="show_stat_satisfaction" value="1" {{ \App\Models\Setting::get('show_stat_satisfaction', '1')=='1'?'checked':'' }}><span class="slider"></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Satisfaction Rate Number') }}</label>
+                            <input type="text" name="stats_satisfaction" class="form-control" value="{{ \App\Models\Setting::get('stats_satisfaction', '98') }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Satisfaction Rate Unit') }}</label>
+                            <input type="text" name="stats_satisfaction_unit" class="form-control" value="{{ \App\Models\Setting::get('stats_satisfaction_unit', '%') }}" dir="ltr">
+                        </div>
                     </div>
                 </div>
             </div>
