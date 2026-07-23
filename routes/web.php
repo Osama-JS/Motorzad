@@ -93,6 +93,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
     Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
 
+    // Testimonials Management
+    Route::get('testimonials/data', [\App\Http\Controllers\Admin\TestimonialController::class, 'getData'])->name('testimonials.data');
+    Route::post('testimonials/{testimonial}/toggle-active', [\App\Http\Controllers\Admin\TestimonialController::class, 'toggleActive'])->name('testimonials.toggle-active');
+    Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
+
     // Wallets Management
     Route::get('wallets/data', [\App\Http\Controllers\Admin\WalletController::class, 'getData'])->name('wallets.data');
     Route::get('wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');

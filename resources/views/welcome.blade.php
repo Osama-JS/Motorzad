@@ -216,16 +216,14 @@
             <h2 class="section-title">{{ __('What our') }} <span class="highlight">{{ __('customers say') }}</span></h2>
         </div>
         <div class="testimonials-grid">
-            @php $reviews = [
-                ['name'=> app()->getLocale()=='ar'?'أحمد الشمري':'Ahmed Al-Shamri','role'=>__('Distinguished Bidder'),'text'=>__('Amazing experience! I got my car at a great price and the process was very smooth'),'init'=> app()->getLocale()=='ar'?'أ':'A'],
-                ['name'=> app()->getLocale()=='ar'?'سارة القحطاني':'Sara Al-Qahtani','role'=>__('New Customer'),'text'=>__('The platform is easy to use and the support team is very helpful. I highly recommend it'),'init'=> app()->getLocale()=='ar'?'س':'S'],
-                ['name'=> app()->getLocale()=='ar'?'محمد العتيبي':'Mohammed Al-Otaibi','role'=>__('Car Dealer'),'text'=>__('Motorzad changed the way of selling cars. Excellent results and high transparency'),'init'=> app()->getLocale()=='ar'?'م':'M']
-            ]; @endphp
+            @php 
+                $reviews = \App\Models\Testimonial::where('is_active', true)->latest()->take(6)->get();
+            @endphp
             @foreach($reviews as $r)
             <div class="testimonial-card animate-on-scroll">
                 <div class="testimonial-stars">@for($s=0;$s<5;$s++)<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>@endfor</div>
-                <p class="testimonial-text">"{{ $r['text'] }}"</p>
-                <div class="testimonial-author"><div class="testimonial-avatar">{{ $r['init'] }}</div><div><div class="testimonial-name">{{ $r['name'] }}</div><div class="testimonial-role">{{ $r['role'] }}</div></div></div>
+                <p class="testimonial-text">"{{ app()->getLocale() == 'ar' ? $r->text_ar : $r->text_en }}"</p>
+                <div class="testimonial-author"><div class="testimonial-avatar">{{ app()->getLocale() == 'ar' ? ($r->avatar_init ?: mb_substr($r->name_ar, 0, 1)) : ($r->avatar_init_en ?: mb_substr($r->name_en, 0, 1)) }}</div><div><div class="testimonial-name">{{ app()->getLocale() == 'ar' ? $r->name_ar : $r->name_en }}</div><div class="testimonial-role">{{ app()->getLocale() == 'ar' ? $r->role_ar : $r->role_en }}</div></div></div>
             </div>
             @endforeach
         </div>
