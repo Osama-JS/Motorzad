@@ -39,6 +39,12 @@ Route::prefix('general')->group(function () {
     Route::get('search', [\App\Http\Controllers\Api\GeneralController::class, 'search']);
 });
 
+// ─── Public Auctions ─────────────────────────────────────────────────────────
+Route::prefix('auctions')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\GeneralController::class, 'auctions']);
+    Route::get('/{auction}', [\App\Http\Controllers\Api\GeneralController::class, 'showAuction']);
+});
+
 // ─── Authenticated Routes ──────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -104,11 +110,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Auctions
     Route::prefix('auctions')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\AuctionController::class, 'index']);
         Route::post('/', [\App\Http\Controllers\Api\AuctionController::class, 'store']);
         Route::get('/my', [\App\Http\Controllers\Api\AuctionController::class, 'myAuctions']);
         Route::get('/watchlist', [\App\Http\Controllers\Api\AuctionController::class, 'watchlist']);
-        Route::get('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'show']);
         Route::put('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'update']);
         Route::delete('/{auction}', [\App\Http\Controllers\Api\AuctionController::class, 'destroy']);
         Route::post('/{auction}/images', [\App\Http\Controllers\Api\AuctionController::class, 'uploadImages']);

@@ -355,7 +355,7 @@ class GeneralController extends Controller
         $query = Auction::with(['vehicle.images', 'highestBid'])
             ->withCount('bids');
 
-        // ── Status Filter ─────────────────────────────────────────────────
+        // ── Filters ──────────────────────────────────────────────────────
         if ($request->filled('status')) {
             $statuses = explode(',', $request->status);
             $allowed = ['live', 'scheduled', 'ended', 'sold'];
@@ -364,15 +364,83 @@ class GeneralController extends Controller
                 $query->whereIn('status', $statuses);
             }
         } else {
+            // Default: show live and scheduled only
             $query->whereIn('status', ['live', 'scheduled']);
         }
 
-        // Default sorting
-        $query->latest();
+        if ($request->filled('featured')) {
+            $query->where('is_featured', true);
+        }
 
-        // ── Pagination ───────────────────────────────────────────────────
+        // Search in title (auction), make, and model (vehicle)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title_ar', 'like', '%' . $search . '%')
+                  ->orWhere('title_en', 'like', '%' . $search . '%')
+                  ->orWhereHas('vehicle', function ($vq) use ($search) {
+                      $vq->where('make_ar', 'like', '%' . $search . '%')
+                         ->orWhere('make_en', 'like', '%' . $search . '%')
+                         ->orWhere('model_ar', 'like', '%' . $search . '%')
+                         ->orWhere('model_en', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        if ($request->filled('make')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where(fn ($sub) => $sub->where('make_ar', 'like', '%' . $request->make . '%')->orWhere('make_en', 'like', '%' . $request->make . '%')));
+        }
+
+        if ($request->filled('location')) {
+            $query->where('location', 'like', '%' . $request->location . '%');
+        }
+
+        if ($request->filled('condition')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('condition', $request->condition));
+        }
+
+        if ($request->filled('year_min')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('year', '>=', $request->year_min));
+        }
+
+        if ($request->filled('year_max')) {
+            $query->whereHas('vehicle', fn ($q) => $q->where('year', '<=', $request->year_max));
+        }
+
+        if ($request->filled('price_min')) {
+            $query->where('start_price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('start_price', '<=', $request->price_max);
+        }
+
+        // ── Sorting ────────────────────────────────────────────────────────
+        $sort = $request->input('sort', 'end_time');
+        $direction = $request->input('direction', 'asc');
+        
+        // Ensure sort column is valid to prevent SQL injection or errors
+        $allowedSorts = ['end_time', 'start_price', 'current_price', 'created_at'];
+        if (in_array($sort, $allowedSorts)) {
+            $query->orderBy($sort, $direction === 'desc' ? 'desc' : 'asc');
+        } else {
+            $query->latest();
+        }
+
         $perPage = min((int) $request->input('per_page', 12), 50);
         $auctions = $query->paginate($perPage);
+
+        // Attach user context if authenticated (Sanctum will not throw if no token)
+        $userId = auth('sanctum')->id();
+        if ($userId) {
+            $watchedIds = \App\Models\AuctionWatchlist::where('user_id', $userId)
+                ->pluck('auction_id')->toArray();
+
+            $auctions->getCollection()->transform(function ($auction) use ($watchedIds) {
+                $auction->is_watching = in_array($auction->id, $watchedIds);
+                return $auction;
+            });
+        }
 
         return response()->json([
             'success' => true,
@@ -383,6 +451,60 @@ class GeneralController extends Controller
                 'total'        => $auctions->total(),
                 'per_page'     => $auctions->perPage(),
             ]
+        ]);
+    }
+
+    /**
+     * Get Auction Details (Public).
+     */
+    #[OA\Get(
+        path: "/api/auctions/{auction}",
+        summary: "Get Auction Details",
+        description: "Returns details of a specific auction.",
+        tags: ["General"],
+        parameters: [
+            new OA\Parameter(name: "auction", in: "path", required: true, description: "Auction ID", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Auction Not Found"
+            )
+        ]
+    )]
+    public function showAuction(Request $request, Auction $auction): JsonResponse
+    {
+        $auction->load(['vehicle.images', 'vehicle.primaryImage', 'winner', 'highestBid', 'bids' => function ($query) {
+            $query->where('status', 'active')->with('user:id,first_name,last_name,profile_photo');
+        }]);
+        
+        $auction->increment('views_count');
+
+        // Check if a user is authenticated (optional) to attach context
+        $userId = auth('sanctum')->id();
+        if ($userId) {
+            $auction->is_watching = \App\Models\AuctionWatchlist::where('auction_id', $auction->id)
+                ->where('user_id', $userId)->exists();
+            $auction->user_highest_bid = $auction->bids()
+                ->where('user_id', $userId)
+                ->max('amount');
+            $auction->has_deposited = $auction->deposits()
+                ->where('user_id', $userId)
+                ->where('status', 'held')
+                ->exists();
+        } else {
+            $auction->is_watching = false;
+            $auction->user_highest_bid = null;
+            $auction->has_deposited = false;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => new AuctionResource($auction)
         ]);
     }
 

@@ -19,7 +19,7 @@ class AuctionController extends Controller
      * List auctions with filtering & pagination.
      */
     #[OA\Get(
-        path: '/api/auctions',
+        path: '/api/deprecated/auctions',
         summary: 'Get Available Auctions',
         description: 'Returns a paginated list of available auctions (live and scheduled by default). Requires Bearer Token.',
         security: [['bearerAuth' => []]],
@@ -211,7 +211,7 @@ class AuctionController extends Controller
      * Get auction details.
      */
     #[OA\Get(
-        path: '/api/auctions/{auction}',
+        path: '/api/deprecated/auctions/{auction}',
         summary: 'Get Auction Details',
         description: 'Returns the full details of a specific auction. Optionally uses Bearer Token to return user-specific context (is_watching, user_highest_bid).',
         security: [['bearerAuth' => []]],

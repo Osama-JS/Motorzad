@@ -23,14 +23,14 @@
         }
     ],
     "paths": {
-        "/api/auctions": {
+        "/api/deprecated/auctions": {
             "get": {
                 "tags": [
                     "Auctions"
                 ],
                 "summary": "Get Available Auctions",
                 "description": "Returns a paginated list of available auctions (live and scheduled by default). Requires Bearer Token.",
-                "operationId": "b0e23ed4d0fc72297ab86eb1e1203358",
+                "operationId": "c22a8f23e0f8a9b42d2057b358346ec5",
                 "parameters": [
                     {
                         "name": "status",
@@ -220,14 +220,14 @@
                 ]
             }
         },
-        "/api/auctions/{auction}": {
+        "/api/deprecated/auctions/{auction}": {
             "get": {
                 "tags": [
                     "Auctions"
                 ],
                 "summary": "Get Auction Details",
                 "description": "Returns the full details of a specific auction. Optionally uses Bearer Token to return user-specific context (is_watching, user_highest_bid).",
-                "operationId": "d935433be127377352306c4ef52a35c8",
+                "operationId": "666efd69c50063d4ad6dba4d49ab1b10",
                 "parameters": [
                     {
                         "name": "auction",
@@ -2502,6 +2502,35 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/auctions/{auction}": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Auction Details",
+                "description": "Returns details of a specific auction.",
+                "operationId": "52cf95375dc3341cc613430a1f379de6",
+                "parameters": [
+                    {
+                        "name": "auction",
+                        "in": "path",
+                        "description": "Auction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Auction Not Found"
                     }
                 }
             }
