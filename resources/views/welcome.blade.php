@@ -117,12 +117,15 @@
             <p class="section-desc">{{ __('We provide everything you need to participate in car auctions easily and securely') }}</p>
         </div>
         <div class="features-grid">
-            <div class="feature-card animate-on-scroll"><div class="feature-icon red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>{{ __('Ultimate Security') }}</h3><p>{{ __('All transactions are protected and encrypted with the highest security standards') }}</p></div>
-            <div class="feature-card animate-on-scroll"><div class="feature-icon gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>{{ __('Instant Auctions') }}</h3><p>{{ __('Follow auctions moment by moment with live price and offer updates') }}</p></div>
-            <div class="feature-card animate-on-scroll"><div class="feature-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><h3>{{ __('Smart Interface') }}</h3><p>{{ __('Modern and user-friendly design that works seamlessly on all devices') }}</p></div>
-            <div class="feature-card animate-on-scroll"><div class="feature-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h3>{{ __('Full Verification') }}</h3><p>{{ __('Integrated KYC system to verify user identity and ensure transaction credibility') }}</p></div>
-            <div class="feature-card animate-on-scroll"><div class="feature-icon red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>{{ __('Secure Payment') }}</h3><p>{{ __('Direct link with your bank accounts to facilitate payment and receiving') }}</p></div>
-            <div class="feature-card animate-on-scroll"><div class="feature-icon gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>{{ __('24/7 Support') }}</h3><p>{{ __('Specialized support team ready to help you around the clock') }}</p></div>
+            @foreach($features as $feature)
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon {{ $feature->color_class }}">
+                    {!! $feature->icon !!}
+                </div>
+                <h3>{{ app()->getLocale() == 'ar' ? $feature->title_ar : $feature->title_en }}</h3>
+                <p>{{ app()->getLocale() == 'ar' ? $feature->description_ar : $feature->description_en }}</p>
+            </div>
+            @endforeach
         </div>
     </div>
 </section>

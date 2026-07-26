@@ -13,8 +13,13 @@ Route::get('/', function () {
         ->get();
 
     $faqs = \App\Models\Faq::where('is_active', true)->latest()->get();
+    
+    $features = [];
+    if (\Illuminate\Support\Facades\Schema::hasTable('features')) {
+        $features = \App\Models\Feature::where('is_active', true)->orderBy('sort_order', 'asc')->get();
+    }
 
-    return view('welcome', compact('featuredAuctions', 'faqs'));
+    return view('welcome', compact('featuredAuctions', 'faqs', 'features'));
 });
 
 // Mobile Developer Documentation
@@ -92,6 +97,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('faqs/data', [\App\Http\Controllers\Admin\FaqController::class, 'getData'])->name('faqs.data');
     Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
     Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
+
+    // Features Management
+    Route::get('features/data', [\App\Http\Controllers\Admin\FeatureController::class, 'getData'])->name('features.data');
+    Route::post('features/{feature}/toggle-active', [\App\Http\Controllers\Admin\FeatureController::class, 'toggleActive'])->name('features.toggle-active');
+    Route::resource('features', \App\Http\Controllers\Admin\FeatureController::class);
 
     // Testimonials Management
     Route::get('testimonials/data', [\App\Http\Controllers\Admin\TestimonialController::class, 'getData'])->name('testimonials.data');
