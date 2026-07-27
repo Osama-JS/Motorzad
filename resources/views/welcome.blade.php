@@ -35,7 +35,7 @@
             <div class="nav-auth">
                 @if(Route::has('login'))
                     @auth
-                        <a href="{{ url('/') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary">{{ __('Control Panel') }}</a>
                     @else
                         <a href="{{ route('login') }}" class="btn btn-ghost">{{ __('Log In') }}</a>
                         @if(Route::has('register'))
