@@ -310,9 +310,64 @@
     [dir="rtl"] .premium-featured-card {
         transform: rotateY(8deg) rotateX(4deg) translateY(-10px);
     }
-    [dir="rtl"] .premium-featured-card:hover {
-        transform: rotateY(0) rotateX(0) translateY(-15px) scale(1.02);
+    
+    /* Removed normal hover transform for premium card so JS can take over */
+    
+    /* Floating Elements */
+    .floating-badge {
+        position: absolute;
+        background: rgba(var(--bg-card-rgb, 20, 25, 35), 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 8px 16px;
+        border-radius: 20px;
+        color: var(--text);
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 15;
+        animation: float 6s ease-in-out infinite;
+        pointer-events: none;
     }
+    
+    .floating-badge svg {
+        width: 18px;
+        height: 18px;
+        color: var(--red);
+    }
+    
+    .pulse-small {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(229,62,62,0.7);
+        animation: pulse-red 1.5s infinite;
+    }
+    
+    @keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229,62,62,0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(229,62,62,0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229,62,62,0); }
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .badge-1 { top: 10%; right: -10%; animation-delay: 0s; }
+    .badge-2 { bottom: 30%; left: -15%; animation-delay: 1.5s; }
+    .badge-3 { bottom: 5%; right: -5%; animation-delay: 3s; }
+    
+    [dir="rtl"] .badge-1 { right: auto; left: -10%; }
+    [dir="rtl"] .badge-2 { left: auto; right: -15%; }
+    [dir="rtl"] .badge-3 { right: auto; left: -5%; }
 
     @media (max-width: 992px) {
         .hero-featured-auction {
@@ -323,6 +378,10 @@
             transform: none !important;
             max-width: 100%;
         }
+        .floating-badge {
+            display: none;
+        }
+
     }
     </style>
 </head>
@@ -418,9 +477,22 @@
         </div>
         
         <!-- Hero Featured Auction Card -->
-        <div class="hero-featured-auction">
+        <div class="hero-featured-auction" id="heroFeaturedAuction">
             @if(isset($heroAuction) && $heroAuction)
-                <div class="premium-featured-card">
+                <!-- Floating Elements -->
+                <div class="floating-badge badge-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>{{ number_format($heroAuction->current_price ?? $heroAuction->start_price) }}</span>
+                </div>
+                <div class="floating-badge badge-2">
+                    <span class="pulse-small"></span> {{ $heroAuction->bids_count ?? 0 }} {{ __('Bids') }}
+                </div>
+                <div class="floating-badge badge-3">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{{ __('Ending Soon') }}</span>
+                </div>
+                
+                <div class="premium-featured-card" id="premiumCard">
                     <div class="pfc-glow"></div>
                     <div class="pfc-badge">
                         <span class="pfc-pulse"></span> {{ __('Featured') }}
@@ -435,12 +507,12 @@
                         <div class="pfc-stats-row">
                             <div class="pfc-stat-box pfc-price-box">
                                 <span class="pfc-label">{{ __('Current Bid') }}</span>
-                                <span class="pfc-value">{{ number_format($heroAuction->highest_bid ?? $heroAuction->starting_price) }} <small>{{ __('SAR') }}</small></span>
+                                <span class="pfc-value">{{ number_format($heroAuction->current_price ?? $heroAuction->start_price) }} <small>{{ __('SAR') }}</small></span>
                             </div>
                             <div class="pfc-divider"></div>
                             <div class="pfc-stat-box pfc-time-box">
                                 <span class="pfc-label">{{ __('Ends In') }}</span>
-                                <span class="pfc-value countdown" data-end="{{ $heroAuction->end_time }}">--:--:--</span>
+                                <span class="pfc-value countdown-timer" data-end-time="{{ $heroAuction->end_time ? $heroAuction->end_time->format('Y-m-d\TH:i:s') : '' }}">--:--:--</span>
                             </div>
                         </div>
                         
@@ -736,6 +808,34 @@
     window.addEventListener('resize', () => {
         if (window.innerWidth > 1024) closeMenu();
     });
+    
+    // === 3D Parallax Effect for Featured Card ===
+    const heroWrapper = document.getElementById('heroFeaturedAuction');
+    const premiumCard = document.getElementById('premiumCard');
+    
+    if(heroWrapper && premiumCard && window.innerWidth > 992) {
+        heroWrapper.addEventListener('mousemove', (e) => {
+            const rect = heroWrapper.getBoundingClientRect();
+            // Calculate mouse position relative to the center of the card (-1 to 1)
+            const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+            const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+            
+            // Apply rotation (multiply by max degrees)
+            const rotateY = x * 10; // max 10deg rotation
+            const rotateX = -y * 10;
+            
+            premiumCard.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) translateY(-15px) scale(1.02)`;
+            premiumCard.style.transition = 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        });
+        
+        heroWrapper.addEventListener('mouseleave', () => {
+            // Reset to default
+            const isRtl = document.documentElement.dir === 'rtl';
+            const defaultY = isRtl ? 8 : -8;
+            premiumCard.style.transform = `rotateY(${defaultY}deg) rotateX(4deg) translateY(-10px)`;
+            premiumCard.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        });
+    }
 
     // === Countdown timers ===
     document.querySelectorAll('.countdown-timer').forEach(el => {
