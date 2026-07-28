@@ -22,9 +22,9 @@ Route::get('/', function () {
     // Get Hero Auction
     $heroAuctionId = \App\Models\Setting::get('hero_auction_id');
     if ($heroAuctionId) {
-        $heroAuction = \App\Models\Auction::with(['car.make', 'car.model', 'highestBid'])->find($heroAuctionId);
+        $heroAuction = \App\Models\Auction::with(['vehicle.make', 'vehicle.model', 'highestBid'])->find($heroAuctionId);
     } else {
-        $heroAuction = \App\Models\Auction::with(['car.make', 'car.model', 'highestBid'])
+        $heroAuction = \App\Models\Auction::with(['vehicle.make', 'vehicle.model', 'highestBid'])
             ->live()
             ->featured()
             ->latest()
