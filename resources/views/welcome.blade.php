@@ -12,7 +12,6 @@
             if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
         })();
     </script>
-    @push('styles')
     <style>
     /* Premium Hero Featured Auction Card */
     .hero-featured-auction {
@@ -326,7 +325,6 @@
         }
     }
     </style>
-    @endpush
 </head>
 <body>
 
