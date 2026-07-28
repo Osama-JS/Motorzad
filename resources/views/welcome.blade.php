@@ -14,62 +14,111 @@
     </script>
     @push('styles')
     <style>
-    /* Hero Featured Auction Card */
+    /* Premium Hero Featured Auction Card */
     .hero-featured-auction {
         display: flex;
         justify-content: center;
         align-items: center;
-        perspective: 1000px;
+        perspective: 1200px;
         position: relative;
         z-index: 2;
-    }
-
-    .featured-card {
-        background: var(--bg-card);
-        border: 1px solid rgba(229,62,62,0.3);
-        border-radius: var(--radius-xl);
-        padding: 1.5rem;
         width: 100%;
-        max-width: 420px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px rgba(229,62,62,0.1), 0 0 40px rgba(229,62,62,0.15);
-        position: relative;
-        transform: rotateY(-5deg) translateY(-10px);
-        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s;
-        overflow: hidden;
     }
 
-    .featured-card::before {
+    .premium-featured-card {
+        background: rgba(var(--bg-card-rgb, 20, 25, 35), 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 440px;
+        position: relative;
+        transform: rotateY(-8deg) rotateX(4deg) translateY(-10px);
+        transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+            0 0 0 1px rgba(229, 62, 62, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    /* Fallback for rgb vars if not defined */
+    :root {
+        --bg-card-rgb: 255, 255, 255;
+    }
+    html[data-theme="dark"] {
+        --bg-card-rgb: 20, 25, 35;
+    }
+
+    .premium-featured-card::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-        pointer-events: none;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+        opacity: 0;
+        transition: opacity 0.6s;
         z-index: 10;
+        pointer-events: none;
     }
 
-    .featured-card:hover {
-        transform: rotateY(0) translateY(-15px);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(229,62,62,0.2), 0 0 60px rgba(229,62,62,0.25);
+    .premium-featured-card:hover {
+        transform: rotateY(0) rotateX(0) translateY(-15px) scale(1.02);
+        box-shadow: 
+            0 35px 65px -15px rgba(229, 62, 62, 0.25), 
+            0 0 0 1px rgba(229, 62, 62, 0.4),
+            0 0 40px rgba(229, 62, 62, 0.15);
     }
 
-    .fc-badge {
+    .premium-featured-card:hover::before {
+        opacity: 1;
+    }
+
+    .pfc-glow {
         position: absolute;
-        top: 1.5rem;
-        left: 1.5rem;
-        background: var(--red);
-        color: #fff;
-        padding: 0.4rem 1rem;
-        border-radius: 100px;
-        font-size: 0.85rem;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 50% 50%, rgba(229, 62, 62, 0.15), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.6s;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .premium-featured-card:hover .pfc-glow {
+        opacity: 1;
+        animation: rotate-glow 10s linear infinite;
+    }
+
+    @keyframes rotate-glow {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .pfc-badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(229, 62, 62, 0.95);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 0.8rem;
         font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
         z-index: 20;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 10px rgba(229,62,62,0.4);
+        gap: 8px;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(229, 62, 62, 0.4);
     }
 
-    .fc-badge .pulse {
+    .pfc-pulse {
         width: 8px;
         height: 8px;
         background: #fff;
@@ -79,91 +128,201 @@
         animation: pulse-white 1.5s infinite;
     }
 
-    @keyframes pulse-white {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-    }
-
-    .fc-image {
+    .pfc-image-wrapper {
         width: 100%;
-        height: 220px;
-        border-radius: var(--radius);
-        overflow: hidden;
-        margin-bottom: 1.5rem;
+        height: 260px;
         position: relative;
-        background: var(--bg-hover);
+        overflow: hidden;
+        border-radius: 24px 24px 0 0;
+        z-index: 5;
     }
 
-    .fc-image img {
+    .pfc-image-wrapper img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    .featured-card:hover .fc-image img {
-        transform: scale(1.05);
+    .premium-featured-card:hover .pfc-image-wrapper img {
+        transform: scale(1.08) translateY(-5px);
     }
 
-    .fc-body h3 {
-        font-size: 1.4rem;
+    .pfc-overlay {
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 60%;
+        background: linear-gradient(to top, var(--bg-card) 0%, transparent 100%);
+    }
+    html[data-theme="dark"] .pfc-overlay {
+        background: linear-gradient(to top, rgba(20, 25, 35, 1) 0%, transparent 100%);
+    }
+
+    .pfc-content {
+        padding: 0 24px 24px;
+        position: relative;
+        z-index: 10;
+        margin-top: -30px;
+    }
+
+    .pfc-title {
+        font-size: 1.6rem;
         font-weight: 800;
         color: var(--text);
-        margin-bottom: 1.25rem;
-        line-height: 1.3;
+        margin-bottom: 20px;
+        line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .pfc-title span {
+        font-weight: 400;
+        color: var(--text-sec);
+        font-size: 1.2rem;
     }
 
-    .fc-details {
+    .pfc-stats-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: var(--bg-body);
-        padding: 1rem;
-        border-radius: var(--radius);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.04);
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(128, 128, 128, 0.1);
+    }
+    
+    html[data-theme="dark"] .pfc-stats-row {
+        background: rgba(255, 255, 255, 0.03);
     }
 
-    .fc-details .label {
-        display: block;
-        font-size: 0.85rem;
+    .pfc-divider {
+        width: 1px;
+        height: 40px;
+        background: rgba(128, 128, 128, 0.2);
+    }
+
+    .pfc-stat-box {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    
+    .pfc-time-box {
+        text-align: right;
+    }
+    
+    [dir="rtl"] .pfc-time-box {
+        text-align: left;
+    }
+
+    .pfc-label {
+        font-size: 0.8rem;
         color: var(--text-sec);
-        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+        font-weight: 600;
     }
 
-    .fc-details .value {
-        display: block;
-        font-size: 1.2rem;
-        font-weight: 700;
+    .pfc-value {
+        font-size: 1.4rem;
+        font-weight: 800;
         color: var(--text);
     }
-
-    .fc-details .value.countdown {
+    
+    .pfc-price-box .pfc-value {
         color: var(--red);
-        font-variant-numeric: tabular-nums;
+    }
+    
+    .pfc-price-box small {
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0.8;
     }
 
-    [dir="rtl"] .fc-badge {
+    .pfc-time-box .pfc-value {
+        font-variant-numeric: tabular-nums;
+        font-family: 'Courier New', Courier, monospace;
+        letter-spacing: -1px;
+    }
+
+    .pfc-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        background: var(--red);
+        color: white !important;
+        padding: 16px 24px;
+        border-radius: 14px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .pfc-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .pfc-action-btn:hover {
+        background: #c53030;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(229, 62, 62, 0.3);
+    }
+
+    .pfc-action-btn:hover::before {
+        left: 100%;
+    }
+    
+    .pfc-action-btn svg {
+        transition: transform 0.3s ease;
+    }
+    
+    .pfc-action-btn:hover svg {
+        transform: translateX(4px);
+    }
+    
+    [dir="rtl"] .pfc-action-btn:hover svg {
+        transform: translateX(-4px);
+    }
+    
+    [dir="rtl"] .pfc-action-btn svg {
+        transform: scaleX(-1);
+    }
+    [dir="rtl"] .pfc-action-btn:hover svg {
+        transform: scaleX(-1) translateX(4px);
+    }
+
+    [dir="rtl"] .pfc-badge {
         left: auto;
-        right: 1.5rem;
+        right: 20px;
     }
-    [dir="rtl"] .featured-card {
-        transform: rotateY(5deg) translateY(-10px);
+    
+    [dir="rtl"] .premium-featured-card {
+        transform: rotateY(8deg) rotateX(4deg) translateY(-10px);
     }
-    [dir="rtl"] .featured-card:hover {
-        transform: rotateY(0) translateY(-15px);
+    [dir="rtl"] .premium-featured-card:hover {
+        transform: rotateY(0) rotateX(0) translateY(-15px) scale(1.02);
     }
 
     @media (max-width: 992px) {
         .hero-featured-auction {
             margin-top: 3rem;
+            perspective: none;
         }
-        .featured-card {
-            transform: none;
-        }
-        [dir="rtl"] .featured-card {
-            transform: none;
+        .premium-featured-card {
+            transform: none !important;
+            max-width: 100%;
         }
     }
     </style>
@@ -263,24 +422,34 @@
         <!-- Hero Featured Auction Card -->
         <div class="hero-featured-auction">
             @if(isset($heroAuction) && $heroAuction)
-                <div class="featured-card">
-                    <div class="fc-badge">{{ __('Featured') }} <span class="pulse"></span></div>
-                    <div class="fc-image">
-                        <img src="{{ $heroAuction->vehicle->primary_image_url ?? asset('images/placeholder-car.jpg') }}" alt="{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }}">
+                <div class="premium-featured-card">
+                    <div class="pfc-glow"></div>
+                    <div class="pfc-badge">
+                        <span class="pfc-pulse"></span> {{ __('Featured') }}
                     </div>
-                    <div class="fc-body">
-                        <h3>{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }} ({{ $heroAuction->vehicle->year ?? '' }})</h3>
-                        <div class="fc-details">
-                            <div class="fc-price">
-                                <span class="label">{{ __('Current Bid') }}</span>
-                                <span class="value">{{ number_format($heroAuction->highest_bid ?? $heroAuction->starting_price) }} {{ __('SAR') }}</span>
+                    <div class="pfc-image-wrapper">
+                        <img src="{{ $heroAuction->vehicle->primary_image_url ?? asset('images/placeholder-car.jpg') }}" alt="{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }}">
+                        <div class="pfc-overlay"></div>
+                    </div>
+                    <div class="pfc-content">
+                        <h3 class="pfc-title">{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }} <span>({{ $heroAuction->vehicle->year ?? '' }})</span></h3>
+                        
+                        <div class="pfc-stats-row">
+                            <div class="pfc-stat-box pfc-price-box">
+                                <span class="pfc-label">{{ __('Current Bid') }}</span>
+                                <span class="pfc-value">{{ number_format($heroAuction->highest_bid ?? $heroAuction->starting_price) }} <small>{{ __('SAR') }}</small></span>
                             </div>
-                            <div class="fc-time">
-                                <span class="label">{{ __('Ends In') }}</span>
-                                <span class="value countdown" data-end="{{ $heroAuction->end_time }}">--:--:--</span>
+                            <div class="pfc-divider"></div>
+                            <div class="pfc-stat-box pfc-time-box">
+                                <span class="pfc-label">{{ __('Ends In') }}</span>
+                                <span class="pfc-value countdown" data-end="{{ $heroAuction->end_time }}">--:--:--</span>
                             </div>
                         </div>
-                        <a href="{{ route('frontend.auctions.show', $heroAuction->id) }}" class="btn btn-primary btn-block mt-3">{{ __('Bid Now') }}</a>
+                        
+                        <a href="{{ route('frontend.auctions.show', $heroAuction->id) }}" class="pfc-action-btn">
+                            <span>{{ __('Bid Now') }}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
                     </div>
                 </div>
             @else
