@@ -20,11 +20,12 @@
 /* ─── Hero Banner ─── */
 .auctions-hero {
     position: relative;
-    padding: 5rem 2rem 4rem;
-    text-align: center;
+    padding: 2.5rem 1rem 2rem;
     overflow: hidden;
-    margin-bottom: 3rem;
-    border-radius: var(--radius-xl);
+    margin-bottom: 2rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
     background:
         radial-gradient(ellipse 80% 60% at 50% 0%, rgba(229,62,62,0.08) 0%, transparent 70%),
         radial-gradient(ellipse 60% 50% at 80% 100%, rgba(245,158,11,0.05) 0%, transparent 70%),
@@ -78,19 +79,32 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
+.hero-content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    text-align: start;
+}
+.hero-text-side {
+    flex: 1;
+    max-width: 600px;
+}
+.hero-stats-side {
+    flex-shrink: 0;
+}
 .hero-sub {
     max-width: 560px;
-    margin: 0 auto;
     font-size: 1.05rem;
     color: var(--text-sec);
     line-height: 1.7;
+    margin: 0;
 }
 /* Floating stats bar inside hero */
 .hero-stats {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 2.5rem;
-    margin-top: 2.5rem;
     flex-wrap: wrap;
 }
 .hero-stat {
@@ -559,6 +573,21 @@ html[dir="rtl"] .search-wrap input { padding: 0.8rem 2.75rem 0.8rem 1rem; }
     /* Collapsible sidebar on tablet */
     .sidebar-collapse-btn { display: flex; }
     .sidebar-body.collapsed { display: none; }
+    
+    .hero-content-wrapper {
+        flex-direction: column;
+        text-align: center;
+    }
+    .hero-text-side {
+        max-width: 100%;
+    }
+    .hero-stats {
+        justify-content: center;
+        margin-top: 2rem !important;
+    }
+    .hero-sub {
+        margin: 0 auto;
+    }
 }
 @media (min-width: 1025px) {
     .sidebar-collapse-btn { display: none; }
@@ -607,25 +636,126 @@ html[dir="rtl"] .search-wrap input { padding: 0.8rem 2.75rem 0.8rem 1rem; }
     font-size: 0.88rem;
 }
 .demo-banner svg { color: var(--gold); flex-shrink: 0; }
+/* ─── Join Us CTA ─── */
+.join-cta-section {
+    padding: 2rem 1rem 4rem;
+    margin-top: 2rem;
+}
+.join-cta-card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(229,62,62,0.05) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.join-cta-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070&auto=format&fit=crop') center/cover;
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+}
+[data-theme="light"] .join-cta-card::before {
+    opacity: 0.15;
+}
+.cta-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+}
+.cta-content h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+.cta-content p {
+    font-size: 1.1rem;
+    color: var(--text-sec);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.btn-cta-primary, .btn-cta-secondary {
+    padding: 0.9rem 2.5rem;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-cta-primary {
+    background: var(--red);
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(229,62,62,0.3);
+    border: 1px solid var(--red);
+}
+.btn-cta-primary:hover {
+    background: var(--red-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229,62,62,0.4);
+}
+.btn-cta-secondary {
+    background: transparent;
+    color: var(--text) !important;
+    border: 1px solid var(--border-hover);
+}
+.btn-cta-secondary:hover {
+    border-color: var(--text);
+    background: var(--bg-hover);
+}
+@media (max-width: 768px) {
+    .join-cta-card {
+        padding: 2rem 1.5rem;
+    }
+    .cta-content h2 {
+        font-size: 1.8rem;
+    }
+    .btn-cta-primary, .btn-cta-secondary {
+        width: 100%;
+    }
+}
 </style>
 @endpush
 
 @section('content')
 <main class="auctions-page">
-    <div class="section-container">
-
-        <!-- ═══ Hero ═══ -->
-        <div class="auctions-hero">
-            <div class="hero-badge"><span class="dot"></span> {{ __('Explore Auctions') }}</div>
-            <h1 class="hero-title">{{ __('Find Your') }} <span class="accent">{{ __('Dream Car') }}</span></h1>
-            <p class="hero-sub">{{ __('Browse live, upcoming, and ended auctions — all in one place. Transparent bidding. Premium vehicles. Real-time updates.') }}</p>
-            <div class="hero-stats">
-                <div class="hero-stat"><div class="num" data-count="{{ $totalLive ?? 12 }}">0</div><div class="lbl">{{ __('Live Now') }}</div></div>
-                <div class="hero-stat"><div class="num" data-count="{{ $totalUpcoming ?? 24 }}">0</div><div class="lbl">{{ __('Upcoming') }}</div></div>
-                <div class="hero-stat"><div class="num" data-count="{{ $totalBids ?? 1580 }}">0</div><div class="lbl">{{ __('Total Bids') }}</div></div>
+    <!-- ═══ Hero (Full Width) ═══ -->
+    <div class="auctions-hero">
+        <div class="section-container">
+            <div class="hero-content-wrapper">
+                <div class="hero-text-side">
+                    <div class="hero-badge"><span class="dot"></span> {{ __('Explore Auctions') }}</div>
+                    <h1 class="hero-title">{{ __('Find Your') }} <span class="accent">{{ __('Dream Car') }}</span></h1>
+                    <p class="hero-sub">{{ __('Browse live, upcoming, and ended auctions — all in one place. Transparent bidding. Premium vehicles. Real-time updates.') }}</p>
+                </div>
+                <div class="hero-stats-side">
+                    <div class="hero-stats">
+                        <div class="hero-stat"><div class="num" data-count="{{ $totalLive ?? 12 }}">0</div><div class="lbl">{{ __('Live Now') }}</div></div>
+                        <div class="hero-stat"><div class="num" data-count="{{ $totalUpcoming ?? 24 }}">0</div><div class="lbl">{{ __('Upcoming') }}</div></div>
+                        <div class="hero-stat"><div class="num" data-count="{{ $totalBids ?? 1580 }}">0</div><div class="lbl">{{ __('Total Bids') }}</div></div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
+    <div class="section-container">
         <!-- ═══ Main Layout ═══ -->
         <div class="auctions-layout">
 
@@ -756,6 +886,27 @@ html[dir="rtl"] .search-wrap input { padding: 0.8rem 2.75rem 0.8rem 1rem; }
                 </div>
             </div>
 
+        </div>
+    </div>
+    
+    <!-- ═══ Join Us CTA ═══ -->
+    <div class="join-cta-section">
+        <div class="section-container">
+            <div class="join-cta-card">
+                <div class="cta-content">
+                    <h2>{{ __('Join Motorzad Today') }}</h2>
+                    <p>{{ __('Whether you want to bid on premium vehicles or sell your own car to the highest bidder, Motorzad is your trusted platform.') }}</p>
+                    <div class="cta-actions">
+                        @if(Route::has('register'))
+                            <a href="{{ route('register') }}" class="btn-cta-primary">{{ __('Join as Bidder') }}</a>
+                            <a href="{{ route('register') }}" class="btn-cta-secondary">{{ __('Join as Seller') }}</a>
+                        @else
+                            <a href="{{ url('/') }}" class="btn-cta-primary">{{ __('Join as Bidder') }}</a>
+                            <a href="{{ url('/') }}" class="btn-cta-secondary">{{ __('Join as Seller') }}</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>

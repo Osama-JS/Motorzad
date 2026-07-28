@@ -28,10 +28,9 @@
         <!-- Nav Drawer -->
         <div class="nav-drawer" id="navDrawer">
             <ul class="nav-links">
-                <li><a href="/#features" class="nav-link-item">{{ __('Features') }}</a></li>
+                <li><a href="{{ url('/') }}" class="nav-link-item">{{ __('Home') }}</a></li>
                 <li><a href="{{ route('frontend.auctions.index') }}" class="nav-link-item">{{ __('Auctions') }}</a></li>
-                <li><a href="/#how" class="nav-link-item">{{ __('How it works?') }}</a></li>
-                <li><a href="/#faq" class="nav-link-item">{{ __('Questions') }}</a></li>
+                <li><a href="{{ route('frontend.contact') }}" class="nav-link-item">{{ __('Contact Us') }}</a></li>
             </ul>
             <div class="nav-auth">
                 @if(Route::has('login'))

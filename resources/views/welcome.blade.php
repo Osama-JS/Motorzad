@@ -12,6 +12,162 @@
             if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
         })();
     </script>
+    @push('styles')
+    <style>
+    /* Hero Featured Auction Card */
+    .hero-featured-auction {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .featured-card {
+        background: var(--bg-card);
+        border: 1px solid rgba(229,62,62,0.3);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px rgba(229,62,62,0.1), 0 0 40px rgba(229,62,62,0.15);
+        position: relative;
+        transform: rotateY(-5deg) translateY(-10px);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s;
+        overflow: hidden;
+    }
+
+    .featured-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .featured-card:hover {
+        transform: rotateY(0) translateY(-15px);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(229,62,62,0.2), 0 0 60px rgba(229,62,62,0.25);
+    }
+
+    .fc-badge {
+        position: absolute;
+        top: 1.5rem;
+        left: 1.5rem;
+        background: var(--red);
+        color: #fff;
+        padding: 0.4rem 1rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 10px rgba(229,62,62,0.4);
+    }
+
+    .fc-badge .pulse {
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+        animation: pulse-white 1.5s infinite;
+    }
+
+    @keyframes pulse-white {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    }
+
+    .fc-image {
+        width: 100%;
+        height: 220px;
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        position: relative;
+        background: var(--bg-hover);
+    }
+
+    .fc-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .featured-card:hover .fc-image img {
+        transform: scale(1.05);
+    }
+
+    .fc-body h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 1.25rem;
+        line-height: 1.3;
+    }
+
+    .fc-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-body);
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .fc-details .label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-sec);
+        margin-bottom: 0.25rem;
+    }
+
+    .fc-details .value {
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .fc-details .value.countdown {
+        color: var(--red);
+        font-variant-numeric: tabular-nums;
+    }
+
+    [dir="rtl"] .fc-badge {
+        left: auto;
+        right: 1.5rem;
+    }
+    [dir="rtl"] .featured-card {
+        transform: rotateY(5deg) translateY(-10px);
+    }
+    [dir="rtl"] .featured-card:hover {
+        transform: rotateY(0) translateY(-15px);
+    }
+
+    @media (max-width: 992px) {
+        .hero-featured-auction {
+            margin-top: 3rem;
+        }
+        .featured-card {
+            transform: none;
+        }
+        [dir="rtl"] .featured-card {
+            transform: none;
+        }
+    }
+    </style>
+    @endpush
 </head>
 <body>
 
@@ -27,10 +183,9 @@
         <!-- Nav Drawer: on desktop = inline links + auth, on mobile = slide-in panel -->
         <div class="nav-drawer" id="navDrawer">
             <ul class="nav-links">
-                <li><a href="#features" class="nav-link-item">{{ __('Features') }}</a></li>
-                <li><a href="{{ route('frontend.auctions.index') }}" class="nav-link-item">{{ __('auctions landing') }}</a></li>
-                <li><a href="#how" class="nav-link-item">{{ __('How it works?') }}</a></li>
-                <li><a href="#faq" class="nav-link-item">{{ __('Questions') }}</a></li>
+                <li><a href="{{ url('/') }}" class="nav-link-item">{{ __('Home') }}</a></li>
+                <li><a href="{{ route('frontend.auctions.index') }}" class="nav-link-item">{{ __('Auctions') }}</a></li>
+                <li><a href="{{ route('frontend.contact') }}" class="nav-link-item">{{ __('Contact Us') }}</a></li>
             </ul>
             <div class="nav-auth">
                 @if(Route::has('login'))
@@ -104,7 +259,34 @@
             </div>
             @endif
         </div>
-        <div class="hero-image"><img src="{{ asset('images/hero-car.png') }}" alt="{{ __('car auctions') }}"></div>
+        
+        <!-- Hero Featured Auction Card -->
+        <div class="hero-featured-auction">
+            @if(isset($heroAuction) && $heroAuction)
+                <div class="featured-card">
+                    <div class="fc-badge">{{ __('Featured') }} <span class="pulse"></span></div>
+                    <div class="fc-image">
+                        <img src="{{ $heroAuction->car->main_image_url ?? asset('images/placeholder-car.jpg') }}" alt="{{ $heroAuction->car->make->name ?? '' }} {{ $heroAuction->car->model->name ?? '' }}">
+                    </div>
+                    <div class="fc-body">
+                        <h3>{{ $heroAuction->car->make->name ?? '' }} {{ $heroAuction->car->model->name ?? '' }} ({{ $heroAuction->car->year ?? '' }})</h3>
+                        <div class="fc-details">
+                            <div class="fc-price">
+                                <span class="label">{{ __('Current Bid') }}</span>
+                                <span class="value">{{ number_format($heroAuction->highest_bid ?? $heroAuction->starting_price) }} {{ __('SAR') }}</span>
+                            </div>
+                            <div class="fc-time">
+                                <span class="label">{{ __('Ends In') }}</span>
+                                <span class="value countdown" data-end="{{ $heroAuction->end_time }}">--:--:--</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('frontend.auctions.show', $heroAuction->id) }}" class="btn btn-primary btn-block mt-3">{{ __('Bid Now') }}</a>
+                    </div>
+                </div>
+            @else
+                <div class="hero-image"><img src="{{ asset('images/hero-car.png') }}" alt="{{ __('car auctions') }}"></div>
+            @endif
+        </div>
     </div>
 </section>
 

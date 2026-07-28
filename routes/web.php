@@ -18,8 +18,20 @@ Route::get('/', function () {
     if (\Illuminate\Support\Facades\Schema::hasTable('features')) {
         $features = \App\Models\Feature::where('is_active', true)->orderBy('sort_order', 'asc')->get();
     }
+    
+    // Get Hero Auction
+    $heroAuctionId = \App\Models\Setting::get('hero_auction_id');
+    if ($heroAuctionId) {
+        $heroAuction = \App\Models\Auction::with(['car.make', 'car.model', 'highestBid'])->find($heroAuctionId);
+    } else {
+        $heroAuction = \App\Models\Auction::with(['car.make', 'car.model', 'highestBid'])
+            ->live()
+            ->featured()
+            ->latest()
+            ->first();
+    }
 
-    return view('welcome', compact('featuredAuctions', 'faqs', 'features'));
+    return view('welcome', compact('featuredAuctions', 'faqs', 'features', 'heroAuction'));
 });
 
 // Public Auctions
@@ -30,6 +42,11 @@ Route::get('/auctions/{id}', [\App\Http\Controllers\Frontend\AuctionController::
 Route::get('/mobile-docs', function () {
     return view('docs.index');
 })->name('docs.index');
+
+Route::get('/contact', function () {
+    return view('frontend.contact');
+})->name('frontend.contact');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('frontend.contact.store');
 
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ar'])) {
@@ -90,6 +107,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Settings Routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+
+    // Contact Messages
+    Route::get('contacts/data', [\App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contacts.data');
+    Route::get('contacts', [\App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('contacts.index');
+    Route::get('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'show'])->name('contacts.show');
+    Route::delete('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'destroy'])->name('contacts.destroy');
 
 
      // Bank Accounts Management

@@ -15,7 +15,10 @@ class SettingController extends Controller
             'total_settings' => \App\Models\Setting::count(),
             'last_updated' => \App\Models\Setting::latest('updated_at')->first()?->updated_at->diffForHumans() ?? __('Never'),
         ];
-        return view('admin.settings.index', compact('stats'));
+        
+        $liveAuctions = \App\Models\Auction::whereIn('status', ['live', 'scheduled'])->latest()->get();
+
+        return view('admin.settings.index', compact('stats', 'liveAuctions'));
     }
 
     public function update(Request $request)
@@ -78,6 +81,7 @@ class SettingController extends Controller
                 'stats_cars_sold_unit' => 'nullable|string|max:20',
                 'stats_satisfaction' => 'nullable|string|max:50',
                 'stats_satisfaction_unit' => 'nullable|string|max:20',
+                'hero_auction_id' => 'nullable|exists:auctions,id',
             ]);
 
             $data = $request->except(['_token', 'site_logo', 'site_favicon', 'hero_bg', 'page_header_bg']);

@@ -141,6 +141,20 @@
                         <label class="form-label">{{ __('Hero Description (English)') }}</label>
                         <textarea name="hero_desc_en" id="hero_desc_en" class="form-control" rows="2" dir="ltr">{{ \App\Models\Setting::get('hero_desc_en') }}</textarea>
                     </div>
+
+                    <!-- ── Hero Auction ── -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ __('Hero Featured Auction') }}</label>
+                        <select name="hero_auction_id" class="form-select">
+                            <option value="">{{ __('Auto (Latest Featured Live Auction)') }}</option>
+                            @foreach($liveAuctions as $auction)
+                                <option value="{{ $auction->id }}" {{ \App\Models\Setting::get('hero_auction_id') == $auction->id ? 'selected' : '' }}>
+                                    #{{ $auction->id }} - {{ $auction->car->make->name ?? '' }} {{ $auction->car->model->name ?? '' }} ({{ $auction->car->year ?? '' }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted d-block mt-1">{{ __('This auction will be displayed in the hero section of the homepage.') }}</small>
+                    </div>
                     <div class="row"><div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Email Address') }}</label>
                         <input type="email" name="contact_email" class="form-control" value="{{ \App\Models\Setting::get('contact_email') }}">
