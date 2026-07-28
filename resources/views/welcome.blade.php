@@ -28,7 +28,7 @@
         <div class="nav-drawer" id="navDrawer">
             <ul class="nav-links">
                 <li><a href="#features" class="nav-link-item">{{ __('Features') }}</a></li>
-                <li><a href="#auctions" class="nav-link-item">{{ __('auctions landing') }}</a></li>
+                <li><a href="{{ route('frontend.auctions.index') }}" class="nav-link-item">{{ __('auctions landing') }}</a></li>
                 <li><a href="#how" class="nav-link-item">{{ __('How it works?') }}</a></li>
                 <li><a href="#faq" class="nav-link-item">{{ __('Questions') }}</a></li>
             </ul>
@@ -305,7 +305,7 @@
                     @endif
                 </div>
             </div>
-            <div class="footer-col"><h4>{{ __('Quick Links') }}</h4><ul><li><a href="#features">{{ __('Features') }}</a></li><li><a href="#auctions">{{ __('auctions landing') }}</a></li><li><a href="#how">{{ __('How it works?') }}</a></li><li><a href="#faq">{{ __('Questions') }}</a></li></ul></div>
+            <div class="footer-col"><h4>{{ __('Quick Links') }}</h4><ul><li><a href="#features">{{ __('Features') }}</a></li><li><a href="{{ route('frontend.auctions.index') }}">{{ __('auctions landing') }}</a></li><li><a href="#how">{{ __('How it works?') }}</a></li><li><a href="#faq">{{ __('Questions') }}</a></li></ul></div>
             <div class="footer-col"><h4>{{ __('Account') }}</h4><ul><li><a href="{{ route('login') }}">{{ __('Log In') }}</a></li><li><a href="{{ route('register') }}">{{ __('Create Account') }}</a></li></ul></div>
             <div class="footer-col"><h4>{{ __('Contact Us') }}</h4><ul><li><a href="mailto:{{ \App\Models\Setting::get('contact_email', 'support@motorzad.com') }}">{{ \App\Models\Setting::get('contact_email', 'support@motorzad.com') }}</a></li><li><a href="tel:{{ preg_replace('/[^0-9+]/', '', \App\Models\Setting::get('contact_phone', '+966500000000')) }}" dir="ltr">{{ \App\Models\Setting::get('contact_phone', '+966 500 000 000') }}</a></li></ul></div>
         </div>

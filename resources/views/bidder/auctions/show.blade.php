@@ -658,7 +658,7 @@ html[dir="rtl"] .currency-suffix {
 
             <div class="price-summary">
                 <div class="price-block">
-                    <span class="price-label">{{ app()->getLocale() === 'ar' ? 'المزايدة الحالية' : 'Current Price' }}</span>
+                    <span class="price-label">{{ app()->getLocale() === 'ar' ? 'أقل مبلغ للمزايدة' : 'Minimum Bid Amount' }}</span>
                     <span class="value" id="currentPriceVal">{{ number_format($auction->current_price) }}</span>
                 </div>
                 <span style="font-weight: 800; color: var(--text-secondary);">SAR</span>
@@ -678,15 +678,21 @@ html[dir="rtl"] .currency-suffix {
                 {{-- Manual Bid Group --}}
                 <div class="bid-form-group" id="manualBidGroup">
                     <label class="form-label" id="bidAmountLabel" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
-                        {{ app()->getLocale() === 'ar' ? 'قيمة المزايدة الحالية' : 'Bid Amount' }}
+                        {{ app()->getLocale() === 'ar' ? 'مبلغ المزايدة الحية' : 'Live Bid Amount' }}
                     </label>
                     <div class="bid-input-wrap">
-                        <input type="number" id="bidAmountInput" value="{{ $auction->current_price + $auction->min_bid_increment }}" min="{{ $auction->current_price + $auction->min_bid_increment }}" step="{{ $auction->min_bid_increment }}">
+                        <input type="number" id="bidAmountInput" value="{{ $auction->min_bid_increment }}" min="{{ $auction->min_bid_increment }}" step="{{ $auction->min_bid_increment }}">
                         <span class="currency-suffix">SAR</span>
                     </div>
-                    <small style="display: block; margin-top: 0.5rem; font-weight: 700; color: var(--text-muted); text-align: center;">
-                        {{ app()->getLocale() === 'ar' ? 'الزيادة الدنيا' : 'Minimum increment' }}: +{{ number_format($auction->min_bid_increment) }} SAR
-                    </small>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <small style="font-weight: 700; color: var(--text-muted);">
+                            {{ app()->getLocale() === 'ar' ? 'الزيادة الدنيا' : 'Minimum increment' }}: +{{ number_format($auction->min_bid_increment) }} SAR
+                        </small>
+                        <div style="font-weight: 800; color: var(--brand-red); font-size: 0.95rem; background: var(--brand-red-glow); padding: 0.25rem 0.75rem; border-radius: 100px;">
+                            {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} <span id="totalBidPreview">{{ number_format($auction->current_price + $auction->min_bid_increment) }}</span> SAR
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Auto Bid Group (Hidden initially) --}}
@@ -929,9 +935,20 @@ function updateQuickBidButtons(currentPrice) {
 
 function applyQuickBid(btn) {
     const addAmt = parseInt(btn.getAttribute('data-amount'));
-    const currentPrice = parseInt(document.getElementById('currentPriceVal').textContent.replace(/,/g, ''));
     const input = document.getElementById('bidAmountInput');
-    input.value = currentPrice + addAmt;
+    input.value = addAmt;
+    if (typeof updateTotalPreview === 'function') updateTotalPreview();
+}
+
+function updateTotalPreview() {
+    const currentPriceStr = document.getElementById('currentPriceVal').textContent.replace(/,/g, '');
+    const currentPrice = parseInt(currentPriceStr) || 0;
+    const input = document.getElementById('bidAmountInput');
+    const increment = parseInt(input.value) || 0;
+    const total = currentPrice + increment;
+    
+    const previewEl = document.getElementById('totalBidPreview');
+    if (previewEl) previewEl.textContent = total.toLocaleString();
 }
 
 // Initial update on load
@@ -939,6 +956,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialPrice = parseInt(document.getElementById('currentPriceVal').textContent.replace(/,/g, ''));
     if (!isNaN(initialPrice)) {
         updateQuickBidButtons(initialPrice);
+    }
+    
+    const bidAmountInput = document.getElementById('bidAmountInput');
+    if (bidAmountInput) {
+        bidAmountInput.addEventListener('input', updateTotalPreview);
     }
 });
 
@@ -1001,7 +1023,10 @@ function setBidMode(mode) {
 function placeBidNow() {
     const btn = document.querySelector('.btn-submit-bid');
     const input = document.getElementById('bidAmountInput');
-    const bidAmount = parseInt(input.value);
+    const currentPriceStr = document.getElementById('currentPriceVal').textContent.replace(/,/g, '');
+    const currentPrice = parseInt(currentPriceStr) || 0;
+    const incrementAmount = parseInt(input.value) || 0;
+    const bidAmount = currentPrice + incrementAmount;
 
     const isAutoBid = bidMode === 'auto';
     const maxAutoBid = isAutoBid ? parseInt(document.getElementById('maxAutoBidInput').value) : null;
@@ -1056,8 +1081,9 @@ function placeBidNow() {
 
                 // Set next bid recommendation
                 const minIncrement = {{ $auction->min_bid_increment }};
-                input.value = data.new_price + minIncrement;
-                input.min = data.new_price + minIncrement;
+                input.value = minIncrement;
+                input.min = minIncrement;
+                if (typeof updateTotalPreview === 'function') updateTotalPreview();
 
                 // Update max auto bid input min
                 const maxInput = document.getElementById('maxAutoBidInput');

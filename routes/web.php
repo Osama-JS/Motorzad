@@ -22,6 +22,10 @@ Route::get('/', function () {
     return view('welcome', compact('featuredAuctions', 'faqs', 'features'));
 });
 
+// Public Auctions
+Route::get('/auctions', [\App\Http\Controllers\Frontend\AuctionController::class, 'index'])->name('frontend.auctions.index');
+Route::get('/auctions/{id}', [\App\Http\Controllers\Frontend\AuctionController::class, 'show'])->name('frontend.auctions.show');
+
 // Mobile Developer Documentation
 Route::get('/mobile-docs', function () {
     return view('docs.index');
