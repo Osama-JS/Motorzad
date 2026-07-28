@@ -266,10 +266,10 @@
                 <div class="featured-card">
                     <div class="fc-badge">{{ __('Featured') }} <span class="pulse"></span></div>
                     <div class="fc-image">
-                        <img src="{{ $heroAuction->vehicle->main_image_url ?? asset('images/placeholder-car.jpg') }}" alt="{{ $heroAuction->vehicle->make->name ?? '' }} {{ $heroAuction->vehicle->model->name ?? '' }}">
+                        <img src="{{ $heroAuction->vehicle->primary_image_url ?? asset('images/placeholder-car.jpg') }}" alt="{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }}">
                     </div>
                     <div class="fc-body">
-                        <h3>{{ $heroAuction->vehicle->make->name ?? '' }} {{ $heroAuction->vehicle->model->name ?? '' }} ({{ $heroAuction->vehicle->year ?? '' }})</h3>
+                        <h3>{{ $heroAuction->vehicle->make ?? '' }} {{ $heroAuction->vehicle->model ?? '' }} ({{ $heroAuction->vehicle->year ?? '' }})</h3>
                         <div class="fc-details">
                             <div class="fc-price">
                                 <span class="label">{{ __('Current Bid') }}</span>
