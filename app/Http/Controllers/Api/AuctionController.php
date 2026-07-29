@@ -714,8 +714,59 @@ class AuctionController extends Controller
     /**
      * Create a new auction.
      */
+    #[OA\Post(
+        path: '/api/auctions',
+        summary: 'Create a new auction',
+        description: 'Creates a new auction as a draft. User must have the "seller" role and the vehicle must be approved. Requires Bearer Token.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['vehicle_id', 'title_ar', 'title_en', 'start_price', 'min_bid_increment', 'deposit_amount', 'start_time', 'end_time'],
+                properties: [
+                    new OA\Property(property: 'vehicle_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'title_ar', type: 'string', example: 'تويوتا كامري 2022'),
+                    new OA\Property(property: 'title_en', type: 'string', example: 'Toyota Camry 2022'),
+                    new OA\Property(property: 'description_ar', type: 'string', example: 'تفاصيل السيارة...'),
+                    new OA\Property(property: 'description_en', type: 'string', example: 'Car details...'),
+                    new OA\Property(property: 'start_price', type: 'number', example: 50000),
+                    new OA\Property(property: 'reserve_price', type: 'number', example: 55000),
+                    new OA\Property(property: 'min_bid_increment', type: 'number', example: 500),
+                    new OA\Property(property: 'buy_now_price', type: 'number', example: 70000),
+                    new OA\Property(property: 'deposit_amount', type: 'number', example: 1000),
+                    new OA\Property(property: 'start_time', type: 'string', format: 'date-time', example: '2023-11-01T10:00:00Z'),
+                    new OA\Property(property: 'end_time', type: 'string', format: 'date-time', example: '2023-11-10T10:00:00Z'),
+                    new OA\Property(property: 'location_ar', type: 'string', example: 'الرياض'),
+                    new OA\Property(property: 'location_en', type: 'string', example: 'Riyadh'),
+                    new OA\Property(property: 'auto_extend_minutes', type: 'integer', example: 15)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201, 
+                description: 'Auction created successfully as a draft',
+                content: new OA\JsonContent(example: ['success' => true, 'message' => 'Auction created successfully as a draft. It is pending admin review.'])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Forbidden - User is not a seller',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'You cannot create a new auction as a bidder only. You must subscribe to become a seller.'])
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error or Vehicle not approved',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Vehicle must be approved before creating an auction.'])
+            )
+        ]
+    )]
     public function store(Request $request): JsonResponse
     {
+        if (!$request->user()->hasRole('seller')) {
+            return $this->errorResponse(__('You cannot create a new auction as a bidder only. You must subscribe to become a seller.'), 403);
+        }
+
         $validated = $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
             'title_ar' => 'required|string|max:255',
@@ -758,6 +809,60 @@ class AuctionController extends Controller
     /**
      * Update an existing draft auction.
      */
+    #[OA\Put(
+        path: '/api/auctions/{auction}',
+        summary: 'Update a draft auction',
+        description: 'Updates an existing auction. The auction must be in draft status and owned by the user. Requires Bearer Token.',
+        security: [['bearerAuth' => []]],
+        tags: ['Auctions'],
+        parameters: [
+            new OA\Parameter(name: 'auction', in: 'path', required: true, description: 'Auction ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['title_ar', 'title_en', 'start_price', 'min_bid_increment', 'deposit_amount', 'start_time', 'end_time'],
+                properties: [
+                    new OA\Property(property: 'title_ar', type: 'string', example: 'تويوتا كامري 2022 المعدلة'),
+                    new OA\Property(property: 'title_en', type: 'string', example: 'Toyota Camry 2022 Modified'),
+                    new OA\Property(property: 'description_ar', type: 'string', example: 'تفاصيل السيارة المحدثة...'),
+                    new OA\Property(property: 'description_en', type: 'string', example: 'Updated car details...'),
+                    new OA\Property(property: 'start_price', type: 'number', example: 52000),
+                    new OA\Property(property: 'reserve_price', type: 'number', example: 55000),
+                    new OA\Property(property: 'min_bid_increment', type: 'number', example: 500),
+                    new OA\Property(property: 'buy_now_price', type: 'number', example: 70000),
+                    new OA\Property(property: 'deposit_amount', type: 'number', example: 1000),
+                    new OA\Property(property: 'start_time', type: 'string', format: 'date-time', example: '2023-11-01T10:00:00Z'),
+                    new OA\Property(property: 'end_time', type: 'string', format: 'date-time', example: '2023-11-10T10:00:00Z'),
+                    new OA\Property(property: 'location_ar', type: 'string', example: 'الرياض'),
+                    new OA\Property(property: 'location_en', type: 'string', example: 'Riyadh'),
+                    new OA\Property(property: 'auto_extend_minutes', type: 'integer', example: 15)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Auction updated successfully',
+                content: new OA\JsonContent(example: ['success' => true, 'message' => 'Auction updated successfully. It remains in draft status pending review.'])
+            ),
+            new OA\Response(
+                response: 403, 
+                description: 'Forbidden - User does not own the auction',
+                content: new OA\JsonContent(example: ['message' => 'This action is unauthorized.'])
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(example: ['message' => 'The given data was invalid.'])
+            ),
+            new OA\Response(
+                response: 404, 
+                description: 'Auction Not Found',
+                content: new OA\JsonContent(example: ['success' => false, 'message' => 'Record not found.'])
+            )
+        ]
+    )]
     public function update(Request $request, Auction $auction): JsonResponse
     {
         \Illuminate\Support\Facades\Gate::authorize('update', $auction);

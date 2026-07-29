@@ -773,6 +773,323 @@
                 ]
             }
         },
+        "/api/auctions": {
+            "post": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Create a new auction",
+                "description": "Creates a new auction as a draft. User must have the \"seller\" role and the vehicle must be approved. Requires Bearer Token.",
+                "operationId": "e166072c36a6ce231a3e98b1f69f45be",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "vehicle_id",
+                                    "title_ar",
+                                    "title_en",
+                                    "start_price",
+                                    "min_bid_increment",
+                                    "deposit_amount",
+                                    "start_time",
+                                    "end_time"
+                                ],
+                                "properties": {
+                                    "vehicle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title_ar": {
+                                        "type": "string",
+                                        "example": "تويوتا كامري 2022"
+                                    },
+                                    "title_en": {
+                                        "type": "string",
+                                        "example": "Toyota Camry 2022"
+                                    },
+                                    "description_ar": {
+                                        "type": "string",
+                                        "example": "تفاصيل السيارة..."
+                                    },
+                                    "description_en": {
+                                        "type": "string",
+                                        "example": "Car details..."
+                                    },
+                                    "start_price": {
+                                        "type": "number",
+                                        "example": 50000
+                                    },
+                                    "reserve_price": {
+                                        "type": "number",
+                                        "example": 55000
+                                    },
+                                    "min_bid_increment": {
+                                        "type": "number",
+                                        "example": 500
+                                    },
+                                    "buy_now_price": {
+                                        "type": "number",
+                                        "example": 70000
+                                    },
+                                    "deposit_amount": {
+                                        "type": "number",
+                                        "example": 1000
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2023-11-01T10:00:00Z"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2023-11-10T10:00:00Z"
+                                    },
+                                    "location_ar": {
+                                        "type": "string",
+                                        "example": "الرياض"
+                                    },
+                                    "location_en": {
+                                        "type": "string",
+                                        "example": "Riyadh"
+                                    },
+                                    "auto_extend_minutes": {
+                                        "type": "integer",
+                                        "example": 15
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Auction created successfully as a draft",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction created successfully as a draft. It is pending admin review."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User is not a seller",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "You cannot create a new auction as a bidder only. You must subscribe to become a seller."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error or Vehicle not approved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Vehicle must be approved before creating an auction."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auctions/{auction}": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Auction Details",
+                "description": "Returns details of a specific auction.",
+                "operationId": "52cf95375dc3341cc613430a1f379de6",
+                "parameters": [
+                    {
+                        "name": "auction",
+                        "in": "path",
+                        "description": "Auction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "Auction Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Auctions"
+                ],
+                "summary": "Update a draft auction",
+                "description": "Updates an existing auction. The auction must be in draft status and owned by the user. Requires Bearer Token.",
+                "operationId": "47a989aa8efc2aeccea5c2ff6e749b5a",
+                "parameters": [
+                    {
+                        "name": "auction",
+                        "in": "path",
+                        "description": "Auction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title_ar",
+                                    "title_en",
+                                    "start_price",
+                                    "min_bid_increment",
+                                    "deposit_amount",
+                                    "start_time",
+                                    "end_time"
+                                ],
+                                "properties": {
+                                    "title_ar": {
+                                        "type": "string",
+                                        "example": "تويوتا كامري 2022 المعدلة"
+                                    },
+                                    "title_en": {
+                                        "type": "string",
+                                        "example": "Toyota Camry 2022 Modified"
+                                    },
+                                    "description_ar": {
+                                        "type": "string",
+                                        "example": "تفاصيل السيارة المحدثة..."
+                                    },
+                                    "description_en": {
+                                        "type": "string",
+                                        "example": "Updated car details..."
+                                    },
+                                    "start_price": {
+                                        "type": "number",
+                                        "example": 52000
+                                    },
+                                    "reserve_price": {
+                                        "type": "number",
+                                        "example": 55000
+                                    },
+                                    "min_bid_increment": {
+                                        "type": "number",
+                                        "example": 500
+                                    },
+                                    "buy_now_price": {
+                                        "type": "number",
+                                        "example": 70000
+                                    },
+                                    "deposit_amount": {
+                                        "type": "number",
+                                        "example": 1000
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2023-11-01T10:00:00Z"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2023-11-10T10:00:00Z"
+                                    },
+                                    "location_ar": {
+                                        "type": "string",
+                                        "example": "الرياض"
+                                    },
+                                    "location_en": {
+                                        "type": "string",
+                                        "example": "Riyadh"
+                                    },
+                                    "auto_extend_minutes": {
+                                        "type": "integer",
+                                        "example": 15
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Auction updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction updated successfully. It remains in draft status pending review."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not own the auction",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "This action is unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid."
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Auction Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": false,
+                                    "message": "Record not found."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auctions/{auction}/bid": {
             "post": {
                 "tags": [
@@ -2502,35 +2819,6 @@
                                 }
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/api/auctions/{auction}": {
-            "get": {
-                "tags": [
-                    "General"
-                ],
-                "summary": "Get Auction Details",
-                "description": "Returns details of a specific auction.",
-                "operationId": "52cf95375dc3341cc613430a1f379de6",
-                "parameters": [
-                    {
-                        "name": "auction",
-                        "in": "path",
-                        "description": "Auction ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response"
-                    },
-                    "404": {
-                        "description": "Auction Not Found"
                     }
                 }
             }
