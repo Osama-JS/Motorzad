@@ -42,7 +42,7 @@ Route::prefix('general')->group(function () {
 // ─── Public Auctions ─────────────────────────────────────────────────────────
 Route::prefix('auctions')->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\GeneralController::class, 'auctions']);
-    Route::get('/{auction}', [\App\Http\Controllers\Api\GeneralController::class, 'showAuction']);
+    Route::get('/{auction}', [\App\Http\Controllers\Api\GeneralController::class, 'showAuction'])->whereNumber('auction');
 });
 
 // ─── Authenticated Routes ──────────────────────────────────────────────────

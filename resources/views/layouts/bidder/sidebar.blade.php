@@ -62,6 +62,22 @@
                 @endif
             </a>
 
+            @if(auth()->user()->hasRole('seller'))
+            <div class="nav-section-title">{{ __('معرضي') }}</div>
+            <a href="{{ route('bidder.garage.create') }}" class="nav-item {{ request()->routeIs('bidder.garage.create') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>{{ __('إضافة سيارة جديدة') }}</span>
+            </a>
+            <a href="{{ route('bidder.garage.index') }}" class="nav-item {{ request()->routeIs('bidder.garage.index') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                <span>{{ __('سياراتي المعروضة') }}</span>
+            </a>
+            <a href="{{ route('bidder.garage.drafts') }}" class="nav-item {{ request()->routeIs('bidder.garage.drafts') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>{{ __('مسوداتي') }}</span>
+            </a>
+            @endif
+
             <div class="nav-section-title">{{ __('Account') }}</div>
             <a href="{{ route('bidder.wallet.index') }}" class="nav-item {{ request()->routeIs('bidder.wallet.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -78,6 +94,12 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/><line x1="5" y1="21" x2="5" y2="10"/><line x1="19" y1="21" x2="19" y2="10"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>
                 <span>{{ __('البيانات البنكية') }}</span>
             </a>
+            @if(!auth()->user()->hasRole('seller'))
+                <a href="{{ route('bidder.become-seller') }}" class="nav-item {{ request()->routeIs('bidder.become-seller') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <span>{{ __('الاشتراك كبائع') }}</span>
+                </a>
+            @endif
             <a href="{{ route('profile.edit') }}" class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span>{{ __('My Profile') }}</span>

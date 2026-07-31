@@ -192,6 +192,25 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'index'])->name('bank-details.index');
     Route::post('/bank-details', [\App\Http\Controllers\Bidder\BankDetailController::class, 'update'])->name('bank-details.update');
 
+    // Become a Seller
+    Route::get('/become-seller', [\App\Http\Controllers\Bidder\SellerSubscriptionController::class, 'index'])->name('become-seller');
+    Route::post('/become-seller', [\App\Http\Controllers\Bidder\SellerSubscriptionController::class, 'store'])->name('become-seller.store');
+
+    // Seller Garage (Requires Seller Role)
+    Route::prefix('garage')->name('garage.')->group(function () {
+        Route::get('/listings', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'index'])->name('index');
+        Route::get('/drafts', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'drafts'])->name('drafts');
+        Route::get('/create', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'store'])->name('store');
+        Route::post('/decode-vin', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'decodeVin'])->name('decode-vin');
+        Route::post('/generate-description', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'generateDescription'])->name('generate-description');
+        Route::post('/auto-save', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'autoSave'])->name('auto-save');
+        
+        // Seller Auction Creation
+        Route::get('/auctions/create/{vehicle_id}', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'createAuction'])->name('auctions.create');
+        Route::post('/auctions/store', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'storeAuction'])->name('auctions.store');
+    });
+
     // Wallet Routes
     Route::get('/wallet', [\App\Http\Controllers\Bidder\WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/transactions', [\App\Http\Controllers\Bidder\WalletController::class, 'transactions'])->name('wallet.transactions');

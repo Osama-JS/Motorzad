@@ -1051,7 +1051,7 @@ class AuctionController extends Controller
         $request->validate([
             'amount'       => 'required|numeric|min:0',
             'is_auto_bid'  => 'nullable|boolean',
-            'max_auto_bid' => 'required_if:is_auto_bid,true|numeric|gte:amount',
+            'max_auto_bid' => 'required_if:is_auto_bid,true' . ($request->boolean('is_auto_bid') ? '|numeric|gte:amount' : ''),
         ]);
 
         $currentPrice  = $auction->current_price;
