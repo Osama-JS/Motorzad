@@ -168,6 +168,17 @@ class WalletController extends Controller
             'payment_method' => $validated['payment_method'],
         ]);
 
+        // إرسال إشعار للإدارة
+        $admins = \App\Models\User::role('admin')->get();
+        if ($admins->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\GeneralNotification(
+                'طلب سحب جديد',
+                'قام المستخدم ' . $user->name . ' بطلب سحب مبلغ ' . $validated['amount'] . ' ريال.',
+                ['database'],
+                url('/admin/wallets/' . $wallet->id)
+            ));
+        }
+
         return response()->json([
             'success' => true,
             'message' => __('Withdrawal request submitted successfully. It will be reviewed soon.'),
@@ -198,6 +209,17 @@ class WalletController extends Controller
             'receipt_path' => $receiptPath,
             'status' => 'pending',
         ]);
+
+        // إرسال إشعار للإدارة
+        $admins = \App\Models\User::role('admin')->get();
+        if ($admins->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\GeneralNotification(
+                'طلب إيداع جديد',
+                'قام المستخدم ' . $user->name . ' بطلب إيداع مبلغ ' . $validated['amount'] . ' ريال.',
+                ['database'],
+                url('/admin/wallets/' . $wallet->id)
+            ));
+        }
 
         return response()->json([
             'success' => true,

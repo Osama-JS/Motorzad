@@ -5,12 +5,48 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class BankDetailController extends Controller
 {
     /**
      * Get the current user's bank details.
      */
+    #[OA\Get(
+        path: '/api/bank-details',
+        summary: 'Get Bank Details',
+        description: 'Returns the authenticated user\'s bank account details.',
+        security: [['bearerAuth' => []]],
+        tags: ['Bank Details'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'iban' => 'SA12345678901234567890',
+                            'bic_code' => 'NBBKSA11',
+                            'beneficiary_name' => 'John Doe',
+                            'bank_name' => 'National Bank',
+                            'account_number' => '1234567890',
+                            'address_1' => '123 Main St',
+                            'address_2' => 'Apt 4B',
+                            'bank_city' => 'Riyadh',
+                            'bank_country' => 'Saudi Arabia',
+                            'is_verified' => true
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
+        ]
+    )]
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -35,6 +71,58 @@ class BankDetailController extends Controller
     /**
      * Update the current user's bank details.
      */
+    #[OA\Put(
+        path: '/api/bank-details',
+        summary: 'Update Bank Details',
+        description: 'Updates the authenticated user\'s bank account details. Updating details will reset the verification status.',
+        security: [['bearerAuth' => []]],
+        tags: ['Bank Details'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'iban', type: 'string', example: 'SA12345678901234567890'),
+                    new OA\Property(property: 'bic_code', type: 'string', example: 'NBBKSA11'),
+                    new OA\Property(property: 'beneficiary_name', type: 'string', example: 'John Doe'),
+                    new OA\Property(property: 'bank_name', type: 'string', example: 'National Bank'),
+                    new OA\Property(property: 'account_number', type: 'string', example: '1234567890'),
+                    new OA\Property(property: 'address_1', type: 'string', example: '123 Main St'),
+                    new OA\Property(property: 'address_2', type: 'string', example: 'Apt 4B'),
+                    new OA\Property(property: 'bank_city', type: 'string', example: 'Riyadh'),
+                    new OA\Property(property: 'bank_country', type: 'string', example: 'Saudi Arabia')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Bank details updated successfully',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Bank details updated successfully.'
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The iban field must not be greater than 255 characters.',
+                        'errors' => [
+                            'iban' => ['The iban field must not be greater than 255 characters.']
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
+        ]
+    )]
     public function update(Request $request): JsonResponse
     {
         $user = $request->user();

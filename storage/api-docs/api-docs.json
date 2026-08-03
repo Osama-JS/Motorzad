@@ -2512,6 +2512,159 @@
                 ]
             }
         },
+        "/api/bank-details": {
+            "get": {
+                "tags": [
+                    "Bank Details"
+                ],
+                "summary": "Get Bank Details",
+                "description": "Returns the authenticated user's bank account details.",
+                "operationId": "40293aca865de251657e261d719b18d0",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "iban": "SA12345678901234567890",
+                                        "bic_code": "NBBKSA11",
+                                        "beneficiary_name": "John Doe",
+                                        "bank_name": "National Bank",
+                                        "account_number": "1234567890",
+                                        "address_1": "123 Main St",
+                                        "address_2": "Apt 4B",
+                                        "bank_city": "Riyadh",
+                                        "bank_country": "Saudi Arabia",
+                                        "is_verified": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Bank Details"
+                ],
+                "summary": "Update Bank Details",
+                "description": "Updates the authenticated user's bank account details. Updating details will reset the verification status.",
+                "operationId": "61b05c0d93017b342c2b68bdeaf28416",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "iban": {
+                                        "type": "string",
+                                        "example": "SA12345678901234567890"
+                                    },
+                                    "bic_code": {
+                                        "type": "string",
+                                        "example": "NBBKSA11"
+                                    },
+                                    "beneficiary_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "bank_name": {
+                                        "type": "string",
+                                        "example": "National Bank"
+                                    },
+                                    "account_number": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "address_1": {
+                                        "type": "string",
+                                        "example": "123 Main St"
+                                    },
+                                    "address_2": {
+                                        "type": "string",
+                                        "example": "Apt 4B"
+                                    },
+                                    "bank_city": {
+                                        "type": "string",
+                                        "example": "Riyadh"
+                                    },
+                                    "bank_country": {
+                                        "type": "string",
+                                        "example": "Saudi Arabia"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bank details updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Bank details updated successfully."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The iban field must not be greater than 255 characters.",
+                                    "errors": {
+                                        "iban": [
+                                            "The iban field must not be greater than 255 characters."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/general/settings": {
             "get": {
                 "tags": [
@@ -4676,6 +4829,10 @@
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Bank Details",
+            "description": "Bank Details"
         },
         {
             "name": "General",

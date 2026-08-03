@@ -156,6 +156,22 @@ class WithdrawalController extends Controller
 
             DB::commit();
 
+            // إرسال إشعار للمستخدم
+            $statusLabels = [
+                'approved' => 'الموافقة على',
+                'rejected' => 'رفض',
+                'completed' => 'إكمال',
+                'processing' => 'قيد المعالجة لـ'
+            ];
+            $statusText = $statusLabels[$status] ?? $status;
+            
+            $withdrawal->user->notify(new \App\Notifications\GeneralNotification(
+                'تحديث حالة السحب',
+                'تم ' . $statusText . ' طلب السحب الخاص بك بمبلغ ' . $withdrawal->requested_amount . ' ريال.',
+                ['database', 'broadcast'],
+                url('/bidder/wallet')
+            ));
+
             return response()->json([
                 'success' => true,
                 'message' => 'تم معالجة الطلب بنجاح',

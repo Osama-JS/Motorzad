@@ -167,6 +167,17 @@ class AuctionController extends Controller
             }
         }
 
+        // إرسال إشعار للمزايدين عند إضافة مزاد جديد
+        $bidders = \App\Models\User::role('bidder')->get();
+        if ($bidders->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($bidders, new \App\Notifications\GeneralNotification(
+                'مزاد جديد متاح!',
+                'تم إضافة مزاد جديد: ' . $auction->title_ar . '. سارع بالمزايدة الآن!',
+                ['database'],
+                url('/bidder/auctions/' . $auction->id)
+            ));
+        }
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,

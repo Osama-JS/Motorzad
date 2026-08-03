@@ -150,6 +150,15 @@ class DepositController extends Controller
                     description: __('Deposit approved by admin') . ($request->admin_note ? ': ' . $request->admin_note : ''),
                 );
             }
+
+            // إرسال إشعار للمستخدم
+            $statusText = $request->status === 'approved' ? 'الموافقة على' : 'رفض';
+            $deposit->user->notify(new \App\Notifications\GeneralNotification(
+                'تحديث حالة الإيداع',
+                'تم ' . $statusText . ' طلب الإيداع الخاص بك بمبلغ ' . $deposit->amount . ' ريال.',
+                ['database', 'broadcast'],
+                url('/bidder/wallet')
+            ));
         });
 
         return response()->json([
