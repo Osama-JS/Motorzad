@@ -154,7 +154,22 @@
             <p class="premium-desc">
                 {{ __('حسابك ممتلك لصلاحيات البائع. قريباً سيتم إطلاق لوحة تحكم مخصصة للبائعين لإدارة مزاداتك وسياراتك بكل سهولة.') }}
             </p>
+        @elseif(isset($pendingRequest) && $pendingRequest)
+            <div class="status-badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);">
+                <i class="fas fa-clock me-2"></i>
+                {{ __('طلبك قيد المراجعة') }}
+            </div>
+            <p class="premium-desc">
+                {{ __('لقد قمنا باستلام طلبك للترقية إلى حساب بائع. الإدارة تقوم بمراجعته حالياً، وسيتم إشعارك فور الموافقة.') }}
+            </p>
         @else
+            @if(isset($rejectedRequest) && $rejectedRequest)
+                <div class="alert alert-danger mb-4 shadow-sm" style="border-radius: 12px; border: none; border-right: 4px solid #dc3545;">
+                    <h5 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i> {{ __('عذراً، تم رفض طلبك السابق') }}</h5>
+                    <p class="mb-0">{{ __('سبب الرفض:') }} {{ $rejectedRequest->admin_notes ?? __('لم يتم تحديد سبب') }}</p>
+                </div>
+            @endif
+            
             <p class="premium-desc">
                 {{ __('قم بترقية حسابك لتتمكن من إضافة سياراتك وعرضها في منصة موترزاد والوصول لآلاف المشترين المحتملين.') }}
             </p>
@@ -204,7 +219,7 @@
             <form action="{{ route('bidder.become-seller.store') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-upgrade">
-                    {{ __('ترقية الحساب الآن') }}
+                    {{ __('تقديم طلب الترقية الآن') }}
                 </button>
             </form>
         @endif

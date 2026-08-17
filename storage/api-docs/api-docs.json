@@ -3912,6 +3912,347 @@
                 }
             }
         },
+        "/api/seller/garage/listings": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Seller Listings (Vehicles)",
+                "description": "Returns the seller's vehicles that are pending, approved, or rejected (excluding drafts). Includes statistics.",
+                "operationId": "fbb3a350c240fdf9ecbe79f0eaa1b6f1",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/drafts": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Seller Drafts",
+                "description": "Returns the seller's vehicles that are saved as drafts.",
+                "operationId": "45c72b969e0910bb00fea4711e2d2f1e",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/vehicles": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Create a new vehicle (or draft)",
+                "description": "Creates a vehicle. Use action=draft to save as draft, action=submit to submit for approval.",
+                "operationId": "e52e3ed6fc6e87357f7826222c0045cc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "make_ar": {
+                                        "type": "string"
+                                    },
+                                    "make_en": {
+                                        "type": "string"
+                                    },
+                                    "model_ar": {
+                                        "type": "string"
+                                    },
+                                    "model_en": {
+                                        "type": "string"
+                                    },
+                                    "year": {
+                                        "type": "integer"
+                                    },
+                                    "action": {
+                                        "description": "draft or submit",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/vehicles/{id}": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Update an existing vehicle",
+                "description": "Updates a vehicle. Use POST with _method=PUT to support multipart/form-data for image uploads.",
+                "operationId": "e3ce4b80e80cd3acda284835beda5550",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/auctions": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Create an auction for a vehicle",
+                "description": "Creates an auction for a specific approved vehicle.",
+                "operationId": "c432a17f374039b8301efe5dd4a1b074",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/auctions/{id}": {
+            "put": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Update an auction",
+                "description": "Updates an existing auction that has not ended yet.",
+                "operationId": "2de7f8ee2121d69d7ced8b8aa97bf371",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/decode-vin": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Decode VIN",
+                "description": "Decodes a VIN number to get vehicle details.",
+                "operationId": "00be38cfe56df91091bcd716f6b05e8a",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/generate-description": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Generate AI Description",
+                "description": "Generates a vehicle description based on provided specs.",
+                "operationId": "15a25035ec07cbef7786806f22a3670b",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller-subscription/status": {
+            "get": {
+                "tags": [
+                    "Seller"
+                ],
+                "summary": "Get Seller Subscription Status",
+                "description": "Returns the current status of the user's seller subscription request (seller, pending, rejected, or none).",
+                "operationId": "ff3431232c587f0f8152d0be325c8135",
+                "responses": {
+                    "200": {
+                        "description": "Current status retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "status": {
+                                                    "description": "Can be: seller, pending, rejected, none",
+                                                    "type": "string",
+                                                    "example": "pending"
+                                                },
+                                                "admin_notes": {
+                                                    "description": "Present if status is rejected",
+                                                    "type": "string",
+                                                    "example": "Identity proof is not clear.",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller-subscription/subscribe": {
+            "post": {
+                "tags": [
+                    "Seller"
+                ],
+                "summary": "Submit Seller Subscription Request",
+                "description": "Submits a request to upgrade the authenticated user to a seller role. Requires KYC verification to be approved. Admin approval is required.",
+                "operationId": "fbdca613536660625b0b3a0905271e83",
+                "responses": {
+                    "200": {
+                        "description": "Successfully submitted the request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Your request to become a seller has been submitted successfully and is awaiting admin approval."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Already a seller or KYC not approved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Please complete identity verification to become a seller."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/support": {
             "get": {
                 "tags": [
@@ -4841,6 +5182,14 @@
         {
             "name": "Orders",
             "description": "Orders"
+        },
+        {
+            "name": "Seller Garage",
+            "description": "Seller Garage"
+        },
+        {
+            "name": "Seller",
+            "description": "Seller"
         },
         {
             "name": "Support",

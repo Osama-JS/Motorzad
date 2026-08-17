@@ -32,7 +32,7 @@
                 extendedTimeOut: 0,
                 closeButton: true
             }, optionsOverride);
-            return originalError(message, title, options);
+            return originalError.call(toastr, message, title, options);
         };
     }
 </script>

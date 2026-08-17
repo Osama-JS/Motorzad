@@ -1,6 +1,6 @@
 @extends('layouts.bidder')
 
-@section('title', __('إضافة سيارة جديدة'))
+@section('title', isset($isEdit) && $isEdit ? __('تعديل بيانات السيارة') : __('إضافة سيارة جديدة'))
 
 @section('css')
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
@@ -333,7 +333,7 @@
     @endif
 
     <!-- Premium Stepper -->
-    <div class="premium-stepper fade-in" style="animation-delay: 0.1s;">
+    <div class="nav premium-stepper fade-in" role="tablist" style="animation-delay: 0.1s;">
         <!-- Step 1 -->
         <div class="step-item active" id="stepper-step1">
             <button class="step-circle" id="step1-tab" data-bs-toggle="tab" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
@@ -364,10 +364,12 @@
         </div>
     </div>
 
-    <form id="vehicleForm" action="{{ route('bidder.garage.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" style="animation-delay: 0.2s;">
+    <form id="vehicleForm" action="{{ isset($isEdit) && $isEdit ? route('bidder.garage.update', $vehicle->id) : route('bidder.garage.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" style="animation-delay: 0.2s;">
         @csrf
-        <input type="hidden" name="vehicle_id" id="vehicle_id" value="">
+        <input type="hidden" name="vehicle_id" id="vehicle_id" value="{{ $vehicle->id ?? '' }}">
         <input type="hidden" name="action" id="formAction" value="submit">
+        <input type="hidden" name="existing_images" id="existingImagesInput">
+        <input type="hidden" name="new_images_order" id="newImagesOrderInput">
 
         <div class="tab-content" id="wizardTabsContent">
             
@@ -379,7 +381,7 @@
                         <div class="col-md-12 form-group mb-4">
                             <label class="form-label">{{ __('رقم الهيكل (VIN)') }}</label>
                             <div class="d-flex gap-2">
-                                <input type="text" id="vin_number" name="vin_number" class="form-control" value="{{ old('vin_number') }}" placeholder="أدخل رقم الهيكل المكون من 17 حرفاً">
+                                <input type="text" id="vin_number" name="vin_number" class="form-control" value="{{ old('vin_number', $vehicle->vin_number ?? '') }}" placeholder="أدخل رقم الهيكل المكون من 17 حرفاً">
                                 <button type="button" id="btnDecodeVin" class="btn-vin">
                                     <i class="fa-solid fa-wand-magic-sparkles"></i> {{ __('استعلام سحري') }}
                                 </button>
@@ -393,7 +395,7 @@
                                 <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none" onclick="translateField('make_ar', 'make_en')"><i class="fa-solid fa-language"></i> {{ __('ترجمة للإنجليزية') }}</button>
                                 @endif
                             </div>
-                            <input type="text" id="make_ar" name="make_ar" class="form-control" value="{{ old('make_ar') }}" required>
+                            <input type="text" id="make_ar" name="make_ar" class="form-control" value="{{ old('make_ar', $vehicle->make_ar ?? '') }}" required>
                         </div>
                         <div class="col-md-6 form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -402,7 +404,7 @@
                                 <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none" onclick="translateField('make_en', 'make_ar')"><i class="fa-solid fa-language"></i> {{ __('ترجمة للعربية') }}</button>
                                 @endif
                             </div>
-                            <input type="text" id="make_en" name="make_en" class="form-control" value="{{ old('make_en') }}" required>
+                            <input type="text" id="make_en" name="make_en" class="form-control" value="{{ old('make_en', $vehicle->make_en ?? '') }}" required>
                         </div>
                         <div class="col-md-6 form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -411,7 +413,7 @@
                                 <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none" onclick="translateField('model_ar', 'model_en')"><i class="fa-solid fa-language"></i> {{ __('ترجمة للإنجليزية') }}</button>
                                 @endif
                             </div>
-                            <input type="text" id="model_ar" name="model_ar" class="form-control" value="{{ old('model_ar') }}" required>
+                            <input type="text" id="model_ar" name="model_ar" class="form-control" value="{{ old('model_ar', $vehicle->model_ar ?? '') }}" required>
                         </div>
                         <div class="col-md-6 form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -420,15 +422,15 @@
                                 <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none" onclick="translateField('model_en', 'model_ar')"><i class="fa-solid fa-language"></i> {{ __('ترجمة للعربية') }}</button>
                                 @endif
                             </div>
-                            <input type="text" id="model_en" name="model_en" class="form-control" value="{{ old('model_en') }}" required>
+                            <input type="text" id="model_en" name="model_en" class="form-control" value="{{ old('model_en', $vehicle->model_en ?? '') }}" required>
                         </div>
                         <div class="col-md-6 form-group">
-                            <label class="form-label">{{ __('سنة الصنع') }} *</label>
-                            <input type="number" id="year" name="year" class="form-control" min="1900" max="{{ date('Y') + 1 }}" value="{{ old('year') }}" required>
+                            <label class="form-label">{{ __('سنة الصنع') }} <span class="text-danger">*</span></label>
+                            <input type="number" id="year" name="year" class="form-control" min="1901" max="{{ date('Y') + 1 }}" value="{{ old('year', $vehicle->year ?? '') }}" required>
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-6 form-group mb-4">
                             <label class="form-label">{{ __('بلد المنشأ') }}</label>
-                            <input type="text" id="country_of_origin" name="country_of_origin" class="form-control" value="{{ old('country_of_origin') }}">
+                            <input type="text" id="country_of_origin" name="country_of_origin" class="form-control" value="{{ old('country_of_origin', $vehicle->country_of_origin ?? '') }}">
                         </div>
                     </div>
                 </div>
@@ -444,15 +446,25 @@
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('الممشى') }}</label>
-                            <input type="number" name="mileage" class="form-control" value="{{ old('mileage') }}">
+                            <input type="number" name="mileage" class="form-control" value="{{ old('mileage', $vehicle->mileage ?? '') }}">
                         </div>
                         <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('نوع الوقود') }}</label>
-                            <input type="text" id="fuel_type" name="fuel_type" class="form-control" value="{{ old('fuel_type') }}">
+                            <select id="fuel_type" name="fuel_type" class="form-select">
+                                <option value="petrol" {{ old('fuel_type', $vehicle->fuel_type ?? '') == 'petrol' ? 'selected' : '' }}>{{ __('بنزين') }}</option>
+                                <option value="diesel" {{ old('fuel_type', $vehicle->fuel_type ?? '') == 'diesel' ? 'selected' : '' }}>{{ __('ديزل') }}</option>
+                                <option value="electric" {{ old('fuel_type', $vehicle->fuel_type ?? '') == 'electric' ? 'selected' : '' }}>{{ __('كهرباء') }}</option>
+                                <option value="hybrid" {{ old('fuel_type', $vehicle->fuel_type ?? '') == 'hybrid' ? 'selected' : '' }}>{{ __('هجين') }}</option>
+                                <option value="other" {{ old('fuel_type', $vehicle->fuel_type ?? '') == 'other' ? 'selected' : '' }}>{{ __('أخرى') }}</option>
+                            </select>
                         </div>
                         <div class="col-md-4 form-group">
                             <label class="form-label">{{ __('ناقل الحركة') }}</label>
-                            <input type="text" id="transmission" name="transmission" class="form-control" value="{{ old('transmission') }}">
+                            <select id="transmission" name="transmission" class="form-select">
+                                <option value="automatic" {{ old('transmission', $vehicle->transmission ?? '') == 'automatic' ? 'selected' : '' }}>{{ __('أوتوماتيك') }}</option>
+                                <option value="manual" {{ old('transmission', $vehicle->transmission ?? '') == 'manual' ? 'selected' : '' }}>{{ __('عادي') }}</option>
+                                <option value="cvt" {{ old('transmission', $vehicle->transmission ?? '') == 'cvt' ? 'selected' : '' }}>{{ __('تتابعي (CVT)') }}</option>
+                            </select>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
@@ -467,7 +479,7 @@
                         </button>
                     </div>
                     <div class="form-group">
-                        <textarea id="description_ar" name="description_ar" class="form-control" rows="5">{{ old('description_ar') }}</textarea>
+                        <textarea id="description_ar" name="description_ar" class="form-control" rows="5">{{ old('description_ar', $vehicle->description_ar ?? '') }}</textarea>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
                         <div class="d-flex align-items-center gap-3">
@@ -478,7 +490,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <textarea id="description_en" name="description_en" class="form-control" rows="5">{{ old('description_en') }}</textarea>
+                        <textarea id="description_en" name="description_en" class="form-control" rows="5">{{ old('description_en', $vehicle->description_en ?? '') }}</textarea>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between mt-4">
@@ -539,7 +551,7 @@
                     <div class="d-flex align-items-center gap-3">
                         <span id="autoSaveStatus" class="text-secondary small fw-bold" style="opacity: 0; transition: opacity 0.3s;"><i class="fa-solid fa-cloud-arrow-up"></i> {{ __('تم الحفظ') }}</span>
                         <button type="button" onclick="submitForm('submit')" class="btn btn-submit">
-                            <i class="fa-solid fa-paper-plane"></i> {{ __('إرسال للمراجعة') }}
+                            <i class="fa-solid fa-check-circle"></i> {{ __('إضافة واعتماد السيارة') }}
                         </button>
                         <button type="button" onclick="submitForm('draft')" class="btn btn-draft">
                             <i class="fa-solid fa-file-lines"></i> {{ __('حفظ كمسودة') }}
@@ -599,21 +611,13 @@
 @endsection
 
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     // ===== PREMIUM TABS NAVIGATION & VALIDATION =====
     function updateStepperState(currentStepId) {
-        // Remove active class from all
-        document.querySelectorAll('.step-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Add active to current
+        document.querySelectorAll('.step-item').forEach(item => item.classList.remove('active'));
         let currentItem = document.getElementById('stepper-' + currentStepId);
         if (currentItem) {
             currentItem.classList.add('active');
-            // Mark previous as completed
             let stepNum = parseInt(currentStepId.replace('step', ''));
             for(let i = 1; i < stepNum; i++) {
                 document.getElementById('stepper-step' + i).classList.add('completed');
@@ -622,13 +626,62 @@
         }
     }
 
+    window.nextTab = function(targetTabId) {
+        let currentPane = document.querySelector('.tab-pane.active');
+        let currentStepId = currentPane ? currentPane.id : null;
+        
+        if (!currentStepId || (typeof validateStep === 'function' && validateStep(currentStepId))) {
+            let triggerEl = document.querySelector('button[data-bs-target="#' + targetTabId + '"]');
+            triggerEl.disabled = false;
+            new bootstrap.Tab(triggerEl).show();
+            updateStepperState(targetTabId);
+        }
+    }
+    
+    window.prevTab = function(targetTabId) {
+        new bootstrap.Tab(document.querySelector('button[data-bs-target="#' + targetTabId + '"]')).show();
+        updateStepperState(targetTabId);
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    let images = [];
+    let primaryId = null;
+    let cropper = null;
+    let currentEditId = null;
+    
+    @if(isset($vehicle))
+        let damagePoints = {!! $vehicle->damage_points ? json_encode($vehicle->damage_points) : '[]' !!};
+        @if($vehicle->images && $vehicle->images->count() > 0)
+            @foreach($vehicle->images as $img)
+                images.push({
+                    id: 'img_existing_{{ $img->id }}',
+                    file: null,
+                    dataUrl: '{{ asset('storage/' . $img->image_path) }}',
+                    name: 'existing_image_{{ $img->id }}.jpg',
+                    isExisting: true,
+                    serverId: {{ $img->id }}
+                });
+                @if($img->is_primary)
+                    primaryId = 'img_existing_{{ $img->id }}';
+                @endif
+            @endforeach
+            if(!primaryId && images.length > 0) primaryId = images[0].id;
+        @endif
+    @else
+        let damagePoints = [];
+    @endif
+
+    // Stepper logic extracted above to prevent CDN blocking
+
     function validateStep(stepId) {
         if (stepId === 'step1') {
             const requiredFields = ['make_ar', 'make_en', 'model_ar', 'model_en', 'year'];
             let isValid = true;
             requiredFields.forEach(field => {
                 let el = document.getElementById(field);
-                if (!el.value.trim()) {
+                if (el && !el.value.trim()) {
                     el.classList.add('is-invalid-shake');
                     setTimeout(() => el.classList.remove('is-invalid-shake'), 400);
                     isValid = false;
@@ -639,34 +692,13 @@
             }
             return isValid;
         }
-        return true; // Other steps are optional or handled differently
-    }
-
-    function nextTab(targetTabId) {
-        // Determine current tab by finding active pane
-        let currentPane = document.querySelector('.tab-pane.active');
-        let currentStepId = currentPane.id;
-        
-        if (validateStep(currentStepId)) {
-            let triggerEl = document.querySelector('button[data-bs-target="#' + targetTabId + '"]');
-            triggerEl.disabled = false;
-            let tab = new bootstrap.Tab(triggerEl);
-            tab.show();
-            updateStepperState(targetTabId);
-        }
+        return true;
     }
     
-    function prevTab(targetTabId) {
-        let triggerEl = document.querySelector('button[data-bs-target="#' + targetTabId + '"]');
-        let tab = new bootstrap.Tab(triggerEl);
-        tab.show();
-        updateStepperState(targetTabId);
-    }
-    
-    // ===== TRANSLATION (Simulated) =====
     function translateField(fromId, toId) {
         let fromEl = document.getElementById(fromId);
         let toEl = document.getElementById(toId);
+        if (!fromEl || !toEl) return;
         
         if (!fromEl.value.trim()) {
             toastr.warning('يرجى تعبئة الحقل باللغة العربية أولاً قبل الترجمة.');
@@ -675,44 +707,31 @@
             return;
         }
 
-        // Add loading state
         let originalPlaceholder = toEl.placeholder;
         toEl.value = '';
         toEl.placeholder = 'جارِ الترجمة السحرية...';
         toEl.disabled = true;
         
-        // Simulate API delay
         setTimeout(() => {
             toEl.disabled = false;
             toEl.placeholder = originalPlaceholder;
-            
-            // Basic mock translation (In real app, this calls an API like Google Translate)
-            let mockTranslation = fromEl.value + ' (Translated)';
-            // simple dictionary for car makes
             const dict = {
                 'تويوتا': 'Toyota', 'هوندا': 'Honda', 'نيسان': 'Nissan', 'فورد': 'Ford', 'شيفروليه': 'Chevrolet',
                 'كامري': 'Camry', 'اكورد': 'Accord', 'التيما': 'Altima', 'موستنج': 'Mustang', 'تاهو': 'Tahoe'
             };
-            
             let words = fromEl.value.split(' ');
             let translatedWords = words.map(w => dict[w] || w);
             toEl.value = translatedWords.join(' ');
-            
             toastr.success('تمت الترجمة بنجاح ✨');
-            
-            // trigger change for auto-save
             toEl.dispatchEvent(new Event('change'));
         }, 800);
     }
 
-    // Fix SVG Map rendering when tab becomes visible
     document.addEventListener('shown.bs.tab', function (event) {
         let targetId = event.target.getAttribute('data-bs-target').substring(1);
         updateStepperState(targetId);
         if (targetId === 'step4') {
             window.dispatchEvent(new Event('resize'));
-            
-            // Build summary card before submit
             buildSummaryCard();
         }
     });
@@ -721,81 +740,72 @@
         let title = document.getElementById('make_ar').value + ' ' + document.getElementById('model_ar').value + ' ' + document.getElementById('year').value;
         let summaryContainer = document.getElementById('summaryCard');
         if (summaryContainer) {
-            summaryContainer.innerHTML = '<strong>' + title + '</strong><br>' + '<span class="text-secondary">جاهزة للإرسال والمراجعة.</span>';
+            summaryContainer.innerHTML = '<strong>' + title + '</strong><br>' + '<span class="text-secondary">جاهزة للإضافة والاعتماد.</span>';
         }
     }
 
-    // ===== VIN DECODER =====
-    document.getElementById('btnDecodeVin').addEventListener('click', function() {
-        const vin = document.getElementById('vin_number').value;
-        if(vin.length < 10) {
-            toastr.error('يرجى إدخال رقم هيكل صحيح.');
-            return;
-        }
-
-        const btn = this;
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاستعلام...';
-        btn.disabled = true;
-
-        // Apply skeleton loading class
-        const fields = ['make_ar', 'make_en', 'model_ar', 'model_en', 'year', 'country_of_origin', 'fuel_type', 'transmission'];
-        fields.forEach(f => {
-            let el = document.getElementById(f);
-            if(el) el.classList.add('skeleton-loading');
-        });
-
-        fetch("{{ route('bidder.garage.decode-vin') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ vin: vin })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                const info = data.data;
-                document.getElementById('make_en').value = info.make || '';
-                document.getElementById('make_ar').value = info.make || '';
-                document.getElementById('model_en').value = info.model || '';
-                document.getElementById('model_ar').value = info.model || '';
-                document.getElementById('year').value = info.year || '';
-                document.getElementById('country_of_origin').value = info.country_of_origin || '';
-                document.getElementById('fuel_type').value = info.fuel_type || '';
-                document.getElementById('transmission').value = info.transmission || '';
-                
-                toastr.success('تم جلب البيانات بنجاح!');
-            } else {
-                toastr.error(data.message);
+    const btnDecodeVin = document.getElementById('btnDecodeVin');
+    if (btnDecodeVin) {
+        btnDecodeVin.addEventListener('click', function() {
+            const vin = document.getElementById('vin_number').value;
+            if(vin.length < 10) {
+                toastr.error('يرجى إدخال رقم هيكل صحيح.');
+                return;
             }
-        })
-        .catch(err => {
-            toastr.error('حدث خطأ أثناء الاتصال بالمزود.');
-        })
-        .finally(() => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
+
+            const btn = this;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاستعلام...';
+            btn.disabled = true;
+
+            const fields = ['make_ar', 'make_en', 'model_ar', 'model_en', 'year', 'country_of_origin', 'fuel_type', 'transmission'];
             fields.forEach(f => {
                 let el = document.getElementById(f);
-                if(el) el.classList.remove('skeleton-loading');
+                if(el) el.classList.add('skeleton-loading');
+            });
+
+            fetch("{{ route('bidder.garage.decode-vin') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ vin: vin })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    const info = data.data;
+                    document.getElementById('make_en').value = info.make || '';
+                    document.getElementById('make_ar').value = info.make || '';
+                    document.getElementById('model_en').value = info.model || '';
+                    document.getElementById('model_ar').value = info.model || '';
+                    document.getElementById('year').value = info.year || '';
+                    document.getElementById('country_of_origin').value = info.country_of_origin || '';
+                    document.getElementById('fuel_type').value = info.fuel_type || '';
+                    document.getElementById('transmission').value = info.transmission || '';
+                    toastr.success('تم جلب البيانات بنجاح!');
+                } else {
+                    toastr.error(data.message);
+                }
+            })
+            .catch(err => toastr.error('حدث خطأ أثناء الاتصال بالمزود.'))
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                fields.forEach(f => {
+                    let el = document.getElementById(f);
+                    if(el) el.classList.remove('skeleton-loading');
+                });
             });
         });
-    });
-
-
+    }
+    
     // ===== PHOTO STUDIO =====
-    let images = [];
-    let primaryId = null;
-    let cropper = null;
-    let currentEditId = null;
-
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('fileInput');
     const studioGrid = document.getElementById('studioGrid');
 
-    // Drag & Drop Handlers
     uploadZone.addEventListener('click', () => fileInput.click());
     uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
@@ -808,17 +818,19 @@
 
     function handleFiles(files) {
         Array.from(files).forEach(file => {
-            if(!file.type.startsWith('image/')) return;
+            if(!file.type.startsWith('image/')) {
+                toastr.error('يرجى رفع صور فقط.');
+                return;
+            }
+            if(file.size > 2 * 1024 * 1024) {
+                toastr.error('حجم الصورة ' + file.name + ' يتجاوز 2 ميجابايت.');
+                return;
+            }
             
             const reader = new FileReader();
             reader.onload = (e) => {
                 const id = 'img_' + Math.random().toString(36).substr(2, 9);
-                images.push({
-                    id: id,
-                    file: file,
-                    dataUrl: e.target.result,
-                    name: file.name
-                });
+                images.push({ id, file, dataUrl: e.target.result, name: file.name });
                 if(!primaryId) primaryId = id;
                 renderGrid();
             };
@@ -914,6 +926,14 @@
         let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
         while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+        
+        // Fix filename extension if mime type was changed by cropper (e.g., png cropped to jpeg)
+        if (mime === 'image/jpeg' && !filename.toLowerCase().endsWith('.jpg') && !filename.toLowerCase().endsWith('.jpeg')) {
+            filename = filename.replace(/\.[^/.]+$/, "") + ".jpg";
+        } else if (mime === 'image/png' && !filename.toLowerCase().endsWith('.png')) {
+            filename = filename.replace(/\.[^/.]+$/, "") + ".png";
+        }
+        
         return new File([u8arr], filename, {type:mime});
     }
 
@@ -923,10 +943,17 @@
         if(images.length > 0) {
             const dataTransfer = new DataTransfer();
             let primaryIndex = 0;
+            let existingImagesOrder = [];
+            let newImagesOrder = [];
             
             images.forEach((img, index) => {
-                const file = dataURLtoFile(img.dataUrl, img.name);
-                dataTransfer.items.add(file);
+                if(img.isExisting) {
+                    existingImagesOrder.push({ serverId: img.serverId, order: index });
+                } else {
+                    const file = dataURLtoFile(img.dataUrl, img.name);
+                    dataTransfer.items.add(file);
+                    newImagesOrder.push({ order: index });
+                }
                 if(img.id === primaryId) {
                     primaryIndex = index;
                 }
@@ -934,13 +961,14 @@
             
             document.getElementById('finalImagesInput').files = dataTransfer.files;
             document.getElementById('primaryImageIndex').value = primaryIndex;
+            document.getElementById('existingImagesInput').value = JSON.stringify(existingImagesOrder);
+            document.getElementById('newImagesOrderInput').value = JSON.stringify(newImagesOrder);
         }
 
         document.getElementById('vehicleForm').submit();
     }
 
     // ===== DAMAGE MAP =====
-    let damagePoints = [];
     let tempDamagePoint = null;
     
     const damageMap = document.getElementById('damageMapContainer');

@@ -1,6 +1,6 @@
 @extends('layouts.bidder')
 
-@section('title', __('إطلاق المزاد'))
+@section('title', isset($isEdit) && $isEdit ? __('تعديل المزاد') : __('إطلاق المزاد'))
 
 @section('css')
 <style>
@@ -142,7 +142,7 @@
 @section('content')
 <div class="container py-4">
     <div class="auction-header fade-in">
-        <h2><i class="fa-solid fa-gavel"></i> {{ __('إطلاق مزاد جديد') }}</h2>
+        <h2><i class="fa-solid fa-gavel"></i> {{ isset($isEdit) && $isEdit ? __('تعديل تفاصيل المزاد') : __('إطلاق مزاد جديد') }}</h2>
         <p class="text-secondary">{{ __('قم بتهيئة إعدادات مزادك للسيارة المعتمدة: ') }} <strong>{{ $vehicle->title }}</strong></p>
     </div>
 
@@ -156,7 +156,7 @@
         </div>
     @endif
 
-    <form action="{{ route('bidder.garage.auctions.store') }}" method="POST">
+    <form action="{{ isset($isEdit) && $isEdit ? route('bidder.garage.auctions.update', $auction->id) : route('bidder.garage.auctions.store') }}" method="POST">
         @csrf
         <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
 
@@ -179,7 +179,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('سعر البداية (Start Price)') }} *</label>
                             <div class="input-group">
-                                <input type="number" name="start_price" id="start_price" class="form-control" placeholder="مثال: 50000" required oninput="updateGauge()">
+                                <input type="number" name="start_price" id="start_price" class="form-control" placeholder="مثال: 50000" value="{{ old('start_price', isset($isEdit) && $isEdit ? $auction->start_price : '') }}" required oninput="updateGauge()">
                                 <span class="input-group-text">ر.س</span>
                             </div>
                             <small class="text-muted">{{ __('السعر الذي سيبدأ منه المزاد.') }}</small>
@@ -187,18 +187,26 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('السعر المستهدف (Reserve Price)') }}</label>
                             <div class="input-group">
-                                <input type="number" name="reserve_price" id="reserve_price" class="form-control" placeholder="مثال: 70000" oninput="updateGauge()">
+                                <input type="number" name="reserve_price" id="reserve_price" class="form-control" placeholder="مثال: 70000" value="{{ old('reserve_price', isset($isEdit) && $isEdit ? $auction->reserve_price : '') }}" oninput="updateGauge()">
                                 <span class="input-group-text">ر.س</span>
                             </div>
                             <small class="text-muted">{{ __('الحد الأدنى الذي تقبل البيع به.') }}</small>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label text-warning"><i class="fa-solid fa-bolt"></i> {{ __('سعر الشراء الفوري (Buy it Now)') }}</label>
                             <div class="input-group">
-                                <input type="number" name="buy_now_price" id="buy_now_price" class="form-control" placeholder="اختياري" oninput="updatePreview()">
+                                <input type="number" name="buy_now_price" id="buy_now_price" class="form-control" placeholder="اختياري" value="{{ old('buy_now_price', isset($isEdit) && $isEdit ? $auction->buy_now_price : '') }}" oninput="updatePreview()">
                                 <span class="input-group-text">ر.س</span>
                             </div>
                             <small class="text-muted">{{ __('سعر يتيح للمزايد شراء السيارة فوراً وإغلاق المزاد.') }}</small>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label"><i class="fa-solid fa-arrow-up-right-dots text-primary me-1"></i> {{ __('الحد الأدنى للزيادة في المزايدة (Min Bid Increment)') }} *</label>
+                            <div class="input-group">
+                                <input type="number" name="min_bid_increment" id="min_bid_increment" class="form-control" placeholder="مثال: 500" value="{{ old('min_bid_increment', isset($isEdit) && $isEdit ? $auction->min_bid_increment : 500) }}" required>
+                                <span class="input-group-text">ر.س</span>
+                            </div>
+                            <small class="text-muted">{{ __('أقل مبلغ يمكن للمزايد إضافته فوق السعر الحالي للمزاد.') }}</small>
                         </div>
                     </div>
                 </div>
@@ -213,21 +221,44 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('وقت البدء') }} *</label>
-                            <input type="datetime-local" name="start_time" id="start_time" class="form-control" required onchange="updatePreview()">
+                            <input type="datetime-local" name="start_time" id="start_time" class="form-control" value="{{ old('start_time', isset($isEdit) && $isEdit ? $auction->start_time->format('Y-m-d\TH:i') : '') }}" required onchange="updatePreview()">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('وقت الانتهاء') }} *</label>
-                            <input type="datetime-local" name="end_time" id="end_time" class="form-control" required onchange="updatePreview()">
+                            <input type="datetime-local" name="end_time" id="end_time" class="form-control" value="{{ old('end_time', isset($isEdit) && $isEdit ? $auction->end_time->format('Y-m-d\TH:i') : '') }}" required onchange="updatePreview()">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label"><i class="fa-solid fa-clock-rotate-left text-info me-1"></i> {{ __('دقائق التمديد التلقائي (Auto Extend Minutes)') }}</label>
+                            <div class="input-group">
+                                <input type="number" name="auto_extend_minutes" id="auto_extend_minutes" class="form-control" placeholder="مثال: 5" value="{{ old('auto_extend_minutes', isset($isEdit) && $isEdit ? $auction->auto_extend_minutes : 0) }}" min="0">
+                                <span class="input-group-text">دقائق</span>
+                            </div>
+                            <small class="text-muted">{{ __('إذا تمت المزايدة في الدقائق الأخيرة، سيتم تمديد المزاد بهذه المدة تلقائياً لإتاحة الفرصة للآخرين. اتركها 0 للإلغاء.') }}</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Strictness Mode -->
+                <!-- 3. Location -->
+                <div class="form-card fade-in" style="animation-delay: 0.25s;">
+                    <h5 class="mb-4"><i class="fa-solid fa-map-location-dot text-primary me-2"></i> {{ __('موقع المزاد / السيارة') }}</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('الموقع بالعربية') }} *</label>
+                            <input type="text" name="location_ar" id="location_ar" class="form-control" placeholder="مثال: الرياض، حي الياسمين" value="{{ old('location_ar', isset($isEdit) && $isEdit ? $auction->location_ar : '') }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('الموقع بالإنجليزية') }} *</label>
+                            <input type="text" name="location_en" id="location_en" class="form-control" placeholder="e.g. Riyadh, Al Yasmin" value="{{ old('location_en', isset($isEdit) && $isEdit ? $auction->location_en : '') }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Strictness Mode -->
                 <div class="form-card fade-in" style="animation-delay: 0.3s;">
                     <h5 class="mb-4"><i class="fa-solid fa-shield-halved text-primary me-2"></i> {{ __('وضعيات المزاد') }}</h5>
                     <div class="radio-card-wrapper">
                         <label class="radio-card">
-                            <input type="radio" name="bidding_mode" value="open" checked>
+                            <input type="radio" name="bidding_mode" value="open" {{ (!isset($isEdit) || (isset($isEdit) && !$auction->deposit_required)) ? 'checked' : '' }}>
                             <div class="card-content">
                                 <div class="card-icon"><i class="fa-solid fa-users"></i></div>
                                 <h5>{{ __('المزاد المرن') }}</h5>
@@ -235,7 +266,7 @@
                             </div>
                         </label>
                         <label class="radio-card">
-                            <input type="radio" name="bidding_mode" value="strict">
+                            <input type="radio" name="bidding_mode" value="strict" {{ (isset($isEdit) && $isEdit && $auction->deposit_required) ? 'checked' : '' }}>
                             <div class="card-content">
                                 <div class="card-icon"><i class="fa-solid fa-lock"></i></div>
                                 <h5>{{ __('مزاد النخبة') }}</h5>
@@ -247,7 +278,7 @@
                 
                 <div class="text-end mb-5 fade-in" style="animation-delay: 0.4s;">
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow" style="border-radius: 12px;">
-                        <i class="fa-solid fa-rocket me-2"></i> {{ __('إرسال المزاد للإدارة') }}
+                        <i class="fa-solid {{ isset($isEdit) && $isEdit ? 'fa-save' : 'fa-rocket' }} me-2"></i> {{ isset($isEdit) && $isEdit ? __('حفظ تعديلات المزاد') : __('اعتماد وإطلاق المزاد') }}
                     </button>
                 </div>
             </div>

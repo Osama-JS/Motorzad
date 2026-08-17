@@ -308,22 +308,38 @@
                                 @if($vehicle->status === 'pending' || $vehicle->status === 'rejected')
                                 <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-pen text-warning me-2"></i> {{ __('تعديل الطلب') }}</a></li>
                                 @endif
-                                @if($vehicle->status === 'approved' && !\App\Models\Auction::where('vehicle_id', $vehicle->id)->exists())
+                                
+                                @php
+                                    $auction = \App\Models\Auction::where('vehicle_id', $vehicle->id)->first();
+                                @endphp
+                                
+                                @if($vehicle->status === 'approved' && !$auction)
                                 <li>
                                     <a class="dropdown-item py-2 text-success fw-bold" href="{{ route('bidder.garage.auctions.create', $vehicle->id) }}">
                                         <i class="fa-solid fa-rocket me-2"></i> {{ __('إطلاق المزاد 🚀') }}
                                     </a>
                                 </li>
-                                @elseif($vehicle->status === 'approved')
-                                <li><span class="dropdown-item py-2 text-muted"><i class="fa-solid fa-check-circle me-2"></i> {{ __('تم طلب المزاد') }}</span></li>
+                                @elseif($auction)
+                                <li>
+                                    <a class="dropdown-item py-2 text-warning fw-bold" href="{{ route('bidder.garage.auctions.edit', $auction->id) }}">
+                                        <i class="fa-solid fa-pen-to-square me-2"></i> {{ __('تعديل المزاد') }}
+                                    </a>
+                                </li>
+                                <li><span class="dropdown-item py-2 text-muted"><i class="fa-solid fa-check-circle me-2"></i> {{ __('تم إطلاق المزاد') }}</span></li>
                                 @endif
                             </ul>
                         </div>
                         
-                        @if($vehicle->status === 'approved' && !\App\Models\Auction::where('vehicle_id', $vehicle->id)->exists())
+                        @if($vehicle->status === 'approved' && !$auction)
                         <div class="position-absolute" style="bottom: 1.5rem; right: 1.5rem;">
                             <a href="{{ route('bidder.garage.auctions.create', $vehicle->id) }}" class="btn btn-success rounded-pill px-4 shadow-sm" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
                                 <i class="fa-solid fa-rocket me-2"></i> {{ __('إطلاق المزاد') }}
+                            </a>
+                        </div>
+                        @elseif($auction)
+                        <div class="position-absolute" style="bottom: 1.5rem; right: 1.5rem;">
+                            <a href="{{ route('bidder.garage.auctions.edit', $auction->id) }}" class="btn btn-warning rounded-pill px-4 shadow-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white;">
+                                <i class="fa-solid fa-pen-to-square me-2"></i> {{ __('تعديل المزاد') }}
                             </a>
                         </div>
                         @endif

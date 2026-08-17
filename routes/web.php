@@ -4,6 +4,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletTransactionController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/debug-render', function() {
+    $html = view('bidder.garage.create', ['vehicle' => null])->render();
+    file_put_contents(public_path('debug.html'), $html);
+    return 'Saved';
+});
+
 Route::get('/', function () {
     $featuredAuctions = \App\Models\Auction::with(['vehicle', 'highestBid'])
         ->live()
@@ -104,6 +110,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('users/{user}/verify-identity', [\App\Http\Controllers\Admin\UserController::class, 'verifyIdentity'])->name('users.verify-identity');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     
+    // Seller Requests
+    Route::get('seller-requests', [\App\Http\Controllers\Admin\SellerRequestController::class, 'index'])->name('seller-requests.index');
+    Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
+    Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
     // Settings Routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
@@ -202,13 +212,17 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
         Route::get('/drafts', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'drafts'])->name('drafts');
         Route::get('/create', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'edit'])->name('edit');
+        Route::post('/{id}/update', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'update'])->name('update');
         Route::post('/decode-vin', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'decodeVin'])->name('decode-vin');
         Route::post('/generate-description', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'generateDescription'])->name('generate-description');
         Route::post('/auto-save', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'autoSave'])->name('auto-save');
         
-        // Seller Auction Creation
+        // Seller Auction Creation & Editing
         Route::get('/auctions/create/{vehicle_id}', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'createAuction'])->name('auctions.create');
         Route::post('/auctions/store', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'storeAuction'])->name('auctions.store');
+        Route::get('/auctions/{id}/edit', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'editAuction'])->name('auctions.edit');
+        Route::post('/auctions/{id}/update', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'updateAuction'])->name('auctions.update');
     });
 
     // Wallet Routes

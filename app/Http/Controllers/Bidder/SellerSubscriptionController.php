@@ -17,7 +17,15 @@ class SellerSubscriptionController extends Controller
         // If they are already a seller
         $isSeller = $user->hasRole('seller');
         
-        return view('bidder.seller-subscription.index', compact('user', 'isSeller'));
+        $pendingRequest = \App\Models\SellerRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+            
+        $rejectedRequest = \App\Models\SellerRequest::where('user_id', $user->id)
+            ->where('status', 'rejected')
+            ->first();
+        
+        return view('bidder.seller-subscription.index', compact('user', 'isSeller', 'pendingRequest', 'rejectedRequest'));
     }
 
     /**
@@ -37,10 +45,22 @@ class SellerSubscriptionController extends Controller
             return redirect()->route('kyc.index')
                 ->with('error', __('Please complete identity verification to become a seller.'));
         }
+        
+        // 3. Check if there is already a pending request
+        $pendingRequest = \App\Models\SellerRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+            
+        if ($pendingRequest) {
+            return redirect()->back()->with('info', __('Your request to become a seller is already pending approval.'));
+        }
 
-        // 3. Upgrade to seller role
-        $user->assignRole('seller');
+        // 4. Create a request
+        \App\Models\SellerRequest::create([
+            'user_id' => $user->id,
+            'status' => 'pending'
+        ]);
 
-        return redirect()->back()->with('success', __('Congratulations! Your account has been upgraded to a Seller. Seller features will be available soon.'));
+        return redirect()->back()->with('success', __('Your request to become a seller has been submitted successfully and is awaiting admin approval.'));
     }
 }

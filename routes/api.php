@@ -144,6 +144,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{ticket}', [\App\Http\Controllers\Api\SupportController::class, 'show']);
         Route::post('/{ticket}/reply', [\App\Http\Controllers\Api\SupportController::class, 'reply']);
     });
+
+    // Seller Subscription
+    Route::get('seller-subscription/status', [\App\Http\Controllers\Api\SellerSubscriptionController::class, 'status']);
+    Route::post('seller-subscription/subscribe', [\App\Http\Controllers\Api\SellerSubscriptionController::class, 'store']);
+
+    // Seller Garage
+    Route::prefix('seller/garage')->middleware('role:seller')->group(function () {
+        Route::get('/listings', [\App\Http\Controllers\Api\SellerGarageController::class, 'listings']);
+        Route::get('/drafts', [\App\Http\Controllers\Api\SellerGarageController::class, 'drafts']);
+        Route::post('/vehicles', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeVehicle']);
+        Route::post('/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateVehicle']);
+        Route::post('/auctions', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeAuction']);
+        Route::put('/auctions/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateAuction']);
+        Route::post('/decode-vin', [\App\Http\Controllers\Api\SellerGarageController::class, 'decodeVin']);
+        Route::post('/generate-description', [\App\Http\Controllers\Api\SellerGarageController::class, 'generateDescription']);
+    });
 });
 
 // ─── API Documentation Redirect ─────────────────────────────────────────────
