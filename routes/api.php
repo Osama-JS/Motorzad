@@ -153,8 +153,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('seller/garage')->middleware('role:seller')->group(function () {
         Route::get('/listings', [\App\Http\Controllers\Api\SellerGarageController::class, 'listings']);
         Route::get('/drafts', [\App\Http\Controllers\Api\SellerGarageController::class, 'drafts']);
+        Route::get('/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'showVehicle']);
         Route::post('/vehicles', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeVehicle']);
-        Route::post('/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateVehicle']);
+        Route::match(['post', 'put'], '/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateVehicle']);
         Route::post('/auctions', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeAuction']);
         Route::put('/auctions/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateAuction']);
         Route::post('/decode-vin', [\App\Http\Controllers\Api\SellerGarageController::class, 'decodeVin']);

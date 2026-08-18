@@ -3922,7 +3922,64 @@
                 "operationId": "fbb3a350c240fdf9ecbe79f0eaa1b6f1",
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "vehicles": [
+                                            {
+                                                "id": 1,
+                                                "make_ar": "تويوتا",
+                                                "make_en": "Toyota",
+                                                "model_ar": "كامري",
+                                                "model_en": "Camry",
+                                                "year": 2022,
+                                                "color_ar": "أبيض",
+                                                "color_en": "White",
+                                                "vin_number": "1HGCM82633AXXXXXX",
+                                                "mileage": 45000,
+                                                "fuel_type": "petrol",
+                                                "transmission": "automatic",
+                                                "engine_capacity": "2.5L",
+                                                "cylinders": 4,
+                                                "condition": "excellent",
+                                                "description_ar": "سيارة نظيفة جداً",
+                                                "description_en": "Very clean car",
+                                                "status": "approved",
+                                                "damage_points": null,
+                                                "primary_image_url": "https://example.com/storage/vehicles/1.jpg",
+                                                "images": [
+                                                    {
+                                                        "id": 101,
+                                                        "url": "https://example.com/storage/vehicles/1.jpg",
+                                                        "is_primary": true,
+                                                        "sort_order": 0
+                                                    }
+                                                ],
+                                                "created_at": "2023-10-01T10:00:00.000000Z",
+                                                "updated_at": "2023-10-01T10:00:00.000000Z"
+                                            }
+                                        ],
+                                        "stats": {
+                                            "total": 5,
+                                            "pending": 1,
+                                            "approved": 3,
+                                            "rejected": 0,
+                                            "draft": 1
+                                        },
+                                        "meta": {
+                                            "current_page": 1,
+                                            "last_page": 1,
+                                            "total": 1,
+                                            "per_page": 15
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Unauthorized"
@@ -3945,10 +4002,318 @@
                 "operationId": "45c72b969e0910bb00fea4711e2d2f1e",
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "vehicles": [
+                                            {
+                                                "id": 2,
+                                                "make_ar": "هوندا",
+                                                "make_en": "Honda",
+                                                "model_ar": "اكورد",
+                                                "model_en": "Accord",
+                                                "year": 2021,
+                                                "status": "draft",
+                                                "primary_image_url": null
+                                            }
+                                        ],
+                                        "meta": {
+                                            "current_page": 1,
+                                            "last_page": 1,
+                                            "total": 1,
+                                            "per_page": 15
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/vehicles/{id}": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Vehicle by ID",
+                "description": "Returns the details of a specific vehicle belonging to the seller.",
+                "operationId": "3642602bc014349e97081a6a1422f0a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "id": 1,
+                                        "make_ar": "تويوتا",
+                                        "make_en": "Toyota",
+                                        "model_ar": "كامري",
+                                        "model_en": "Camry",
+                                        "year": 2022,
+                                        "color_ar": "أبيض",
+                                        "color_en": "White",
+                                        "vin_number": "1HGCM82633AXXXXXX",
+                                        "mileage": 45000,
+                                        "fuel_type": "petrol",
+                                        "transmission": "automatic",
+                                        "engine_capacity": "2.5L",
+                                        "cylinders": 4,
+                                        "condition": "excellent",
+                                        "description_ar": "سيارة نظيفة جداً",
+                                        "description_en": "Very clean car",
+                                        "status": "approved",
+                                        "damage_points": null,
+                                        "primary_image_url": "https://example.com/storage/vehicles/1.jpg",
+                                        "images": [
+                                            {
+                                                "id": 101,
+                                                "url": "https://example.com/storage/vehicles/1.jpg",
+                                                "is_primary": true,
+                                                "sort_order": 0
+                                            }
+                                        ],
+                                        "created_at": "2023-10-01T10:00:00.000000Z",
+                                        "updated_at": "2023-10-01T10:00:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Update an existing vehicle",
+                "description": "Updates a vehicle. Use POST with _method=PUT to support multipart/form-data for image uploads.",
+                "operationId": "e3ce4b80e80cd3acda284835beda5550",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "Method spoofing for PUT request",
+                                        "type": "string",
+                                        "default": "PUT"
+                                    },
+                                    "make_ar": {
+                                        "type": "string"
+                                    },
+                                    "make_en": {
+                                        "type": "string"
+                                    },
+                                    "model_ar": {
+                                        "type": "string"
+                                    },
+                                    "model_en": {
+                                        "type": "string"
+                                    },
+                                    "year": {
+                                        "type": "integer"
+                                    },
+                                    "color_ar": {
+                                        "description": "اللون (عربي)",
+                                        "type": "string"
+                                    },
+                                    "color_en": {
+                                        "description": "اللون (إنجليزي)",
+                                        "type": "string"
+                                    },
+                                    "vin_number": {
+                                        "description": "رقم الهيكل",
+                                        "type": "string"
+                                    },
+                                    "mileage": {
+                                        "description": "الممشى",
+                                        "type": "integer"
+                                    },
+                                    "fuel_type": {
+                                        "description": "نوع الوقود (بنزين، ديزل، كهرباء، هجين، أخرى)",
+                                        "type": "string",
+                                        "enum": [
+                                            "petrol",
+                                            "diesel",
+                                            "electric",
+                                            "hybrid",
+                                            "other"
+                                        ]
+                                    },
+                                    "transmission": {
+                                        "description": "ناقل الحركة (أوتوماتيك، عادي، تتابعي)",
+                                        "type": "string",
+                                        "enum": [
+                                            "automatic",
+                                            "manual",
+                                            "cvt"
+                                        ]
+                                    },
+                                    "engine_capacity": {
+                                        "description": "سعة المحرك",
+                                        "type": "string"
+                                    },
+                                    "cylinders": {
+                                        "description": "عدد السلندرات",
+                                        "type": "integer"
+                                    },
+                                    "condition": {
+                                        "description": "حالة السيارة",
+                                        "type": "string"
+                                    },
+                                    "description_ar": {
+                                        "description": "وصف السيارة (عربي)",
+                                        "type": "string"
+                                    },
+                                    "description_en": {
+                                        "description": "وصف السيارة (إنجليزي)",
+                                        "type": "string"
+                                    },
+                                    "damage_points": {
+                                        "description": "نقاط الضرر (JSON array)",
+                                        "type": "string"
+                                    },
+                                    "primary_image_index": {
+                                        "description": "فهرس الصورة الرئيسية",
+                                        "type": "integer"
+                                    },
+                                    "images[]": {
+                                        "description": "الصور الجديدة",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "existing_images": {
+                                        "description": "JSON array of kept images with serverId and order",
+                                        "type": "string"
+                                    },
+                                    "new_images_order": {
+                                        "description": "JSON array specifying sort order of new images",
+                                        "type": "string"
+                                    },
+                                    "action": {
+                                        "description": "draft or submit",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Vehicle updated successfully.",
+                                    "data": {
+                                        "id": 10,
+                                        "make_ar": "فورد",
+                                        "make_en": "Ford",
+                                        "model_ar": "موستانج",
+                                        "model_en": "Mustang",
+                                        "year": 2023,
+                                        "color_ar": "أسود",
+                                        "color_en": "Black",
+                                        "vin_number": "1FA6P8CF8N5XXXXXX",
+                                        "mileage": 12000,
+                                        "fuel_type": "petrol",
+                                        "transmission": "automatic",
+                                        "engine_capacity": "5.0L",
+                                        "cylinders": 8,
+                                        "condition": "excellent",
+                                        "description_ar": "سيارة رياضية ممتازة",
+                                        "description_en": "Excellent sports car",
+                                        "status": "approved",
+                                        "damage_points": null,
+                                        "primary_image_url": "https://example.com/storage/vehicles/10_updated.jpg",
+                                        "images": [
+                                            {
+                                                "id": 102,
+                                                "url": "https://example.com/storage/vehicles/10_updated.jpg",
+                                                "is_primary": true,
+                                                "sort_order": 0
+                                            }
+                                        ],
+                                        "created_at": "2023-10-01T10:00:00.000000Z",
+                                        "updated_at": "2023-10-01T10:05:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "make_ar": [
+                                            "The make ar field is required."
+                                        ],
+                                        "year": [
+                                            "The year must be at least 1901."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -3987,6 +4352,85 @@
                                     "year": {
                                         "type": "integer"
                                     },
+                                    "color_ar": {
+                                        "description": "اللون (عربي)",
+                                        "type": "string"
+                                    },
+                                    "color_en": {
+                                        "description": "اللون (إنجليزي)",
+                                        "type": "string"
+                                    },
+                                    "vin_number": {
+                                        "description": "رقم الهيكل",
+                                        "type": "string"
+                                    },
+                                    "mileage": {
+                                        "description": "الممشى",
+                                        "type": "integer"
+                                    },
+                                    "fuel_type": {
+                                        "description": "نوع الوقود (بنزين، ديزل، كهرباء، هجين، أخرى)",
+                                        "type": "string",
+                                        "enum": [
+                                            "petrol",
+                                            "diesel",
+                                            "electric",
+                                            "hybrid",
+                                            "other"
+                                        ]
+                                    },
+                                    "transmission": {
+                                        "description": "ناقل الحركة (أوتوماتيك، عادي، تتابعي)",
+                                        "type": "string",
+                                        "enum": [
+                                            "automatic",
+                                            "manual",
+                                            "cvt"
+                                        ]
+                                    },
+                                    "engine_capacity": {
+                                        "description": "سعة المحرك",
+                                        "type": "string"
+                                    },
+                                    "cylinders": {
+                                        "description": "عدد السلندرات",
+                                        "type": "integer"
+                                    },
+                                    "condition": {
+                                        "description": "حالة السيارة",
+                                        "type": "string",
+                                        "enum": [
+                                            "new",
+                                            "excellent",
+                                            "good",
+                                            "fair",
+                                            "damaged"
+                                        ]
+                                    },
+                                    "description_ar": {
+                                        "description": "وصف السيارة (عربي)",
+                                        "type": "string"
+                                    },
+                                    "description_en": {
+                                        "description": "وصف السيارة (إنجليزي)",
+                                        "type": "string"
+                                    },
+                                    "damage_points": {
+                                        "description": "نقاط الضرر (JSON array)",
+                                        "type": "string"
+                                    },
+                                    "primary_image_index": {
+                                        "description": "فهرس الصورة الرئيسية",
+                                        "type": "integer"
+                                    },
+                                    "images[]": {
+                                        "description": "صور السيارة",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
                                     "action": {
                                         "description": "draft or submit",
                                         "type": "string"
@@ -3998,44 +4442,68 @@
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "Successful Response"
-                    },
-                    "422": {
-                        "description": "Validation Error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/seller/garage/vehicles/{id}": {
-            "post": {
-                "tags": [
-                    "Seller Garage"
-                ],
-                "summary": "Update an existing vehicle",
-                "description": "Updates a vehicle. Use POST with _method=PUT to support multipart/form-data for image uploads.",
-                "operationId": "e3ce4b80e80cd3acda284835beda5550",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Vehicle saved successfully.",
+                                    "data": {
+                                        "id": 10,
+                                        "make_ar": "فورد",
+                                        "make_en": "Ford",
+                                        "model_ar": "موستانج",
+                                        "model_en": "Mustang",
+                                        "year": 2023,
+                                        "color_ar": "أسود",
+                                        "color_en": "Black",
+                                        "vin_number": "1FA6P8CF8N5XXXXXX",
+                                        "mileage": 12000,
+                                        "fuel_type": "petrol",
+                                        "transmission": "automatic",
+                                        "engine_capacity": "5.0L",
+                                        "cylinders": 8,
+                                        "condition": "excellent",
+                                        "description_ar": "سيارة رياضية ممتازة",
+                                        "description_en": "Excellent sports car",
+                                        "status": "approved",
+                                        "damage_points": null,
+                                        "primary_image_url": "https://example.com/storage/vehicles/10.jpg",
+                                        "images": [
+                                            {
+                                                "id": 102,
+                                                "url": "https://example.com/storage/vehicles/10.jpg",
+                                                "is_primary": true,
+                                                "sort_order": 0
+                                            }
+                                        ],
+                                        "created_at": "2023-10-01T10:00:00.000000Z",
+                                        "updated_at": "2023-10-01T10:00:00.000000Z"
+                                    }
+                                }
+                            }
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful Response"
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "make_ar": [
+                                            "The make ar field is required."
+                                        ],
+                                        "year": [
+                                            "The year must be at least 1901."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4053,12 +4521,116 @@
                 "summary": "Create an auction for a vehicle",
                 "description": "Creates an auction for a specific approved vehicle.",
                 "operationId": "c432a17f374039b8301efe5dd4a1b074",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "vehicle_id",
+                                    "start_price",
+                                    "min_bid_increment",
+                                    "location_ar",
+                                    "location_en",
+                                    "start_time",
+                                    "end_time",
+                                    "bidding_mode"
+                                ],
+                                "properties": {
+                                    "vehicle_id": {
+                                        "type": "integer"
+                                    },
+                                    "start_price": {
+                                        "type": "number"
+                                    },
+                                    "reserve_price": {
+                                        "type": "number",
+                                        "nullable": true
+                                    },
+                                    "buy_now_price": {
+                                        "type": "number",
+                                        "nullable": true
+                                    },
+                                    "min_bid_increment": {
+                                        "type": "number"
+                                    },
+                                    "location_ar": {
+                                        "type": "string"
+                                    },
+                                    "location_en": {
+                                        "type": "string"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "bidding_mode": {
+                                        "type": "string",
+                                        "enum": [
+                                            "open",
+                                            "strict"
+                                        ]
+                                    },
+                                    "auto_extend_minutes": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction created successfully.",
+                                    "data": {
+                                        "id": 50,
+                                        "title_ar": "مزاد: فورد موستانج 2023",
+                                        "title_en": "Auction: Ford Mustang 2023",
+                                        "start_price": 150000,
+                                        "status": "scheduled",
+                                        "start_time": "2023-12-01T10:00:00.000000Z",
+                                        "end_time": "2023-12-10T10:00:00.000000Z",
+                                        "vehicle": {
+                                            "id": 10,
+                                            "make": "Ford",
+                                            "model": "Mustang",
+                                            "year": 2023
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "start_price": [
+                                            "The start price field is required."
+                                        ],
+                                        "end_time": [
+                                            "The end time must be a date after start time."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4086,12 +4658,106 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "start_price",
+                                    "min_bid_increment",
+                                    "location_ar",
+                                    "location_en",
+                                    "start_time",
+                                    "end_time",
+                                    "bidding_mode"
+                                ],
+                                "properties": {
+                                    "start_price": {
+                                        "type": "number"
+                                    },
+                                    "reserve_price": {
+                                        "type": "number",
+                                        "nullable": true
+                                    },
+                                    "buy_now_price": {
+                                        "type": "number",
+                                        "nullable": true
+                                    },
+                                    "min_bid_increment": {
+                                        "type": "number"
+                                    },
+                                    "location_ar": {
+                                        "type": "string"
+                                    },
+                                    "location_en": {
+                                        "type": "string"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "bidding_mode": {
+                                        "type": "string",
+                                        "enum": [
+                                            "open",
+                                            "strict"
+                                        ]
+                                    },
+                                    "auto_extend_minutes": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction updated successfully.",
+                                    "data": {
+                                        "id": 50,
+                                        "title_ar": "مزاد: فورد موستانج 2023",
+                                        "title_en": "Auction: Ford Mustang 2023",
+                                        "start_price": 145000,
+                                        "status": "scheduled",
+                                        "start_time": "2023-12-01T10:00:00.000000Z",
+                                        "end_time": "2023-12-10T10:00:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "start_price": [
+                                            "The start price field is required."
+                                        ],
+                                        "end_time": [
+                                            "The end time must be a date after start time."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4109,9 +4775,62 @@
                 "summary": "Decode VIN",
                 "description": "Decodes a VIN number to get vehicle details.",
                 "operationId": "00be38cfe56df91091bcd716f6b05e8a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "vin"
+                                ],
+                                "properties": {
+                                    "vin": {
+                                        "description": "The 17-character Vehicle Identification Number",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "VIN decoded successfully",
+                                    "data": {
+                                        "make": "TOYOTA",
+                                        "model": "CAMRY",
+                                        "year": 2022,
+                                        "engine_capacity": "2.5L",
+                                        "fuel_type": "Gasoline",
+                                        "country_of_origin": "JAPAN",
+                                        "transmission": "Automatic"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "vin": [
+                                            "The vin field is required."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4131,7 +4850,19 @@
                 "operationId": "15a25035ec07cbef7786806f22a3670b",
                 "responses": {
                     "200": {
-                        "description": "Successful Response"
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "description_ar": "🌟 **فرصة مميزة: تويوتا كامري موديل 2022** 🌟\\n\\nنقدم لكم سيارة تويوتا كامري الأنيقة والاعتمادية موديل 2022. السيارة قطعت مسافة 45000 كم فقط، مما يجعلها بحالة ممتازة للاستخدام الفوري. تتميز هذه المركبة بأداء استثنائي بفضل محركها الذي يعمل بـ البنزين. تم فحص السيارة وهي جاهزة للمزايدة. لا تفوت فرصة امتلاك هذه المركبة الرائعة بسعر منافس!",
+                                        "description_en": "🌟 **Exclusive Opportunity: 2022 Toyota Camry** 🌟\\n\\nPresenting the elegant and reliable 2022 Toyota Camry. With a low mileage of just 45000 km, this vehicle is in excellent condition and ready for the road. It boasts exceptional performance thanks to its Gasoline engine. The car has been inspected and is ready for auction. Don't miss the chance to own this amazing vehicle at a competitive price!"
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

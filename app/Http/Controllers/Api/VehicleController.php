@@ -55,13 +55,13 @@ class VehicleController extends Controller
         ]);
 
         $validated['submitted_by'] = $request->user()->id;
-        $validated['status'] = 'pending'; // Always pending for new vehicles
+        $validated['status'] = 'approved'; // Auto-approved
 
         $vehicle = Vehicle::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' => __('Vehicle submitted successfully. It is pending admin review.'),
+            'message' => __('Vehicle submitted successfully and is auto-approved.'),
             'data' => $vehicle
         ], 201);
     }
@@ -111,14 +111,14 @@ class VehicleController extends Controller
             'issues_en' => 'nullable|string',
         ]);
 
-        // When updated, reset status to pending if it was rejected
-        $validated['status'] = 'pending';
+        // When updated, keep it approved
+        $validated['status'] = 'approved';
 
         $vehicle->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => __('Vehicle updated successfully and is pending review.'),
+            'message' => __('Vehicle updated successfully and remains approved.'),
             'data' => $vehicle
         ]);
     }

@@ -30,7 +30,64 @@ class SellerGarageController extends Controller
         security: [['bearerAuth' => []]],
         tags: ['Seller Garage'],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'vehicles' => [
+                                [
+                                    'id' => 1,
+                                    'make_ar' => 'تويوتا',
+                                    'make_en' => 'Toyota',
+                                    'model_ar' => 'كامري',
+                                    'model_en' => 'Camry',
+                                    'year' => 2022,
+                                    'color_ar' => 'أبيض',
+                                    'color_en' => 'White',
+                                    'vin_number' => '1HGCM82633AXXXXXX',
+                                    'mileage' => 45000,
+                                    'fuel_type' => 'petrol',
+                                    'transmission' => 'automatic',
+                                    'engine_capacity' => '2.5L',
+                                    'cylinders' => 4,
+                                    'condition' => 'excellent',
+                                    'description_ar' => 'سيارة نظيفة جداً',
+                                    'description_en' => 'Very clean car',
+                                    'status' => 'approved',
+                                    'damage_points' => null,
+                                    'primary_image_url' => 'https://example.com/storage/vehicles/1.jpg',
+                                    'images' => [
+                                        [
+                                            'id' => 101,
+                                            'url' => 'https://example.com/storage/vehicles/1.jpg',
+                                            'is_primary' => true,
+                                            'sort_order' => 0
+                                        ]
+                                    ],
+                                    'created_at' => '2023-10-01T10:00:00.000000Z',
+                                    'updated_at' => '2023-10-01T10:00:00.000000Z'
+                                ]
+                            ],
+                            'stats' => [
+                                'total' => 5,
+                                'pending' => 1,
+                                'approved' => 3,
+                                'rejected' => 0,
+                                'draft' => 1
+                            ],
+                            'meta' => [
+                                'current_page' => 1,
+                                'last_page' => 1,
+                                'total' => 1,
+                                'per_page' => 15
+                            ]
+                        ]
+                    ]
+                )
+            ),
             new OA\Response(response: 403, description: 'Unauthorized')
         ]
     )]
@@ -74,7 +131,35 @@ class SellerGarageController extends Controller
         security: [['bearerAuth' => []]],
         tags: ['Seller Garage'],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'vehicles' => [
+                                [
+                                    'id' => 2,
+                                    'make_ar' => 'هوندا',
+                                    'make_en' => 'Honda',
+                                    'model_ar' => 'اكورد',
+                                    'model_en' => 'Accord',
+                                    'year' => 2021,
+                                    'status' => 'draft',
+                                    'primary_image_url' => null
+                                ]
+                            ],
+                            'meta' => [
+                                'current_page' => 1,
+                                'last_page' => 1,
+                                'total' => 1,
+                                'per_page' => 15
+                            ]
+                        ]
+                    ]
+                )
+            ),
             new OA\Response(response: 403, description: 'Unauthorized')
         ]
     )]
@@ -100,6 +185,83 @@ class SellerGarageController extends Controller
     }
 
     /**
+     * Get a specific vehicle by ID
+     */
+    #[OA\Get(
+        path: '/api/seller/garage/vehicles/{id}',
+        summary: 'Get Vehicle by ID',
+        description: 'Returns the details of a specific vehicle belonging to the seller.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'id' => 1,
+                            'make_ar' => 'تويوتا',
+                            'make_en' => 'Toyota',
+                            'model_ar' => 'كامري',
+                            'model_en' => 'Camry',
+                            'year' => 2022,
+                            'color_ar' => 'أبيض',
+                            'color_en' => 'White',
+                            'vin_number' => '1HGCM82633AXXXXXX',
+                            'mileage' => 45000,
+                            'fuel_type' => 'petrol',
+                            'transmission' => 'automatic',
+                            'engine_capacity' => '2.5L',
+                            'cylinders' => 4,
+                            'condition' => 'excellent',
+                            'description_ar' => 'سيارة نظيفة جداً',
+                            'description_en' => 'Very clean car',
+                            'status' => 'approved',
+                            'damage_points' => null,
+                            'primary_image_url' => 'https://example.com/storage/vehicles/1.jpg',
+                            'images' => [
+                                [
+                                    'id' => 101,
+                                    'url' => 'https://example.com/storage/vehicles/1.jpg',
+                                    'is_primary' => true,
+                                    'sort_order' => 0
+                                ]
+                            ],
+                            'created_at' => '2023-10-01T10:00:00.000000Z',
+                            'updated_at' => '2023-10-01T10:00:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found')
+        ]
+    )]
+    public function showVehicle(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $vehicle = Vehicle::with('images')
+            ->where('submitted_by', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$vehicle) {
+            return $this->errorResponse(__('Vehicle not found.'), 404);
+        }
+
+        return $this->successResponse(
+            new VehicleResource($vehicle),
+            __('Vehicle retrieved successfully.')
+        );
+    }
+
+    /**
      * Store a newly created vehicle (or draft).
      */
     #[OA\Post(
@@ -119,14 +281,81 @@ class SellerGarageController extends Controller
                         new OA\Property(property: 'model_ar', type: 'string'),
                         new OA\Property(property: 'model_en', type: 'string'),
                         new OA\Property(property: 'year', type: 'integer'),
+                        new OA\Property(property: 'color_ar', type: 'string', description: 'اللون (عربي)'),
+                        new OA\Property(property: 'color_en', type: 'string', description: 'اللون (إنجليزي)'),
+                        new OA\Property(property: 'vin_number', type: 'string', description: 'رقم الهيكل'),
+                        new OA\Property(property: 'mileage', type: 'integer', description: 'الممشى'),
+                        new OA\Property(property: 'fuel_type', type: 'string', enum: ['petrol', 'diesel', 'electric', 'hybrid', 'other'], description: 'نوع الوقود (بنزين، ديزل، كهرباء، هجين، أخرى)'),
+                        new OA\Property(property: 'transmission', type: 'string', enum: ['automatic', 'manual', 'cvt'], description: 'ناقل الحركة (أوتوماتيك، عادي، تتابعي)'),
+                        new OA\Property(property: 'engine_capacity', type: 'string', description: 'سعة المحرك'),
+                        new OA\Property(property: 'cylinders', type: 'integer', description: 'عدد السلندرات'),
+                        new OA\Property(property: 'condition', type: 'string', enum: ['new', 'excellent', 'good', 'fair', 'damaged'], description: 'حالة السيارة'),
+                        new OA\Property(property: 'description_ar', type: 'string', description: 'وصف السيارة (عربي)'),
+                        new OA\Property(property: 'description_en', type: 'string', description: 'وصف السيارة (إنجليزي)'),
+                        new OA\Property(property: 'damage_points', type: 'string', description: 'نقاط الضرر (JSON array)'),
+                        new OA\Property(property: 'primary_image_index', type: 'integer', description: 'فهرس الصورة الرئيسية'),
+                        new OA\Property(property: 'images[]', type: 'array', items: new OA\Items(type: 'string', format: 'binary'), description: 'صور السيارة'),
                         new OA\Property(property: 'action', type: 'string', description: 'draft or submit'),
                     ]
                 )
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 422, description: 'Validation Error')
+            new OA\Response(
+                response: 201, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Vehicle saved successfully.',
+                        'data' => [
+                            'id' => 10,
+                            'make_ar' => 'فورد',
+                            'make_en' => 'Ford',
+                            'model_ar' => 'موستانج',
+                            'model_en' => 'Mustang',
+                            'year' => 2023,
+                            'color_ar' => 'أسود',
+                            'color_en' => 'Black',
+                            'vin_number' => '1FA6P8CF8N5XXXXXX',
+                            'mileage' => 12000,
+                            'fuel_type' => 'petrol',
+                            'transmission' => 'automatic',
+                            'engine_capacity' => '5.0L',
+                            'cylinders' => 8,
+                            'condition' => 'excellent',
+                            'description_ar' => 'سيارة رياضية ممتازة',
+                            'description_en' => 'Excellent sports car',
+                            'status' => 'approved',
+                            'damage_points' => null,
+                            'primary_image_url' => 'https://example.com/storage/vehicles/10.jpg',
+                            'images' => [
+                                [
+                                    'id' => 102,
+                                    'url' => 'https://example.com/storage/vehicles/10.jpg',
+                                    'is_primary' => true,
+                                    'sort_order' => 0
+                                ]
+                            ],
+                            'created_at' => '2023-10-01T10:00:00.000000Z',
+                            'updated_at' => '2023-10-01T10:00:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The given data was invalid.',
+                        'errors' => [
+                            'make_ar' => ['The make ar field is required.'],
+                            'year' => ['The year must be at least 1901.']
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function storeVehicle(Request $request): JsonResponse
@@ -143,11 +372,11 @@ class SellerGarageController extends Controller
             'color_en' => 'nullable|string|max:50',
             'vin_number' => 'nullable|string|max:50',
             'mileage' => 'nullable|integer|min:0',
-            'fuel_type' => 'nullable|string|max:50',
-            'transmission' => 'nullable|string|max:50',
+            'fuel_type' => 'nullable|string|in:petrol,diesel,electric,hybrid,other',
+            'transmission' => 'nullable|string|in:automatic,manual,cvt',
             'engine_capacity' => 'nullable|string|max:50',
             'cylinders' => 'nullable|integer|min:1',
-            'condition' => 'nullable|string',
+            'condition' => 'nullable|string|in:new,excellent,good,fair,damaged',
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'images' => 'nullable|array',
@@ -207,9 +436,95 @@ class SellerGarageController extends Controller
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
         ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: '_method', type: 'string', default: 'PUT', description: 'Method spoofing for PUT request'),
+                        new OA\Property(property: 'make_ar', type: 'string'),
+                        new OA\Property(property: 'make_en', type: 'string'),
+                        new OA\Property(property: 'model_ar', type: 'string'),
+                        new OA\Property(property: 'model_en', type: 'string'),
+                        new OA\Property(property: 'year', type: 'integer'),
+                        new OA\Property(property: 'color_ar', type: 'string', description: 'اللون (عربي)'),
+                        new OA\Property(property: 'color_en', type: 'string', description: 'اللون (إنجليزي)'),
+                        new OA\Property(property: 'vin_number', type: 'string', description: 'رقم الهيكل'),
+                        new OA\Property(property: 'mileage', type: 'integer', description: 'الممشى'),
+                        new OA\Property(property: 'fuel_type', type: 'string', enum: ['petrol', 'diesel', 'electric', 'hybrid', 'other'], description: 'نوع الوقود (بنزين، ديزل، كهرباء، هجين، أخرى)'),
+                        new OA\Property(property: 'transmission', type: 'string', enum: ['automatic', 'manual', 'cvt'], description: 'ناقل الحركة (أوتوماتيك، عادي، تتابعي)'),
+                        new OA\Property(property: 'engine_capacity', type: 'string', description: 'سعة المحرك'),
+                        new OA\Property(property: 'cylinders', type: 'integer', description: 'عدد السلندرات'),
+                        new OA\Property(property: 'condition', type: 'string', description: 'حالة السيارة'),
+                        new OA\Property(property: 'description_ar', type: 'string', description: 'وصف السيارة (عربي)'),
+                        new OA\Property(property: 'description_en', type: 'string', description: 'وصف السيارة (إنجليزي)'),
+                        new OA\Property(property: 'damage_points', type: 'string', description: 'نقاط الضرر (JSON array)'),
+                        new OA\Property(property: 'primary_image_index', type: 'integer', description: 'فهرس الصورة الرئيسية'),
+                        new OA\Property(property: 'images[]', type: 'array', items: new OA\Items(type: 'string', format: 'binary'), description: 'الصور الجديدة'),
+                        new OA\Property(property: 'existing_images', type: 'string', description: 'JSON array of kept images with serverId and order'),
+                        new OA\Property(property: 'new_images_order', type: 'string', description: 'JSON array specifying sort order of new images'),
+                        new OA\Property(property: 'action', type: 'string', description: 'draft or submit'),
+                    ]
+                )
+            )
+        ),
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 422, description: 'Validation Error')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Vehicle updated successfully.',
+                        'data' => [
+                            'id' => 10,
+                            'make_ar' => 'فورد',
+                            'make_en' => 'Ford',
+                            'model_ar' => 'موستانج',
+                            'model_en' => 'Mustang',
+                            'year' => 2023,
+                            'color_ar' => 'أسود',
+                            'color_en' => 'Black',
+                            'vin_number' => '1FA6P8CF8N5XXXXXX',
+                            'mileage' => 12000,
+                            'fuel_type' => 'petrol',
+                            'transmission' => 'automatic',
+                            'engine_capacity' => '5.0L',
+                            'cylinders' => 8,
+                            'condition' => 'excellent',
+                            'description_ar' => 'سيارة رياضية ممتازة',
+                            'description_en' => 'Excellent sports car',
+                            'status' => 'approved',
+                            'damage_points' => null,
+                            'primary_image_url' => 'https://example.com/storage/vehicles/10_updated.jpg',
+                            'images' => [
+                                [
+                                    'id' => 102,
+                                    'url' => 'https://example.com/storage/vehicles/10_updated.jpg',
+                                    'is_primary' => true,
+                                    'sort_order' => 0
+                                ]
+                            ],
+                            'created_at' => '2023-10-01T10:00:00.000000Z',
+                            'updated_at' => '2023-10-01T10:05:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The given data was invalid.',
+                        'errors' => [
+                            'make_ar' => ['The make ar field is required.'],
+                            'year' => ['The year must be at least 1901.']
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function updateVehicle(Request $request, $id): JsonResponse
@@ -228,17 +543,18 @@ class SellerGarageController extends Controller
             'color_en' => 'nullable|string|max:50',
             'vin_number' => 'nullable|string|max:50',
             'mileage' => 'nullable|integer|min:0',
-            'fuel_type' => 'nullable|string|max:50',
-            'transmission' => 'nullable|string|max:50',
+            'fuel_type' => 'nullable|string|in:petrol,diesel,electric,hybrid,other',
+            'transmission' => 'nullable|string|in:automatic,manual,cvt',
             'engine_capacity' => 'nullable|string|max:50',
             'cylinders' => 'nullable|integer|min:1',
-            'condition' => 'nullable|string',
+            'condition' => 'nullable|string|in:new,excellent,good,fair,damaged',
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'damage_points' => 'nullable|string',
             'existing_images' => 'nullable|string', // JSON array of objects with serverId and order
+            'new_images_order' => 'nullable|string',
             'action' => 'required|in:draft,submit',
         ]);
 
@@ -284,19 +600,32 @@ class SellerGarageController extends Controller
             }
         }
 
-        // Add new images
-        $primaryIndex = (int) $request->input('primary_image_index', 0);
+        // Handle new images
         if ($request->hasFile('images')) {
-            $existingCount = count($keptExistingImages);
+            $newImagesOrder = json_decode($validated['new_images_order'] ?? '[]', true) ?? [];
             foreach ($request->file('images') as $index => $file) {
                 $path = $file->store('vehicles', 'public');
+                $sortOrder = $newImagesOrder[$index]['order'] ?? $index + 99;
+                
                 VehicleImage::create([
                     'vehicle_id' => $vehicle->id,
                     'image_path' => $path,
-                    'is_primary' => (($index + $existingCount) === $primaryIndex),
-                    'sort_order' => $index + $existingCount
+                    'is_primary' => false,
+                    'sort_order' => $sortOrder
                 ]);
             }
+        }
+
+        // Set primary image
+        $primaryIndex = (int) $request->input('primary_image_index', 0);
+        $primaryImage = VehicleImage::where('vehicle_id', $vehicle->id)
+            ->where('sort_order', $primaryIndex)
+            ->first();
+            
+        if ($primaryImage) {
+            $primaryImage->update(['is_primary' => true]);
+        } elseif (VehicleImage::where('vehicle_id', $vehicle->id)->exists()) {
+            VehicleImage::where('vehicle_id', $vehicle->id)->orderBy('sort_order')->first()->update(['is_primary' => true]);
         } else {
             // Ensure at least one image is primary if exists
             $firstImg = VehicleImage::where('vehicle_id', $vehicle->id)->orderBy('sort_order')->first();
@@ -320,9 +649,64 @@ class SellerGarageController extends Controller
         description: 'Creates an auction for a specific approved vehicle.',
         security: [['bearerAuth' => []]],
         tags: ['Seller Garage'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['vehicle_id', 'start_price', 'min_bid_increment', 'location_ar', 'location_en', 'start_time', 'end_time', 'bidding_mode'],
+                properties: [
+                    new OA\Property(property: 'vehicle_id', type: 'integer'),
+                    new OA\Property(property: 'start_price', type: 'number'),
+                    new OA\Property(property: 'reserve_price', type: 'number', nullable: true),
+                    new OA\Property(property: 'buy_now_price', type: 'number', nullable: true),
+                    new OA\Property(property: 'min_bid_increment', type: 'number'),
+                    new OA\Property(property: 'location_ar', type: 'string'),
+                    new OA\Property(property: 'location_en', type: 'string'),
+                    new OA\Property(property: 'start_time', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'end_time', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'bidding_mode', type: 'string', enum: ['open', 'strict']),
+                    new OA\Property(property: 'auto_extend_minutes', type: 'integer', nullable: true)
+                ]
+            )
+        ),
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 422, description: 'Validation Error')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Auction created successfully.',
+                        'data' => [
+                            'id' => 50,
+                            'title_ar' => 'مزاد: فورد موستانج 2023',
+                            'title_en' => 'Auction: Ford Mustang 2023',
+                            'start_price' => 150000,
+                            'status' => 'scheduled',
+                            'start_time' => '2023-12-01T10:00:00.000000Z',
+                            'end_time' => '2023-12-10T10:00:00.000000Z',
+                            'vehicle' => [
+                                'id' => 10,
+                                'make' => 'Ford',
+                                'model' => 'Mustang',
+                                'year' => 2023
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The given data was invalid.',
+                        'errors' => [
+                            'start_price' => ['The start price field is required.'],
+                            'end_time' => ['The end time must be a date after start time.']
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function storeAuction(Request $request): JsonResponse
@@ -412,9 +796,57 @@ class SellerGarageController extends Controller
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
         ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['start_price', 'min_bid_increment', 'location_ar', 'location_en', 'start_time', 'end_time', 'bidding_mode'],
+                properties: [
+                    new OA\Property(property: 'start_price', type: 'number'),
+                    new OA\Property(property: 'reserve_price', type: 'number', nullable: true),
+                    new OA\Property(property: 'buy_now_price', type: 'number', nullable: true),
+                    new OA\Property(property: 'min_bid_increment', type: 'number'),
+                    new OA\Property(property: 'location_ar', type: 'string'),
+                    new OA\Property(property: 'location_en', type: 'string'),
+                    new OA\Property(property: 'start_time', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'end_time', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'bidding_mode', type: 'string', enum: ['open', 'strict']),
+                    new OA\Property(property: 'auto_extend_minutes', type: 'integer', nullable: true)
+                ]
+            )
+        ),
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response'),
-            new OA\Response(response: 422, description: 'Validation Error')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Auction updated successfully.',
+                        'data' => [
+                            'id' => 50,
+                            'title_ar' => 'مزاد: فورد موستانج 2023',
+                            'title_en' => 'Auction: Ford Mustang 2023',
+                            'start_price' => 145000,
+                            'status' => 'scheduled',
+                            'start_time' => '2023-12-01T10:00:00.000000Z',
+                            'end_time' => '2023-12-10T10:00:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The given data was invalid.',
+                        'errors' => [
+                            'start_price' => ['The start price field is required.'],
+                            'end_time' => ['The end time must be a date after start time.']
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function updateAuction(Request $request, $id): JsonResponse
@@ -484,8 +916,47 @@ class SellerGarageController extends Controller
         description: 'Decodes a VIN number to get vehicle details.',
         security: [['bearerAuth' => []]],
         tags: ['Seller Garage'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['vin'],
+                properties: [
+                    new OA\Property(property: 'vin', type: 'string', description: 'The 17-character Vehicle Identification Number')
+                ]
+            )
+        ),
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'VIN decoded successfully',
+                        'data' => [
+                            'make' => 'TOYOTA',
+                            'model' => 'CAMRY',
+                            'year' => 2022,
+                            'engine_capacity' => '2.5L',
+                            'fuel_type' => 'Gasoline',
+                            'country_of_origin' => 'JAPAN',
+                            'transmission' => 'Automatic'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    example: [
+                        'message' => 'The given data was invalid.',
+                        'errors' => [
+                            'vin' => ['The vin field is required.']
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function decodeVin(Request $request): JsonResponse
@@ -563,7 +1034,19 @@ class SellerGarageController extends Controller
         security: [['bearerAuth' => []]],
         tags: ['Seller Garage'],
         responses: [
-            new OA\Response(response: 200, description: 'Successful Response')
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'description_ar' => '🌟 **فرصة مميزة: تويوتا كامري موديل 2022** 🌟\n\nنقدم لكم سيارة تويوتا كامري الأنيقة والاعتمادية موديل 2022. السيارة قطعت مسافة 45000 كم فقط، مما يجعلها بحالة ممتازة للاستخدام الفوري. تتميز هذه المركبة بأداء استثنائي بفضل محركها الذي يعمل بـ البنزين. تم فحص السيارة وهي جاهزة للمزايدة. لا تفوت فرصة امتلاك هذه المركبة الرائعة بسعر منافس!',
+                            'description_en' => '🌟 **Exclusive Opportunity: 2022 Toyota Camry** 🌟\n\nPresenting the elegant and reliable 2022 Toyota Camry. With a low mileage of just 45000 km, this vehicle is in excellent condition and ready for the road. It boasts exceptional performance thanks to its Gasoline engine. The car has been inspected and is ready for auction. Don\'t miss the chance to own this amazing vehicle at a competitive price!'
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function generateDescription(Request $request): JsonResponse
