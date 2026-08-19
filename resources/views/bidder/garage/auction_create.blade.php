@@ -4,146 +4,558 @@
 
 @section('css')
 <style>
-    .auction-header {
-        text-align: center;
-        margin-bottom: 2rem;
+    /* ==========================================================================
+       ULTRA PREMIUM ADAPTIVE LUXURY THEME (AUCTION)
+       ========================================================================== */
+    :root {
+        --font-primary: 'Tajawal', 'Outfit', sans-serif;
+        --primary-glow: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.25);
+        --neon-primary: #8b5cf6;
+        --radius-xl: 24px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
     }
-    .auction-header h2 {
-        font-weight: 700;
+
+    body { font-family: var(--font-primary); }
+
+    /* Page Header - Hero Card */
+    .garage-hero-card {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--primary-glow) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        transition: all 0.4s ease;
+    }
+
+    .garage-hero-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; width: 6px; height: 100%;
+        background: var(--primary);
+        box-shadow: 0 0 15px var(--primary);
+    }
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        width: 75px;
+        height: 75px;
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
         color: var(--primary);
+        box-shadow: 0 15px 30px var(--primary-glow);
+        transform: rotate(8deg);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
+    .garage-hero-card:hover .hero-icon {
+        transform: rotate(0deg) scale(1.1);
+        border-color: var(--primary);
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 5px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .hero-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .hero-decoration {
+        position: absolute;
+        left: 20px;
+        bottom: -40px;
+        font-size: 15rem;
+        color: var(--primary);
+        opacity: 0.04;
+        z-index: 1;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    .btn-add {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.85rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 15px var(--primary-glow);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .btn-add:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
+    }
+
+    /* Premium Cards */
     .form-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-    }
-    
-    /* Pricing Simulator */
-    .pricing-gauge {
-        background: rgba(0,0,0,0.02);
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        border: 1px dashed var(--border-color);
-    }
-    .gauge-meter {
-        height: 10px;
-        background: #e2e8f0;
-        border-radius: 5px;
-        margin: 1rem 0;
-        overflow: hidden;
+        border-radius: var(--radius-xl);
+        padding: 3.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.03);
+        transition: all 0.4s ease;
         position: relative;
     }
+    
+    .form-card:hover {
+        border-color: rgba(139, 92, 246, 0.3);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.06);
+    }
+
+    /* Massive Action Bar */
+    .action-bar-massive {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem 3.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+    .action-bar-massive:hover {
+        border-color: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.3);
+        box-shadow: 0 25px 60px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.1);
+    }
+    .action-bar-massive::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 6px; height: 100%;
+        background: var(--primary);
+    }
+    .action-bar-text h4 {
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.8rem;
+    }
+    .action-bar-text p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    .btn-massive {
+        background: linear-gradient(135deg, var(--primary), #8b5cf6);
+        color: white;
+        border: none;
+        padding: 1.25rem 4rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        box-shadow: 0 15px 35px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-massive::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 50%; height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+        transform: skewX(-20deg);
+        animation: shimmer 3s infinite;
+    }
+    .btn-massive:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.6);
+        color: white;
+    }
+    @keyframes shimmer {
+        0% { left: -100%; }
+        20% { left: 200%; }
+        100% { left: 200%; }
+    }
+    @media (max-width: 768px) {
+        .action-bar-massive {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+            padding: 2rem 1.5rem;
+        }
+        .action-bar-massive::before {
+            width: 100%; height: 6px; top: 0; left: 0;
+        }
+        .btn-massive { width: 100%; justify-content: center; }
+    }
+
+    .form-card h5 {
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-bottom: 3rem !important;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-card h5 i {
+        background: var(--primary-glow);
+        color: var(--primary);
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 1.2rem;
+    }
+    
+    /* Ultra Premium Inputs */
+    .form-label {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .input-group {
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .input-group:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-glow), inset 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .form-control, .form-select {
+        border: none !important;
+        background: transparent !important;
+        color: var(--text-primary);
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        box-shadow: none !important;
+    }
+    
+    .input-group-text {
+        border: none !important;
+        background: rgba(139, 92, 246, 0.05);
+        font-weight: 800;
+        color: var(--primary);
+        padding: 0 1.5rem;
+        border-right: 1px solid var(--border-color) !important;
+    }
+
+    /* Pricing Simulator */
+    .pricing-gauge {
+        background: var(--bg-body);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        border: 1px dashed rgba(139, 92, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .pricing-gauge::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .gauge-meter {
+        height: 16px;
+        background: var(--border-color);
+        border-radius: 50px;
+        margin: 2rem 0;
+        overflow: visible; /* To allow glow */
+        position: relative;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
     .gauge-fill {
         height: 100%;
         background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
         width: 0%;
-        transition: width 0.5s ease;
+        border-radius: 50px;
+        transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy */
+        position: relative;
     }
+    
+    .gauge-fill::after {
+        content: '';
+        position: absolute;
+        right: -8px;
+        top: -4px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+        transition: border-color 0.8s ease;
+    }
+
     .gauge-text {
-        font-weight: 700;
+        font-weight: 800;
         color: var(--text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
     }
     
     /* Custom Radio Cards */
     .radio-card-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-    .radio-card {
-        position: relative;
-        display: block;
-        cursor: pointer;
-    }
-    .radio-card input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-    }
-    .radio-card .card-content {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        transition: all 0.3s;
-        text-align: center;
-    }
-    .radio-card input:checked ~ .card-content {
-        border-color: var(--primary);
-        background: rgba(139, 92, 246, 0.05);
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
-    }
-    .radio-card .card-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: var(--text-secondary);
-    }
-    .radio-card input:checked ~ .card-content .card-icon {
-        color: var(--primary);
-    }
-    .radio-card h5 {
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        gap: 1.5rem;
     }
     
-    /* Live Preview */
-    .live-preview {
-        background: #111827;
-        border-radius: 16px;
-        color: white;
-        padding: 1.5rem;
+    .radio-card input { display: none; }
+    
+    .radio-card .card-content {
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        text-align: center;
+        background: var(--bg-body);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         position: relative;
         overflow: hidden;
     }
+    
+    .radio-card:hover .card-content {
+        border-color: rgba(139, 92, 246, 0.4);
+        transform: translateY(-5px);
+    }
+    
+    .radio-card input:checked ~ .card-content {
+        border-color: var(--primary);
+        background: var(--primary-glow);
+        transform: translateY(-8px);
+    }
+    
+    .radio-card input:checked ~ .card-content::before {
+        content: '\f058';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: var(--primary);
+        font-size: 1.5rem;
+    }
+    
+    .radio-card .card-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-secondary);
+        transition: all 0.4s;
+    }
+    
+    .radio-card input:checked ~ .card-content .card-icon {
+        color: var(--primary);
+        transform: scale(1.15) translateY(-5px);
+        filter: drop-shadow(0 10px 10px rgba(139, 92, 246, 0.3));
+    }
+    
+    .radio-card h5 {
+        font-weight: 800;
+        margin-bottom: 0.75rem !important;
+        color: var(--text-primary);
+        justify-content: center;
+    }
+    
+    /* Live Preview - The Crown Jewel */
+    .live-preview {
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 30px;
+        color: #ffffff;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 30px 60px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    
+    .live-preview::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
     .preview-tag {
         position: absolute;
-        top: 10px;
-        left: -30px;
-        background: #ef4444;
+        top: 30px;
+        left: -45px;
+        background: linear-gradient(90deg, #ef4444, #dc2626);
         color: white;
-        padding: 5px 30px;
+        padding: 8px 50px;
         transform: rotate(-45deg);
-        font-size: 0.7rem;
-        font-weight: bold;
+        font-size: 0.85rem;
+        font-weight: 900;
         z-index: 2;
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.5);
+        letter-spacing: 2px;
     }
+    
     .preview-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
-    }
-    .preview-timer {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: bold;
-        font-family: monospace;
-        font-size: 1.2rem;
-        animation: pulse 2s infinite;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
     }
     
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
+    .preview-timer {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-family: 'Outfit', monospace;
+        font-size: 1.5rem;
+        animation: pulse-border 2s infinite;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        letter-spacing: 2px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .preview-timer::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        background: #ef4444;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #ef4444;
+        animation: blink 1s infinite;
+    }
+    
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+        70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    /* Buttons */
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary), var(--neon-primary));
+        border: none;
+        color: white;
+        padding: 1.25rem 3.5rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-submit::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 50%; height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+        transform: skewX(-20deg);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        20% { left: 200%; }
+        100% { left: 200%; }
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(139, 92, 246, 0.6);
+        color: white;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container py-4">
-    <div class="auction-header fade-in">
-        <h2><i class="fa-solid fa-gavel"></i> {{ isset($isEdit) && $isEdit ? __('تعديل تفاصيل المزاد') : __('إطلاق مزاد جديد') }}</h2>
-        <p class="text-secondary">{{ __('قم بتهيئة إعدادات مزادك للسيارة المعتمدة: ') }} <strong>{{ $vehicle->title }}</strong></p>
+    <div class="garage-hero-card fade-in">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fa-solid fa-gavel"></i>
+            </div>
+            <div class="hero-text">
+                <h1 class="hero-title">{{ isset($isEdit) && $isEdit ? __('تعديل تفاصيل المزاد') : __('إطلاق مزاد جديد') }}</h1>
+                <p class="hero-subtitle">{{ __('قم بتهيئة إعدادات المزاد بدقة للسيارة المعتمدة:') }} <strong>{{ $vehicle->title }}</strong></p>
+            </div>
+        </div>
+        <a href="{{ route('bidder.garage.index') }}" class="btn-add">
+            <i class="fa-solid fa-arrow-right"></i> {{ __('العودة للمعرض') }}
+        </a>
+        <div class="hero-decoration">
+            <i class="fa-solid fa-sack-dollar"></i>
+        </div>
     </div>
 
     @if($errors->any())
@@ -238,54 +650,12 @@
                     </div>
                 </div>
 
-                <!-- 3. Location -->
-                <div class="form-card fade-in" style="animation-delay: 0.25s;">
-                    <h5 class="mb-4"><i class="fa-solid fa-map-location-dot text-primary me-2"></i> {{ __('موقع المزاد / السيارة') }}</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('الموقع بالعربية') }} *</label>
-                            <input type="text" name="location_ar" id="location_ar" class="form-control" placeholder="مثال: الرياض، حي الياسمين" value="{{ old('location_ar', isset($isEdit) && $isEdit ? $auction->location_ar : '') }}" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('الموقع بالإنجليزية') }} *</label>
-                            <input type="text" name="location_en" id="location_en" class="form-control" placeholder="e.g. Riyadh, Al Yasmin" value="{{ old('location_en', isset($isEdit) && $isEdit ? $auction->location_en : '') }}" required>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- 4. Strictness Mode -->
-                <div class="form-card fade-in" style="animation-delay: 0.3s;">
-                    <h5 class="mb-4"><i class="fa-solid fa-shield-halved text-primary me-2"></i> {{ __('وضعيات المزاد') }}</h5>
-                    <div class="radio-card-wrapper">
-                        <label class="radio-card">
-                            <input type="radio" name="bidding_mode" value="open" {{ (!isset($isEdit) || (isset($isEdit) && !$auction->deposit_required)) ? 'checked' : '' }}>
-                            <div class="card-content">
-                                <div class="card-icon"><i class="fa-solid fa-users"></i></div>
-                                <h5>{{ __('المزاد المرن') }}</h5>
-                                <p class="text-muted small mb-0">{{ __('بدون ضمان مالي. مشاركات أكثر ولكن جدية أقل.') }}</p>
-                            </div>
-                        </label>
-                        <label class="radio-card">
-                            <input type="radio" name="bidding_mode" value="strict" {{ (isset($isEdit) && $isEdit && $auction->deposit_required) ? 'checked' : '' }}>
-                            <div class="card-content">
-                                <div class="card-icon"><i class="fa-solid fa-lock"></i></div>
-                                <h5>{{ __('مزاد النخبة') }}</h5>
-                                <p class="text-muted small mb-0">{{ __('يتطلب ضمان (10% من سعر البداية). مشاركات أقل وجدية 100%.') }}</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="text-end mb-5 fade-in" style="animation-delay: 0.4s;">
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow" style="border-radius: 12px;">
-                        <i class="fa-solid {{ isset($isEdit) && $isEdit ? 'fa-save' : 'fa-rocket' }} me-2"></i> {{ isset($isEdit) && $isEdit ? __('حفظ تعديلات المزاد') : __('اعتماد وإطلاق المزاد') }}
-                    </button>
-                </div>
             </div>
 
             <!-- Left Column: Live Preview -->
             <div class="col-lg-5">
-                <div class="sticky-top" style="top: 100px;">
+                <div>
                     <h5 class="mb-3"><i class="fa-solid fa-eye text-primary me-2"></i> {{ __('معاينة المزاد (كيف سيبدو؟)') }}</h5>
                     <div class="live-preview shadow-lg">
                         <div class="preview-tag">LIVE PREVIEW</div>
@@ -320,8 +690,58 @@
                             {{ __('المزايدة الآن') }}
                         </button>
                     </div>
+
+                    <!-- 3. Location (Moved) -->
+                    <div class="form-card fade-in mt-4" style="animation-delay: 0.25s;">
+                        <h5 class="mb-4"><i class="fa-solid fa-map-location-dot text-primary me-2"></i> {{ __('موقع المزاد / السيارة') }}</h5>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">{{ __('الموقع بالعربية') }} *</label>
+                                <input type="text" name="location_ar" id="location_ar" class="form-control" placeholder="مثال: الرياض، حي الياسمين" value="{{ old('location_ar', isset($isEdit) && $isEdit ? $auction->location_ar : '') }}" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">{{ __('الموقع بالإنجليزية') }} *</label>
+                                <input type="text" name="location_en" id="location_en" class="form-control" placeholder="e.g. Riyadh, Al Yasmin" value="{{ old('location_en', isset($isEdit) && $isEdit ? $auction->location_en : '') }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Strictness Mode (Moved) -->
+                    <div class="form-card fade-in" style="animation-delay: 0.3s;">
+                        <h5 class="mb-4"><i class="fa-solid fa-shield-halved text-primary me-2"></i> {{ __('وضعيات المزاد') }}</h5>
+                        <div class="radio-card-wrapper" style="grid-template-columns: 1fr; gap: 1rem;">
+                            <label class="radio-card">
+                                <input type="radio" name="bidding_mode" value="open" {{ (!isset($isEdit) || (isset($isEdit) && !$auction->deposit_required)) ? 'checked' : '' }}>
+                                <div class="card-content" style="padding: 1.5rem;">
+                                    <div class="card-icon" style="font-size: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-users"></i></div>
+                                    <h5 style="font-size: 1.2rem; margin-bottom: 0.5rem !important;">{{ __('المزاد المرن') }}</h5>
+                                    <p class="text-muted small mb-0">{{ __('بدون ضمان مالي. مشاركات أكثر ولكن جدية أقل.') }}</p>
+                                </div>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="bidding_mode" value="strict" {{ (isset($isEdit) && $isEdit && $auction->deposit_required) ? 'checked' : '' }}>
+                                <div class="card-content" style="padding: 1.5rem;">
+                                    <div class="card-icon" style="font-size: 2rem; margin-bottom: 1rem;"><i class="fa-solid fa-lock"></i></div>
+                                    <h5 style="font-size: 1.2rem; margin-bottom: 0.5rem !important;">{{ __('مزاد النخبة') }}</h5>
+                                    <p class="text-muted small mb-0">{{ __('يتطلب ضمان (10%). مشاركات أقل وجدية 100%.') }}</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Massive Action Bar -->
+        <div class="action-bar-massive fade-in" style="animation-delay: 0.4s;">
+            <div class="action-bar-text">
+                <h4>{{ isset($isEdit) && $isEdit ? __('جاهز لحفظ التعديلات؟') : __('جاهز لإطلاق المزاد؟') }}</h4>
+                <p>{{ __('بمجرد الاعتماد سيتم تطبيق التحديثات على المنصة فوراً.') }}</p>
+            </div>
+            <button type="submit" class="btn-massive">
+                <i class="fa-solid {{ isset($isEdit) && $isEdit ? 'fa-save' : 'fa-rocket' }}"></i> 
+                {{ isset($isEdit) && $isEdit ? __('حفظ التعديلات') : __('اعتماد وإطلاق المزاد') }}
+            </button>
         </div>
     </form>
 </div>

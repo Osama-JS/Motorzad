@@ -4,283 +4,483 @@
 
 @section('css')
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-    .garage-header {
-        margin-bottom: 2rem;
+    /* ==========================================================================
+       ADAPTIVE LUXURY THEME (Respects Light/Dark Mode)
+       ========================================================================== */
+    :root {
+        --font-primary: 'Tajawal', 'Outfit', sans-serif;
+        
+        /* Premium Accents */
+        --brand-gold: #e2b365;
+        --brand-gold-glow: rgba(226, 179, 101, 0.25);
+        --brand-gold-light: #f3d49b;
+        
+        /* Dynamic Glow based on Primary Color */
+        --primary-glow: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.25);
+        
+        /* Radii */
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
     }
-    .garage-title {
-        font-size: 1.5rem;
-        font-weight: 700;
+
+    body {
+        font-family: var(--font-primary);
+    }
+
+    /* Page Header - Professional Hero Card */
+    .garage-hero-card {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--primary-glow) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        margin-bottom: 3.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        transition: all 0.4s ease;
+    }
+
+    .garage-hero-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; width: 6px; height: 100%;
+        background: var(--primary);
+        box-shadow: 0 0 15px var(--primary);
+    }
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        width: 85px;
+        height: 85px;
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        color: var(--primary);
+        box-shadow: 0 15px 30px var(--primary-glow);
+        transform: rotate(8deg);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .garage-hero-card:hover .hero-icon {
+        transform: rotate(0deg) scale(1.1);
+        border-color: var(--primary);
+    }
+
+    .hero-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hero-title {
+        font-size: 2.4rem;
+        font-weight: 800;
         color: var(--text-primary);
-        margin: 0;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
     }
+
+    .hero-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        margin: 0;
+        max-width: 550px;
+        line-height: 1.6;
+    }
+
+    .hero-decoration {
+        position: absolute;
+        left: 20px;
+        bottom: -40px;
+        font-size: 15rem;
+        color: var(--primary);
+        opacity: 0.04;
+        z-index: 1;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    /* Premium Cards */
     .form-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 2rem;
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+        transition: all 0.4s ease;
+    }
+    
+    .form-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    }
+
+    .form-card h5 {
+        font-weight: 800;
+        font-size: 1.4rem;
+        margin-bottom: 2.5rem !important;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    
+    .form-card h5 i {
+        color: var(--primary);
+        font-size: 1.5rem;
+    }
+
+    /* Input Fields */
+    .form-group {
         margin-bottom: 2rem;
     }
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
+
     .form-label {
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.8rem;
         color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
     }
-    .form-control {
+
+    .form-control, .form-select {
         background-color: var(--bg-body);
         border: 1px solid var(--border-color);
         color: var(--text-primary);
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        padding: 1.1rem 1.25rem;
+        font-weight: 500;
+        font-size: 1.05rem;
+        transition: all 0.4s ease;
     }
-    .form-control:focus {
+
+    .form-control:hover, .form-select:hover {
+        border-color: var(--primary);
+    }
+
+    .form-control:focus, .form-select:focus {
         background-color: var(--bg-body);
         border-color: var(--primary);
-        box-shadow: 0 0 0 0.25rem var(--primary-glow);
+        box-shadow: 0 0 0 4px var(--primary-glow);
         color: var(--text-primary);
     }
-    
-    /* Image Studio Styles */
+
+    .form-select option {
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+    }
+
+    /* Image Studio / Upload */
     .image-upload-wrapper {
         border: 2px dashed var(--border-color);
-        border-radius: 12px;
-        padding: 3rem 2rem;
+        border-radius: var(--radius-lg);
+        padding: 5rem 2rem;
         text-align: center;
         background: var(--bg-body);
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.4s ease;
     }
+
     .image-upload-wrapper:hover, .image-upload-wrapper.dragover {
         border-color: var(--primary);
         background: var(--primary-glow);
+        transform: translateY(-2px);
     }
+
+    .image-upload-wrapper h4 {
+        color: var(--text-primary) !important;
+        font-weight: 700;
+        margin-top: 15px;
+    }
+
+    .image-upload-wrapper i {
+        color: var(--primary) !important;
+    }
+
     .studio-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 1rem;
-        margin-top: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
     }
+
     .studio-item {
         position: relative;
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         overflow: hidden;
         border: 1px solid var(--border-color);
         aspect-ratio: 4/3;
         background: #000;
         cursor: grab;
     }
-    .studio-item.sortable-ghost {
-        opacity: 0.4;
-    }
+
     .studio-item img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        opacity: 0.9;
+        transition: all 0.5s ease;
     }
+    
+    .studio-item:hover img {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+
     .studio-item-actions {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0,0,0,0.7);
-        padding: 0.5rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+        padding: 1.5rem 1rem 0.75rem;
         display: flex;
         justify-content: space-between;
-        gap: 0.5rem;
-        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
+    
+    .studio-item:hover .studio-item-actions {
+        opacity: 1;
+    }
+
     .studio-item-actions button {
-        background: none;
+        background: rgba(255,255,255,0.2);
         border: none;
         color: white;
-        font-size: 0.9rem;
+        font-size: 1.1rem;
         cursor: pointer;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        transition: 0.2s;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
     .studio-item-actions button:hover {
-        background: rgba(255,255,255,0.2);
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1);
     }
+
     .btn-cover {
         position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
+        top: 1rem;
+        right: 1rem;
         background: rgba(0,0,0,0.6);
         color: white;
         border: 1px solid rgba(255,255,255,0.3);
         border-radius: 50px;
-        padding: 0.2rem 0.6rem;
+        padding: 0.4rem 1rem;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0.5px;
         cursor: pointer;
-        backdrop-filter: blur(4px);
-    }
-    .studio-item.is-cover {
-        border: 2px solid var(--brand-gold);
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
-    }
-    .studio-item.is-cover .btn-cover {
-        background: var(--brand-gold);
-        border-color: var(--brand-gold);
-        color: #000;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
     }
 
-    .btn-submit {
+    .studio-item.is-cover {
+        border: 3px solid var(--brand-gold);
+        box-shadow: 0 0 20px var(--brand-gold-glow);
+    }
+
+    .studio-item.is-cover .btn-cover {
+        background: var(--brand-gold);
+        color: #000;
+        border-color: var(--brand-gold);
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        text-transform: uppercase;
+    }
+
+    .btn-primary, .btn-submit {
+        background: var(--primary);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .btn-primary:hover, .btn-submit:hover {
         background: var(--primary);
         color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
     }
-    .btn-submit:hover {
-        background: var(--primary-light);
-        color: white;
-    }
-    .btn-draft {
-        background: var(--bg-body);
-        color: var(--text-secondary);
-        border: 1px solid var(--border-color);
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-    .btn-draft:hover {
-        background: var(--border-color);
+
+    .btn-secondary, .btn-draft {
+        background: transparent;
         color: var(--text-primary);
+        border: 1px solid var(--border-color);
     }
+
+    .btn-secondary:hover, .btn-draft:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--text-primary);
+        transform: translateY(-3px);
+    }
+
     .btn-vin {
-        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0 1.5rem;
-        font-weight: 600;
+        background: var(--primary-glow);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: 0.3s;
+        gap: 0.75rem;
     }
+
     .btn-vin:hover {
-        box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
-        transform: translateY(-1px);
+        background: var(--primary);
         color: white;
+        box-shadow: 0 0 20px var(--primary-glow);
     }
-    .skeleton-loading {
-        animation: skeleton 1.5s infinite alternate;
-    }
-    @keyframes skeleton {
-        0% { background-color: var(--bg-body); }
-        100% { background-color: var(--border-color); }
-    }
-    
+
     /* Damage Map */
     .damage-map-container {
         position: relative;
         width: 100%;
-        max-width: 700px;
-        margin: 0 auto;
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
+        max-width: 750px;
+        margin: 2.5rem auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
         background: var(--bg-body);
         overflow: hidden;
         cursor: crosshair;
+        padding: 2rem;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
     }
+
     .car-blueprint {
         width: 100%;
         height: auto;
         display: block;
-        opacity: 0.8;
+        opacity: 0.7;
     }
+
     .damage-pin {
         position: absolute;
-        width: 24px;
-        height: 24px;
-        background: #ef4444;
-        border: 2px solid white;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 59, 48, 0.9);
+        border: 3px solid #fff;
         border-radius: 50%;
         transform: translate(-50%, -50%);
         cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
         z-index: 10;
-        animation: pulse 2s infinite;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 12px;
+        font-weight: 800;
+        font-size: 14px;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
     .damage-pin:hover {
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translate(-50%, -50%) scale(1.3);
     }
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-    }
-    
-    /* Premium Stepper */
+
+    /* Luxury Stepper */
     .premium-stepper {
         display: flex;
         justify-content: space-between;
         position: relative;
-        padding: 2rem 1rem;
-        background: var(--bg-card);
-        border-radius: 16px;
-        border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
+        padding: 0;
+        margin-bottom: 4rem;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
+
     .premium-stepper::before {
         content: '';
         position: absolute;
-        top: 50%;
-        left: 3rem;
-        right: 3rem;
-        height: 3px;
+        top: 25px;
+        left: 5%;
+        right: 5%;
+        height: 2px;
         background: var(--border-color);
-        transform: translateY(-50%);
         z-index: 1;
     }
+
     .step-item {
         position: relative;
         z-index: 2;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
+        gap: 1rem;
+        width: 120px;
     }
+
     .step-circle {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        background: var(--bg-card);
-        border: 3px solid var(--border-color);
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
+        font-weight: 700;
+        font-size: 1.1rem;
         color: var(--text-secondary);
-        transition: all 0.4s ease;
+        transition: all 0.5s ease;
+        padding: 0;
     }
+
     .step-title {
         font-size: 0.85rem;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
         transition: all 0.4s ease;
     }
     
-    /* States */
     .step-item.active .step-circle {
         border-color: var(--primary);
-        background: var(--primary);
-        color: white;
-        box-shadow: 0 0 15px var(--primary-glow);
-        transform: scale(1.1);
+        background: var(--bg-body);
+        color: var(--primary);
+        box-shadow: 0 0 25px var(--primary-glow), inset 0 0 10px var(--primary-glow);
+        transform: scale(1.2);
     }
+    
     .step-item.active .step-title {
         color: var(--primary);
     }
@@ -290,36 +490,55 @@
         background: #10b981;
         color: white;
     }
+    
     .step-item.completed .step-title {
         color: #10b981;
     }
-    
-    /* Hide default bootstrap tab styling inside premium stepper */
-    .premium-stepper button {
-        background: none;
-        border: none;
-        padding: 0;
-        outline: none;
+
+    /* Floating Action Bar */
+    .action-bar {
+        position: sticky;
+        bottom: 2rem;
+        background: rgba(var(--bg-card-rgb, 255,255,255), 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--border-color);
+        border-radius: 100px;
+        padding: 1.25rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        z-index: 100;
+        margin-top: 2rem;
     }
-    
-    /* Validation shake */
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
+
+    /* Validation Errors */
     .is-invalid-shake {
-        animation: shake 0.4s;
         border-color: #ef4444 !important;
+        box-shadow: 0 0 0 1px #ef4444 !important;
+    }
+    .modal-backdrop{
+        z-index: auto !important;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <div class="garage-header fade-in">
-        <h1 class="garage-title">{{ __('إضافة سيارة جديدة') }}</h1>
-        <p class="text-secondary">{{ __('أدخل تفاصيل سيارتك ليتم مراجعتها من قبل الإدارة وإدراجها في المزاد.') }}</p>
+    <div class="garage-hero-card fade-in">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fa-solid fa-car-side"></i>
+            </div>
+            <div class="hero-text">
+                <h1 class="hero-title">{{ __('إضافة سيارة جديدة') }}</h1>
+                <p class="hero-subtitle">{{ __('أدخل تفاصيل سيارتك ليتم مراجعتها من قبل الإدارة وإدراجها في المزاد بكل سهولة ويسر.') }}</p>
+            </div>
+        </div>
+        <div class="hero-decoration">
+            <i class="fa-solid fa-gauge-high"></i>
+        </div>
     </div>
 
     @if ($errors->any())
@@ -434,7 +653,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-end gap-3 mt-4">
+                <div class="action-bar fade-in">
+                    <div></div> <!-- Empty div for flex-between spacing -->
                     <button type="button" class="btn btn-primary px-5" onclick="nextTab('step2')">{{ __('التالي') }} <i class="fa-solid fa-arrow-left ms-2"></i></button>
                 </div>
             </div>
@@ -493,7 +713,7 @@
                         <textarea id="description_en" name="description_en" class="form-control" rows="5">{{ old('description_en', $vehicle->description_en ?? '') }}</textarea>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between mt-4">
+                <div class="action-bar fade-in">
                     <button type="button" class="btn btn-secondary px-5" onclick="prevTab('step1')"><i class="fa-solid fa-arrow-right me-2"></i> {{ __('السابق') }}</button>
                     <button type="button" class="btn btn-primary px-5" onclick="nextTab('step3')">{{ __('التالي') }} <i class="fa-solid fa-arrow-left ms-2"></i></button>
                 </div>
@@ -513,7 +733,7 @@
                     <input type="hidden" name="primary_image_index" id="primaryImageIndex" value="0">
                     <div id="studioGrid" class="studio-grid"></div>
                 </div>
-                <div class="d-flex justify-content-between mt-4">
+                <div class="action-bar fade-in">
                     <button type="button" class="btn btn-secondary px-5" onclick="prevTab('step2')"><i class="fa-solid fa-arrow-right me-2"></i> {{ __('السابق') }}</button>
                     <button type="button" class="btn btn-primary px-5" onclick="nextTab('step4')">{{ __('التالي') }} <i class="fa-solid fa-arrow-left ms-2"></i></button>
                 </div>
@@ -541,10 +761,10 @@
                     <input type="hidden" name="damage_points" id="damagePointsInput" value="[]">
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4 p-4" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div class="action-bar fade-in">
                     <button type="button" class="btn btn-secondary px-4" onclick="prevTab('step3')"><i class="fa-solid fa-arrow-right me-2"></i> {{ __('السابق') }}</button>
                     
-                    <div id="summaryCard" class="text-center mx-3 flex-grow-1" style="background: var(--bg-body); padding: 10px; border-radius: 8px; border: 1px dashed var(--primary);">
+                    <div id="summaryCard" class="text-center mx-3 flex-grow-1" style="background: var(--bg-body); padding: 10px; border-radius: 8px; border: 1px dashed var(--neon-primary);">
                         <!-- Filled by JS -->
                     </div>
 

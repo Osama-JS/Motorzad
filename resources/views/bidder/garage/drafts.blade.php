@@ -3,144 +3,325 @@
 @section('title', __('مسوداتي'))
 
 @section('css')
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-    .garage-header {
+    /* ==========================================================================
+       ADAPTIVE LUXURY THEME (DRAFTS)
+       ========================================================================== */
+    :root {
+        --font-primary: 'Tajawal', 'Outfit', sans-serif;
+        --primary-glow: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.25);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+    }
+
+    body {
+        font-family: var(--font-primary);
+    }
+
+    /* Page Header - Hero Card */
+    .garage-hero-card {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--primary-glow) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        margin-bottom: 3.5rem;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        transition: all 0.4s ease;
     }
-    .garage-title {
-        font-size: 1.5rem;
-        font-weight: 700;
+
+    .garage-hero-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; width: 6px; height: 100%;
+        background: var(--primary);
+        box-shadow: 0 0 15px var(--primary);
+    }
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        width: 85px;
+        height: 85px;
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        color: var(--primary);
+        box-shadow: 0 15px 30px var(--primary-glow);
+        transform: rotate(8deg);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .garage-hero-card:hover .hero-icon {
+        transform: rotate(0deg) scale(1.1);
+        border-color: var(--primary);
+    }
+
+    .hero-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hero-title {
+        font-size: 2.4rem;
+        font-weight: 800;
         color: var(--text-primary);
-        margin: 0;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
     }
+
+    .hero-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        margin: 0;
+        max-width: 550px;
+        line-height: 1.6;
+    }
+
+    .hero-decoration {
+        position: absolute;
+        left: 20px;
+        bottom: -40px;
+        font-size: 15rem;
+        color: var(--primary);
+        opacity: 0.04;
+        z-index: 1;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
     .btn-add {
-        background: var(--primary-color);
+        background: var(--primary);
         color: white;
         border: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 600;
+        padding: 0.85rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 15px var(--primary-glow);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    
     .btn-add:hover {
-        background: var(--primary-hover);
+        background: var(--primary);
         color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
     }
+
     /* Premium Vehicle Card */
     .vehicle-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
     }
+    
     .vehicle-card:hover {
-        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         border-color: var(--primary);
+        transform: translateY(-2px);
     }
+    
     .vehicle-card-inner {
         display: flex;
-        align-items: center;
+        align-items: stretch;
         padding: 1.5rem;
-        gap: 1.5rem;
+        gap: 2rem;
         position: relative;
     }
+    
     .vehicle-img {
-        width: 160px;
-        height: 100px;
-        border-radius: 12px;
+        width: 220px;
+        height: 140px;
+        border-radius: var(--radius-md);
         object-fit: cover;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transition: transform 0.5s ease;
     }
+    
+    .vehicle-card:hover .vehicle-img {
+        transform: scale(1.03);
+    }
+    
     .vehicle-info {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
+    
     .vehicle-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
         color: var(--text-primary);
     }
+    
     .vehicle-meta {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: var(--text-secondary);
         display: flex;
-        gap: 1.5rem;
+        gap: 2rem;
+        font-weight: 500;
+    }
+    
+    .vehicle-meta i {
+        color: var(--primary);
+        margin-left: 0.5rem;
     }
     
     /* Progress Bar for Draft */
     .draft-progress-container {
-        background: rgba(0,0,0,0.02);
-        padding: 1.2rem 1.5rem;
+        background: var(--bg-body);
+        padding: 1.5rem 2rem;
         border-top: 1px solid var(--border-color);
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 2rem;
     }
+    
     .progress-wrapper {
         flex-grow: 1;
     }
+    
     .progress-label {
         display: flex;
         justify-content: space-between;
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 700;
         color: var(--text-secondary);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
     }
+    
     .progress {
-        height: 8px;
-        border-radius: 10px;
-        background-color: var(--border-color);
+        height: 10px;
+        border-radius: 50px;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        overflow: visible;
     }
+    
     .progress-bar {
         background: linear-gradient(90deg, var(--primary), #8b5cf6);
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(139, 92, 246, 0.4);
+        border-radius: 50px;
+        box-shadow: 0 0 10px var(--primary-glow);
+        position: relative;
+    }
+    
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: -4px;
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border: 3px solid var(--primary);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--primary-glow);
     }
     
     /* Quick Actions */
     .btn-resume {
         background: linear-gradient(135deg, var(--primary), #6d28d9);
-        color: white;
+        color: white !important;
         border: none;
-        padding: 0.5rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
         transition: all 0.3s;
+        box-shadow: 0 5px 15px var(--primary-glow);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .btn-resume:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(109, 40, 217, 0.3);
-        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
     }
     
     /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 5rem 2rem;
+        padding: 6rem 2rem;
         background: var(--bg-card);
-        border-radius: 16px;
-        border: 1px dashed var(--border-color);
+        border-radius: var(--radius-lg);
+        border: 2px dashed var(--border-color);
+        transition: all 0.3s;
+    }
+    
+    .empty-state:hover {
+        border-color: var(--primary);
+        background: var(--bg-body);
+    }
+    
+    .empty-state i.fa-file-pen {
+        font-size: 6rem;
+        color: var(--text-secondary);
+        opacity: 0.3;
+        margin-bottom: 2rem;
+        display: inline-block;
+        transition: transform 0.4s;
+    }
+    
+    .empty-state:hover i.fa-file-pen {
+        transform: scale(1.1) rotate(5deg);
+        color: var(--primary);
+        opacity: 0.5;
+    }
+    
+    .dropdown-menu {
+        border-radius: var(--radius-md);
+        overflow: hidden;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <div class="garage-header fade-in">
-        <h1 class="garage-title">{{ __('مسوداتي') }}</h1>
+    <div class="garage-hero-card fade-in">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fa-solid fa-file-pen"></i>
+            </div>
+            <div class="hero-text">
+                <h1 class="hero-title">{{ __('مسوداتي') }}</h1>
+                <p class="hero-subtitle">{{ __('أكمل تفاصيل سياراتك التي لم تقم بنشرها بعد لتبدأ في بيعها.') }}</p>
+            </div>
+        </div>
         <a href="{{ route('bidder.garage.create') }}" class="btn-add">
-            <i class="fa-solid fa-plus"></i> {{ __('إكمال الإضافة') }}
+            <i class="fa-solid fa-plus"></i> {{ __('إضافة سيارة جديدة') }}
         </a>
+        <div class="hero-decoration">
+            <i class="fa-solid fa-folder-open"></i>
+        </div>
     </div>
 
     @if(session('success'))

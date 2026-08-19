@@ -3,120 +3,289 @@
 @section('title', __('سياراتي المعروضة'))
 
 @section('css')
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-    .garage-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
+    /* ==========================================================================
+       ADAPTIVE LUXURY THEME
+       ========================================================================== */
+    :root {
+        --font-primary: 'Tajawal', 'Outfit', sans-serif;
+        --primary-glow: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.25);
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
     }
-    .garage-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0;
+
+    body {
+        font-family: var(--font-primary);
     }
-    .btn-add {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .btn-add:hover {
-        background: var(--primary-hover);
-        color: white;
-    }
-    /* Stats Header */
-    .stats-header {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        background: var(--bg-card);
+
+    /* Page Header - Hero Card */
+    .garage-hero-card {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--primary-glow) 100%);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        margin-bottom: 2.5rem;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        transition: transform 0.3s, box-shadow 0.3s;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        transition: all 0.4s ease;
     }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+
+    .garage-hero-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; width: 6px; height: 100%;
+        background: var(--primary);
+        box-shadow: 0 0 15px var(--primary);
     }
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        width: 75px;
+        height: 75px;
+        background: var(--bg-body);
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 2.5rem;
+        color: var(--primary);
+        box-shadow: 0 15px 30px var(--primary-glow);
+        transform: rotate(8deg);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .stat-info h3 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 700;
+
+    .garage-hero-card:hover .hero-icon {
+        transform: rotate(0deg) scale(1.1);
+        border-color: var(--primary);
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+        font-weight: 800;
         color: var(--text-primary);
+        margin: 0 0 5px 0;
+        letter-spacing: -0.5px;
     }
-    .stat-info p {
-        margin: 0;
-        font-size: 0.85rem;
+
+    .hero-subtitle {
         color: var(--text-secondary);
-        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .hero-decoration {
+        position: absolute;
+        left: 20px;
+        bottom: -40px;
+        font-size: 15rem;
+        color: var(--primary);
+        opacity: 0.04;
+        z-index: 1;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    .btn-add {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.85rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 15px var(--primary-glow);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .btn-add:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--bs-primary-rgb, 99, 102, 241), 0.4);
+    }
+
+    /* Stats Header */
+    .stats-header {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 4px;
+        background: transparent;
+        transition: all 0.4s ease;
+    }
+
+    .stat-card.primary::before { background: var(--primary); }
+    .stat-card.warning::before { background: #f59e0b; }
+    .stat-card.success::before { background: #10b981; }
+    .stat-card.secondary::before { background: #64748b; }
+    
+    .stat-watermark {
+        position: absolute;
+        left: -15px; /* Left side for RTL */
+        bottom: -20px;
+        font-size: 7rem;
+        opacity: 0.03;
+        transform: rotate(-15deg);
+        pointer-events: none;
+        transition: all 0.5s ease;
+        z-index: 0;
+    }
+
+    .stat-card:hover .stat-watermark {
+        opacity: 0.08;
+        transform: rotate(0deg) scale(1.1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    }
+    
+    .stat-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stat-title {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        transition: transform 0.4s;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.15) rotate(5deg);
+    }
+    
+    .stat-value {
+        margin: 0;
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1;
+        letter-spacing: -1px;
     }
 
     /* Premium Vehicle Card */
     .vehicle-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
     }
+    
     .vehicle-card:hover {
-        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         border-color: var(--primary);
+        transform: translateY(-2px);
     }
+    
     .vehicle-card-inner {
         display: flex;
-        align-items: center;
+        align-items: stretch; /* Make image full height */
         padding: 1.5rem;
-        gap: 1.5rem;
+        gap: 2rem;
         position: relative;
     }
+    
     .vehicle-img {
-        width: 160px;
-        height: 100px;
-        border-radius: 12px;
+        width: 220px;
+        height: 140px;
+        border-radius: var(--radius-md);
         object-fit: cover;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transition: transform 0.5s ease;
     }
+    
+    .vehicle-card:hover .vehicle-img {
+        transform: scale(1.03);
+    }
+    
     .vehicle-info {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
+    
     .vehicle-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
         color: var(--text-primary);
     }
+    
     .vehicle-meta {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: var(--text-secondary);
         display: flex;
-        gap: 1.5rem;
+        gap: 2rem;
+        font-weight: 500;
+    }
+    
+    .vehicle-meta i {
+        color: var(--primary);
+        margin-left: 0.5rem; /* Arabic RTL */
     }
     
     /* Quick Actions */
@@ -124,27 +293,60 @@
         position: absolute;
         top: 1.5rem;
         left: 1.5rem; /* Arabic RTL */
+        z-index: 10;
     }
+    
+    /* Action Buttons inside Card */
+    .card-actions-bottom {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 1.5rem; /* Arabic RTL */
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-gradient {
+        border: none;
+        border-radius: 50px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .btn-gradient-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .btn-gradient-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
     
     /* Pipeline Tracker / Stepper */
     .stepper-wrapper {
-        background: rgba(0,0,0,0.02);
-        padding: 1.5rem;
+        background: var(--bg-body);
+        padding: 2rem;
         display: flex;
         justify-content: space-between;
         position: relative;
         border-top: 1px solid var(--border-color);
     }
+    
     .stepper-wrapper::before {
         content: '';
         position: absolute;
-        top: 36px;
-        left: 50px;
-        right: 50px;
+        top: 45px;
+        left: 60px;
+        right: 60px;
         height: 3px;
         background: var(--border-color);
         z-index: 1;
     }
+    
     .stepper-item {
         position: relative;
         display: flex;
@@ -152,23 +354,24 @@
         align-items: center;
         flex: 1;
         z-index: 2;
+        gap: 0.75rem;
     }
+    
     .stepper-item .step-counter {
         position: relative;
         z-index: 5;
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         background: var(--bg-card);
         border: 3px solid var(--border-color);
         color: var(--text-secondary);
-        font-weight: bold;
-        margin-bottom: 8px;
-        transition: all 0.4s ease;
-        font-size: 16px;
+        font-weight: 700;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        font-size: 1.1rem;
     }
     
     /* Animations & Gradients for Stepper */
@@ -176,40 +379,48 @@
         background: linear-gradient(135deg, #10b981, #059669);
         border-color: transparent;
         color: white;
-        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
     }
     
     @keyframes pulse-ring {
-        0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        0% { box-shadow: 0 0 0 0 var(--primary-glow); }
+        70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
     }
     
     .stepper-item.active .step-counter {
-        background: linear-gradient(135deg, var(--primary), #6d28d9);
+        background: linear-gradient(135deg, var(--primary), #8b5cf6);
         border-color: transparent;
         color: white;
         animation: pulse-ring 2s infinite;
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
     
     .stepper-item.rejected .step-counter {
         background: linear-gradient(135deg, #ef4444, #b91c1c);
         border-color: transparent;
         color: white;
-        box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
     }
     
     .stepper-item .step-name {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: var(--text-secondary);
         font-weight: 700;
         text-align: center;
         transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    .stepper-item.completed .step-name, .stepper-item.active .step-name {
-        color: var(--text-primary);
+    
+    .stepper-item.completed .step-name {
+        color: #10b981;
     }
+    
+    .stepper-item.active .step-name {
+        color: var(--primary);
+    }
+    
     .stepper-item.rejected .step-name {
         color: #ef4444;
     }
@@ -217,26 +428,53 @@
     /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 5rem 2rem;
+        padding: 6rem 2rem;
         background: var(--bg-card);
-        border-radius: 16px;
-        border: 1px dashed var(--border-color);
+        border-radius: var(--radius-lg);
+        border: 2px dashed var(--border-color);
+        transition: all 0.3s;
     }
-    .empty-state img {
-        width: 200px;
-        opacity: 0.8;
+    
+    .empty-state:hover {
+        border-color: var(--primary);
+        background: var(--bg-body);
+    }
+    
+    .empty-state i.fa-car-side {
+        font-size: 6rem;
+        color: var(--text-secondary);
+        opacity: 0.3;
         margin-bottom: 2rem;
+        display: inline-block;
+        transition: transform 0.4s;
+    }
+    
+    .empty-state:hover i.fa-car-side {
+        transform: scale(1.1) translateX(-10px); /* Move forward in RTL */
+        color: var(--primary);
+        opacity: 0.5;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <div class="garage-header fade-in">
-        <h1 class="garage-title">{{ __('سياراتي المعروضة') }}</h1>
+    <div class="garage-hero-card fade-in">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fa-solid fa-car-side"></i>
+            </div>
+            <div class="hero-text">
+                <h1 class="hero-title">{{ __('سياراتي المعروضة') }}</h1>
+                <p class="hero-subtitle">{{ __('تابع حالة سياراتك، قم بإدارتها، وأطلق المزادات بكل سهولة.') }}</p>
+            </div>
+        </div>
         <a href="{{ route('bidder.garage.create') }}" class="btn-add">
-            <i class="fa-solid fa-plus"></i> {{ __('إضافة سيارة') }}
+            <i class="fa-solid fa-plus"></i> {{ __('إضافة سيارة جديدة') }}
         </a>
+        <div class="hero-decoration">
+            <i class="fa-solid fa-gauge-high"></i>
+        </div>
     </div>
 
     @if(session('success'))
@@ -247,43 +485,50 @@
 
     <div class="row fade-in" style="animation-delay: 0.1s;">
         <div class="col-12">
-            <!-- Stats Header -->
+            <!-- Premium Stats Header -->
             <div class="stats-header">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--primary);">
-                        <i class="fa-solid fa-car"></i>
+                <div class="stat-card primary">
+                    <i class="fa-solid fa-car-side stat-watermark" style="color: var(--primary);"></i>
+                    <div class="stat-header-row">
+                        <p class="stat-title">{{ __('إجمالي المعروض') }}</p>
+                        <div class="stat-icon" style="background: rgba(var(--bs-primary-rgb, 99, 102, 241), 0.1); color: var(--primary);">
+                            <i class="fa-solid fa-car"></i>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ $stats['total'] }}</h3>
-                        <p>{{ __('إجمالي المعروض') }}</p>
-                    </div>
+                    <h3 class="stat-value" style="position: relative; z-index: 2;">{{ $stats['total'] }}</h3>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+                
+                <div class="stat-card warning">
+                    <i class="fa-solid fa-clock-rotate-left stat-watermark" style="color: #f59e0b;"></i>
+                    <div class="stat-header-row">
+                        <p class="stat-title">{{ __('قيد المراجعة') }}</p>
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ $stats['pending'] }}</h3>
-                        <p>{{ __('قيد المراجعة') }}</p>
-                    </div>
+                    <h3 class="stat-value" style="position: relative; z-index: 2;">{{ $stats['pending'] }}</h3>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-                        <i class="fa-solid fa-check-double"></i>
+                
+                <div class="stat-card success">
+                    <i class="fa-solid fa-check-double stat-watermark" style="color: #10b981;"></i>
+                    <div class="stat-header-row">
+                        <p class="stat-title">{{ __('تم الاعتماد') }}</p>
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ $stats['approved'] }}</h3>
-                        <p>{{ __('تم الاعتماد') }}</p>
-                    </div>
+                    <h3 class="stat-value" style="position: relative; z-index: 2;">{{ $stats['approved'] }}</h3>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(100, 116, 139, 0.1); color: #64748b;">
-                        <i class="fa-solid fa-file-lines"></i>
+                
+                <div class="stat-card secondary">
+                    <i class="fa-solid fa-file-lines stat-watermark" style="color: #64748b;"></i>
+                    <div class="stat-header-row">
+                        <p class="stat-title">{{ __('مسوداتي') }}</p>
+                        <div class="stat-icon" style="background: rgba(100, 116, 139, 0.1); color: #64748b;">
+                            <i class="fa-solid fa-file-lines"></i>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ $stats['draft'] }}</h3>
-                        <p>{{ __('مسوداتي') }}</p>
-                    </div>
+                    <h3 class="stat-value" style="position: relative; z-index: 2;">{{ $stats['draft'] }}</h3>
                 </div>
             </div>
 
