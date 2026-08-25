@@ -38,6 +38,7 @@ class VehicleResource extends JsonResource
                     'sort_order' => $img->sort_order,
                 ])
             ),
+            'is_published_for_auction' => $this->relationLoaded('auction') ? $this->auction !== null : $this->auction()->exists(),
             'auction'             => $this->whenLoaded('auction', fn () => new AuctionResource($this->auction)),
             'created_at'          => $this->created_at?->toISOString(),
             'updated_at'          => $this->updated_at?->toISOString(),

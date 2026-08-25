@@ -4089,6 +4089,7 @@
                                         "description_en": "Very clean car",
                                         "status": "approved",
                                         "damage_points": null,
+                                        "is_published_for_auction": true,
                                         "primary_image_url": "https://example.com/storage/vehicles/1.jpg",
                                         "images": [
                                             {
@@ -4513,7 +4514,140 @@
                 ]
             }
         },
+        "/api/seller/garage/vehicles/{id}/submit": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Submit a draft vehicle",
+                "description": "Changes the status of a draft vehicle to approved/submitted.",
+                "operationId": "7d694cbdb5f74d296d9d3f9d528ea735",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Vehicle submitted successfully.",
+                                    "data": {
+                                        "id": 10,
+                                        "make_ar": "فورد",
+                                        "make_en": "Ford",
+                                        "model_ar": "موستانج",
+                                        "model_en": "Mustang",
+                                        "year": 2023,
+                                        "color_ar": "أسود",
+                                        "color_en": "Black",
+                                        "vin_number": "1FA6P8CF8N5XXXXXX",
+                                        "mileage": 12000,
+                                        "fuel_type": "petrol",
+                                        "transmission": "automatic",
+                                        "engine_capacity": "5.0L",
+                                        "cylinders": 8,
+                                        "condition": "excellent",
+                                        "description_ar": "سيارة رياضية ممتازة",
+                                        "description_en": "Excellent sports car",
+                                        "status": "approved",
+                                        "damage_points": null,
+                                        "primary_image_url": "https://example.com/storage/vehicles/10.jpg",
+                                        "images": [
+                                            {
+                                                "id": 102,
+                                                "url": "https://example.com/storage/vehicles/10.jpg",
+                                                "is_primary": true,
+                                                "sort_order": 0
+                                            }
+                                        ],
+                                        "created_at": "2023-10-01T10:00:00.000000Z",
+                                        "updated_at": "2023-10-01T10:05:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/seller/garage/auctions": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Seller Auctions",
+                "description": "Returns a list of auctions created by the seller.",
+                "operationId": "cf91b8be5e582395e016d0033d7ff87e",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "auctions": [
+                                            {
+                                                "id": 50,
+                                                "title_ar": "مزاد: فورد موستانج 2023",
+                                                "title_en": "Auction: Ford Mustang 2023",
+                                                "start_price": 150000,
+                                                "status": "scheduled",
+                                                "start_time": "2023-12-01T10:00:00.000000Z",
+                                                "end_time": "2023-12-10T10:00:00.000000Z",
+                                                "vehicle": {
+                                                    "id": 10,
+                                                    "make_ar": "فورد",
+                                                    "make_en": "Ford",
+                                                    "model_ar": "موستانج",
+                                                    "model_en": "Mustang",
+                                                    "year": 2023
+                                                }
+                                            }
+                                        ],
+                                        "meta": {
+                                            "current_page": 1,
+                                            "last_page": 1,
+                                            "total": 1,
+                                            "per_page": 15
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Seller Garage"
@@ -4641,6 +4775,80 @@
             }
         },
         "/api/seller/garage/auctions/{id}": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Seller Auction Details",
+                "description": "Returns the details of a specific auction created by the seller.",
+                "operationId": "253bdf754cde64df4ebab465bdc7b9d6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction retrieved successfully.",
+                                    "data": {
+                                        "id": 50,
+                                        "title_ar": "مزاد: فورد موستانج 2023",
+                                        "title_en": "Auction: Ford Mustang 2023",
+                                        "description_ar": "وصف المزاد",
+                                        "description_en": "Auction Description",
+                                        "location_ar": "الرياض",
+                                        "location_en": "Riyadh",
+                                        "start_price": 150000,
+                                        "reserve_price": null,
+                                        "buy_now_price": null,
+                                        "min_bid_increment": 1000,
+                                        "status": "scheduled",
+                                        "deposit_required": false,
+                                        "deposit_amount": 0,
+                                        "start_time": "2023-12-01T10:00:00.000000Z",
+                                        "end_time": "2023-12-10T10:00:00.000000Z",
+                                        "vehicle": {
+                                            "id": 10,
+                                            "make_ar": "فورد",
+                                            "make_en": "Ford",
+                                            "model_ar": "موستانج",
+                                            "model_en": "Mustang",
+                                            "year": 2023,
+                                            "color_ar": "أسود",
+                                            "color_en": "Black",
+                                            "vin_number": "1FA6P8CF8N5XXXXXX"
+                                        },
+                                        "created_at": "2023-10-01T10:00:00.000000Z",
+                                        "updated_at": "2023-10-01T10:05:00.000000Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Seller Garage"

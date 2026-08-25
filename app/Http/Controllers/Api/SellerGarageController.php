@@ -223,6 +223,7 @@ class SellerGarageController extends Controller
                             'description_en' => 'Very clean car',
                             'status' => 'approved',
                             'damage_points' => null,
+                            'is_published_for_auction' => true,
                             'primary_image_url' => 'https://example.com/storage/vehicles/1.jpg',
                             'images' => [
                                 [
@@ -571,7 +572,7 @@ class SellerGarageController extends Controller
 
         // Handle existing images
         $keptExistingImages = [];
-        if (!empty($validated['existing_images'])) {
+        if ($request->has('existing_images') && $validated['existing_images'] !== null) {
             $existingImagesOrder = json_decode($validated['existing_images'], true) ?? [];
             foreach ($existingImagesOrder as $img) {
                 $keptExistingImages[] = $img['serverId'];
@@ -590,13 +591,6 @@ class SellerGarageController extends Controller
             // Update sort order for kept existing images
             foreach ($existingImagesOrder as $img) {
                 VehicleImage::where('id', $img['serverId'])->update(['sort_order' => $img['order'], 'is_primary' => false]);
-            }
-        } else {
-            // Delete all existing images if none kept
-            $allImages = VehicleImage::where('vehicle_id', $vehicle->id)->get();
-            foreach($allImages as $delImg) {
-                Storage::disk('public')->delete($delImg->image_path);
-                $delImg->delete();
             }
         }
 
@@ -637,6 +631,423 @@ class SellerGarageController extends Controller
         return $this->successResponse(
             new VehicleResource($vehicle->load('images')),
             __('Vehicle updated successfully.')
+        );
+    }
+
+    /**
+     * Submit a draft vehicle to make it published.
+     */
+    #[OA\Post(
+        path: '/api/seller/garage/vehicles/{id}/submit',
+        summary: 'Submit a draft vehicle',
+        description: 'Changes the status of a draft vehicle to approved/submitted.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Vehicle submitted successfully.',
+                        'data' => [
+                            'id' => 10,
+                            'make_ar' => 'فورد',
+                            'make_en' => 'Ford',
+                            'model_ar' => 'موستانج',
+                            'model_en' => 'Mustang',
+                            'year' => 2023,
+                            'color_ar' => 'أسود',
+                            'color_en' => 'Black',
+                            'vin_number' => '1FA6P8CF8N5XXXXXX',
+                            'mileage' => 12000,
+                            'fuel_type' => 'petrol',
+                            'transmission' => 'automatic',
+                            'engine_capacity' => '5.0L',
+                            'cylinders' => 8,
+                            'condition' => 'excellent',
+                            'description_ar' => 'سيارة رياضية ممتازة',
+                            'description_en' => 'Excellent sports car',
+                            'status' => 'approved',
+                            'damage_points' => null,
+                            'primary_image_url' => 'https://example.com/storage/vehicles/10.jpg',
+                            'images' => [
+                                [
+                                    'id' => 102,
+                                    'url' => 'https://example.com/storage/vehicles/10.jpg',
+                                    'is_primary' => true,
+                                    'sort_order' => 0
+                                ]
+                            ],
+                            'created_at' => '2023-10-01T10:00:00.000000Z',
+                            'updated_at' => '2023-10-01T10:05:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found')
+        ]
+    )]
+    public function submitDraft(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $vehicle = Vehicle::where('id', $id)
+            ->where('submitted_by', $user->id)
+            ->first();
+
+        if (!$vehicle) {
+            return $this->errorResponse(__('Vehicle not found.'), 404);
+        }
+
+        if ($vehicle->status !== 'draft') {
+            return $this->errorResponse(__('This vehicle is not a draft.'), 400);
+        }
+
+        $vehicle->update(['status' => 'approved']);
+
+        return $this->successResponse(
+            new VehicleResource($vehicle->load('images')),
+            __('Vehicle submitted successfully.')
+        );
+    }
+
+    /**
+     * Get seller's auctions
+     */
+    #[OA\Get(
+        path: '/api/seller/garage/auctions',
+        summary: 'Get Seller Auctions',
+        description: 'Returns a list of auctions created by the seller.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'auctions' => [
+                                [
+                                    'id' => 50,
+                                    'title_ar' => 'مزاد: فورد موستانج 2023',
+                                    'title_en' => 'Auction: Ford Mustang 2023',
+                                    'start_price' => 150000,
+                                    'status' => 'scheduled',
+                                    'start_time' => '2023-12-01T10:00:00.000000Z',
+                                    'end_time' => '2023-12-10T10:00:00.000000Z',
+                                    'vehicle' => [
+                                        'id' => 10,
+                                        'make_ar' => 'فورد',
+                                        'make_en' => 'Ford',
+                                        'model_ar' => 'موستانج',
+                                        'model_en' => 'Mustang',
+                                        'year' => 2023,
+                                    ]
+                                ]
+                            ],
+                            'meta' => [
+                                'current_page' => 1,
+                                'last_page' => 1,
+                                'total' => 1,
+                                'per_page' => 15
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized')
+        ]
+    )]
+    public function myAuctions(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $auctions = Auction::with('vehicle.images')
+            ->where('created_by', $user->id)
+            ->latest()
+            ->paginate(15);
+
+        return $this->successResponse([
+            'auctions' => AuctionResource::collection($auctions->items()),
+            'meta' => [
+                'current_page' => $auctions->currentPage(),
+                'last_page'    => $auctions->lastPage(),
+                'total'        => $auctions->total(),
+                'per_page'     => $auctions->perPage(),
+            ]
+        ]);
+    }
+
+    /**
+     * Get a specific auction created by the seller
+     */
+    #[OA\Get(
+        path: '/api/seller/garage/auctions/{id}',
+        summary: 'Get Seller Auction Details',
+        description: 'Returns the details of a specific auction created by the seller.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Auction retrieved successfully.',
+                        'data' => [
+                            'id' => 50,
+                            'title_ar' => 'مزاد: فورد موستانج 2023',
+                            'title_en' => 'Auction: Ford Mustang 2023',
+                            'description_ar' => 'وصف المزاد',
+                            'description_en' => 'Auction Description',
+                            'location_ar' => 'الرياض',
+                            'location_en' => 'Riyadh',
+                            'start_price' => 150000,
+                            'reserve_price' => null,
+                            'buy_now_price' => null,
+                            'min_bid_increment' => 1000,
+                            'status' => 'scheduled',
+                            'deposit_required' => false,
+                            'deposit_amount' => 0,
+                            'start_time' => '2023-12-01T10:00:00.000000Z',
+                            'end_time' => '2023-12-10T10:00:00.000000Z',
+                            'vehicle' => [
+                                'id' => 10,
+                                'make_ar' => 'فورد',
+                                'make_en' => 'Ford',
+                                'model_ar' => 'موستانج',
+                                'model_en' => 'Mustang',
+                                'year' => 2023,
+                                'color_ar' => 'أسود',
+                                'color_en' => 'Black',
+                                'vin_number' => '1FA6P8CF8N5XXXXXX',
+                            ],
+                            'created_at' => '2023-10-01T10:00:00.000000Z',
+                            'updated_at' => '2023-10-01T10:05:00.000000Z'
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Not Found')
+        ]
+    )]
+    public function showAuction(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $auction = Auction::with('vehicle.images')
+            ->where('created_by', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$auction) {
+            return $this->errorResponse(__('Auction not found.'), 404);
+        }
+
+        return $this->successResponse(
+            new AuctionResource($auction),
+            __('Auction retrieved successfully.')
+        );
+    }
+
+    /**
+     * Get bids for a specific auction
+     */
+    #[OA\Get(
+        path: '/api/seller/garage/auctions/{id}/bids',
+        summary: 'Get Auction Bids',
+        description: 'Returns a paginated list of bids for a specific auction.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'bids' => [
+                                [
+                                    'id' => 1,
+                                    'amount' => 160000,
+                                    'status' => 'active',
+                                    'created_at' => '2023-10-01T10:05:00.000000Z',
+                                    'user' => [
+                                        'id' => 5,
+                                        'name' => 'محمد أحمد',
+                                        'phone' => '+966500000000'
+                                    ]
+                                ]
+                            ],
+                            'meta' => [
+                                'current_page' => 1,
+                                'last_page' => 1,
+                                'total' => 1,
+                                'per_page' => 15
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'Auction not found')
+        ]
+    )]
+    public function auctionBids(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $auction = Auction::where('created_by', $user->id)->find($id);
+
+        if (!$auction) {
+            return $this->errorResponse(__('Auction not found.'), 404);
+        }
+
+        $bids = $auction->bids()->with('user:id,name,phone,avatar')->latest()->paginate(15);
+
+        return $this->successResponse([
+            'bids' => $bids->items(),
+            'meta' => [
+                'current_page' => $bids->currentPage(),
+                'last_page'    => $bids->lastPage(),
+                'total'        => $bids->total(),
+                'per_page'     => $bids->perPage(),
+            ]
+        ]);
+    }
+
+    /**
+     * Accept a specific bid manually to close the auction
+     */
+    #[OA\Post(
+        path: '/api/seller/garage/auctions/{id}/bids/{bidId}/accept',
+        summary: 'Accept Bid manually',
+        description: 'Accepts a specific bid and marks the auction as sold/completed.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'bidId', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Bid accepted successfully. The auction is now closed and sold.',
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Auction already closed'),
+            new OA\Response(response: 404, description: 'Not Found')
+        ]
+    )]
+    public function acceptBid(Request $request, $id, $bidId): JsonResponse
+    {
+        $user = $request->user();
+
+        $auction = Auction::where('created_by', $user->id)->find($id);
+
+        if (!$auction) {
+            return $this->errorResponse(__('Auction not found.'), 404);
+        }
+
+        if (in_array($auction->status, ['completed', 'sold', 'cancelled'])) {
+            return $this->errorResponse(__('This auction is already closed.'), 400);
+        }
+
+        $bid = $auction->bids()->find($bidId);
+
+        if (!$bid) {
+            return $this->errorResponse(__('Bid not found.'), 404);
+        }
+
+        // Accept the bid and mark auction as sold
+        $auction->update([
+            'status' => 'sold',
+            'winner_id' => $bid->user_id,
+            'winning_bid_amount' => $bid->amount,
+            'sold_at' => now(),
+        ]);
+        
+        $bid->update(['status' => 'accepted']);
+
+        // Here we could also dispatch an event or send notifications to the winner 
+        // and other bidders that the auction has ended.
+
+        return $this->successResponse(
+            null,
+            __('Bid accepted successfully. The auction is now closed and sold.')
+        );
+    }
+
+    /**
+     * End an auction early (cancel or close it manually)
+     */
+    #[OA\Post(
+        path: '/api/seller/garage/auctions/{id}/end',
+        summary: 'End Auction Early',
+        description: 'Allows the seller to manually stop an active or scheduled auction before its timer ends.',
+        security: [['bearerAuth' => []]],
+        tags: ['Seller Garage'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response',
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'message' => 'Auction ended successfully.',
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Auction is already closed'),
+            new OA\Response(response: 404, description: 'Not Found')
+        ]
+    )]
+    public function endEarly(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $auction = Auction::where('created_by', $user->id)->find($id);
+
+        if (!$auction) {
+            return $this->errorResponse(__('Auction not found.'), 404);
+        }
+
+        if (in_array($auction->status, ['completed', 'sold', 'cancelled'])) {
+            return $this->errorResponse(__('This auction is already closed.'), 400);
+        }
+
+        $auction->update([
+            'status' => 'cancelled', // Setting to cancelled since it ended without a winner through the platform
+            'end_time' => now(),
+        ]);
+
+        return $this->successResponse(
+            null,
+            __('Auction ended successfully.')
         );
     }
 

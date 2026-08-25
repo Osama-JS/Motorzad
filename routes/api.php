@@ -156,6 +156,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'showVehicle']);
         Route::post('/vehicles', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeVehicle']);
         Route::match(['post', 'put'], '/vehicles/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateVehicle']);
+        Route::post('/vehicles/{id}/submit', [\App\Http\Controllers\Api\SellerGarageController::class, 'submitDraft']);
+        Route::get('/auctions', [\App\Http\Controllers\Api\SellerGarageController::class, 'myAuctions']);
+        Route::get('/auctions/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'showAuction']);
+        Route::get('/auctions/{id}/bids', [\App\Http\Controllers\Api\SellerGarageController::class, 'auctionBids']);
+        Route::post('/auctions/{id}/bids/{bidId}/accept', [\App\Http\Controllers\Api\SellerGarageController::class, 'acceptBid']);
+        Route::post('/auctions/{id}/end', [\App\Http\Controllers\Api\SellerGarageController::class, 'endEarly']);
         Route::post('/auctions', [\App\Http\Controllers\Api\SellerGarageController::class, 'storeAuction']);
         Route::put('/auctions/{id}', [\App\Http\Controllers\Api\SellerGarageController::class, 'updateAuction']);
         Route::post('/decode-vin', [\App\Http\Controllers\Api\SellerGarageController::class, 'decodeVin']);
