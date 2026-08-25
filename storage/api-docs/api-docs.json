@@ -4975,6 +4975,166 @@
                 ]
             }
         },
+        "/api/seller/garage/auctions/{id}/bids": {
+            "get": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Get Auction Bids",
+                "description": "Returns a paginated list of bids for a specific auction.",
+                "operationId": "2dc1a338353948c21cc99f576c0f5d69",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "bids": [
+                                            {
+                                                "id": 1,
+                                                "amount": 160000,
+                                                "status": "active",
+                                                "created_at": "2023-10-01T10:05:00.000000Z",
+                                                "user": {
+                                                    "id": 5,
+                                                    "name": "محمد أحمد",
+                                                    "phone": "+966500000000"
+                                                }
+                                            }
+                                        ],
+                                        "meta": {
+                                            "current_page": 1,
+                                            "last_page": 1,
+                                            "total": 1,
+                                            "per_page": 15
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Auction not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/auctions/{id}/bids/{bidId}/accept": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "Accept Bid manually",
+                "description": "Accepts a specific bid and marks the auction as sold/completed.",
+                "operationId": "bd35794423119033aae5162b9a513f27",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bidId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Bid accepted successfully. The auction is now closed and sold."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Auction already closed"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/seller/garage/auctions/{id}/end": {
+            "post": {
+                "tags": [
+                    "Seller Garage"
+                ],
+                "summary": "End Auction Early",
+                "description": "Allows the seller to manually stop an active or scheduled auction before its timer ends.",
+                "operationId": "e63112b94695b2a20d22252e8cf27dd5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Auction ended successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Auction is already closed"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/seller/garage/decode-vin": {
             "post": {
                 "tags": [

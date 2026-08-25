@@ -398,6 +398,12 @@ class SellerGarageController extends Controller
             $validated['damage_points'] = null;
         }
 
+        foreach (['condition', 'transmission', 'fuel_type'] as $field) {
+            if (array_key_exists($field, $validated) && is_null($validated[$field])) {
+                unset($validated[$field]);
+            }
+        }
+
         if (!empty($validated['vehicle_id'])) {
             $vehicle = Vehicle::where('id', $validated['vehicle_id'])->where('submitted_by', $user->id)->firstOrFail();
             $vehicle->update($validated);
@@ -566,6 +572,12 @@ class SellerGarageController extends Controller
             $validated['damage_points'] = json_decode($validated['damage_points'], true);
         } else {
             $validated['damage_points'] = null;
+        }
+
+        foreach (['condition', 'transmission', 'fuel_type'] as $field) {
+            if (array_key_exists($field, $validated) && is_null($validated[$field])) {
+                unset($validated[$field]);
+            }
         }
 
         $vehicle->update($validated);
