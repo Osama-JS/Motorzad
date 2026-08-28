@@ -218,7 +218,12 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
         Route::post('/generate-description', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'generateDescription'])->name('generate-description');
         Route::post('/auto-save', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'autoSave'])->name('auto-save');
         
-        // Seller Auction Creation & Editing
+        // Seller Auction Management
+        Route::get('/auctions', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'indexAuctions'])->name('auctions.index');
+        Route::get('/auctions/{id}/show', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'showAuction'])->name('auctions.show');
+        Route::get('/auctions/{id}/bids', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'auctionBids'])->name('auctions.bids');
+        Route::post('/auctions/{id}/bids/{bidId}/accept', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'acceptBid'])->name('auctions.accept-bid');
+        Route::post('/auctions/{id}/end', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'endEarly'])->name('auctions.end');
         Route::get('/auctions/create/{vehicle_id}', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'createAuction'])->name('auctions.create');
         Route::post('/auctions/store', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'storeAuction'])->name('auctions.store');
         Route::get('/auctions/{id}/edit', [\App\Http\Controllers\Bidder\SellerGarageController::class, 'editAuction'])->name('auctions.edit');

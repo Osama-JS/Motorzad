@@ -473,6 +473,133 @@ class SellerGarageController extends Controller
     }
 
     /**
+     * Display the seller's auctions.
+     */
+    public function indexAuctions()
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('seller')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $auctions = Auction::with(['vehicle.images', 'highestBid', 'bids'])
+            ->where('created_by', $user->id)
+            ->latest()
+            ->paginate(10);
+
+        $stats = [
+            'total' => Auction::where('created_by', $user->id)->count(),
+            'live' => Auction::where('created_by', $user->id)->where('status', 'live')->count(),
+            'scheduled' => Auction::where('created_by', $user->id)->where('status', 'scheduled')->count(),
+            'ended' => Auction::where('created_by', $user->id)->where('status', 'ended')->count(),
+        ];
+
+        return view('bidder.garage.auctions.index', compact('auctions', 'stats'));
+    }
+
+    /**
+     * Show the details of the seller's auction.
+     */
+    public function showAuction($id)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('seller')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $auction = Auction::with(['vehicle.images', 'highestBid', 'bids.user'])
+            ->where('created_by', $user->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        return view('bidder.garage.auctions.show', compact('auction'));
+    }
+
+    /**
+     * Show the bids for a specific auction.
+     */
+    public function auctionBids($id)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('seller')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $auction = Auction::with(['vehicle', 'highestBid'])
+            ->where('created_by', $user->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $bids = $auction->bids()->with('user')->orderBy('created_at', 'desc')->paginate(15);
+
+        return view('bidder.garage.auctions.bids', compact('auction', 'bids'));
+    }
+
+    /**
+     * Accept a specific bid manually to close the auction
+     */
+    public function acceptBid(Request $request, $id, $bidId)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('seller')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $auction = Auction::where('created_by', $user->id)->findOrFail($id);
+
+        if (in_array($auction->status, ['completed', 'sold', 'cancelled'])) {
+            return redirect()->back()->with('error', __('هذا المزاد مغلق بالفعل.'));
+        }
+
+        $bid = $auction->bids()->findOrFail($bidId);
+
+        // Accept the bid and mark auction as sold
+        $auction->update([
+            'status' => 'sold',
+            'winner_id' => $bid->user_id,
+            'winning_bid_amount' => $bid->amount,
+            'sold_at' => now(),
+        ]);
+        
+        $bid->update(['status' => 'won']);
+
+        // Send notifications if required here...
+
+        return redirect()->route('bidder.garage.auctions.show', $auction->id)
+            ->with('success', __('تم قبول المزايدة بنجاح وإغلاق المزاد.'));
+    }
+
+    /**
+     * End an auction early (cancel or close it manually)
+     */
+    public function endEarly(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('seller')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $auction = Auction::where('created_by', $user->id)->findOrFail($id);
+
+        if (in_array($auction->status, ['completed', 'sold', 'cancelled'])) {
+            return redirect()->back()->with('error', __('هذا المزاد مغلق بالفعل.'));
+        }
+
+        $auction->update([
+            'status' => 'cancelled', // Setting to cancelled since it ended without a winner
+            'end_time' => now(),
+        ]);
+
+        return redirect()->route('bidder.garage.auctions.show', $auction->id)
+            ->with('success', __('تم إنهاء المزاد مبكراً.'));
+    }
+
+    /**
      * Show the form for creating an auction for an approved vehicle.
      */
     public function createAuction($vehicle_id)
