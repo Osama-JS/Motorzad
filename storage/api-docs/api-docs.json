@@ -3194,7 +3194,7 @@
                                     "full_name",
                                     "country",
                                     "id_number",
-                                    "id_image",
+                                    "document_type",
                                     "selfie_image"
                                 ],
                                 "properties": {
@@ -3210,8 +3210,26 @@
                                         "type": "string",
                                         "example": "1234567890"
                                     },
-                                    "id_image": {
-                                        "description": "Identity document image (JPEG, PNG, JPG, max 2MB)",
+                                    "document_type": {
+                                        "type": "string",
+                                        "example": "national_id",
+                                        "enum": [
+                                            "national_id",
+                                            "passport"
+                                        ]
+                                    },
+                                    "id_front_image": {
+                                        "description": "National ID front image (Required if document_type is national_id)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "id_back_image": {
+                                        "description": "National ID back image (Required if document_type is national_id)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "passport_image": {
+                                        "description": "Passport image (Required if document_type is passport)",
                                         "type": "string",
                                         "format": "binary"
                                     },

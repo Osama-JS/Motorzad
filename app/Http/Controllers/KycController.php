@@ -35,7 +35,10 @@ class KycController extends Controller
             'full_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'id_number' => 'required|string|max:50',
-            'id_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'document_type' => 'required|in:national_id,passport',
+            'id_front_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
+            'id_back_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
+            'passport_image' => 'required_if:document_type,passport|image|mimes:jpeg,png,jpg|max:2048',
             'selfie_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -52,7 +55,17 @@ class KycController extends Controller
             return back()->with('error', 'لديك طلب قيد المراجعة بالفعل.');
         }
 
-        $idPath = $request->file('id_image')->store('kyc', 'public');
+        $idFrontPath = null;
+        $idBackPath = null;
+        $passportPath = null;
+
+        if ($request->document_type === 'national_id') {
+            $idFrontPath = $request->file('id_front_image')->store('kyc', 'public');
+            $idBackPath = $request->file('id_back_image')->store('kyc', 'public');
+        } else {
+            $passportPath = $request->file('passport_image')->store('kyc', 'public');
+        }
+        
         $selfiePath = $request->file('selfie_image')->store('kyc', 'public');
 
         KycRequest::create([
@@ -60,7 +73,10 @@ class KycController extends Controller
             'full_name' => $request->full_name,
             'country' => $request->country,
             'id_number' => $request->id_number,
-            'id_image' => $idPath,
+            'document_type' => $request->document_type,
+            'id_front_image' => $idFrontPath,
+            'id_back_image' => $idBackPath,
+            'passport_image' => $passportPath,
             'selfie_image' => $selfiePath,
             'status' => 'pending'
         ]);

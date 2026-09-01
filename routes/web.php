@@ -135,6 +135,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
     Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
 
+    // News Management
+    Route::get('news/data', [\App\Http\Controllers\Admin\NewsController::class, 'getData'])->name('news.data');
+    Route::post('news/{news}/toggle-active', [\App\Http\Controllers\Admin\NewsController::class, 'toggleActive'])->name('news.toggle-active');
+    Route::resource('news', \App\Http\Controllers\Admin\NewsController::class);
+
     // Features Management
     Route::get('features/data', [\App\Http\Controllers\Admin\FeatureController::class, 'getData'])->name('features.data');
     Route::post('features/{feature}/toggle-active', [\App\Http\Controllers\Admin\FeatureController::class, 'toggleActive'])->name('features.toggle-active');

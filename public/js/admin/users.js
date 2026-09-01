@@ -588,6 +588,9 @@ window.viewUser = function(id) {
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0 text-start" style="font-size: 0.9rem;">
                                         <tbody>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.firstName}</th><td class="border-bottom-0 fw-medium">${user.first_name || '---'}</td></tr>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.lastName}</th><td class="border-bottom-0 fw-medium">${user.last_name || '---'}</td></tr>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.email}</th><td class="border-bottom-0 fw-medium">${user.email || '---'}</td></tr>
                                             <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.phoneNumber}</th><td class="border-bottom-0 fw-medium" dir="ltr" style="text-align: left;">${user.country_code ? user.country_code + ' ' : ''}${user.phone || '---'}</td></tr>
                                             <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.idNumber}</th><td class="border-bottom-0 fw-medium">${user.id_number || '---'}</td></tr>
                                             <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.gender}</th><td class="border-bottom-0 fw-medium">${user.gender === 'male' ? window.UserConfig.trans.male : (user.gender === 'female' ? window.UserConfig.trans.female : '---')}</td></tr>
@@ -601,25 +604,63 @@ window.viewUser = function(id) {
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="card border-0 shadow-sm mt-4" style="background: var(--bg-card, #fff);">
+                            <div class="card-header bg-transparent border-bottom pt-3 pb-2">
+                                <h6 class="text-primary fw-bold mb-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>${window.UserConfig.trans.bankInfo}</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 text-start" style="font-size: 0.9rem;">
+                                        <tbody>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.bankName}</th><td class="border-bottom-0 fw-medium">${user.bank_name || '---'}</td></tr>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.accountNumber}</th><td class="border-bottom-0 fw-medium">${user.account_number || '---'}</td></tr>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.iban}</th><td class="border-bottom-0 fw-medium" dir="ltr" style="text-align: left;">${user.iban || '---'}</td></tr>
+                                            <tr><th style="width: 35%; color: var(--text-muted);" class="ps-4 border-bottom-0">${window.UserConfig.trans.beneficiaryName}</th><td class="border-bottom-0 fw-medium">${user.beneficiary_name || '---'}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 ${kyc ? `
                 <div class="card border-0 shadow-sm mt-4" style="background: var(--bg-card, #fff);">
-                    <div class="card-header bg-transparent border-bottom pt-3 pb-2">
+                    <div class="card-header bg-transparent border-bottom pt-3 pb-2 d-flex justify-content-between align-items-center">
                         <h6 class="text-primary fw-bold mb-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>${window.UserConfig.trans.kycDocs}</h6>
+                        <span class="badge bg-secondary">${kyc.document_type === 'passport' ? 'Passport (جواز سفر)' : 'National ID (هوية وطنية)'}</span>
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            ${kyc.document_type === 'passport' ? `
                             <div class="col-md-6 mb-4 mb-md-0">
                                 <div class="p-3 rounded text-center h-100 border" style="background: var(--bg-input, #f8f9fa); border-color: var(--border) !important;">
-                                    <label class="d-block fw-semibold mb-3 text-muted">${window.UserConfig.trans.idImage}</label>
-                                    <a href="${kyc.id_image_url}" target="_blank">
-                                        <img src="${kyc.id_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                    <label class="d-block fw-semibold mb-3 text-muted">صورة الجواز</label>
+                                    <a href="${kyc.passport_image_url}" target="_blank">
+                                        <img src="${kyc.passport_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 220px; object-fit: contain;">
                                     </a>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            ` : `
+                            <div class="col-md-4 mb-4 mb-md-0">
+                                <div class="p-3 rounded text-center h-100 border" style="background: var(--bg-input, #f8f9fa); border-color: var(--border) !important;">
+                                    <label class="d-block fw-semibold mb-3 text-muted">صورة الهوية (أمام)</label>
+                                    <a href="${kyc.id_front_image_url}" target="_blank">
+                                        <img src="${kyc.id_front_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mb-md-0">
+                                <div class="p-3 rounded text-center h-100 border" style="background: var(--bg-input, #f8f9fa); border-color: var(--border) !important;">
+                                    <label class="d-block fw-semibold mb-3 text-muted">صورة الهوية (خلف)</label>
+                                    <a href="${kyc.id_back_image_url}" target="_blank">
+                                        <img src="${kyc.id_back_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                    </a>
+                                </div>
+                            </div>
+                            `}
+                            <div class="${kyc.document_type === 'passport' ? 'col-md-6' : 'col-md-4'}">
                                 <div class="p-3 rounded text-center h-100 border" style="background: var(--bg-input, #f8f9fa); border-color: var(--border) !important;">
                                     <label class="d-block fw-semibold mb-3 text-muted">${window.UserConfig.trans.selfieImage}</label>
                                     <a href="${kyc.selfie_image_url}" target="_blank">
@@ -629,13 +670,19 @@ window.viewUser = function(id) {
                             </div>
                             <div class="col-12 mt-4">
                                 <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="p-3 border rounded" style="background: var(--bg-card, #fff); border-color: var(--border) !important;">
                                             <small class="d-block text-muted mb-1">${window.UserConfig.trans.nameInReq}</small>
                                             <strong class="fs-6">${kyc.full_name || '---'}</strong>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded" style="background: var(--bg-card, #fff); border-color: var(--border) !important;">
+                                            <small class="d-block text-muted mb-1">${window.UserConfig.trans.idNumber}</small>
+                                            <strong class="fs-6">${kyc.id_number || '---'}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
                                         <div class="p-3 border rounded" style="background: var(--bg-card, #fff); border-color: var(--border) !important;">
                                             <small class="d-block text-muted mb-1">${window.UserConfig.trans.country}</small>
                                             <strong class="fs-6">${kyc.country || '---'}</strong>

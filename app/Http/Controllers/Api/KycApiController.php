@@ -75,7 +75,10 @@ class KycApiController extends Controller
                 'full_name' => $latestRequest->full_name,
                 'country' => $latestRequest->country,
                 'id_number' => $latestRequest->id_number,
-                'id_image_url' => asset('storage/' . $latestRequest->id_image),
+                'document_type' => $latestRequest->document_type,
+                'id_front_image_url' => $latestRequest->id_front_image ? asset('storage/' . $latestRequest->id_front_image) : null,
+                'id_back_image_url' => $latestRequest->id_back_image ? asset('storage/' . $latestRequest->id_back_image) : null,
+                'passport_image_url' => $latestRequest->passport_image ? asset('storage/' . $latestRequest->passport_image) : null,
                 'selfie_image_url' => asset('storage/' . $latestRequest->selfie_image),
                 'status' => $latestRequest->status,
                 'admin_note' => $latestRequest->admin_note,
@@ -112,12 +115,15 @@ class KycApiController extends Controller
             content: new OA\MediaType(
                 mediaType: "multipart/form-data",
                 schema: new OA\Schema(
-                    required: ["full_name", "country", "id_number", "id_image", "selfie_image"],
+                    required: ["full_name", "country", "id_number", "document_type", "selfie_image"],
                     properties: [
                         new OA\Property(property: "full_name", type: "string", example: "John Doe"),
                         new OA\Property(property: "country", type: "string", example: "Saudi Arabia"),
                         new OA\Property(property: "id_number", type: "string", example: "1234567890"),
-                        new OA\Property(property: "id_image", type: "string", format: "binary", description: "Identity document image (JPEG, PNG, JPG, max 2MB)"),
+                        new OA\Property(property: "document_type", type: "string", example: "national_id", enum: ["national_id", "passport"]),
+                        new OA\Property(property: "id_front_image", type: "string", format: "binary", description: "National ID front image (Required if document_type is national_id)"),
+                        new OA\Property(property: "id_back_image", type: "string", format: "binary", description: "National ID back image (Required if document_type is national_id)"),
+                        new OA\Property(property: "passport_image", type: "string", format: "binary", description: "Passport image (Required if document_type is passport)"),
                         new OA\Property(property: "selfie_image", type: "string", format: "binary", description: "Selfie holding document (JPEG, PNG, JPG, max 2MB)")
                     ]
                 )
@@ -163,7 +169,10 @@ class KycApiController extends Controller
             'full_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'id_number' => 'required|string|max:50',
-            'id_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'document_type' => 'required|in:national_id,passport',
+            'id_front_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
+            'id_back_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
+            'passport_image' => 'required_if:document_type,passport|image|mimes:jpeg,png,jpg|max:2048',
             'selfie_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -187,7 +196,9 @@ class KycApiController extends Controller
         }
 
         // Upload and store the files
-        $idPath = $request->file('id_image')->store('kyc', 'public');
+        $idFrontPath = $request->hasFile('id_front_image') ? $request->file('id_front_image')->store('kyc', 'public') : null;
+        $idBackPath = $request->hasFile('id_back_image') ? $request->file('id_back_image')->store('kyc', 'public') : null;
+        $passportPath = $request->hasFile('passport_image') ? $request->file('passport_image')->store('kyc', 'public') : null;
         $selfiePath = $request->file('selfie_image')->store('kyc', 'public');
 
         // Create the KYC request
@@ -196,7 +207,10 @@ class KycApiController extends Controller
             'full_name' => $validated['full_name'],
             'country' => $validated['country'],
             'id_number' => $validated['id_number'],
-            'id_image' => $idPath,
+            'document_type' => $validated['document_type'],
+            'id_front_image' => $idFrontPath,
+            'id_back_image' => $idBackPath,
+            'passport_image' => $passportPath,
             'selfie_image' => $selfiePath,
             'status' => 'pending'
         ]);
@@ -211,7 +225,10 @@ class KycApiController extends Controller
             'full_name' => $kycRequest->full_name,
             'country' => $kycRequest->country,
             'id_number' => $kycRequest->id_number,
-            'id_image_url' => asset('storage/' . $kycRequest->id_image),
+            'document_type' => $kycRequest->document_type,
+            'id_front_image_url' => $kycRequest->id_front_image ? asset('storage/' . $kycRequest->id_front_image) : null,
+            'id_back_image_url' => $kycRequest->id_back_image ? asset('storage/' . $kycRequest->id_back_image) : null,
+            'passport_image_url' => $kycRequest->passport_image ? asset('storage/' . $kycRequest->passport_image) : null,
             'selfie_image_url' => asset('storage/' . $kycRequest->selfie_image),
             'status' => $kycRequest->status,
             'created_at' => $kycRequest->created_at->toIso8601String(),
@@ -294,7 +311,10 @@ class KycApiController extends Controller
                 'full_name' => $req->full_name,
                 'country' => $req->country,
                 'id_number' => $req->id_number,
-                'id_image_url' => asset('storage/' . $req->id_image),
+                'document_type' => $req->document_type,
+                'id_front_image_url' => $req->id_front_image ? asset('storage/' . $req->id_front_image) : null,
+                'id_back_image_url' => $req->id_back_image ? asset('storage/' . $req->id_back_image) : null,
+                'passport_image_url' => $req->passport_image ? asset('storage/' . $req->passport_image) : null,
                 'selfie_image_url' => asset('storage/' . $req->selfie_image),
                 'status' => $req->status,
                 'admin_note' => $req->admin_note,

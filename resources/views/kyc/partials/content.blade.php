@@ -85,19 +85,47 @@
                         <input type="text" name="id_number" value="{{ old('id_number', $user->id_number) }}" required placeholder="{{ __('National ID number') }}">
                         @error('id_number')<span style="color:#ef4444; font-size:.75rem;">{{ $message }}</span>@enderror
                     </div>
+                    <div class="kyc-field" style="grid-column: 1 / -1;">
+                        <label>{{ __('Document Type') }}</label>
+                        <select name="document_type" id="documentTypeSelect" required style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-hover); color: var(--text);">
+                            <option value="national_id">{{ __('National ID (بطاقة الهوية)') }}</option>
+                            <option value="passport">{{ __('Passport (جواز السفر)') }}</option>
+                        </select>
+                        @error('document_type')<span style="color:#ef4444; font-size:.75rem;">{{ $message }}</span>@enderror
+                    </div>
                 </div>
 
                 {{-- Upload Zones --}}
                 <div class="upload-zones">
-                    <div class="upload-zone" id="idZone">
-                        <input type="file" name="id_image" accept="image/*" required id="idInput">
+                    <div class="upload-zone" id="idFrontZone">
+                        <input type="file" name="id_front_image" accept="image/*" required id="idFrontInput">
                         <div class="upload-zone-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h4"/></svg>
                         </div>
                         <h4>{{ __('ID Card Front') }}</h4>
                         <p>{{ __('Upload a clear photo of the front of your national ID card.') }}</p>
-                        <div class="upload-preview" id="idPreview"><img src="" alt="preview"><div class="upload-name" id="idName"></div></div>
-                        @error('id_image')<span style="color:#ef4444; font-size:.75rem; display:block; margin-top:.5rem;">{{ $message }}</span>@enderror
+                        <div class="upload-preview" id="idFrontPreview"><img src="" alt="preview"><div class="upload-name" id="idFrontName"></div></div>
+                        @error('id_front_image')<span style="color:#ef4444; font-size:.75rem; display:block; margin-top:.5rem;">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="upload-zone" id="idBackZone">
+                        <input type="file" name="id_back_image" accept="image/*" required id="idBackInput">
+                        <div class="upload-zone-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h4"/></svg>
+                        </div>
+                        <h4>{{ __('ID Card Back') }}</h4>
+                        <p>{{ __('Upload a clear photo of the back of your national ID card.') }}</p>
+                        <div class="upload-preview" id="idBackPreview"><img src="" alt="preview"><div class="upload-name" id="idBackName"></div></div>
+                        @error('id_back_image')<span style="color:#ef4444; font-size:.75rem; display:block; margin-top:.5rem;">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="upload-zone" id="passportZone" style="display: none;">
+                        <input type="file" name="passport_image" accept="image/*" id="passportInput">
+                        <div class="upload-zone-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h4"/></svg>
+                        </div>
+                        <h4>{{ __('Passport') }}</h4>
+                        <p>{{ __('Upload a clear photo of your passport.') }}</p>
+                        <div class="upload-preview" id="passportPreview"><img src="" alt="preview"><div class="upload-name" id="passportName"></div></div>
+                        @error('passport_image')<span style="color:#ef4444; font-size:.75rem; display:block; margin-top:.5rem;">{{ $message }}</span>@enderror
                     </div>
                     <div class="upload-zone" id="selfieZone">
                         <input type="file" name="selfie_image" accept="image/*" required id="selfieInput">
@@ -105,7 +133,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                         </div>
                         <h4>{{ __('Selfie with ID') }}</h4>
-                        <p>{{ __('Upload a selfie holding your ID next to your face clearly.') }}</p>
+                        <p>{{ __('Upload a selfie holding your document next to your face clearly.') }}</p>
                         <div class="upload-preview" id="selfiePreview"><img src="" alt="preview"><div class="upload-name" id="selfieName"></div></div>
                         @error('selfie_image')<span style="color:#ef4444; font-size:.75rem; display:block; margin-top:.5rem;">{{ $message }}</span>@enderror
                     </div>
@@ -168,3 +196,61 @@
         </div>
     </div>
 @endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('documentTypeSelect');
+        const idFrontZone = document.getElementById('idFrontZone');
+        const idBackZone = document.getElementById('idBackZone');
+        const passportZone = document.getElementById('passportZone');
+
+        const idFrontInput = document.getElementById('idFrontInput');
+        const idBackInput = document.getElementById('idBackInput');
+        const passportInput = document.getElementById('passportInput');
+
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+                if (this.value === 'national_id') {
+                    idFrontZone.style.display = 'block';
+                    idBackZone.style.display = 'block';
+                    passportZone.style.display = 'none';
+
+                    idFrontInput.required = true;
+                    idBackInput.required = true;
+                    passportInput.required = false;
+                } else {
+                    idFrontZone.style.display = 'none';
+                    idBackZone.style.display = 'none';
+                    passportZone.style.display = 'block';
+
+                    idFrontInput.required = false;
+                    idBackInput.required = false;
+                    passportInput.required = true;
+                }
+            });
+        }
+        
+        function setupPreview(inputId, previewId, nameId) {
+            const input = document.getElementById(inputId);
+            if(!input) return;
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById(previewId);
+                        preview.querySelector('img').src = e.target.result;
+                        preview.classList.add('active');
+                        document.getElementById(nameId).textContent = file.name;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        setupPreview('idFrontInput', 'idFrontPreview', 'idFrontName');
+        setupPreview('idBackInput', 'idBackPreview', 'idBackName');
+        setupPreview('passportInput', 'passportPreview', 'passportName');
+        setupPreview('selfieInput', 'selfiePreview', 'selfieName');
+    });
+</script>
