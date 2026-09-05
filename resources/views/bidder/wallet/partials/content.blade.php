@@ -457,121 +457,228 @@
     </div>
 </div>
 
-{{-- ===== DEPOSIT MODAL (Admin Style) ===== --}}
+{{-- ===== DEPOSIT MODAL (Enhanced with HyperPay & Bank Transfer) ===== --}}
 <div class="modal fade" id="depositModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius:16px;">
-            <div class="modal-header border-bottom-0 pt-4 px-4 pb-0">
-                <h5 class="modal-title fw-bold fs-5 d-flex align-items-center gap-2">
-                    <span style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.12);display:inline-flex;align-items:center;justify-content:center;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-                    </span>
-                    {{ __('إيداع رصيد') }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-bottom-0 pt-4 px-4 pb-2">
+                <div class="w-100 d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title fw-bold fs-5 d-flex align-items-center gap-2 mb-0">
+                        <span style="width:36px;height:36px;border-radius:10px;background:rgba(229,62,62,.12);display:inline-flex;align-items:center;justify-content:center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        </span>
+                        {{ __('شحن وتغذية المحفظة المالية') }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
-            <form id="depositForm" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body p-4">
-                    <div class="row g-4">
-                        {{-- Left: Bank Accounts --}}
-                        <div class="col-md-6">
-                            <p class="fw-bold small text-muted mb-3">
-                                <span class="badge rounded-pill me-1" style="background:rgba(59,130,246,.12);color:#3b82f6;">1</span>
-                                {{ __('اختر الحساب البنكي وقم بالتحويل') }}
-                            </p>
-                            <div class="d-flex flex-column gap-2">
-                                @forelse($platformBanks as $bank)
-                                <label class="deposit-bank-option" style="cursor:pointer;">
-                                    <input type="radio" name="bank_account_id" value="{{ $bank->id }}" class="d-none bank-radio" {{ $loop->first ? 'checked' : '' }}>
-                                    <div class="bank-card p-3 rounded-3 d-flex align-items-center gap-3" style="border:2px solid var(--border);transition:all .2s;">
-                                        @if($bank->logo_path)
-                                            <img src="{{ asset('storage/'.$bank->logo_path) }}" alt="" width="36" height="36" style="object-fit:contain;border-radius:6px;">
-                                        @else
-                                            <div style="width:36px;height:36px;border-radius:6px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg>
-                                            </div>
-                                        @endif
-                                        <div class="flex-1" style="flex:1; max-width: calc(100% - 90px);">
-                                            <div class="fw-bold mb-2" style="font-size:.9rem;">{{ $bank->bank_name }}</div>
-                                            
-                                            <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:.75rem; color:var(--text-muted); background: rgba(0,0,0,0.02); padding: 4px 8px; border-radius: 4px;">
-                                                <span class="text-truncate" style="max-width: 140px;" title="{{ $bank->beneficiary_name }}">{{ __('Beneficiary') }}: {{ $bank->beneficiary_name }}</span>
-                                                <button type="button" class="btn btn-sm p-0 m-0 text-secondary copy-btn" onclick="copyToClipboard('{{ $bank->beneficiary_name }}', this, event)" title="{{ __('نسخ') }}" style="line-height:1;">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                                </button>
-                                            </div>
 
-                                            @if($bank->account_number)
-                                            <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:.75rem; color:var(--text-muted); background: rgba(0,0,0,0.02); padding: 4px 8px; border-radius: 4px;">
-                                                <span class="text-truncate" style="font-family:monospace; font-size:0.8rem; letter-spacing:0.5px;" dir="ltr">{{ $bank->account_number }}</span>
-                                                <button type="button" class="btn btn-sm p-0 m-0 text-secondary copy-btn" onclick="copyToClipboard('{{ $bank->account_number }}', this, event)" title="{{ __('نسخ') }}" style="line-height:1;">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                                </button>
-                                            </div>
-                                            @endif
+            {{-- Method Switching Pills --}}
+            <div class="px-4 pb-2">
+                <ul class="nav nav-pills nav-fill p-1 rounded-3" style="background: var(--bg-hover, rgba(255,255,255,0.05)); border: 1px solid var(--border);">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="online-pay-tab" data-bs-toggle="pill" data-bs-target="#tab-online-pay" type="button" style="border-radius:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            <span>{{ __('دفع إلكتروني فوري (مدى / فيزا)') }}</span>
+                            <span class="badge bg-success small py-1 px-2" style="font-size:0.7rem;">{{ __('رصيد لحظي') }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="bank-transfer-tab" data-bs-toggle="pill" data-bs-target="#tab-bank-transfer" type="button" style="border-radius:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg>
+                            <span>{{ __('تحويل بنكي يدوي') }}</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
 
-                                            <div class="d-flex align-items-center justify-content-between" style="font-size:.75rem; color:var(--text-muted); background: rgba(16,185,129,0.05); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.1);">
-                                                <span class="text-truncate fw-bold" style="font-family:monospace; font-size:0.75rem; letter-spacing:0.5px; color:#10b981;" dir="ltr">{{ $bank->iban }}</span>
-                                                <button type="button" class="btn btn-sm p-0 m-0 copy-btn" style="color:#10b981; line-height:1;" onclick="copyToClipboard('{{ $bank->iban }}', this, event)" title="{{ __('نسخ') }}">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                                </button>
-                                            </div>
+            <div class="tab-content">
+                {{-- 1. ONLINE PAYMENT TAB (HYPERPAY) --}}
+                <div class="tab-pane fade show active" id="tab-online-pay" role="tabpanel">
+                    <form id="hyperpayDepositForm" onsubmit="event.preventDefault(); submitHyperPayDeposit();">
+                        <div class="modal-body p-4 pt-2">
+                            {{-- Payment Methods Selection --}}
+                            <p class="fw-bold small text-muted mb-2">1. {{ __('اختر وسيلة الدفع الإلكتروني:') }}</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-4">
+                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                        <input type="radio" name="hp_brand" value="mada" class="d-none hp-radio" checked>
+                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid #10b981; background:rgba(16,185,129,0.06); transition:all .2s;">
+                                            <div style="font-size:1.5rem; margin-bottom:4px;">💳</div>
+                                            <strong class="d-block" style="font-size:0.9rem;">مدى (Mada)</strong>
+                                            <small class="text-muted" style="font-size:0.75rem;">بطاقات البنوك السعودية</small>
                                         </div>
-                                        <div class="bank-check-icon" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                        <input type="radio" name="hp_brand" value="visa_master" class="d-none hp-radio">
+                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid var(--border); transition:all .2s;">
+                                            <div style="font-size:1.5rem; margin-bottom:4px;">🌐</div>
+                                            <strong class="d-block" style="font-size:0.9rem;">Visa / Master</strong>
+                                            <small class="text-muted" style="font-size:0.75rem;">البطاقات الائتمانية</small>
                                         </div>
-                                    </div>
-                                </label>
-                                @empty
-                                <div class="text-center py-3 text-muted"><small>{{ __('لا توجد حسابات بنكية متاحة.') }}</small></div>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        {{-- Right: Proof Form --}}
-                        <div class="col-md-6">
-                            <p class="fw-bold small text-muted mb-3">
-                                <span class="badge rounded-pill me-1" style="background:rgba(59,130,246,.12);color:#3b82f6;">2</span>
-                                {{ __('أرسل إثبات التحويل') }}
-                            </p>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold small text-muted mb-2">* {{ __('المبلغ المحوّل') }}</label>
-                                <div class="input-group">
-                                    <input type="number" name="amount" class="form-control form-control-lg px-3" step="0.01" min="1" required placeholder="0.00" style="border-radius:8px 0 0 8px;">
-                                    <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text-muted);border-color:var(--border);">{{ __('ر.س') }}</span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                        <input type="radio" name="hp_brand" value="apple_pay" class="d-none hp-radio">
+                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid var(--border); transition:all .2s;">
+                                            <div style="font-size:1.5rem; margin-bottom:4px;">🍏</div>
+                                            <strong class="d-block" style="font-size:0.9rem;">Apple Pay</strong>
+                                            <small class="text-muted" style="font-size:0.75rem;">الدفع عبر آبل</small>
+                                        </div>
+                                    </label>
                                 </div>
                             </div>
 
-                            <div class="mb-1">
-                                <label class="form-label fw-bold small text-muted mb-2">* {{ __('رفع وصل التحويل') }}</label>
-                                <div id="receiptDropzone" class="receipt-dropzone" style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;">
-                                    <input type="file" name="receipt" id="receiptInput" accept="image/*,.pdf" required style="position:absolute;inset:0;opacity:0;cursor:pointer;">
-                                    <div id="receiptPlaceholder">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted);margin-bottom:.5rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <p style="font-size:.8rem;color:var(--text-muted);margin:0;">{{ __('اسحب الملف هنا أو انقر للاختيار') }}</p>
-                                        <p style="font-size:.7rem;color:var(--text-secondary);margin:.25rem 0 0;">JPEG, PNG, WebP, PDF — Max 5MB</p>
-                                    </div>
-                                    <div id="receiptPreview" style="display:none;">
-                                        <img id="receiptImg" src="" style="max-height:80px;border-radius:6px;margin-bottom:.5rem;">
-                                        <p id="receiptName" style="font-size:.75rem;color:#10b981;font-weight:600;margin:0;"></p>
-                                    </div>
+                            {{-- Amount Input --}}
+                            <p class="fw-bold small text-muted mb-2">2. {{ __('حدد المبلغ المراد إيداعه في المحفظة:') }}</p>
+                            <div class="mb-3">
+                                <div class="input-group input-group-lg">
+                                    <input type="number" id="hp_amount" name="hp_amount" class="form-control fw-bold fs-4 px-3" step="1" min="10" max="500000" placeholder="500" value="500" required style="border-radius:8px 0 0 8px;">
+                                    <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text);border-color:var(--border);">{{ __('ر.س') }}</span>
                                 </div>
-                                <div class="form-text small mt-1">ⓘ {{ __('يجب أن يكون الوصل واضحاً ويحتوي على المبلغ وبيانات التحويل') }}</div>
+                                <div class="d-flex justify-content-between mt-1 text-muted" style="font-size:0.75rem;">
+                                    <span>الحد الأدنى: 10 ر.س</span>
+                                    <span>الحد الأقصى: 500,000 ر.س</span>
+                                </div>
+                            </div>
+
+                            {{-- Quick Amount Chips --}}
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(200);">+ 200</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(500);">+ 500</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(1000);">+ 1,000</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(5000);">+ 5,000</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(10000);">+ 10,000</button>
+                            </div>
+
+                            {{-- Guarantee Note --}}
+                            <div class="p-3 rounded-3 d-flex align-items-center gap-3" style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span class="small" style="color:var(--text-secondary);">{{ __('يتم إيداع الرصيد في محفظتك بشكل فوري وتلقائي بمجرد نجاح المصادقة البنكية (3D Secure).') }}</span>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="modal-footer border-top-0 px-4 pb-4 pt-0 d-flex justify-content-start gap-2">
+                            <button type="submit" id="hpSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#e53e3e,#c53030); border-radius:8px;">
+                                <span id="hpBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                <span>{{ __('الانتقال للدفع الآمن الآن') }} ←</span>
+                            </button>
+                            <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius:8px;">{{ __('إلغاء') }}</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer border-top-0 px-4 pb-4 pt-0 d-flex justify-content-start gap-2">
-                    <button type="submit" id="depositSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#10b981,#047857);border-radius:8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-                        {{ __('إرسال إثبات الإيداع') }}
-                    </button>
-                    <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius:8px;">{{ __('إلغاء') }}</button>
+
+                {{-- 2. MANUAL BANK TRANSFER TAB --}}
+                <div class="tab-pane fade" id="tab-bank-transfer" role="tabpanel">
+                    <form id="depositForm" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body p-4 pt-2">
+                            <div class="row g-4">
+                                {{-- Left: Bank Accounts --}}
+                                <div class="col-md-6">
+                                    <p class="fw-bold small text-muted mb-3">
+                                        <span class="badge rounded-pill me-1" style="background:rgba(59,130,246,.12);color:#3b82f6;">1</span>
+                                        {{ __('اختر الحساب البنكي وقم بالتحويل') }}
+                                    </p>
+                                    <div class="d-flex flex-column gap-2">
+                                        @forelse($platformBanks as $bank)
+                                        <label class="deposit-bank-option" style="cursor:pointer;">
+                                            <input type="radio" name="bank_account_id" value="{{ $bank->id }}" class="d-none bank-radio" {{ $loop->first ? 'checked' : '' }}>
+                                            <div class="bank-card p-3 rounded-3 d-flex align-items-center gap-3" style="border:2px solid var(--border);transition:all .2s;">
+                                                @if($bank->logo_path)
+                                                    <img src="{{ asset('storage/'.$bank->logo_path) }}" alt="" width="36" height="36" style="object-fit:contain;border-radius:6px;">
+                                                @else
+                                                    <div style="width:36px;height:36px;border-radius:6px;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg>
+                                                    </div>
+                                                @endif
+                                                <div class="flex-1" style="flex:1; max-width: calc(100% - 90px);">
+                                                    <div class="fw-bold mb-2" style="font-size:.9rem;">{{ $bank->bank_name }}</div>
+                                                    
+                                                    <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:.75rem; color:var(--text-muted); background: rgba(0,0,0,0.02); padding: 4px 8px; border-radius: 4px;">
+                                                        <span class="text-truncate" style="max-width: 140px;" title="{{ $bank->beneficiary_name }}">{{ __('Beneficiary') }}: {{ $bank->beneficiary_name }}</span>
+                                                        <button type="button" class="btn btn-sm p-0 m-0 text-secondary copy-btn" onclick="copyToClipboard('{{ $bank->beneficiary_name }}', this, event)" title="{{ __('نسخ') }}" style="line-height:1;">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                        </button>
+                                                    </div>
+
+                                                    @if($bank->account_number)
+                                                    <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:.75rem; color:var(--text-muted); background: rgba(0,0,0,0.02); padding: 4px 8px; border-radius: 4px;">
+                                                        <span class="text-truncate" style="font-family:monospace; font-size:0.8rem; letter-spacing:0.5px;" dir="ltr">{{ $bank->account_number }}</span>
+                                                        <button type="button" class="btn btn-sm p-0 m-0 text-secondary copy-btn" onclick="copyToClipboard('{{ $bank->account_number }}', this, event)" title="{{ __('نسخ') }}" style="line-height:1;">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                    @endif
+
+                                                    <div class="d-flex align-items-center justify-content-between" style="font-size:.75rem; color:var(--text-muted); background: rgba(16,185,129,0.05); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.1);">
+                                                        <span class="text-truncate fw-bold" style="font-family:monospace; font-size:0.75rem; letter-spacing:0.5px; color:#10b981;" dir="ltr">{{ $bank->iban }}</span>
+                                                        <button type="button" class="btn btn-sm p-0 m-0 copy-btn" style="color:#10b981; line-height:1;" onclick="copyToClipboard('{{ $bank->iban }}', this, event)" title="{{ __('نسخ') }}">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="bank-check-icon" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        @empty
+                                        <div class="text-center py-3 text-muted"><small>{{ __('لا توجد حسابات بنكية متاحة.') }}</small></div>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                {{-- Right: Proof Form --}}
+                                <div class="col-md-6">
+                                    <p class="fw-bold small text-muted mb-3">
+                                        <span class="badge rounded-pill me-1" style="background:rgba(59,130,246,.12);color:#3b82f6;">2</span>
+                                        {{ __('أرسل إثبات التحويل') }}
+                                    </p>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold small text-muted mb-2">* {{ __('المبلغ المحوّل') }}</label>
+                                        <div class="input-group">
+                                            <input type="number" name="amount" class="form-control form-control-lg px-3" step="0.01" min="1" required placeholder="0.00" style="border-radius:8px 0 0 8px;">
+                                            <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text-muted);border-color:var(--border);">{{ __('ر.س') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-1">
+                                        <label class="form-label fw-bold small text-muted mb-2">* {{ __('رفع وصل التحويل') }}</label>
+                                        <div id="receiptDropzone" class="receipt-dropzone" style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;">
+                                            <input type="file" name="receipt" id="receiptInput" accept="image/*,.pdf" required style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+                                            <div id="receiptPlaceholder">
+                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted);margin-bottom:.5rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                                <p style="font-size:.8rem;color:var(--text-muted);margin:0;">{{ __('اسحب الملف هنا أو انقر للاختيار') }}</p>
+                                                <p style="font-size:.7rem;color:var(--text-secondary);margin:.25rem 0 0;">JPEG, PNG, WebP, PDF — Max 5MB</p>
+                                            </div>
+                                            <div id="receiptPreview" style="display:none;">
+                                                <img id="receiptImg" src="" style="max-height:80px;border-radius:6px;margin-bottom:.5rem;">
+                                                <p id="receiptName" style="font-size:.75rem;color:#10b981;font-weight:600;margin:0;"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-text small mt-1">ⓘ {{ __('يجب أن يكون الوصل واضحاً ويحتوي على المبلغ وبيانات التحويل') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 px-4 pb-4 pt-0 d-flex justify-content-start gap-2">
+                            <button type="submit" id="depositSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#10b981,#047857);border-radius:8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                                {{ __('إرسال إثبات الإيداع') }}
+                            </button>
+                            <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius:8px;">{{ __('إلغاء') }}</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
+    </div>
+</div>
     </div>
 </div>
 

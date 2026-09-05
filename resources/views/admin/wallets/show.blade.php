@@ -108,41 +108,43 @@
         </table>
     </div>
 </div>
+@endsection
 
+@section('modals')
 <!-- Transaction Modal (same as index for consistency) -->
-<div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ __('Add Financial Transaction') }}</h5>
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom bg-light">
+                <h5 class="modal-title fw-bold fs-5" id="transactionModalLabel">{{ __('Add Financial Transaction') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="transactionForm" action="{{ route('admin.wallets.transactions.store', $wallet->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Operation Type') }}</label>
-                        <select name="type" class="form-control" required>
+                        <label class="form-label fw-bold small text-muted">{{ __('Operation Type') }}</label>
+                        <select name="type" class="form-select" required>
                             <option value="credit">{{ __('Deposit') }} (Credit)</option>
                             <option value="debit">{{ __('Withdraw') }} (Debit)</option>
                         </select>
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Amount') }}</label>
+                        <label class="form-label fw-bold small text-muted">{{ __('Amount') }}</label>
                         <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Description / Notes') }}</label>
+                        <label class="form-label fw-bold small text-muted">{{ __('Description / Notes') }}</label>
                         <textarea name="description" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label">{{ __('Attachment (Optional)') }}</label>
+                        <label class="form-label fw-bold small text-muted">{{ __('Attachment (Optional)') }}</label>
                         <input type="file" name="attachment" class="form-control">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Save Transaction') }}</button>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-ghost px-4" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">{{ __('Save Transaction') }}</button>
                 </div>
             </form>
         </div>

@@ -85,6 +85,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                         <span>{{ __('System') }}</span>
                     </a>
+                    <a href="#" class="settings-nav-item" data-tab="hyperpay">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <span>{{ __('بوابة هايبر باي (HyperPay)') }}</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -460,6 +464,108 @@
             </div>
         </div>
 
+        {{-- HyperPay Gateway Panel --}}
+        <div class="settings-panel" id="panel-hyperpay">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <h2 class="mb-0">{{ __('إعدادات بوابة الدفع الإلكتروني (HyperPay)') }}</h2>
+                    </div>
+                    <span class="badge {{ \App\Models\Setting::get('hyperpay_enabled') == '1' ? 'bg-success' : 'bg-secondary' }}" id="hp-status-badge">
+                        {{ \App\Models\Setting::get('hyperpay_enabled') == '1' ? __('مفعلة') : __('معطلة') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {{-- Gateway Enable Switch --}}
+                    <div class="toggle-row">
+                        <div class="toggle-info">
+                            <strong>{{ __('تفعيل بوابة هايبر باي') }}</strong>
+                            <span>{{ __('السماح للمستخدمين بشحن محافظهم المالية عبر البطاقات البنكية ومدى') }}</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="hyperpay_enabled" value="1" {{ \App\Models\Setting::get('hyperpay_enabled') == '1' ? 'checked' : '' }}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    {{-- Environment Mode --}}
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">{{ __('بيئة التشغيل (Mode)') }}</label>
+                            <select name="hyperpay_mode" class="form-control">
+                                <option value="test" {{ \App\Models\Setting::get('hyperpay_mode', 'test') == 'test' ? 'selected' : '' }}>🧪 {{ __('بيئة تجريبية (Test Sandbox)') }}</option>
+                                <option value="live" {{ \App\Models\Setting::get('hyperpay_mode') == 'live' ? 'selected' : '' }}>🚀 {{ __('بيئة حية / إنتاجية (Live Production)') }}</option>
+                            </select>
+                            <small class="text-muted">{{ __('اختر البيئة التجريبية لاختبار الكروت الوهمية أو البيئة الحية لتلقي أموال حقيقية.') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">{{ __('العملة الافتراضية') }}</label>
+                            <input type="text" class="form-control" value="SAR (ريال سعودي)" disabled readonly>
+                        </div>
+                    </div>
+
+                    {{-- Access Token --}}
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('رمز التخويل السري (Access Token / Bearer Token)') }}</label>
+                        <input type="password" name="hyperpay_access_token" id="hp_access_token" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_access_token') }}" placeholder="OGE4MmRlNGExMjM0NTY3ODkwMW..." dir="ltr">
+                        <small class="text-muted">{{ __('الرمز السري الممنوح لك من لوحة تحكم هايبر باي.') }}</small>
+                    </div>
+
+                    {{-- Entity IDs Section --}}
+                    <div class="p-3 mb-4" style="background:var(--bg-input); border-radius:var(--radius); border:1px solid var(--border);">
+                        <h4 class="mb-3" style="font-size:1rem; color:var(--text); font-weight:700;">💳 {{ __('معرفات الكيانات (Entity IDs)') }}</h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ __('Entity ID لشبكة مدى (Mada)') }}</label>
+                                <input type="text" name="hyperpay_entity_id_mada" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_entity_id_mada') }}" placeholder="8a8294174..." dir="ltr">
+                                <small class="text-muted">{{ __('خاص ببطاقات مدى البنكية السعودية.') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ __('Entity ID لـ Visa / MasterCard') }}</label>
+                                <input type="text" name="hyperpay_entity_id_visa_master" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_entity_id_visa_master') }}" placeholder="8a8294174..." dir="ltr">
+                                <small class="text-muted">{{ __('خاص بالبطاقات الائتمانية الدولية.') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ __('Entity ID لـ Apple Pay') }}</label>
+                                <input type="text" name="hyperpay_entity_id_apple_pay" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_entity_id_apple_pay') }}" placeholder="8a8294174..." dir="ltr">
+                                <small class="text-muted">{{ __('خاص بالدفع الفوري عبر أجهزة آبل.') }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Min and Max Deposit Limits --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('الحد الأدنى لمبلغ الشحن (ر.س)') }}</label>
+                            <input type="number" step="1" min="1" name="hyperpay_min_deposit" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_min_deposit', 10) }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('الحد الأقصى لمبلغ الشحن (ر.س)') }}</label>
+                            <input type="number" step="1" min="1" name="hyperpay_max_deposit" class="form-control" value="{{ \App\Models\Setting::get('hyperpay_max_deposit', 500000) }}" dir="ltr">
+                        </div>
+                    </div>
+
+                    {{-- Webhook Configuration Box --}}
+                    <div class="p-3 mb-3" style="background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25); border-radius:var(--radius);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            <strong style="color:#60a5fa;">{{ __('رابط الـ Webhook الخاص بنظامك') }}</strong>
+                        </div>
+                        <p class="mb-2 text-muted" style="font-size:0.85rem;">
+                            {{ __('قم بنسخ هذا الرابط ولصقه في لوحة تحكم حساب التاجر لدى هايبر باي (Merchant Dashboard -> Webhooks) لإشعار موقعك بنتيجة الدفع آلياً:') }}
+                        </p>
+                        <div class="input-group" dir="ltr">
+                            <input type="text" class="form-control" id="hp-webhook-url" value="{{ url('/api/hyperpay/webhook') }}" readonly style="background:var(--bg-input);">
+                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText($('#hp-webhook-url').val()); Swal.fire({icon:'success',title:'تم النسخ!',timer:1500,showConfirmButton:false});">
+                                📋 {{ __('نسخ الرابط') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Save Button --}}
         <div style="margin-top:1.5rem; display:flex; justify-content:flex-end;">
             <button type="submit" class="btn btn-primary px-5" id="saveBtn">
@@ -537,6 +643,7 @@ $(function(){
         var btn=$('#saveBtn'),fd=new FormData(this);
         if(!fd.has('maintenance_mode'))fd.append('maintenance_mode','0');
         if(!fd.has('show_hotels_page'))fd.append('show_hotels_page','0');
+        if(!fd.has('hyperpay_enabled'))fd.append('hyperpay_enabled','0');
         btn.prop('disabled',true);$('#saveBtnText').addClass('d-none');$('#saveBtnLoading').removeClass('d-none');
         $.ajax({url:$(this).attr('action'),method:'POST',data:fd,processData:false,contentType:false,
             success:function(r){
@@ -556,6 +663,15 @@ $(function(){
                     } else {
                         card.removeClass('blue').addClass('green');
                         val.text(dir === 'rtl' ? 'نشط' : 'Active');
+                    }
+
+                    // Dynamically update HyperPay status badge
+                    let isHpEnabled = $('input[name="hyperpay_enabled"]').is(':checked');
+                    let hpBadge = $('#hp-status-badge');
+                    if (isHpEnabled) {
+                        hpBadge.removeClass('bg-secondary').addClass('bg-success').text(dir === 'rtl' ? 'مفعلة' : 'Enabled');
+                    } else {
+                        hpBadge.removeClass('bg-success').addClass('bg-secondary').text(dir === 'rtl' ? 'معطلة' : 'Disabled');
                     }
                 } else {
                     Swal.fire({icon:'error',title:'خطأ',text:r.message});

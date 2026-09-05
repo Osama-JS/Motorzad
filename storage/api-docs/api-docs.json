@@ -3054,6 +3054,289 @@
                 }
             }
         },
+        "/api/wallet/hyperpay/checkout": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Initialize HyperPay Checkout Session",
+                "description": "Creates a new HyperPay checkout session for mobile or web clients to pay using Mada, Visa/Mastercard, or Apple Pay.",
+                "operationId": "73e1d779217cf565eff0121120aa006c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "brand"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "description": "Amount in SAR to deposit",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    },
+                                    "brand": {
+                                        "description": "Payment brand/method",
+                                        "type": "string",
+                                        "example": "mada",
+                                        "enum": [
+                                            "mada",
+                                            "visa_master",
+                                            "apple_pay"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Session initialized successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "checkout_id": {
+                                                    "description": "HyperPay checkout ID to pass to mobile SDK",
+                                                    "type": "string",
+                                                    "example": "8A8294174B7E6CA0014B829..."
+                                                },
+                                                "merchant_transaction_id": {
+                                                    "type": "string",
+                                                    "example": "MZ-HP-20260905143000-A1B2C"
+                                                },
+                                                "brand": {
+                                                    "type": "string",
+                                                    "example": "mada"
+                                                },
+                                                "widget_brands": {
+                                                    "type": "string",
+                                                    "example": "MADA"
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                },
+                                                "base_url": {
+                                                    "type": "string",
+                                                    "example": "https://eu-test.oppwa.com"
+                                                },
+                                                "script_url": {
+                                                    "type": "string",
+                                                    "example": "https://eu-test.oppwa.com/v1/paymentWidgets.js?checkoutId=8A82..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Session initialized successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation or Gateway Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The minimum deposit amount is 10.00 SAR"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/hyperpay/verify": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Verify HyperPay Payment and Credit Wallet",
+                "description": "Verifies the outcome of a HyperPay transaction using checkout_id, credits user wallet upon success, and returns transaction details.",
+                "operationId": "1553b08bbd143eb8572e96f19e6c9521",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "checkout_id"
+                                ],
+                                "properties": {
+                                    "checkout_id": {
+                                        "type": "string",
+                                        "example": "8A8294174B7E6CA0014B829..."
+                                    },
+                                    "brand": {
+                                        "type": "string",
+                                        "example": "mada",
+                                        "nullable": true,
+                                        "enum": [
+                                            "mada",
+                                            "visa_master",
+                                            "apple_pay"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment verified successfully and credited",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment successful! 500.00 SAR has been added to your wallet."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "merchant_transaction_id": {
+                                                    "type": "string",
+                                                    "example": "MZ-HP-20260905143000-A1B2C"
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "example": 500
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "paid"
+                                                },
+                                                "card_brand": {
+                                                    "type": "string",
+                                                    "example": "mada"
+                                                },
+                                                "card_last4": {
+                                                    "type": "string",
+                                                    "example": "1234"
+                                                },
+                                                "new_wallet_balance": {
+                                                    "type": "number",
+                                                    "example": 2500
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Payment Failed or Rejected",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment verification failed."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/hyperpay/webhook": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "HyperPay Webhook Receiver",
+                "description": "Receives asynchronous server-to-server notifications from HyperPay to finalize payments in the background.",
+                "operationId": "227ffefb905f2478aca4a3904c15400f",
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "result": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/kyc/status": {
             "get": {
                 "tags": [
@@ -6297,6 +6580,10 @@
             "description": "General"
         },
         {
+            "name": "Wallet",
+            "description": "Wallet"
+        },
+        {
             "name": "Orders",
             "description": "Orders"
         },
@@ -6311,10 +6598,6 @@
         {
             "name": "Support",
             "description": "Support"
-        },
-        {
-            "name": "Wallet",
-            "description": "Wallet"
         }
     ]
 }

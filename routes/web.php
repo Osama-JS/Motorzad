@@ -112,6 +112,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     
     // Seller Requests
     Route::get('seller-requests', [\App\Http\Controllers\Admin\SellerRequestController::class, 'index'])->name('seller-requests.index');
+    Route::get('seller-requests/{sellerRequest}', [\App\Http\Controllers\Admin\SellerRequestController::class, 'show'])->name('seller-requests.show');
     Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
     Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
     // Settings Routes
@@ -160,6 +161,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::post('/{withdrawal}/process', [\App\Http\Controllers\Admin\WithdrawalController::class, 'process'])->name('withdrawals.process');
     });
 
+    Route::get('wallets/online-payments', [\App\Http\Controllers\Admin\WalletController::class, 'onlinePayments'])->name('wallets.online-payments');
     Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
     Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
     Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
@@ -241,6 +243,9 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/wallet/transactions/{id}/invoice', [\App\Http\Controllers\Bidder\WalletController::class, 'invoice'])->name('wallet.invoice');
     Route::post('/wallet/withdraw', [\App\Http\Controllers\Bidder\WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
+    Route::post('/wallet/hyperpay/initiate', [\App\Http\Controllers\Bidder\WalletController::class, 'initiateHyperPay'])->name('wallet.hyperpay.initiate');
+    Route::get('/wallet/hyperpay/checkout/{id}', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCheckout'])->name('wallet.hyperpay.checkout');
+    Route::get('/wallet/hyperpay/callback', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCallback'])->name('wallet.hyperpay.callback');
 
     // Auctions Routes
     Route::get('/global-search', [\App\Http\Controllers\Bidder\AuctionController::class, 'globalSearch'])->name('global-search');

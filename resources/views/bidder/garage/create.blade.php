@@ -783,7 +783,9 @@
         </div>
     </form>
 </div>
+@endsection
 
+@section('modals')
 <!-- Cropper Modal -->
 <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -827,7 +829,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('js')

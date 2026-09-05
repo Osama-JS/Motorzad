@@ -29,6 +29,9 @@ Route::prefix('otp')->group(function () {
     Route::post('verify', [\App\Http\Controllers\Api\OtpController::class, 'verifyOtp']);
 });
 
+// HyperPay Asynchronous Webhook
+Route::post('hyperpay/webhook', [\App\Http\Controllers\Api\HyperPayApiController::class, 'webhook']);
+
 // General App Data
 Route::prefix('general')->group(function () {
     Route::get('settings', [\App\Http\Controllers\Api\GeneralController::class, 'settings']);
@@ -86,6 +89,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('withdrawals', [WalletController::class, 'withdrawals']);
         Route::post('deposit', [WalletController::class, 'requestDeposit']);
         Route::post('withdraw', [WalletController::class, 'requestWithdrawal']);
+
+        // HyperPay Mobile Gateway
+        Route::post('hyperpay/checkout', [\App\Http\Controllers\Api\HyperPayApiController::class, 'checkout']);
+        Route::post('hyperpay/verify', [\App\Http\Controllers\Api\HyperPayApiController::class, 'verify']);
     });
 
     // Platform Bank Accounts (for deposit)

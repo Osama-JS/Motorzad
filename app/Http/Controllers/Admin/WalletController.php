@@ -68,11 +68,11 @@ class WalletController extends Controller
                 $baseUrl = url('admin/wallets');
                 $actionsHtml = '
                     <div class="btn-group shadow-sm" style="border-radius: 8px;">
-                        <a href="' . $baseUrl . '/' . $wallet->id . '/transactions" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold" title="' . __('Advanced Transactions History') . '">
+                        <a href="' . $baseUrl . '/' . $wallet->id . '/transactions" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold" title="عرض سجل الحركات، الإيداعات والسحوبات">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4H10a2 2 0 0 1-2-2v-4"/><circle cx="18" cy="12" r="1.5"/></svg>
-                            <span>' . __('Transactions') . '</span>
+                            <span>حركات المحفظة</span>
                         </a>
-                        <button type="button" class="btn btn-sm btn-warning d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold text-dark" onclick="openDebtModal(' . $wallet->id . ', ' . $wallet->debt_ceiling . ')" title="' . __('Debt Ceiling') . '">
+                        <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1 px-2 py-1 fw-bold" onclick="openDebtModal(' . $wallet->id . ', ' . $wallet->debt_ceiling . ')" title="' . __('Debt Ceiling') . '">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
                             <span>' . __('Ceiling') . '</span>
                         </button>
@@ -175,4 +175,43 @@ class WalletController extends Controller
 
         return redirect()->back()->with('success', 'تم تحديث سقف الدين بنجاح');
     }
+
+    /**
+     * عرض شاشة حركات الدفع الإلكتروني عبر هايبر باي
+     */
+    public function onlinePayments(Request $request)
+    {
+        $stats = [
+            'total_transactions' => \App\Models\HyperpayTransaction::count(),
+            'total_paid_amount'  => \App\Models\HyperpayTransaction::where('status', 'paid')->sum('amount'),
+            'total_paid_count'   => \App\Models\HyperpayTransaction::where('status', 'paid')->count(),
+            'total_failed_count' => \App\Models\HyperpayTransaction::whereIn('status', ['failed', 'cancelled'])->count(),
+        ];
+
+        $transactions = \App\Models\HyperpayTransaction::with(['user', 'wallet'])
+            ->when($request->filled('status') && $request->status !== 'all', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->when($request->filled('brand') && $request->brand !== 'all', function ($q) use ($request) {
+                $q->where('brand', $request->brand);
+            })
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $term = $request->search;
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('merchant_transaction_id', 'like', "%{$term}%")
+                        ->orWhere('checkout_id', 'like', "%{$term}%")
+                        ->orWhere('hyperpay_payment_id', 'like', "%{$term}%")
+                        ->orWhereHas('user', function ($u) use ($term) {
+                            $u->where('name', 'like', "%{$term}%")
+                              ->orWhere('email', 'like', "%{$term}%");
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.wallets.online-payments', compact('stats', 'transactions'));
+    }
 }
+

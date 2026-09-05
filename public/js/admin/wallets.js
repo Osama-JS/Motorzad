@@ -163,6 +163,7 @@ $(document).ready(function () {
 
     // Initialize Select2 globally
     function initSelect2() {
+        if (!$.fn.select2) return;
         let dir = $('html').attr('dir') || 'rtl';
         $('.select2-init').each(function () {
             let dropdownParent = $(this).data('dropdown-parent');

@@ -165,8 +165,55 @@ function initWalletEventListeners() {
     }
 }
 
+function submitHyperPayDeposit() {
+    const amount = $('#hp_amount').val();
+    const brand = $('input[name="hp_brand"]:checked').val();
+    const btn = $('#hpSubmitBtn');
+    const spinner = $('#hpBtnSpinner');
+
+    if (!amount || amount < 10) {
+        toastr.warning('{{ __("الحد الأدنى لمبلغ الإيداع هو 10 ر.س") }}');
+        return;
+    }
+
+    btn.prop('disabled', true);
+    spinner.removeClass('d-none');
+
+    $.ajax({
+        url: "{{ route('bidder.wallet.hyperpay.initiate') }}",
+        method: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            amount: amount,
+            brand: brand
+        },
+        success: function(response) {
+            if (response.success && response.redirect_url) {
+                window.location.href = response.redirect_url;
+            } else {
+                toastr.error(response.message || '{{ __("فشل في بدء جلسة الدفع") }}');
+                btn.prop('disabled', false);
+                spinner.addClass('d-none');
+            }
+        },
+        error: function(xhr) {
+            btn.prop('disabled', false);
+            spinner.addClass('d-none');
+            const msg = xhr.responseJSON?.message || '{{ __("حدث خطأ أثناء الاتصال ببوابة الدفع") }}';
+            toastr.error(msg);
+        }
+    });
+}
+
 $(document).ready(function() {
     initWalletEventListeners();
+
+    // HyperPay brand radio card highlight
+    $(document).on('change', '.hp-radio', function() {
+        $('.hp-card').css({'border-color': 'var(--border)', 'background': 'transparent'});
+        const card = $(this).closest('.hp-method-label').find('.hp-card');
+        card.css({'border-color': '#10b981', 'background': 'rgba(16,185,129,0.06)'});
+    });
 
     // Transactions type filter via AJAX
     $(document).on('change', '#txTypeFilter', function(e) {
@@ -194,3 +241,4 @@ $(document).ready(function() {
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 @endsection
+

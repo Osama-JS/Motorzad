@@ -15,7 +15,38 @@ class NotificationController extends Controller
      */
     public function create()
     {
-        return view('admin.notifications.create');
+        $totalUsers = User::count();
+        $totalSellers = User::role('seller')->count();
+        $totalBidders = User::role('bidder')->count();
+
+        // Latest notifications sent in the system
+        $recentNotifications = \Illuminate\Support\Facades\DB::table('notifications')
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get()
+            ->map(function ($notif) {
+                $data = json_decode($notif->data, true);
+                $recipient = User::find($notif->notifiable_id);
+                return (object)[
+                    'id' => $notif->id,
+                    'title' => $data['title'] ?? 'إشعار نظام',
+                    'message' => $data['message'] ?? ($data['body'] ?? '---'),
+                    'action_url' => $data['action_url'] ?? null,
+                    'channels' => $data['channels'] ?? ['database'],
+                    'recipient_name' => $recipient ? $recipient->name : ('User #' . $notif->notifiable_id),
+                    'created_at' => \Carbon\Carbon::parse($notif->created_at)->diffForHumans(),
+                ];
+            });
+
+        $usersList = User::select('id', 'name', 'email', 'phone')->latest()->get();
+
+        return view('admin.notifications.create', compact(
+            'totalUsers',
+            'totalSellers',
+            'totalBidders',
+            'recentNotifications',
+            'usersList'
+        ));
     }
 
     /**

@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
     
     <!-- Pusher & Echo JS for WebSockets -->
+    @if(env('ENABLE_WEBSOCKETS', false) && env('REVERB_APP_KEY'))
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
     <script>
@@ -30,8 +31,8 @@
             broadcaster: 'reverb',
             key: '{{ env('REVERB_APP_KEY') }}',
             wsHost: window.location.hostname,
-            wsPort: 8080,
-            wssPort: 8080,
+            wsPort: {{ env('REVERB_PORT', 8080) }},
+            wssPort: {{ env('REVERB_PORT', 8080) }},
             forceTLS: false,
             enabledTransports: ['ws', 'wss'],
             authEndpoint: '{{ url("/broadcasting/auth") }}',
@@ -42,6 +43,7 @@
             }
         });
     </script>
+    @endif
 
     {{-- Apply saved theme immediately to prevent flash --}}
     <script>
@@ -168,8 +170,7 @@
             });
 
             // Real-Time Notification Modal dynamically via Laravel Echo (Reverb/WebSockets)
-            @if(Auth::check())
-            
+            @if(Auth::check() && env('ENABLE_WEBSOCKETS', false))
             if (typeof window.Echo !== 'undefined') {
                 window.Echo.private('App.Models.User.{{ auth()->id() }}')
                     .notification((notification) => {
@@ -195,12 +196,10 @@
                         // Show Modal
                         const modalEl = document.getElementById('unreadNotificationModal');
                         if (modalEl) {
-                            const notificationModal = new bootstrap.Modal(modalEl);
+                            const notificationModal = bootstrap.Modal.getOrCreateInstance(modalEl);
                             notificationModal.show();
                         }
                     });
-            } else {
-                console.warn('Laravel Echo is not defined.');
             }
             @endif
         });

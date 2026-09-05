@@ -82,6 +82,15 @@ class SettingController extends Controller
                 'stats_satisfaction' => 'nullable|string|max:50',
                 'stats_satisfaction_unit' => 'nullable|string|max:20',
                 'hero_auction_id' => 'nullable|exists:auctions,id',
+                'hyperpay_enabled' => 'nullable|in:0,1',
+                'hyperpay_mode' => 'nullable|in:test,live',
+                'hyperpay_access_token' => 'nullable|string',
+                'hyperpay_entity_id_mada' => 'nullable|string',
+                'hyperpay_entity_id_visa_master' => 'nullable|string',
+                'hyperpay_entity_id_apple_pay' => 'nullable|string',
+                'hyperpay_webhook_secret' => 'nullable|string',
+                'hyperpay_min_deposit' => 'nullable|numeric|min:1',
+                'hyperpay_max_deposit' => 'nullable|numeric|min:1',
             ]);
 
             $data = $request->except(['_token', 'site_logo', 'site_favicon', 'hero_bg', 'page_header_bg']);
@@ -91,7 +100,8 @@ class SettingController extends Controller
                 'maintenance_mode', 'show_hotels_page', 'show_homepage_stats',
                 'show_stat_bidders', 'show_stat_cars', 'show_stat_satisfaction',
                 'show_facebook', 'show_twitter', 'show_instagram', 'show_linkedin',
-                'show_tiktok', 'show_snapchat', 'show_youtube', 'show_whatsapp', 'show_telegram'
+                'show_tiktok', 'show_snapchat', 'show_youtube', 'show_whatsapp', 'show_telegram',
+                'hyperpay_enabled'
             ];
             foreach ($checkboxes as $checkbox) {
                 if (!array_key_exists($checkbox, $data)) {

@@ -750,7 +750,9 @@
         </div>
     </div>
 </form>
+@endsection
 
+@section('modals')
 <!-- Image Cropper/Rotator Modal -->
 <div class="modal fade" id="imageEditorModal" tabindex="-1" aria-labelledby="imageEditorModalLabel" aria-hidden="true" style="backdrop-filter: blur(8px);">
     <div class="modal-dialog modal-lg modal-dialog-centered">

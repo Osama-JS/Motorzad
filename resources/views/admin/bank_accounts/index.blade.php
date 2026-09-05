@@ -184,62 +184,62 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section('modals')
 <!-- Add/Edit Modal -->
 <div class="modal fade" id="bankAccountModal" tabindex="-1" role="dialog" aria-labelledby="bankAccountModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="bankAccountModalLabel">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom bg-light">
+                <h5 class="modal-title fw-bold fs-5" id="bankAccountModalLabel">
                     <i class="fas fa-university me-2 text-primary"></i>
                     <span id="modal-title-text">{{ __('Add Bank Account') }}</span>
                 </h5>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="bankAccountForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="id" id="account_id">
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="form-group mb-3">
-                        <label for="bank_name" class="form-control-label">{{ __('Bank Name') }}</label>
+                        <label for="bank_name" class="form-label fw-bold small text-muted">{{ __('Bank Name') }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-building text-xs"></i></span>
                             <input class="form-control" type="text" name="bank_name" id="bank_name" required>
                         </div>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="iban" class="form-control-label">{{ __('IBAN') }}</label>
+                        <label for="iban" class="form-label fw-bold small text-muted">{{ __('IBAN') }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-barcode text-xs"></i></span>
                             <input class="form-control" type="text" name="iban" id="iban" required>
                         </div>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="beneficiary_name" class="form-control-label">{{ __('Beneficiary Name') }}</label>
+                        <label for="beneficiary_name" class="form-label fw-bold small text-muted">{{ __('Beneficiary Name') }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-user text-xs"></i></span>
                             <input class="form-control" type="text" name="beneficiary_name" id="beneficiary_name" required>
                         </div>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="logo" class="form-control-label">{{ __('Bank Logo') }}</label>
+                        <label for="logo" class="form-label fw-bold small text-muted">{{ __('Bank Logo') }}</label>
                         <input class="form-control" type="file" name="logo" id="logo" accept="image/*">
                         <div id="logo-preview" class="mt-2 text-center" style="display:none;">
                             <img src="" id="current-logo" class="img-thumbnail shadow-sm" width="100">
                         </div>
                     </div>
-                    <div class="form-check form-switch mb-3">
+                    <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" checked>
-                        <label class="form-check-label" for="is_active">{{ __('Active Status') }}</label>
+                        <label class="form-check-label fw-bold small text-muted" for="is_active">{{ __('Active Status') }}</label>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> {{ __('Close') }}
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-ghost px-4" data-bs-dismiss="modal">
+                        {{ __('Close') }}
                     </button>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" id="saveBtn">
                         <i class="fas fa-save me-1"></i> {{ __('Save Changes') }}
                     </button>
                 </div>

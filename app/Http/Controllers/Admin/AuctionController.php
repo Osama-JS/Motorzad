@@ -380,56 +380,107 @@ class AuctionController extends Controller
         }
     }
 
-    public function analytics()
+    public function analytics(Request $request)
     {
-        // Total commissions
-        $totalCommissions = Auction::where('status', 'sold')->sum('commission_amount');
+        $baseSoldQuery = Auction::where('status', 'sold');
+        if ($request->filled('date_from')) {
+            $baseSoldQuery->whereDate('sold_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $baseSoldQuery->whereDate('sold_at', '<=', $request->input('date_to'));
+        }
 
-        // Total sold auctions
-        $soldCount = Auction::where('status', 'sold')->count();
-
-        // Total ended/cancelled
+        // ── 1. High-level KPIs ─────────────────────────────────────────────
+        $totalAuctions = Auction::count();
+        $liveCount = Auction::where('status', 'active')->count();
+        $soldCount = (clone $baseSoldQuery)->count();
         $endedCount = Auction::where('status', 'ended')->count();
         $cancelledCount = Auction::where('status', 'cancelled')->count();
-        $totalEnded = $endedCount + $cancelledCount;
+        $draftCount = Auction::where('status', 'draft')->count();
 
-        // Average commission
-        $avgCommission = $soldCount > 0 ? $totalCommissions / $soldCount : 0;
+        // Total sales volume & platform commissions
+        $totalSalesVolume = (clone $baseSoldQuery)->sum('winning_bid_amount') ?? 0;
+        $totalCommissions = (clone $baseSoldQuery)->sum('commission_amount') ?? 0;
 
-        // Monthly commission growth for the current year
-        $currentYear = now()->year;
-        $monthlyCommissions = \Illuminate\Support\Facades\DB::table('auctions')
+        // Averages
+        $avgSellingPrice = $soldCount > 0 ? ($totalSalesVolume / $soldCount) : 0;
+        $avgCommission = $soldCount > 0 ? ($totalCommissions / $soldCount) : 0;
+
+        // Bids stats
+        $totalBids = \App\Models\Bid::count();
+        $avgBidsPerAuction = $totalAuctions > 0 ? round($totalBids / $totalAuctions, 1) : 0;
+
+        // Sell-through rate
+        $closedCount = $soldCount + $endedCount + $cancelledCount;
+        $successRate = $closedCount > 0 ? round(($soldCount / $closedCount) * 100, 1) : 0;
+
+        // ── 2. Monthly Commission & Sales Growth (12 Months) ────────────────
+        $currentYear = $request->filled('year') ? $request->input('year') : now()->year;
+        $monthlyStats = \Illuminate\Support\Facades\DB::table('auctions')
             ->where('status', 'sold')
             ->whereYear('sold_at', $currentYear)
-            ->selectRaw('MONTH(sold_at) as month, SUM(commission_amount) as total')
+            ->selectRaw('MONTH(sold_at) as month, SUM(commission_amount) as total_comm, SUM(winning_bid_amount) as total_vol, COUNT(*) as count')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
-            ->pluck('total', 'month')
-            ->toArray();
+            ->keyBy('month');
 
-        // Prepare monthly data for all 12 months (defaulting to 0 if no sales)
-        $monthsData = [];
+        $monthsCommissions = [];
+        $monthsVolume = [];
+        $monthsCount = [];
         for ($m = 1; $m <= 12; $m++) {
-            $monthsData[$m] = $monthlyCommissions[$m] ?? 0;
+            $monthsCommissions[$m] = (float)($monthlyStats[$m]->total_comm ?? 0);
+            $monthsVolume[$m] = (float)($monthlyStats[$m]->total_vol ?? 0);
+            $monthsCount[$m] = (int)($monthlyStats[$m]->count ?? 0);
         }
 
-        // Recent sales
+        // ── 3. Top Brands / Vehicle Makes in Auctions ──────────────────────
+        $topMakes = \Illuminate\Support\Facades\DB::table('auctions')
+            ->join('vehicles', 'auctions.vehicle_id', '=', 'vehicles.id')
+            ->selectRaw('COALESCE(vehicles.make_ar, vehicles.make_en, "أخرى") as brand, COUNT(auctions.id) as auction_count')
+            ->groupBy('brand')
+            ->orderByDesc('auction_count')
+            ->limit(5)
+            ->get();
+
+        $brandLabels = $topMakes->pluck('brand')->toArray();
+        $brandCounts = $topMakes->pluck('auction_count')->toArray();
+
+        // ── 4. Recent High-Value Sales ────────────────────────────────────
         $recentSales = Auction::where('status', 'sold')
             ->with(['winner', 'vehicle'])
             ->orderByDesc('sold_at')
+            ->limit(6)
+            ->get();
+
+        // ── 5. Top Performing Auctions (Highest Winning Bids) ─────────────
+        $topAuctions = Auction::where('status', 'sold')
+            ->with(['winner', 'vehicle'])
+            ->orderByDesc('winning_bid_amount')
             ->limit(5)
             ->get();
 
         return view('admin.auctions.analytics', compact(
-            'totalCommissions',
+            'totalAuctions',
+            'liveCount',
             'soldCount',
             'endedCount',
             'cancelledCount',
-            'totalEnded',
+            'draftCount',
+            'totalSalesVolume',
+            'totalCommissions',
+            'avgSellingPrice',
             'avgCommission',
-            'monthsData',
-            'recentSales'
+            'totalBids',
+            'avgBidsPerAuction',
+            'successRate',
+            'monthsCommissions',
+            'monthsVolume',
+            'monthsCount',
+            'brandLabels',
+            'brandCounts',
+            'recentSales',
+            'topAuctions'
         ));
     }
 

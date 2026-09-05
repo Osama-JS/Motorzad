@@ -55,6 +55,8 @@
         </div>
     </div>
 
+    @yield('modals')
+
     @include('layouts.admin.scripts')
 
     <script>

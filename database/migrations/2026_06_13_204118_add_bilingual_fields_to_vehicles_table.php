@@ -39,6 +39,10 @@ return new class extends Migration
         });
 
         Schema::table('vehicles', function (Blueprint $table) {
+            try {
+                $table->dropIndex(['make']);
+                $table->dropIndex(['model']);
+            } catch (\Throwable $e) {}
             $table->dropColumn(['make', 'model', 'color', 'issues']);
         });
     }

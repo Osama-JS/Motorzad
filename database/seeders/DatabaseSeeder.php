@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             TestimonialSeeder::class,
             FeatureSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

@@ -6,11 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\WithdrawalRequest;
 use App\Models\DepositRequest;
 use App\Models\BankAccount;
+use App\Models\HyperpayTransaction;
+use App\Services\HyperPayService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WalletController extends Controller
 {
+    public function __construct(
+        protected HyperPayService $hyperPayService
+    ) {}
+
     /**
      * Display the bidder's wallet profile page.
      */
@@ -237,4 +243,96 @@ class WalletController extends Controller
 
         return view('bidder.wallet.invoice', compact('user', 'transaction'));
     }
+
+    /**
+     * Start HyperPay checkout session from Bidder portal.
+     */
+    public function initiateHyperPay(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'brand'  => 'required|in:mada,visa_master,apple_pay',
+        ]);
+
+        try {
+            $user = auth()->user();
+            $amount = (float) $request->amount;
+            $brand = $request->brand;
+            $returnUrl = route('bidder.wallet.hyperpay.callback');
+
+            $checkoutData = $this->hyperPayService->prepareCheckout(
+                user: $user,
+                amount: $amount,
+                brand: $brand,
+                channel: 'web',
+                returnUrl: $returnUrl
+            );
+
+            return response()->json([
+                'success'      => true,
+                'redirect_url' => route('bidder.wallet.hyperpay.checkout', $checkoutData['transaction_id']),
+                'data'         => $checkoutData,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Render the official HyperPay payment widget page.
+     */
+    public function hyperPayCheckout($transactionId)
+    {
+        $user = auth()->user();
+        $transaction = HyperpayTransaction::where('user_id', $user->id)->findOrFail($transactionId);
+
+        if ($transaction->status === 'paid') {
+            return redirect()->route('bidder.wallet.index')->with('success', __('This payment has already been completed and added to your wallet.'));
+        }
+
+        $widgetBrands = $this->hyperPayService->getWidgetBrands($transaction->brand);
+        $scriptUrl = $this->hyperPayService->getBaseUrl() . "/v1/paymentWidgets.js?checkoutId={$transaction->checkout_id}";
+        $returnUrl = route('bidder.wallet.hyperpay.callback');
+
+        return view('bidder.wallet.hyperpay-checkout', compact('transaction', 'widgetBrands', 'scriptUrl', 'returnUrl', 'user'));
+    }
+
+    /**
+     * Handle user return after 3D Secure / payment processing on HyperPay.
+     */
+    public function hyperPayCallback(Request $request)
+    {
+        $checkoutId = $request->query('id');
+
+        if (!$checkoutId) {
+            return redirect()->route('bidder.wallet.index')->with('error', __('Invalid payment reference returned from gateway.'));
+        }
+
+        $transaction = HyperpayTransaction::where('checkout_id', $checkoutId)->firstOrFail();
+
+        try {
+            // Verify payment directly from HyperPay
+            $paymentData = $this->hyperPayService->verifyPayment($checkoutId, $transaction->brand);
+            $resultCode = $paymentData['result']['code'] ?? '';
+
+            if ($this->hyperPayService->isSuccessCode($resultCode)) {
+                $this->hyperPayService->processSuccessfulPayment($transaction, $paymentData);
+
+                return redirect()->route('bidder.wallet.index')->with('success', __('Payment successful! An amount of :amount SAR has been credited to your wallet.', [
+                    'amount' => number_format($transaction->amount, 2)
+                ]));
+            } else {
+                $this->hyperPayService->markAsFailed($transaction, $paymentData);
+                $errorDesc = $paymentData['result']['description'] ?? __('The payment could not be processed.');
+
+                return redirect()->route('bidder.wallet.index')->with('error', __('Payment Failed: :desc', ['desc' => $errorDesc]));
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('bidder.wallet.index')->with('error', __('Verification error: :msg', ['msg' => $e->getMessage()]));
+        }
+    }
 }
+
