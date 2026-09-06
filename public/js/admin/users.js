@@ -872,3 +872,107 @@ window.deleteUser = function(id) {
         }
     });
 };
+
+window.approveWithKycData = function(id) {
+    // Show modal and show loading
+    $('#kycDataBody').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>');
+    $('#kycDataModal').modal('show');
+    
+    // Set up confirm button
+    $('#confirmKycApprovalBtn').off('click').on('click', function() {
+        let url = window.UserConfig.urls.updateStatus.replace(':id', id);
+        $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> ' + window.UserConfig.trans.approve);
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: { status: 'approved' },
+            success: function(response) {
+                if (response.success) {
+                    $('#kycDataModal').modal('hide');
+                    fetchUsers(currentPage);
+                    toastr.success(response.message);
+                }
+            },
+            complete: function() {
+                $('#confirmKycApprovalBtn').prop('disabled', false).text('تأكيد الموافقة');
+            }
+        });
+    });
+
+    // Fetch data
+    let url = window.UserConfig.urls.show.replace(':id', id);
+    $.get(url, function(response) {
+        if (response.success) {
+            const kyc = response.kyc_request;
+            if(!kyc) {
+                $('#kycDataBody').html('<div class="alert alert-warning m-0">لا يوجد بيانات توثيق مرفقة مع هذا المستخدم. هل أنت متأكد من الموافقة؟</div>');
+                return;
+            }
+            
+            const isPassport = kyc.document_type === 'passport';
+            
+            let html = `
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-1">الاسم كما في الطلب</label>
+                        <div class="form-control bg-light border-0">${kyc.full_name || '---'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-1">رقم الهوية / الإقامة</label>
+                        <div class="form-control bg-light border-0" dir="ltr">${kyc.id_number || '---'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-1">الدولة</label>
+                        <div class="form-control bg-light border-0">${kyc.country || '---'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-1">نوع المستند</label>
+                        <div class="form-control bg-light border-0">${isPassport ? 'جواز سفر' : 'هوية وطنية / إقامة'}</div>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">المستندات المرفقة</h6>
+                    </div>
+                    
+                    ${isPassport ? `
+                    <div class="col-12">
+                        <div class="border rounded p-2 text-center bg-light">
+                            <span class="d-block mb-2 text-muted fw-bold small">صورة الجواز</span>
+                            <a href="${kyc.passport_image_url}" target="_blank">
+                                <img src="${kyc.passport_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 250px;">
+                            </a>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="col-md-6">
+                        <div class="border rounded p-2 text-center bg-light h-100">
+                            <span class="d-block mb-2 text-muted fw-bold small">صورة الهوية (أمام)</span>
+                            <a href="${kyc.id_front_image_url}" target="_blank">
+                                <img src="${kyc.id_front_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-2 text-center bg-light h-100">
+                            <span class="d-block mb-2 text-muted fw-bold small">صورة الهوية (خلف)</span>
+                            <a href="${kyc.id_back_image_url}" target="_blank">
+                                <img src="${kyc.id_back_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
+                            </a>
+                        </div>
+                    </div>
+                    `}
+                    <div class="col-12 mt-3">
+                        <div class="border rounded p-2 text-center bg-light">
+                            <span class="d-block mb-2 text-muted fw-bold small">صورة السيلفي</span>
+                            <a href="${kyc.selfie_image_url}" target="_blank">
+                                <img src="${kyc.selfie_image_url}" class="img-fluid rounded shadow-sm" style="max-height: 250px;">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#kycDataBody').html(html);
+        }
+    });
+};

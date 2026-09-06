@@ -66,7 +66,16 @@ class UserController extends Controller
                 $statusBadge = '<span class="badge badge-warning text-dark">'.__("Pending").' ⏳</span>';
             }
 
-            $kycLevelBadge = '<span class="badge badge-info">Level ' . $user->kyc_level . '</span>';
+            $kycLevelBadge = '';
+            if ($user->kyc_level == 3) {
+                $kycLevelBadge = '<span class="badge badge-primary">بائع باحترافية</span>';
+            } elseif ($user->kyc_level == 2) {
+                $kycLevelBadge = '<span class="badge badge-info">موثق (KYC)</span>';
+            } elseif ($user->kyc_level == 1) {
+                $kycLevelBadge = '<span class="badge badge-secondary">موثق البريد</span>';
+            } else {
+                $kycLevelBadge = '<span class="badge badge-light text-dark">غير موثق</span>';
+            }
 
             $verifiedBadge = $user->email_verified_at
                 ? '<span class="badge badge-success">'.__("Verified").'</span>'
@@ -79,7 +88,7 @@ class UserController extends Controller
             if(empty($rolesHtml)) $rolesHtml = '<span class="text-muted">'.__("No Role").'</span>';
 
             $approveBtn = $user->status !== 'approved' 
-                ? '<li><a class="dropdown-item text-success" href="#" onclick="updateUserStatus(' . $user->id . ', \'approved\')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> '.__("Approve").'</a></li>' 
+                ? '<li><a class="dropdown-item text-success" href="#" onclick="approveWithKycData(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> '.__("Approve").'</a></li>' 
                 : '';
                 
             $rejectBtn = $user->status !== 'rejected' 
@@ -169,38 +178,51 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'first_name'   => 'required|string|max:100',
-            'last_name'    => 'required|string|max:100',
-            'email'        => 'required|email|unique:users,email',
-            'phone'        => 'nullable|string|unique:users,phone',
-            'country_code' => 'nullable|string|max:10',
-            'password'     => 'required|min:8',
-            'status'       => 'required|in:approved,pending,rejected',
-            'kyc_level'    => 'required|integer|min:0|max:3',
-            'country'      => 'nullable|string|max:100',
-            'city'         => 'nullable|string|max:100',
-            'address'      => 'nullable|string|max:500',
-            'gender'       => 'nullable|in:male,female',
-            'date_of_birth'=> 'nullable|date',
-            'id_number'    => 'nullable|string|max:50|unique:users,id_number',
-            'roles'        => 'array'
-        ]);
+        try {
+            $validated = $request->validate([
+                'first_name'   => 'required|string|max:100',
+                'last_name'    => 'required|string|max:100',
+                'email'        => 'required|email|unique:users,email',
+                'phone'        => 'nullable|string|unique:users,phone',
+                'country_code' => 'nullable|string|max:10',
+                'password'     => 'required|min:8',
+                'status'       => 'required|in:approved,pending,rejected',
+                'kyc_level'    => 'required|integer|min:0|max:3',
+                'country'      => 'nullable|string|max:100',
+                'city'         => 'nullable|string|max:100',
+                'address'      => 'nullable|string|max:500',
+                'gender'       => 'nullable|in:male,female',
+                'date_of_birth'=> 'nullable|date',
+                'id_number'    => 'nullable|string|max:50|unique:users,id_number',
+                'roles'        => 'array'
+            ]);
 
-        $validated['password'] = Hash::make($request->password);
-        $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
+            $validated['password'] = Hash::make($request->password);
+            $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
 
-        $user = User::create($validated);
+            $user = User::create($validated);
 
-        $roles = array_filter($request->roles ?? []);
-        if (!empty($roles)) {
-            $user->syncRoles($roles);
+            $roles = array_filter($request->roles ?? []);
+            if (!empty($roles)) {
+                $user->syncRoles($roles);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إضافة المستخدم بنجاح'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('User store error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Exception: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إضافة المستخدم بنجاح'
-        ]);
     }
 
     public function update(Request $request, User $user)
@@ -251,7 +273,7 @@ class UserController extends Controller
         $newStatus = $request->status;
         $user->update([
             'status' => $newStatus,
-            'kyc_level' => ($newStatus === 'approved' ? 3 : ($newStatus === 'rejected' ? 1 : $user->kyc_level))
+            'kyc_level' => ($newStatus === 'approved' ? 2 : ($newStatus === 'rejected' ? 1 : $user->kyc_level))
         ]);
 
         // Update the latest KYC request as well
@@ -285,9 +307,12 @@ class UserController extends Controller
 
     public function verify(User $user)
     {
-        $user->update([
-            'email_verified_at' => now(),
-        ]);
+        $updateData = ['email_verified_at' => now()];
+        if ($user->kyc_level == 0) {
+            $updateData['kyc_level'] = 1;
+        }
+
+        $user->update($updateData);
 
         return response()->json([
             'success' => true,

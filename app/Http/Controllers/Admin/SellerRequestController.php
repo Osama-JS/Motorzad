@@ -102,8 +102,9 @@ class SellerRequestController extends Controller
             return redirect()->back()->with('error', __('الطلب غير معلق حالياً.'));
         }
 
-        // Assign seller role
+        // Assign seller role and update kyc level
         $sellerRequest->user->assignRole('seller');
+        $sellerRequest->user->update(['kyc_level' => 3]);
 
         // Update request status
         $sellerRequest->update([

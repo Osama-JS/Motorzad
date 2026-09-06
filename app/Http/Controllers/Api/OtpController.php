@@ -224,7 +224,11 @@ class OtpController extends Controller
 
         // If existing user verified via email, mark as verified
         if ($user && $request->filled('email') && is_null($user->email_verified_at)) {
-            $user->update(['email_verified_at' => now()]);
+            $updateData = ['email_verified_at' => now()];
+            if ($user->kyc_level == 0) {
+                $updateData['kyc_level'] = 1;
+            }
+            $user->update($updateData);
         }
 
         $isNewUser = false;
@@ -262,6 +266,7 @@ class OtpController extends Controller
 
             if ($request->filled('email')) {
                 $user->email_verified_at = now();
+                $user->kyc_level = 1;
                 $user->save();
             }
 
