@@ -36,10 +36,10 @@ class KycController extends Controller
             'country' => 'required|string|max:100',
             'id_number' => 'required|string|max:50',
             'document_type' => 'required|in:national_id,passport',
-            'id_front_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
-            'id_back_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg|max:2048',
-            'passport_image' => 'required_if:document_type,passport|image|mimes:jpeg,png,jpg|max:2048',
-            'selfie_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'id_front_image' => 'required_if:document_type,national_id|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'id_back_image' => 'required_if:document_type,national_id|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'passport_image' => 'required_if:document_type,passport|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'selfie_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $user = auth()->user();

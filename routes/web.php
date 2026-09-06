@@ -76,10 +76,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // KYC Routes
-    Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
-    Route::post('/kyc', [\App\Http\Controllers\KycController::class, 'store'])->name('kyc.store');
+    // KYC Routes (Require verified email)
+    Route::middleware('verified')->group(function () {
+        Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
+        Route::post('/kyc', [\App\Http\Controllers\KycController::class, 'store'])->name('kyc.store');
+    });
 });
 
 // مسارات إدارة حركات المحفظة المخصصة بالمعيار الصناعي (ذات أولوية توجيه عليا)

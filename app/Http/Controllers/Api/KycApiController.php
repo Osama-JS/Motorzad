@@ -170,9 +170,9 @@ class KycApiController extends Controller
             'country' => 'required|string|max:100',
             'id_number' => 'required|string|max:50',
             'document_type' => 'required|in:national_id,passport',
-            'id_front_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'id_back_image' => 'required_if:document_type,national_id|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'passport_image' => 'required_if:document_type,passport|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'id_front_image' => 'required_if:document_type,national_id|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'id_back_image' => 'required_if:document_type,national_id|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'passport_image' => 'required_if:document_type,passport|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'selfie_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
@@ -229,7 +229,7 @@ class KycApiController extends Controller
             'id_front_image_url' => $kycRequest->id_front_image ? asset('storage/' . $kycRequest->id_front_image) : null,
             'id_back_image_url' => $kycRequest->id_back_image ? asset('storage/' . $kycRequest->id_back_image) : null,
             'passport_image_url' => $kycRequest->passport_image ? asset('storage/' . $kycRequest->passport_image) : null,
-            'selfie_image_url' => asset('storage/' . $kycRequest->selfie_image),
+            'selfie_image_url' => $kycRequest->selfie_image ? asset('storage/' . $kycRequest->selfie_image) : null,
             'status' => $kycRequest->status,
             'created_at' => $kycRequest->created_at->toIso8601String(),
         ];
@@ -315,7 +315,7 @@ class KycApiController extends Controller
                 'id_front_image_url' => $req->id_front_image ? asset('storage/' . $req->id_front_image) : null,
                 'id_back_image_url' => $req->id_back_image ? asset('storage/' . $req->id_back_image) : null,
                 'passport_image_url' => $req->passport_image ? asset('storage/' . $req->passport_image) : null,
-                'selfie_image_url' => asset('storage/' . $req->selfie_image),
+                'selfie_image_url' => $req->selfie_image ? asset('storage/' . $req->selfie_image) : null,
                 'status' => $req->status,
                 'admin_note' => $req->admin_note,
                 'reviewed_at' => $req->reviewed_at ? $req->reviewed_at->toIso8601String() : null,

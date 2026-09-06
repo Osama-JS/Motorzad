@@ -29,6 +29,16 @@ class User extends Authenticatable implements MustVerifyEmail
                 'debt_usage' => 0,
             ]);
         });
+
+        static::saving(function (User $user) {
+            if ($user->isDirty('email_verified_at')) {
+                if ($user->email_verified_at && $user->kyc_level == 0) {
+                    $user->kyc_level = 1;
+                } elseif (!$user->email_verified_at && $user->kyc_level == 1) {
+                    $user->kyc_level = 0;
+                }
+            }
+        });
     }
 
     /**

@@ -69,7 +69,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('kyc')->group(function () {
         Route::get('/status', [\App\Http\Controllers\Api\KycApiController::class, 'status']);
         Route::get('/history', [\App\Http\Controllers\Api\KycApiController::class, 'history']);
-        Route::post('/submit', [\App\Http\Controllers\Api\KycApiController::class, 'submit']);
+        
+        Route::middleware('verified')->group(function () {
+            Route::post('/submit', [\App\Http\Controllers\Api\KycApiController::class, 'submit']);
+        });
     });
 
     // Notifications

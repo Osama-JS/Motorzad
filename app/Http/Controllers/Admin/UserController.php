@@ -72,7 +72,7 @@ class UserController extends Controller
             } elseif ($user->kyc_level == 2) {
                 $kycLevelBadge = '<span class="badge badge-info">موثق (KYC)</span>';
             } elseif ($user->kyc_level == 1) {
-                $kycLevelBadge = '<span class="badge badge-secondary">موثق البريد</span>';
+                $kycLevelBadge = '<span class="badge badge-secondary">موثق جزئيا</span>';
             } else {
                 $kycLevelBadge = '<span class="badge badge-light text-dark">غير موثق</span>';
             }
@@ -95,6 +95,10 @@ class UserController extends Controller
                 ? '<li><a class="dropdown-item text-danger" href="#" onclick="updateUserStatus(' . $user->id . ', \'rejected\')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> '.__("Reject").'</a></li>' 
                 : '';
 
+            $verifyBtn = !$user->email_verified_at
+                ? '<li><a class="dropdown-item text-warning" href="#" onclick="verifyUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> '.__("Verify Account").'</a></li>'
+                : '';
+
             $actions = '
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light dropdown-toggle action-btn-kebab" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="border:none; background:transparent;">
@@ -105,6 +109,7 @@ class UserController extends Controller
                         <li><a class="dropdown-item text-info" href="#" onclick="editUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '.__("Edit User").'</a></li>
                         '.$approveBtn.'
                         '.$rejectBtn.'
+                        '.$verifyBtn.'
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> '.__("Delete").'</a></li>
                     </ul>
@@ -271,10 +276,15 @@ class UserController extends Controller
         ]);
 
         $newStatus = $request->status;
-        $user->update([
-            'status' => $newStatus,
-            'kyc_level' => ($newStatus === 'approved' ? 2 : ($newStatus === 'rejected' ? 1 : $user->kyc_level))
-        ]);
+        
+        $user->status = $newStatus;
+        $user->kyc_level = ($newStatus === 'approved' ? 2 : ($newStatus === 'rejected' ? 1 : $user->kyc_level));
+        
+        if ($newStatus === 'approved') {
+            $user->identity_verified_at = now();
+        }
+        
+        $user->save();
 
         // Update the latest KYC request as well
         $kyc = $user->latestKycRequest;
@@ -307,12 +317,12 @@ class UserController extends Controller
 
     public function verify(User $user)
     {
-        $updateData = ['email_verified_at' => now()];
+        $user->email_verified_at = now();
         if ($user->kyc_level == 0) {
-            $updateData['kyc_level'] = 1;
+            $user->kyc_level = 1;
         }
 
-        $user->update($updateData);
+        $user->save();
 
         return response()->json([
             'success' => true,
@@ -365,7 +375,8 @@ class UserController extends Controller
                 ], 400);
             }
 
-            $user->update(['is_deleted' => true]);
+            $user->is_deleted = true;
+            $user->save();
 
             return response()->json([
                 'success' => true,

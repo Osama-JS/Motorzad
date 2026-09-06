@@ -6,12 +6,12 @@ $(document).ready(function() {
         }
     });
 
-    let currentPage = 1;
+    window.currentPage = 1;
     let currentData = [];
     let currentView = localStorage.getItem('users_view_mode') || 'table';
 
     window.fetchUsers = function(page = 1) {
-        currentPage = page;
+        window.currentPage = page;
         $('#custom-users-tbody').html('<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> ' + window.UserConfig.trans.loading + '</td></tr>');
         $('#grid-view-container').html('<div class="col-12 text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div> ' + window.UserConfig.trans.loading + '</div>');
         
