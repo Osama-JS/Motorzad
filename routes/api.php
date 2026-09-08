@@ -35,6 +35,7 @@ Route::post('hyperpay/webhook', [\App\Http\Controllers\Api\HyperPayApiController
 // General App Data
 Route::prefix('general')->group(function () {
     Route::get('settings', [\App\Http\Controllers\Api\GeneralController::class, 'settings']);
+    Route::get('contact', [\App\Http\Controllers\Api\GeneralController::class, 'contact']);
     Route::get('faqs', [\App\Http\Controllers\Api\GeneralController::class, 'faqs']);
     Route::get('vehicle-options', [\App\Http\Controllers\Api\GeneralController::class, 'vehicleOptions']);
     Route::get('featured-auctions', [\App\Http\Controllers\Api\GeneralController::class, 'featuredAuctions']);

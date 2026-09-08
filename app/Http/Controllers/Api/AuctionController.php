@@ -122,7 +122,7 @@ class AuctionController extends Controller
 
         // ── Filters ──────────────────────────────────────────────────────
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->whereIn('status', (array) $request->status);
         } else {
             // Default: show live and scheduled only
             $query->whereIn('status', ['live', 'scheduled']);
@@ -148,7 +148,15 @@ class AuctionController extends Controller
         }
 
         if ($request->filled('make')) {
-            $query->whereHas('vehicle', fn ($q) => $q->where(fn ($sub) => $sub->where('make_ar', 'like', '%' . $request->make . '%')->orWhere('make_en', 'like', '%' . $request->make . '%')));
+            $makes = (array) $request->make;
+            $query->whereHas('vehicle', function ($q) use ($makes) {
+                $q->where(function ($sub) use ($makes) {
+                    foreach ($makes as $make) {
+                        $sub->orWhere('make_ar', 'like', '%' . $make . '%')
+                            ->orWhere('make_en', 'like', '%' . $make . '%');
+                    }
+                });
+            });
         }
 
         if ($request->filled('location')) {
@@ -174,6 +182,14 @@ class AuctionController extends Controller
         if ($request->filled('price_max')) {
             $query->where('start_price', '<=', $request->price_max);
         }
+
+        // ── Facets (Stats) ────────────────────────────────────────────────
+        $statsQuery = clone $query;
+        $facets = [
+            'status' => $this->getStatusStats(clone $statsQuery),
+            'make'   => $this->getMakeStats(clone $statsQuery),
+            'price_range' => $this->getPriceStats(clone $statsQuery),
+        ];
 
         // ── Sorting ────────────────────────────────────────────────────────
         $sort = $request->input('sort', 'end_time');
@@ -203,8 +219,45 @@ class AuctionController extends Controller
                 'last_page'    => $auctions->lastPage(),
                 'total'        => $auctions->total(),
                 'per_page'     => $auctions->perPage(),
+                'facets'       => $facets,
             ]
         );
+    }
+
+    // ── Helper Methods for Facets ────────────────────────────────────────
+
+    private function getStatusStats($query)
+    {
+        return $query->select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => __("auctions.status.{$item->status}"),
+                    'value' => $item->status,
+                    'count' => $item->count
+                ];
+            });
+    }
+
+    private function getMakeStats($query)
+    {
+        $locale = app()->getLocale();
+        $makeColumn = $locale === 'ar' ? 'vehicles.make_ar' : 'vehicles.make_en';
+
+        return $query->join('vehicles', 'auctions.vehicle_id', '=', 'vehicles.id')
+            ->select($makeColumn . ' as name', $makeColumn . ' as value', DB::raw('count(auctions.id) as count'))
+            ->whereNotNull($makeColumn)
+            ->groupBy($makeColumn)
+            ->get();
+    }
+
+    private function getPriceStats($query)
+    {
+        return [
+            'min' => $query->min('start_price') ?? 0,
+            'max' => $query->max('start_price') ?? 0,
+        ];
     }
 
     /**
@@ -693,11 +746,49 @@ class AuctionController extends Controller
     )]
     public function myAuctions(Request $request): JsonResponse
     {
-        $auctions = Auction::where('created_by', $request->user()->id)
+        $query = Auction::where('created_by', $request->user()->id)
             ->with(['vehicle.images', 'highestBid'])
-            ->withCount('bids')
-            ->latest()
-            ->paginate($request->input('per_page', 12));
+            ->withCount('bids');
+
+        // ── Filters ──────────────────────────────────────────────────────
+        if ($request->filled('status')) {
+            $query->whereIn('status', (array) $request->status);
+        }
+
+        if ($request->filled('make')) {
+            $makes = (array) $request->make;
+            $query->whereHas('vehicle', function ($q) use ($makes) {
+                $q->where(function ($sub) use ($makes) {
+                    foreach ($makes as $make) {
+                        $sub->orWhere('make_ar', 'like', '%' . $make . '%')
+                            ->orWhere('make_en', 'like', '%' . $make . '%');
+                    }
+                });
+            });
+        }
+
+        if ($request->filled('price_min')) {
+            $query->where('start_price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('start_price', '<=', $request->price_max);
+        }
+
+        // ── Facets (Stats) ────────────────────────────────────────────────
+        $statsQuery = clone $query;
+        $facets = [
+            'status' => $this->getStatusStats(clone $statsQuery),
+            'make'   => $this->getMakeStats(clone $statsQuery),
+            'price_range' => $this->getPriceStats(clone $statsQuery),
+        ];
+
+        // ── Sorting ────────────────────────────────────────────────────────
+        $sort = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
+        $query->orderBy($sort, $direction);
+
+        $auctions = $query->paginate($request->input('per_page', 12));
 
         return $this->successResponse(
             AuctionResource::collection($auctions->items()),
@@ -707,6 +798,8 @@ class AuctionController extends Controller
                 'current_page' => $auctions->currentPage(),
                 'last_page'    => $auctions->lastPage(),
                 'total'        => $auctions->total(),
+                'per_page'     => $auctions->perPage(),
+                'facets'       => $facets,
             ]
         );
     }

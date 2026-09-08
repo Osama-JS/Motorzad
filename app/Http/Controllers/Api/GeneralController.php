@@ -55,6 +55,43 @@ class GeneralController extends Controller
     }
 
     /**
+     * Get Contact Information.
+     */
+    #[OA\Get(
+        path: "/api/general/contact",
+        summary: "Get Contact Information",
+        description: "Returns WhatsApp number and support email.",
+        tags: ["General"],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Successful response",
+                content: new OA\JsonContent(
+                    example: [
+                        'success' => true,
+                        'data' => [
+                            'whatsapp' => '+966500000000',
+                            'email' => 'support@motorzad.com'
+                        ]
+                    ]
+                )
+            )
+        ]
+    )]
+    public function contact(): JsonResponse
+    {
+        $settings = Setting::whereIn('key', ['support_phone', 'support_email', 'whatsapp_number'])->pluck('value', 'key');
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'whatsapp' => $settings->get('whatsapp_number', $settings->get('support_phone', '+966500000000')),
+                'email' => $settings->get('support_email', 'support@motorzad.com')
+            ]
+        ]);
+    }
+
+    /**
      * Get FAQs.
      */
     #[OA\Get(

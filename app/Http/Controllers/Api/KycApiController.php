@@ -66,7 +66,7 @@ class KycApiController extends Controller
         $latestRequest = $user->latestKycRequest;
 
         $data = [
-            'kyc_status' => $latestRequest ? $latestRequest->status : 'not_submitted',
+            'kyc_status' => $user->kyc_level === 2 ? 'approved' : ($latestRequest ? $latestRequest->status : 'not_submitted'),
             'kyc_level' => $user->kyc_level,
             'identity_verified_at' => $user->identity_verified_at ? $user->identity_verified_at->toIso8601String() : null,
             'user_status' => $user->status,
