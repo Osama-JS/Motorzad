@@ -215,6 +215,182 @@ html[dir="rtl"] .form-field select {
     border-color: rgba(239, 68, 68, 0.35);
 }
 
+/* ===== PROFILE HERO MASTERPIECE ===== */
+.profile-hero-card {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4rem;
+    padding: 3rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.profile-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(229, 62, 62, 0.15) 0%, transparent 60%);
+    transform: rotate(-45deg);
+    pointer-events: none;
+}
+.profile-hero-card::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 40%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+.profile-hero-content {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+.profile-hero-avatar-wrapper {
+    position: relative;
+}
+.profile-hero-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    background: #0b0f19;
+}
+.profile-hero-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #1e293b;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+html[dir="rtl"] .profile-hero-badge {
+    right: auto;
+    left: 5px;
+}
+.profile-hero-badge.verified {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+.profile-hero-badge.unverified {
+    background: linear-gradient(135deg, #64748b, #475569);
+}
+.profile-hero-info {
+    color: white;
+}
+.profile-hero-name {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(to right, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+.profile-hero-email {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.profile-hero-tags {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.p-tag {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+}
+.p-tag.kyc {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.p-tag.status.approved { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+.p-tag.status.pending { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.p-tag.status.rejected { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.profile-hero-stats {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.5rem 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+}
+.p-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem;
+}
+.p-stat-item:not(:last-child) {
+    border-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 1px solid rgba(255, 255, 255, 0.1);
+}
+.p-stat-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+.p-stat-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+@media(max-width: 992px) {
+    .profile-hero-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+    .profile-hero-content {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .profile-hero-email { justify-content: center; }
+    .profile-hero-tags { justify-content: center; }
+}
+@media(max-width: 480px) {
+    .profile-hero-avatar { width: 110px; height: 110px; }
+    .profile-hero-name { font-size: 2rem; }
+    .profile-hero-stats { flex-direction: column; gap: 1rem; width: 100%; }
+    .p-stat-item:not(:last-child) { border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1rem; }
+}
+
 @media(max-width: 992px) {
     .profile-grid {
         grid-template-columns: 1fr;
@@ -248,34 +424,51 @@ html[dir="rtl"] .form-field select {
 @section('content')
 
 {{-- ===== HERO BANNER ===== --}}
-<div class="wallet-hero-card">
-    <div class="wallet-hero-bg"></div>
-    <div class="wallet-hero-content">
-        <div class="wallet-hero-left">
-            <div class="wallet-hero-avatar">
-                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->full_name }}" id="bannerAvatar">
-                <div class="wallet-verified-badge {{ $user->status === 'approved' ? 'verified' : '' }}">
-                    @if($user->status === 'approved')
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    @else
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    @endif
-                </div>
+<div class="profile-hero-card">
+    <div class="profile-hero-content">
+        <div class="profile-hero-avatar-wrapper">
+            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->full_name }}" class="profile-hero-avatar" id="bannerAvatar">
+            <div class="profile-hero-badge {{ $user->status === 'approved' ? 'verified' : 'unverified' }}">
+                @if($user->status === 'approved')
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                @else
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                @endif
             </div>
-            <div class="wallet-hero-info">
-                <h1>{{ $user->full_name }}</h1>
-                <div class="wallet-hero-email">{{ $user->email }}</div>
-                <div class="wallet-hero-badges">
-                    <span class="w-badge kyc">{{ __('KYC Level') }} {{ $user->kyc_level }}</span>
-                    @if($user->status === 'approved')
-                        <span class="w-badge status approved">{{ __('Verified') }}</span>
-                    @elseif($user->status === 'pending')
-                        <span class="w-badge status pending">{{ __('Pending') }}</span>
-                    @else
-                        <span class="w-badge status rejected">{{ __('Not Verified') }}</span>
-                    @endif
-                </div>
+        </div>
+        <div class="profile-hero-info">
+            <h1 class="profile-hero-name">{{ $user->full_name }}</h1>
+            <div class="profile-hero-email">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                {{ $user->email }}
             </div>
+            <div class="profile-hero-tags">
+                <span class="p-tag kyc">{{ __('KYC Level') }} {{ $user->kyc_level }}</span>
+                @if($user->status === 'approved')
+                    <span class="p-tag status approved">{{ __('Verified Account') }}</span>
+                @elseif($user->status === 'pending')
+                    <span class="p-tag status pending">{{ __('Pending Verification') }}</span>
+                @else
+                    <span class="p-tag status rejected">{{ __('Not Verified') }}</span>
+                @endif
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-hero-stats">
+        <div class="p-stat-item">
+            <span class="p-stat-value">{{ $user->created_at->format('Y') }}</span>
+            <span class="p-stat-label">{{ app()->getLocale() === 'ar' ? 'سنة الانضمام' : 'Joined' }}</span>
+        </div>
+        <div class="p-stat-item">
+            <span class="p-stat-value">{{ strtoupper($user->country ?? '---') }}</span>
+            <span class="p-stat-label">{{ app()->getLocale() === 'ar' ? 'البلد' : 'Country' }}</span>
+        </div>
+        <div class="p-stat-item">
+            <span class="p-stat-value" style="color: #10b981;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <span class="p-stat-label">{{ app()->getLocale() === 'ar' ? 'حماية مفعلة' : 'Secured' }}</span>
         </div>
     </div>
 </div>
@@ -595,12 +788,12 @@ $(document).ready(function() {
                 if (response.success) {
                     toastr.success(response.message || 'Profile updated successfully.');
                     
-                    // Update user info across UI
-                    if (response.user) {
-                        $('.wallet-hero-info h1').text(response.user.full_name);
-                        $('.wallet-hero-email').text(response.user.email);
-                        $('#bannerAvatar').attr('src', response.user.profile_photo_url);
-                        $('#avatarPreview').attr('src', response.user.profile_photo_url);
+                        // Update user info across UI
+                        if (response.user) {
+                            $('.profile-hero-name').text(response.user.full_name);
+                            $('.profile-hero-email').html('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ' + response.user.email);
+                            $('#bannerAvatar').attr('src', response.user.profile_photo_url);
+                            $('#avatarPreview').attr('src', response.user.profile_photo_url);
                         
                         // Update topbar & sidebar user display
                         $('.topbar .user-name, .sidebar-user .name').text(response.user.full_name);

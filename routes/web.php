@@ -261,6 +261,15 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/notifications/unread-state', [\App\Http\Controllers\Bidder\DashboardController::class, 'getUnreadState'])->name('notifications.unread_state');
     Route::get('/notifications', [\App\Http\Controllers\Bidder\DashboardController::class, 'notifications'])->name('notifications');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Bidder\DashboardController::class, 'markNotificationRead'])->name('notifications.read');
+
+    // Support Tickets Routes
+    Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Bidder\SupportController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Bidder\SupportController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Bidder\SupportController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [\App\Http\Controllers\Bidder\SupportController::class, 'show'])->name('show');
+        Route::post('/{ticket}/reply', [\App\Http\Controllers\Bidder\SupportController::class, 'reply'])->name('reply');
+    });
 });
 
 Route::get('/resources', function () {
