@@ -278,11 +278,11 @@ class AuthController extends Controller
     /**
      * Update profile.
      */
-    #[OA\Put(
+    #[OA\Post(
         path: "/api/auth/profile",
         summary: "Update user profile",
         operationId: "updateUserProfile",
-        description: "Updates the authenticated user's profile details.",
+        description: "Updates the authenticated user's profile details. Supports multipart/form-data for image uploads. Alternatively, you can send a base64 string in the 'image' field.",
         tags: ["Authentication"],
         security: [["bearerAuth" => []]],
         parameters: [
@@ -290,17 +290,22 @@ class AuthController extends Controller
         ],
         requestBody: new OA\RequestBody(
             required: false,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: "first_name", type: "string", example: "John"),
-                    new OA\Property(property: "last_name", type: "string", example: "Doe"),
-                    new OA\Property(property: "phone", type: "string", example: "500000000"),
-                    new OA\Property(property: "country_code", type: "string", example: "+966"),
-                    new OA\Property(property: "country", type: "string", example: "Saudi Arabia"),
-                    new OA\Property(property: "city", type: "string", example: "Riyadh"),
-                    new OA\Property(property: "gender", type: "string", enum: ["male", "female"]),
-                    new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "1990-01-01")
-                ]
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "first_name", type: "string", example: "John"),
+                        new OA\Property(property: "last_name", type: "string", example: "Doe"),
+                        new OA\Property(property: "phone", type: "string", example: "500000000"),
+                        new OA\Property(property: "country_code", type: "string", example: "+966"),
+                        new OA\Property(property: "country", type: "string", example: "Saudi Arabia"),
+                        new OA\Property(property: "city", type: "string", example: "Riyadh"),
+                        new OA\Property(property: "gender", type: "string", enum: ["male", "female"]),
+                        new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "1990-01-01"),
+                        new OA\Property(property: "image", type: "string", format: "binary", description: "Profile photo image file or base64 string"),
+                        new OA\Property(property: "_method", type: "string", example: "PUT", description: "Optional: Use this if forcing a PUT request via POST")
+                    ]
+                )
             )
         ),
         responses: [
@@ -324,7 +329,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        $validated = $request->validate([
+        $rules = [
             'first_name' => 'sometimes|string|max:100',
             'last_name' => 'sometimes|string|max:100',
             'phone' => 'sometimes|nullable|string|unique:users,phone,' . $user->id,
@@ -333,13 +338,49 @@ class AuthController extends Controller
             'city' => 'sometimes|nullable|string|max:100',
             'gender' => 'sometimes|nullable|in:male,female',
             'date_of_birth' => 'sometimes|nullable|date',
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,webp|max:5120';
+        }
+
+        $validated = $request->validate($rules);
 
         if (isset($validated['first_name']) || isset($validated['last_name'])) {
             $validated['name'] = ($validated['first_name'] ?? $user->first_name)
                 . ' '
                 . ($validated['last_name'] ?? $user->last_name);
         }
+
+        // Handle File Upload (form-data)
+        if ($request->hasFile('image')) {
+            if ($user->profile_photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            }
+            $validated['profile_photo'] = $request->file('image')->store('profile_photos', 'public');
+        } 
+        // Handle Base64 Upload (json payload)
+        elseif ($request->filled('image') && is_string($request->image)) {
+            if (preg_match('/^data:image\/(\w+);base64,/', $request->image, $type)) {
+                $image_data = substr($request->image, strpos($request->image, ',') + 1);
+                $ext = strtolower($type[1]);
+                
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                    $decoded_image = base64_decode($image_data);
+                    
+                    if ($decoded_image !== false) {
+                        $filename = 'profile_photos/' . uniqid() . '.' . $ext;
+                        if ($user->profile_photo) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+                        }
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $decoded_image);
+                        $validated['profile_photo'] = $filename;
+                    }
+                }
+            }
+        }
+        
+        unset($validated['image']);
 
         $user->update($validated);
 

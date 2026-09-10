@@ -1768,12 +1768,12 @@
             }
         },
         "/api/auth/profile": {
-            "put": {
+            "post": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Update user profile",
-                "description": "Updates the authenticated user's profile details.",
+                "description": "Updates the authenticated user's profile details. Supports multipart/form-data for image uploads. Alternatively, you can send a base64 string in the 'image' field.",
                 "operationId": "updateUserProfile",
                 "parameters": [
                     {
@@ -1793,7 +1793,7 @@
                 "requestBody": {
                     "required": false,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "properties": {
                                     "first_name": {
@@ -1831,6 +1831,16 @@
                                         "type": "string",
                                         "format": "date",
                                         "example": "1990-01-01"
+                                    },
+                                    "image": {
+                                        "description": "Profile photo image file or base64 string",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "_method": {
+                                        "description": "Optional: Use this if forcing a PUT request via POST",
+                                        "type": "string",
+                                        "example": "PUT"
                                     }
                                 },
                                 "type": "object"
@@ -2682,14 +2692,44 @@
                                 "example": {
                                     "success": true,
                                     "data": {
-                                        "site_name_ar": "موترزاد",
-                                        "site_name_en": "Motorzad",
+                                        "android_url": "https://play.google.com/store/apps/details?id=com.Motorzad",
+                                        "ios_url": "https://apps.apple.com/app/Motorzad/id000000000",
+                                        "android_version": "1.0.0",
+                                        "ios_version": "1.0.0",
+                                        "android_min_version": "1.0.0",
+                                        "ios_min_version": "1.0.0",
                                         "support_email": "support@motorzad.com",
-                                        "support_phone": "+966500000000",
-                                        "terms_ar": "شروط وأحكام المنصة...",
-                                        "terms_en": "Platform terms and conditions...",
-                                        "about_ar": "من نحن...",
-                                        "about_en": "About us..."
+                                        "support_whatsapp_url": "https://wa.me/966500000000",
+                                        "whatsapp_url": "https://wa.me/966500000000",
+                                        "twitter_url": "https://twitter.com/Motorzad",
+                                        "telegram_url": "https://t.me/Motorzad"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/general/contact": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Contact Information",
+                "description": "Returns WhatsApp number and support email.",
+                "operationId": "a5c60a2edda4a065fc1ab696258b3dc1",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "whatsapp": "+966500000000",
+                                        "email": "support@motorzad.com"
                                     }
                                 }
                             }

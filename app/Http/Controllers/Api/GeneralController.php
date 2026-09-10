@@ -30,14 +30,17 @@ class GeneralController extends Controller
                     example: [
                         'success' => true,
                         'data' => [
-                            'site_name_ar' => 'موترزاد',
-                            'site_name_en' => 'Motorzad',
+                            'android_url' => 'https://play.google.com/store/apps/details?id=com.Motorzad',
+                            'ios_url' => 'https://apps.apple.com/app/Motorzad/id000000000',
+                            'android_version' => '1.0.0',
+                            'ios_version' => '1.0.0',
+                            'android_min_version' => '1.0.0',
+                            'ios_min_version' => '1.0.0',
                             'support_email' => 'support@motorzad.com',
-                            'support_phone' => '+966500000000',
-                            'terms_ar' => 'شروط وأحكام المنصة...',
-                            'terms_en' => 'Platform terms and conditions...',
-                            'about_ar' => 'من نحن...',
-                            'about_en' => 'About us...'
+                            'support_whatsapp_url' => 'https://wa.me/966500000000',
+                            'whatsapp_url' => 'https://wa.me/966500000000',
+                            'twitter_url' => 'https://twitter.com/Motorzad',
+                            'telegram_url' => 'https://t.me/Motorzad'
                         ]
                     ]
                 )
@@ -46,7 +49,21 @@ class GeneralController extends Controller
     )]
     public function settings(): JsonResponse
     {
-        $settings = Setting::all()->pluck('value', 'key');
+        $keys = [
+            'android_url',
+            'ios_url',
+            'android_version',
+            'ios_version',
+            'android_min_version',
+            'ios_min_version',
+            'support_email',
+            'support_whatsapp_url',
+            'whatsapp_url',
+            'twitter_url',
+            'telegram_url'
+        ];
+
+        $settings = Setting::whereIn('key', $keys)->pluck('value', 'key');
         
         return response()->json([
             'success' => true,
