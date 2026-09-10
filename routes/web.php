@@ -187,11 +187,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
     Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
     Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])->name('auctions.force-end');
+    Route::post('auctions/{auction}/block-user', [\App\Http\Controllers\Admin\AuctionController::class, 'blockUser'])->name('auctions.block-user');
     Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
 
     // Bids Management
     Route::get('bids/data', [\App\Http\Controllers\Admin\BidController::class, 'getData'])->name('bids.data');
     Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
+    Route::post('bids/{bid}/void', [\App\Http\Controllers\Admin\BidController::class, 'void'])->name('bids.void');
 
     // Vehicles Management
     Route::post('vehicles/decode-vin', [\App\Http\Controllers\Admin\VehicleController::class, 'decodeVin'])->name('vehicles.decode-vin');

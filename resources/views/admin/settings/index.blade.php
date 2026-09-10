@@ -166,6 +166,13 @@
                         <label class="form-label">{{ __('Phone Number') }}</label>
                         <input type="text" name="contact_phone" class="form-control" value="{{ \App\Models\Setting::get('contact_phone') }}" dir="ltr">
                     </div></div>
+                    <div class="row"><div class="col-md-6 mb-3">
+                        <label class="form-label">{{ __('Support Email Address') }}</label>
+                        <input type="email" name="support_email" class="form-control" value="{{ \App\Models\Setting::get('support_email') }}">
+                    </div><div class="col-md-6 mb-3">
+                        <label class="form-label">{{ __('Support WhatsApp URL') }}</label>
+                        <input type="url" name="support_whatsapp_url" class="form-control" value="{{ \App\Models\Setting::get('support_whatsapp_url') }}" dir="ltr">
+                    </div></div>
                     <div class="mb-3">
                         <label class="form-label">{{ __('Primary Color') }}</label>
                         <div class="d-flex align-items-center gap-3">
@@ -357,8 +364,28 @@
             <div class="card">
                 <div class="card-header"><h2>{{ __('Mobile Apps') }}</h2></div>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Android App Version') }}</label>
+                            <input type="text" name="android_version" class="form-control" value="{{ \App\Models\Setting::get('android_version') }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('iOS App Version') }}</label>
+                            <input type="text" name="ios_version" class="form-control" value="{{ \App\Models\Setting::get('ios_version') }}" dir="ltr">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Android Minimum Required Version') }}</label>
+                            <input type="text" name="android_min_version" class="form-control" value="{{ \App\Models\Setting::get('android_min_version') }}" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('iOS Minimum Required Version') }}</label>
+                            <input type="text" name="ios_min_version" class="form-control" value="{{ \App\Models\Setting::get('ios_min_version') }}" dir="ltr">
+                        </div>
+                    </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ __('Minimum Required Version') }}</label>
+                        <label class="form-label">{{ __('Minimum Required Version (Legacy)') }}</label>
                         <input type="text" name="app_min_version" class="form-control" value="{{ \App\Models\Setting::get('app_min_version') }}" dir="ltr" style="max-width:200px;">
                     </div>
                     <div class="mb-3">
