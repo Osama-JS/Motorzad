@@ -586,7 +586,7 @@ class AuthController extends Controller
         Cache::put('reset_pwd_' . $user->email, $code, now()->addMinutes(15));
 
         // Send OTP using MailService
-        $this->mailService->sendOtp($user->email, $code);
+        $this->mailService->sendPasswordResetOtp($user->email, $code);
 
         $responseData = new \stdClass();
         if (config('app.debug') || app()->environment('local')) {

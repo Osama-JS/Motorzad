@@ -26,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Auction::class, AuctionPolicy::class);
+
+        // Apply dynamic SMTP mail configuration from database settings
+        \App\Services\MailConfigService::applySettings();
     }
 }

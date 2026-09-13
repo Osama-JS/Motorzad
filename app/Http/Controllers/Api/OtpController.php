@@ -12,9 +12,16 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
 use App\Http\Resources\UserResource;
+use App\Services\MailService;
 
 class OtpController extends Controller
 {
+    protected MailService $mailService;
+
+    public function __construct(MailService $mailService)
+    {
+        $this->mailService = $mailService;
+    }
     #[OA\Post(
         path: "/api/otp/send",
         summary: "Send an OTP code",
@@ -89,22 +96,45 @@ class OtpController extends Controller
             ? $request->email 
             : $request->country_code . $request->phone;
 
-        // Generate a 6-digit OTP
-        $code = (string) mt_rand(100000, 999999);
+        // Rate limiting: 60 seconds between OTP requests per identifier
+        $throttleKey = 'otp_throttle_' . $identifier;
+        if (Cache::has($throttleKey)) {
+            $secondsLeft = Cache::get($throttleKey) - now()->timestamp;
+            if ($secondsLeft > 0) {
+                return $this->apiResponse(
+                    true,
+                    __('Please wait :seconds seconds before requesting another code.', ['seconds' => $secondsLeft]),
+                    null,
+                    ['retry_after' => $secondsLeft],
+                    429
+                );
+            }
+        }
+
+        // Generate a cryptographically secure 6-digit OTP
+        $code = sprintf('%06d', random_int(100000, 999999));
+
+        // If email was provided, dispatch real SMTP email
+        if ($request->filled('email')) {
+            $sendResult = $this->mailService->sendOtp($request->email, $code, 'login', 5);
+            if (!$sendResult['success']) {
+                return $this->apiResponse(true, $sendResult['message'], null, null, 500);
+            }
+        }
 
         // Store OTP in Cache for 5 minutes
         Cache::put('otp_' . $identifier, $code, now()->addMinutes(5));
+        Cache::put($throttleKey, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+        Cache::put('otp_attempts_' . $identifier, 0, now()->addMinutes(5));
 
-        // Log OTP code (Simulating sending SMS/Email)
-        Log::info("OTP generated for: {$identifier} -> Code: {$code}");
+        Log::info("OTP generated and sent to: {$identifier} -> Code: {$code}");
 
-        // Prepare response data
-        $responseData = [];
-        if (config('app.debug') || app()->environment('local')) {
-            $responseData['otp'] = $code;
-        }
+        $responseData = [
+            'expires_in' => 300, // seconds
+            'resend_in'  => 60,  // seconds
+        ];
 
-        return $this->apiResponse(false, __('OTP sent successfully.'), $responseData);
+        return $this->apiResponse(false, __('OTP sent successfully to your email.'), $responseData);
     }
 
     #[OA\Post(
@@ -197,20 +227,28 @@ class OtpController extends Controller
             : $request->country_code . $request->phone;
 
         $cachedCode = Cache::get('otp_' . $identifier);
+        $attemptsKey = 'otp_attempts_' . $identifier;
+        $attempts = (int) Cache::get($attemptsKey, 0);
 
-        // Allow '123456' as master code in local/debug environment for easy testing
-        $isMasterCode = (config('app.debug') || app()->environment('local')) && $request->code === '123456';
-
-        if (!$cachedCode && !$isMasterCode) {
+        if (!$cachedCode) {
             return $this->apiResponse(true, __('Invalid or expired OTP code.'), null, null, 400);
         }
 
-        if ($cachedCode !== $request->code && !$isMasterCode) {
+        if ($cachedCode !== $request->code) {
+            $attempts++;
+            if ($attempts >= 5) {
+                Cache::forget('otp_' . $identifier);
+                Cache::forget($attemptsKey);
+                return $this->apiResponse(true, __('Too many failed attempts. This code has been invalidated. Please request a new code.'), null, null, 429);
+            }
+            Cache::put($attemptsKey, $attempts, now()->addMinutes(5));
             return $this->apiResponse(true, __('Invalid or expired OTP code.'), null, null, 400);
         }
 
         // OTP verified successfully, remove from cache
         Cache::forget('otp_' . $identifier);
+        Cache::forget($attemptsKey);
+        Cache::forget('otp_throttle_' . $identifier);
 
         // Find user
         $user = null;

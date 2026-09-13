@@ -97,6 +97,15 @@ class SettingController extends Controller
                 'hyperpay_webhook_secret' => 'nullable|string',
                 'hyperpay_min_deposit' => 'nullable|numeric|min:1',
                 'hyperpay_max_deposit' => 'nullable|numeric|min:1',
+                // SMTP & Mail Settings
+                'mail_mailer' => 'nullable|in:smtp,log,sendmail',
+                'mail_host' => 'nullable|string|max:255',
+                'mail_port' => 'nullable|integer',
+                'mail_username' => 'nullable|string|max:255',
+                'mail_password' => 'nullable|string|max:255',
+                'mail_encryption' => 'nullable|string|max:20',
+                'mail_from_address' => 'nullable|email|max:255',
+                'mail_from_name' => 'nullable|string|max:255',
             ]);
 
             $data = $request->except(['_token', 'site_logo', 'site_favicon', 'hero_bg', 'page_header_bg']);
@@ -119,6 +128,9 @@ class SettingController extends Controller
             foreach ($data as $key => $value) {
                 Setting::set($key, $value);
             }
+
+            // Immediately apply any updated mail credentials
+            \App\Services\MailConfigService::applySettings();
 
             // Handle File Uploads
             $logoPath = $this->handleFileUpload($request, 'site_logo');
@@ -147,6 +159,30 @@ class SettingController extends Controller
             }
             return redirect()->back()->with('error', __('An error occurred while updating settings.'));
         }
+    }
+
+    /**
+     * Send a test email to verify SMTP configuration from admin dashboard.
+     */
+    public function sendTestEmail(Request $request, \App\Services\MailService $mailService)
+    {
+        $request->validate([
+            'test_email' => 'required|email',
+        ]);
+
+        $result = $mailService->sendTestEmail($request->test_email);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'],
+        ], 422);
     }
 
     private function handleFileUpload($request, $key)

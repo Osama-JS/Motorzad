@@ -119,6 +119,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Settings Routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    Route::post('settings/test-email', [\App\Http\Controllers\Admin\SettingController::class, 'sendTestEmail'])->name('settings.test-email');
 
     // Contact Messages
     Route::get('contacts/data', [\App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contacts.data');

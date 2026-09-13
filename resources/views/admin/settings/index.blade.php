@@ -82,6 +82,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         <span>{{ __('بوابة هايبر باي (HyperPay)') }}</span>
                     </a>
+                    <a href="#" class="settings-nav-item" data-tab="smtp">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L1 7"/></svg>
+                        <span>{{ __('إعدادات البريد وOTP (SMTP)') }}</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -586,6 +590,114 @@
             </div>
         </div>
 
+        {{-- SMTP & Mail Settings Panel --}}
+        <div class="settings-panel" id="panel-smtp">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 style="margin:0;">{{ __('إعدادات خادم البريد (SMTP & OTP Settings)') }}</h2>
+                        <small class="text-muted">{{ __('تهيئة ربط خادم إرسال البريد الإلكتروني ورموز التحقق والإشعارات.') }}</small>
+                    </div>
+                    <span class="badge {{ \App\Services\MailConfigService::isConfigured() ? 'bg-success' : 'bg-warning text-dark' }}" id="smtp-status-badge">
+                        {{ \App\Services\MailConfigService::isConfigured() ? __('الخادم مهيأ') : __('غير مكتمل') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {{-- Alert Box --}}
+                    <div class="p-3 mb-4" style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fa-solid fa-shield-halved text-danger"></i>
+                            <strong style="color:var(--brand-red-light);">{{ __('إرسال حقيقي مباشر عبر خادم الـ SMTP') }}</strong>
+                        </div>
+                        <p class="mb-0 text-muted" style="font-size:0.85rem; line-height:1.6;">
+                            {{ __('تُستخدم هذه البيانات لإرسال كافة رسائل البريد الإلكتروني فعلياً إلى صناديق بريد المستخدمين سواء في بيئة التطوير أو بيئة الإنتاج، بما فيها رموز التحقق (OTP) للمصادقة وتأكيد الحسابات واستعادة كلمات المرور.') }}
+                        </p>
+                    </div>
+
+                    {{-- Driver, Host, Port --}}
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('نوع مشغل البريد (Mailer Driver)') }}</label>
+                            <select name="mail_mailer" class="form-select" style="background:var(--bg-input);">
+                                <option value="smtp" {{ \App\Models\Setting::get('mail_mailer', 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP (خادم بريد خارجي / قياسي)</option>
+                                <option value="sendmail" {{ \App\Models\Setting::get('mail_mailer') === 'sendmail' ? 'selected' : '' }}>Sendmail (خادم السيرفر الداخلي)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label">{{ __('عنوان خادم البريد (SMTP Host)') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="mail_host" class="form-control" value="{{ \App\Models\Setting::get('mail_host', env('MAIL_HOST', 'smtp.gmail.com')) }}" placeholder="smtp.mailgun.org أو smtp.gmail.com" dir="ltr">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">{{ __('منفذ الخادم (Port)') }} <span class="text-danger">*</span></label>
+                            <input type="number" name="mail_port" class="form-control" value="{{ \App\Models\Setting::get('mail_port', env('MAIL_PORT', 587)) }}" placeholder="587 أو 465" dir="ltr">
+                        </div>
+                    </div>
+
+                    {{-- Username, Password, Encryption --}}
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label">{{ __('اسم المستخدم / البريد (SMTP Username)') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="mail_username" class="form-control" value="{{ \App\Models\Setting::get('mail_username', env('MAIL_USERNAME')) }}" placeholder="info@yourdomain.com" dir="ltr">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('كلمة المرور / App Password') }} <span class="text-danger">*</span></label>
+                            <div class="input-group" dir="ltr">
+                                <input type="password" name="mail_password" id="smtp_mail_password" class="form-control" value="{{ \App\Models\Setting::get('mail_password', env('MAIL_PASSWORD')) }}" placeholder="••••••••••••">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('smtp_mail_password', this)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">{{ __('نوع التشفير (Encryption)') }}</label>
+                            <select name="mail_encryption" class="form-select" style="background:var(--bg-input);">
+                                @php $enc = strtolower(\App\Models\Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls'))); @endphp
+                                <option value="tls" {{ $enc === 'tls' ? 'selected' : '' }}>TLS (المنفذ 587 - موصى به)</option>
+                                <option value="ssl" {{ $enc === 'ssl' ? 'selected' : '' }}>SSL (المنفذ 465)</option>
+                                <option value="none" {{ $enc === 'none' || empty($enc) ? 'selected' : '' }}>بدون تشفير (None)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Sender Address & Name --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('البريد الإلكتروني للمُرسل (From Address)') }} <span class="text-danger">*</span></label>
+                            <input type="email" name="mail_from_address" class="form-control" value="{{ \App\Models\Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@motorzad.com')) }}" placeholder="noreply@motorzad.com" dir="ltr">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('اسم المُرسل الظاهر (From Name)') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="mail_from_name" class="form-control" value="{{ \App\Models\Setting::get('mail_from_name', env('MAIL_FROM_NAME', config('app.name', 'Motorzad'))) }}" placeholder="Motorzad | منصة موتورزاد">
+                        </div>
+                    </div>
+
+                    <hr style="border-color:var(--border); margin:1.5rem 0;">
+
+                    {{-- Test Email Section --}}
+                    <div class="p-3" style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:var(--radius);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fa-solid fa-paper-plane text-success"></i>
+                            <strong style="color:#34d399;">{{ __('فحص الاتصال وإرسال بريد تجريبي (Live SMTP Connection Test)') }}</strong>
+                        </div>
+                        <p class="mb-3 text-muted" style="font-size:0.85rem;">
+                            {{ __('أدخل بريدك الإلكتروني أدناه ثم اضغط على زر الفحص للتأكد من نجاح الاتصال بالخادم ووصول الرسائل إلى صندوق الوارد بشكل سليم:') }}
+                        </p>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-8">
+                                <input type="email" id="test_recipient_email" class="form-control" value="{{ auth()->user()->email ?? '' }}" placeholder="name@example.com" dir="ltr">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-success w-100" id="btnSendTestEmail" onclick="sendSmtpTestEmail()">
+                                    <span id="testEmailBtnText">🚀 {{ __('إرسال بريد تجريبي الآن') }}</span>
+                                    <span id="testEmailBtnLoading" class="d-none"><span class="spinner-border spinner-border-sm me-1"></span> {{ __('جارٍ الفحص...') }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Save Button --}}
         <div style="margin-top:1.5rem; display:flex; justify-content:flex-end;">
             <button type="submit" class="btn btn-primary px-5" id="saveBtn">
@@ -702,5 +814,66 @@ $(function(){
         });
     });
 });
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function sendSmtpTestEmail() {
+    const email = $('#test_recipient_email').val().trim();
+    if (!email) {
+        Swal.fire({icon: 'warning', title: 'تنبيه', text: 'يرجى إدخال بريد إلكتروني صحيح لإرسال الفحص إليه.'});
+        return;
+    }
+
+    const btn = $('#btnSendTestEmail');
+    const btnText = $('#testEmailBtnText');
+    const btnLoading = $('#testEmailBtnLoading');
+
+    btn.prop('disabled', true);
+    btnText.addClass('d-none');
+    btnLoading.removeClass('d-none');
+
+    $.ajax({
+        url: '{{ route("admin.settings.test-email") }}',
+        method: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            test_email: email
+        },
+        success: function(res) {
+            Swal.fire({
+                icon: 'success',
+                title: 'نجح الاتصال!',
+                text: res.message || 'تم إرسال بريد الاختبار بنجاح وتم التحقق من إعدادات الـ SMTP.',
+                timer: 4000
+            });
+            $('#smtp-status-badge').removeClass('bg-warning text-dark').addClass('bg-success').text('الخادم مهيأ ونشط');
+        },
+        error: function(xhr) {
+            const msg = xhr.responseJSON?.message || 'فشل الاتصال بخادم البريد. تأكد من صحة بيانات الخادم وكلمة المرور في الإعدادات.';
+            Swal.fire({
+                icon: 'error',
+                title: 'فشل إرسال البريد التجريبي',
+                html: '<div style="text-align:right; direction:rtl; font-size:0.9rem;"><strong>تفاصيل الخطأ التقني من الخادم:</strong><br><code style="color:#ef4444; word-break:break-all;">' + $('<div>').text(msg).html() + '</code></div>'
+            });
+        },
+        complete: function() {
+            btn.prop('disabled', false);
+            btnText.removeClass('d-none');
+            btnLoading.addClass('d-none');
+        }
+    });
+}
 </script>
 @endsection
