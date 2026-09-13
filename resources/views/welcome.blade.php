@@ -443,6 +443,114 @@
 
 <!-- HERO -->
 <section class="hero">
+    <!-- Automotive & Auction Dynamic Background Decorations -->
+    <div class="hero-bg-decorations" aria-hidden="true">
+        <!-- 1. Carbon Matrix & Speed Grid -->
+        <div class="hero-bg-grid"></div>
+
+        <!-- 2. Aerodynamic Flow Streamlines & Sportscar Silhouette -->
+        <div class="hero-aerodynamic-flow">
+            <svg viewBox="0 0 1440 600" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <path class="flow-line flow-line-1" d="M-100 180 C 300 240, 600 80, 1000 220 C 1200 280, 1400 200, 1600 250" stroke="url(#hero-flow-grad-1)" stroke-width="1.5" stroke-dasharray="12 16" />
+                <path class="flow-line flow-line-2" d="M-100 320 C 250 380, 550 210, 900 340 C 1150 410, 1380 300, 1600 360" stroke="url(#hero-flow-grad-2)" stroke-width="2" stroke-dasharray="16 20" />
+                <path class="flow-line" d="M-100 450 C 400 480, 800 330, 1200 440 C 1350 480, 1500 430, 1600 460" stroke="url(#hero-flow-grad-1)" stroke-width="1" opacity="0.4" />
+                <!-- Dynamic Car Silhouette Sweep -->
+                <path d="M 160 530 C 320 520, 430 495, 540 435 C 630 385, 780 380, 880 425 C 970 465, 1080 485, 1280 505" stroke="url(#hero-flow-grad-red)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="8 12" opacity="0.35" />
+                <defs>
+                    <linearGradient id="hero-flow-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="var(--hero-accent-red)" stop-opacity="0" />
+                        <stop offset="30%" stop-color="var(--hero-accent-red)" stop-opacity="0.35" />
+                        <stop offset="70%" stop-color="var(--hero-accent-gold)" stop-opacity="0.35" />
+                        <stop offset="100%" stop-color="var(--hero-accent-gold)" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="hero-flow-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="var(--hero-accent-gold)" stop-opacity="0" />
+                        <stop offset="50%" stop-color="var(--hero-accent-red)" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="var(--hero-accent-gold)" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="hero-flow-grad-red" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="var(--hero-accent-red)" stop-opacity="0" />
+                        <stop offset="50%" stop-color="var(--hero-accent-red)" stop-opacity="0.5" />
+                        <stop offset="100%" stop-color="var(--hero-accent-red)" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <!-- 3. High-Performance Tachometer & Speedometer Watermark -->
+        <div class="hero-tachometer-watermark">
+            <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer Track Ring -->
+                <circle cx="250" cy="250" r="220" stroke="var(--hero-gauge-stroke)" stroke-width="2" stroke-dasharray="6 8" />
+                <!-- Main Gauge Arc -->
+                <path d="M 95 340 A 180 180 0 1 1 405 340" stroke="var(--hero-gauge-track)" stroke-width="12" stroke-linecap="round" fill="none" />
+                <!-- Redline High RPM Racing Sector -->
+                <path d="M 340 125 A 180 180 0 0 1 405 340" stroke="var(--hero-gauge-redline)" stroke-width="12" stroke-linecap="round" fill="none" />
+                <!-- Inner Accent Arc -->
+                <path d="M 120 320 A 150 150 0 1 1 380 320" stroke="var(--hero-gauge-stroke)" stroke-width="1.5" stroke-dasharray="4 6" fill="none" />
+                <!-- Radial Graduation Ticks -->
+                <g stroke="var(--hero-gauge-tick)" stroke-width="2" stroke-linecap="round">
+                    <line x1="95" y1="340" x2="115" y2="325" />
+                    <line x1="80" y1="250" x2="105" y2="250" />
+                    <line x1="110" y1="160" x2="130" y2="175" />
+                    <line x1="170" y1="100" x2="185" y2="120" />
+                    <line x1="250" y1="70" x2="250" y2="95" />
+                    <line x1="330" y1="100" x2="315" y2="120" stroke="var(--hero-accent-red)" />
+                    <line x1="390" y1="160" x2="370" y2="175" stroke="var(--hero-accent-red)" stroke-width="3" />
+                    <line x1="420" y1="250" x2="395" y2="250" stroke="var(--hero-accent-red)" stroke-width="3" />
+                    <line x1="405" y1="340" x2="385" y2="325" stroke="var(--hero-accent-red)" stroke-width="3" />
+                </g>
+                <!-- Gauge Text Branding -->
+                <text x="250" y="320" text-anchor="middle" fill="var(--hero-gauge-text)" font-size="14" font-weight="700" letter-spacing="3" font-family="sans-serif">MOTORZAD</text>
+                <text x="250" y="340" text-anchor="middle" fill="var(--hero-gauge-text-muted)" font-size="10" font-weight="600" letter-spacing="2" font-family="sans-serif">RPM x1000</text>
+                <!-- Central Digital Hub & Needle -->
+                <circle cx="250" cy="250" r="38" fill="var(--hero-gauge-hub-bg)" stroke="var(--hero-gauge-stroke)" stroke-width="3" />
+                <circle cx="250" cy="250" r="16" fill="var(--hero-accent-red)" opacity="0.85" />
+                <!-- Revving Needle -->
+                <g class="tachometer-needle">
+                    <line x1="250" y1="250" x2="340" y2="140" stroke="var(--hero-accent-red)" stroke-width="3.5" stroke-linecap="round" />
+                    <polygon points="340,140 334,152 344,148" fill="var(--hero-accent-red)" />
+                </g>
+            </svg>
+        </div>
+
+        <!-- 4. Luxury Live Auction Crest & Gavel Watermark -->
+        <div class="hero-auction-watermark">
+            <svg viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Radiating Live Bidding Waves -->
+                <circle class="hero-bid-pulse" cx="175" cy="175" r="70" stroke="var(--hero-accent-gold)" fill="none" />
+                <circle class="hero-bid-pulse pulse-delay-1" cx="175" cy="175" r="70" stroke="var(--hero-accent-gold)" fill="none" />
+                <!-- Crest Polygonal Shield -->
+                <polygon points="175,25 315,95 315,255 175,325 35,255 35,95" stroke="var(--hero-crest-stroke)" stroke-width="1.5" stroke-dasharray="6 6" fill="none" />
+                <polygon points="175,45 295,105 295,245 175,305 55,245 55,105" stroke="var(--hero-crest-stroke)" stroke-width="1" fill="none" opacity="0.6" />
+                <!-- Sound Block Base (قاعدة المطرقة) -->
+                <rect x="125" y="235" width="100" height="14" rx="4" fill="var(--hero-gavel-fill)" stroke="var(--hero-gavel-stroke)" stroke-width="1.5" />
+                <rect x="140" y="249" width="70" height="6" rx="2" fill="var(--hero-gavel-stroke)" opacity="0.6" />
+                <!-- Stylized Auction Gavel (مطرقة المزاد) -->
+                <g transform="rotate(-30 175 165)">
+                    <rect x="170" y="115" width="10" height="95" rx="5" fill="var(--hero-gavel-fill)" stroke="var(--hero-gavel-stroke)" stroke-width="1.5" />
+                    <circle cx="175" cy="213" r="7" fill="var(--hero-accent-gold)" opacity="0.9" />
+                    <rect x="156" y="98" width="38" height="24" rx="4" fill="var(--hero-gavel-fill)" stroke="var(--hero-gavel-stroke)" stroke-width="1.5" />
+                    <line x1="175" y1="98" x2="175" y2="122" stroke="var(--hero-accent-gold)" stroke-width="2" />
+                    <rect x="142" y="94" width="14" height="32" rx="3" fill="var(--hero-gavel-fill)" stroke="var(--hero-accent-gold)" stroke-width="1.5" />
+                    <rect x="194" y="94" width="14" height="32" rx="3" fill="var(--hero-gavel-fill)" stroke="var(--hero-accent-gold)" stroke-width="1.5" />
+                </g>
+                <!-- Subtle Accent Spark Points -->
+                <circle cx="120" cy="110" r="3" fill="var(--hero-accent-gold)" opacity="0.7" />
+                <circle cx="230" cy="90" r="2" fill="var(--hero-accent-red)" opacity="0.7" />
+                <circle cx="260" cy="210" r="2.5" fill="var(--hero-accent-gold)" opacity="0.6" />
+            </svg>
+        </div>
+
+        <!-- 5. Dynamic Speed Streaks & Night Beams -->
+        <div class="hero-speed-streaks">
+            <span class="speed-streak streak-1"></span>
+            <span class="speed-streak streak-2"></span>
+            <span class="speed-streak streak-3"></span>
+            <span class="speed-streak streak-4"></span>
+        </div>
+    </div>
+
     <div class="hero-container">
         <div>
             <div class="hero-badge"><span class="pulse"></span> {{ __('The #1 auction platform in the region') }}</div>

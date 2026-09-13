@@ -28,6 +28,24 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:5re
     --container-max:1280px;
     --section-padding:6rem 0;
     --container-padding:0 2rem;
+    /* Hero Automotive & Auction Decorations */
+    --hero-grid-color:rgba(15,23,42,0.05);
+    --hero-grid-opacity:0.85;
+    --hero-accent-red:#dc2626;
+    --hero-accent-gold:#d97706;
+    --hero-accent-blue:#2563eb;
+    --hero-gauge-stroke:rgba(15,23,42,0.09);
+    --hero-gauge-track:rgba(15,23,42,0.06);
+    --hero-gauge-redline:rgba(220,38,38,0.45);
+    --hero-gauge-tick:rgba(15,23,42,0.18);
+    --hero-gauge-hub-bg:rgba(255,255,255,0.92);
+    --hero-gauge-text:rgba(15,23,42,0.35);
+    --hero-gauge-text-muted:rgba(15,23,42,0.22);
+    --hero-crest-stroke:rgba(15,23,42,0.1);
+    --hero-gavel-fill:rgba(255,255,255,0.7);
+    --hero-gavel-stroke:rgba(15,23,42,0.2);
+    --hero-streak-color-red:rgba(220,38,38,0.22);
+    --hero-streak-color-gold:rgba(217,119,6,0.22);
 }
 
 /* ========== DARK THEME ========== */
@@ -46,6 +64,24 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:5re
     --auction-timer-bg:rgba(0,0,0,0.7);
     --img-shadow:drop-shadow(0 20px 60px rgba(0,0,0,0.5));
     --drawer-bg:rgba(14,20,33,0.98);
+    /* Hero Automotive & Auction Decorations */
+    --hero-grid-color:rgba(255,255,255,0.04);
+    --hero-grid-opacity:0.9;
+    --hero-accent-red:#ef4444;
+    --hero-accent-gold:#f59e0b;
+    --hero-accent-blue:#3b82f6;
+    --hero-gauge-stroke:rgba(255,255,255,0.08);
+    --hero-gauge-track:rgba(255,255,255,0.05);
+    --hero-gauge-redline:rgba(239,68,68,0.65);
+    --hero-gauge-tick:rgba(255,255,255,0.22);
+    --hero-gauge-hub-bg:#0e1421;
+    --hero-gauge-text:rgba(255,255,255,0.4);
+    --hero-gauge-text-muted:rgba(255,255,255,0.25);
+    --hero-crest-stroke:rgba(255,255,255,0.12);
+    --hero-gavel-fill:rgba(14,20,33,0.8);
+    --hero-gavel-stroke:rgba(245,158,11,0.45);
+    --hero-streak-color-red:rgba(239,68,68,0.4);
+    --hero-streak-color-gold:rgba(245,158,11,0.35);
 }
 
 /* ========== SMOOTH THEME TRANSITION ========== */
@@ -148,6 +184,217 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);lin
 .hero-image{position:relative;animation:fadeInRight 0.8s ease 0.3s both}
 .hero-image img{width:100%;border-radius:var(--radius-xl);filter:var(--img-shadow)}
 .hero-image::before{content:'';position:absolute;inset:-2px;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--red),transparent,var(--gold));z-index:-1;opacity:0.3}
+
+/* ===== HERO BACKGROUND DECORATIONS (Automotive & Auction Motifs) ===== */
+.hero-bg-decorations {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* 1. Speed Grid & Carbon Matrix */
+.hero-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-size: 44px 44px;
+    background-image: 
+        linear-gradient(to right, var(--hero-grid-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--hero-grid-color) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%);
+    opacity: var(--hero-grid-opacity);
+}
+
+/* 2. Aerodynamic Flow Lines (Wind Tunnel Curves) */
+.hero-aerodynamic-flow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+}
+.hero-aerodynamic-flow svg {
+    width: 100%;
+    height: 100%;
+}
+.flow-line {
+    transition: var(--transition);
+}
+.flow-line-1 {
+    animation: flowPulse 8s ease-in-out infinite alternate;
+}
+.flow-line-2 {
+    animation: flowPulse 11s ease-in-out infinite alternate-reverse;
+}
+@keyframes flowPulse {
+    0% { stroke-dashoffset: 0; opacity: 0.5; }
+    50% { stroke-dashoffset: 60; opacity: 0.9; }
+    100% { stroke-dashoffset: 120; opacity: 0.5; }
+}
+
+/* 3. Automotive Speedometer & Tachometer Watermark */
+.hero-tachometer-watermark {
+    position: absolute;
+    top: 50%;
+    right: -80px;
+    transform: translateY(-50%);
+    width: 520px;
+    height: 520px;
+    pointer-events: none;
+    opacity: 0.85;
+    animation: tachometerFloat 10s ease-in-out infinite alternate;
+}
+[dir="rtl"] .hero-tachometer-watermark {
+    right: auto;
+    left: -80px;
+}
+.hero-tachometer-watermark svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 35px var(--hero-glow-red, rgba(229, 62, 62, 0.12)));
+}
+@keyframes tachometerFloat {
+    0% { transform: translateY(-50%) rotate(0deg) scale(0.98); }
+    100% { transform: translateY(-53%) rotate(4deg) scale(1.02); }
+}
+.tachometer-needle {
+    transform-origin: 250px 250px;
+    animation: needleRev 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes needleRev {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(18deg); }
+    35% { transform: rotate(8deg); }
+    55% { transform: rotate(32deg); }
+    75% { transform: rotate(14deg); }
+    90% { transform: rotate(24deg); }
+}
+
+/* 4. Luxury Auction Gavel & Crest Watermark */
+.hero-auction-watermark {
+    position: absolute;
+    top: 22%;
+    left: 6%;
+    width: 360px;
+    height: 360px;
+    pointer-events: none;
+    opacity: 0.75;
+    animation: crestFloat 12s ease-in-out infinite alternate;
+}
+[dir="rtl"] .hero-auction-watermark {
+    left: auto;
+    right: 5%;
+}
+.hero-auction-watermark svg {
+    width: 100%;
+    height: 100%;
+}
+@keyframes crestFloat {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-20px) rotate(-6deg); }
+}
+.hero-bid-pulse {
+    animation: bidPulseRing 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    transform-origin: 175px 175px;
+}
+.pulse-delay-1 {
+    animation-delay: 1.75s;
+}
+@keyframes bidPulseRing {
+    0% { r: 60px; opacity: 0.6; stroke-width: 2px; }
+    50% { opacity: 0.3; stroke-width: 1.5px; }
+    100% { r: 140px; opacity: 0; stroke-width: 0.5px; }
+}
+
+/* 5. Automotive Speed Streaks & Night Beams */
+.hero-speed-streaks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.speed-streak {
+    position: absolute;
+    height: 2px;
+    border-radius: 999px;
+    transform: rotate(-15deg);
+    opacity: 0.65;
+    animation: speedStreakGlance 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+[dir="rtl"] .speed-streak {
+    transform: rotate(15deg);
+}
+.streak-1 {
+    top: 20%;
+    right: 22%;
+    width: 180px;
+    background: linear-gradient(90deg, transparent, var(--hero-streak-color-red), transparent);
+    animation-delay: 0s;
+}
+.streak-2 {
+    bottom: 25%;
+    right: 42%;
+    width: 240px;
+    background: linear-gradient(90deg, transparent, var(--hero-streak-color-gold), transparent);
+    animation-delay: 2.5s;
+}
+.streak-3 {
+    top: 45%;
+    left: 14%;
+    width: 150px;
+    background: linear-gradient(90deg, transparent, var(--hero-streak-color-red), transparent);
+    animation-delay: 4s;
+}
+.streak-4 {
+    bottom: 12%;
+    left: 28%;
+    width: 210px;
+    background: linear-gradient(90deg, transparent, var(--hero-streak-color-gold), transparent);
+    animation-delay: 1.2s;
+}
+@keyframes speedStreakGlance {
+    0% { transform: rotate(-15deg) translateX(-60px); opacity: 0; }
+    40% { opacity: 0.8; }
+    70%, 100% { transform: rotate(-15deg) translateX(80px); opacity: 0; }
+}
+[dir="rtl"] @keyframes speedStreakGlance {
+    0% { transform: rotate(15deg) translateX(60px); opacity: 0; }
+    40% { opacity: 0.8; }
+    70%, 100% { transform: rotate(15deg) translateX(-80px); opacity: 0; }
+}
+
+/* Mobile responsive tuning for decorations */
+@media (max-width: 992px) {
+    .hero-tachometer-watermark {
+        width: 360px;
+        height: 360px;
+        top: 65%;
+        opacity: 0.4;
+    }
+    .hero-auction-watermark {
+        width: 240px;
+        height: 240px;
+        top: 15%;
+        opacity: 0.35;
+    }
+}
+@media (max-width: 576px) {
+    .hero-tachometer-watermark {
+        width: 260px;
+        height: 260px;
+        opacity: 0.3;
+    }
+    .hero-auction-watermark {
+        width: 180px;
+        height: 180px;
+        opacity: 0.25;
+    }
+    .hero-bg-grid {
+        background-size: 32px 32px;
+    }
+}
+
 
 /* ===== SECTION COMMON ===== */
 .section{padding:var(--section-padding)}
