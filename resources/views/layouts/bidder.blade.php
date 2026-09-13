@@ -25,18 +25,23 @@
     </script>
 
     <!-- Pusher & Echo JS for WebSockets -->
-    @if(env('ENABLE_WEBSOCKETS', false) && env('REVERB_APP_KEY'))
+    @php
+        $reverbKey = config('broadcasting.connections.reverb.key') ?: env('REVERB_APP_KEY');
+        $wsEnabled = env('ENABLE_WEBSOCKETS', true);
+    @endphp
+    @if($wsEnabled && $reverbKey)
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
     <script>
         window.Pusher = Pusher;
+        const isHttps = window.location.protocol === 'https:';
         window.Echo = new Echo({
             broadcaster: 'reverb',
-            key: '{{ env('REVERB_APP_KEY') }}',
+            key: '{{ $reverbKey }}',
             wsHost: window.location.hostname,
-            wsPort: {{ env('REVERB_PORT', 8080) }},
-            wssPort: {{ env('REVERB_PORT', 8080) }},
-            forceTLS: false,
+            wsPort: isHttps ? 443 : {{ env('REVERB_PORT', 8080) }},
+            wssPort: isHttps ? 443 : {{ env('REVERB_PORT', 8080) }},
+            forceTLS: isHttps,
             enabledTransports: ['ws', 'wss'],
             authEndpoint: '{{ url("/broadcasting/auth") }}',
             auth: {
