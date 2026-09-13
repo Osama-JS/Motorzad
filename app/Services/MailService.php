@@ -63,11 +63,15 @@ class MailService
 
     /**
      * Send a test email to verify SMTP configuration.
+     *
+     * @param string $recipientEmail
+     * @param array|null $customOverrides
+     * @return array
      */
-    public function sendTestEmail(string $recipientEmail): array
+    public function sendTestEmail(string $recipientEmail, ?array $customOverrides = null): array
     {
         try {
-            MailConfigService::applySettings();
+            MailConfigService::applySettings($customOverrides);
 
             Mail::to($recipientEmail)->send(new TestMail());
 

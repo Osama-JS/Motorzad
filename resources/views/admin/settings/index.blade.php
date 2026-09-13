@@ -663,11 +663,23 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('البريد الإلكتروني للمُرسل (From Address)') }} <span class="text-danger">*</span></label>
-                            <input type="email" name="mail_from_address" class="form-control" value="{{ \App\Models\Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@motorzad.com')) }}" placeholder="noreply@motorzad.com" dir="ltr">
+                            @php
+                                $savedFrom = \App\Models\Setting::get('mail_from_address');
+                                if (empty($savedFrom) || str_contains(strtolower($savedFrom), 'example.com')) {
+                                    $savedFrom = \App\Models\Setting::get('mail_username');
+                                    if (empty($savedFrom) || !filter_var($savedFrom, FILTER_VALIDATE_EMAIL)) {
+                                        $savedFrom = 'noreply@motorzad.com';
+                                    }
+                                }
+                            @endphp
+                            <input type="email" name="mail_from_address" class="form-control" value="{{ $savedFrom }}" placeholder="info@yourdomain.com أو بريد حساب SMTP" dir="ltr">
+                            <small class="text-muted d-block mt-1" style="font-size:0.8rem;">
+                                <i class="fa-solid fa-circle-info text-info"></i> {{ __('يجب أن يكون بريداً حقيقياً ومطابقاً لحساب SMTP أو لنطاق موثق لتجنب رفض الخادم للرسائل (كود 550).') }}
+                            </small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('اسم المُرسل الظاهر (From Name)') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="mail_from_name" class="form-control" value="{{ \App\Models\Setting::get('mail_from_name', env('MAIL_FROM_NAME', config('app.name', 'Motorzad'))) }}" placeholder="Motorzad | منصة موتورزاد">
+                            <input type="text" name="mail_from_name" class="form-control" value="{{ \App\Models\Setting::get('mail_from_name', 'Motorzad | منصة موتورزاد') }}" placeholder="Motorzad | منصة موتورزاد">
                         </div>
                     </div>
 
@@ -844,13 +856,22 @@ function sendSmtpTestEmail() {
     btnText.addClass('d-none');
     btnLoading.removeClass('d-none');
 
+    const payload = {
+        _token: '{{ csrf_token() }}',
+        test_email: email,
+        mail_host: $('input[name="mail_host"]').val() || '',
+        mail_port: $('input[name="mail_port"]').val() || '',
+        mail_username: $('input[name="mail_username"]').val() || '',
+        mail_password: $('#smtp_mail_password').val() || '',
+        mail_encryption: $('select[name="mail_encryption"]').val() || '',
+        mail_from_address: $('input[name="mail_from_address"]').val() || '',
+        mail_from_name: $('input[name="mail_from_name"]').val() || ''
+    };
+
     $.ajax({
         url: '{{ route("admin.settings.test-email") }}',
         method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}',
-            test_email: email
-        },
+        data: payload,
         success: function(res) {
             Swal.fire({
                 icon: 'success',

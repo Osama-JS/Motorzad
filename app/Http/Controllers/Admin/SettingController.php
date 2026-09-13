@@ -168,9 +168,37 @@ class SettingController extends Controller
     {
         $request->validate([
             'test_email' => 'required|email',
+            'mail_host' => 'nullable|string|max:255',
+            'mail_port' => 'nullable|integer',
+            'mail_username' => 'nullable|string|max:255',
+            'mail_password' => 'nullable|string|max:255',
+            'mail_encryption' => 'nullable|string|max:20',
+            'mail_from_address' => 'nullable|email|max:255',
+            'mail_from_name' => 'nullable|string|max:255',
         ]);
 
-        $result = $mailService->sendTestEmail($request->test_email);
+        $overrides = [];
+        $smtpFields = ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_encryption', 'mail_from_address', 'mail_from_name'];
+        foreach ($smtpFields as $field) {
+            if ($request->filled($field)) {
+                $val = $request->input($field);
+                $overrides[$field] = $val;
+                Setting::set($field, $val);
+            }
+        }
+
+        // If from_address was empty or dummy example.com, fix it
+        $username = $overrides['mail_username'] ?? Setting::get('mail_username');
+        $fromAddress = $overrides['mail_from_address'] ?? Setting::get('mail_from_address');
+        if (empty($fromAddress) || str_contains(strtolower($fromAddress), 'example.com')) {
+            if (!empty($username) && filter_var($username, FILTER_VALIDATE_EMAIL)) {
+                $fromAddress = $username;
+                $overrides['mail_from_address'] = $fromAddress;
+                Setting::set('mail_from_address', $fromAddress);
+            }
+        }
+
+        $result = $mailService->sendTestEmail($request->test_email, !empty($overrides) ? $overrides : null);
 
         if ($result['success']) {
             return response()->json([
