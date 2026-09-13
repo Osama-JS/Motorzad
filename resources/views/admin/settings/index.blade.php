@@ -531,13 +531,6 @@
                         </div>
                         <label class="switch"><input type="checkbox" name="maintenance_mode" value="1" {{ \App\Models\Setting::get('maintenance_mode')=='1'?'checked':'' }}><span class="slider"></span></label>
                     </div>
-                    <div class="toggle-row">
-                        <div class="toggle-info">
-                            <strong>{{ __('Hotels Page') }}</strong>
-                            <span>{{ __('Show hotels section in the frontend') }}</span>
-                        </div>
-                        <label class="switch"><input type="checkbox" name="show_hotels_page" value="1" {{ \App\Models\Setting::get('show_hotels_page')=='1'?'checked':'' }}><span class="slider"></span></label>
-                    </div>
                 </div>
             </div>
         </div>
