@@ -55,6 +55,8 @@
     @yield('css')
 </head>
 <body>
+    @include('partials.dev-banner')
+
     {{-- ========== SIDEBAR OVERLAY ========== --}}
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 

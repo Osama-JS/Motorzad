@@ -467,6 +467,60 @@
 
         {{-- System --}}
         <div class="settings-panel" id="panel-system">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0" style="font-size:1.2rem;">{{ __('وضع التطوير والشريط التنبيهي (Development Mode & Marquee)') }}</h2>
+                        <small class="text-muted">{{ __('شريط إعلاني متحرك وسلس يظهر في أعلى كافة صفحات المنصة ولوحات التحكم للزوار والمستخدمين') }}</small>
+                    </div>
+                    <span class="badge {{ \App\Models\Setting::get('development_mode') == '1' ? 'bg-warning text-dark' : 'bg-secondary' }}" id="dev-mode-status-badge">
+                        {{ \App\Models\Setting::get('development_mode') == '1' ? __('قيد التشغيل') : __('معطل') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {{-- Toggle Switch --}}
+                    <div class="toggle-row mb-4">
+                        <div class="toggle-info">
+                            <strong>{{ __('تشغيل وضع التطوير (Enable Development Mode)') }}</strong>
+                            <span>{{ __('تفعيل شريط تنبيهي متحرك في أعلى كافة صفحات المنصة (للزوار ولوحات التحكم) لإشعارهم بأن المنصة تحت التطوير') }}</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="development_mode" id="toggle_development_mode" value="1" {{ \App\Models\Setting::get('development_mode') == '1' ? 'checked' : '' }} onchange="updateDevModeBadge(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    {{-- Marquee Ticker Message Input --}}
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold d-flex justify-content-between align-items-center">
+                            <span>{{ __('رسالة الشريط المتحرك لوضع التطوير (Ticker Message)') }} <span class="text-danger">*</span></span>
+                            <small class="text-muted">{{ __('يدعم النصوص الطويلة والإيموجي') }}</small>
+                        </label>
+                        <textarea name="development_mode_message" id="dev_mode_message_input" class="form-control" rows="3" placeholder="مثال: تنبيه: المنصة حالياً في وضع التطوير والتحسين المستمر. قد تكون بعض البيانات والميزات تجريبية." style="background:var(--bg-input); line-height: 1.6;">{{ \App\Models\Setting::get('development_mode_message', 'تنبيه: المنصة حالياً في وضع التطوير والتحسين المستمر. قد تكون بعض البيانات والميزات تجريبية.') }}</textarea>
+                        <small class="text-muted mt-1 d-block" style="font-size:0.82rem;">
+                            <i class="fa-solid fa-circle-info text-info me-1"></i> {{ __('تظهر هذه الرسالة وتتحرك أفقياً بشكل لا نهائي وسلس في رأس كافة صفحات الموقع لجميع الشاشات والأجهزة.') }}
+                        </small>
+                    </div>
+
+                    {{-- Live Preview of Marquee Banner --}}
+                    <div class="mt-4 p-3" style="background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.25); border-radius:var(--radius);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fa-solid fa-eye text-warning"></i>
+                            <strong style="color:var(--brand-gold, #f59e0b); font-size:0.88rem;">{{ __('معاينة مباشرة للشريط كما يظهر للمستخدمين (Live Banner Preview)') }}:</strong>
+                        </div>
+                        <div style="background: #18181b; border: 1px solid #ef4444; border-radius: 6px; overflow: hidden; height: 38px; display: flex; align-items: center;">
+                            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; padding: 0 10px; height: 100%; display: flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 800; white-space: nowrap;">
+                                <span style="width:7px; height:7px; background:#fff; border-radius:50%; display:inline-block;"></span>
+                                🛠️ {{ __('وضع التطوير') }}
+                            </div>
+                            <div style="flex:1; overflow:hidden; white-space:nowrap; padding: 0 15px; font-size: 0.82rem; font-weight: 600; color: #fef08a;" id="dev-banner-preview-text">
+                                {{ \App\Models\Setting::get('development_mode_message', 'تنبيه: المنصة حالياً في وضع التطوير والتحسين المستمر. قد تكون بعض البيانات والميزات تجريبية.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header"><h2>{{ __('System Settings') }}</h2></div>
                 <div class="card-body">
@@ -896,5 +950,20 @@ function sendSmtpTestEmail() {
         }
     });
 }
+
+function updateDevModeBadge(isChecked) {
+    const badge = $('#dev-mode-status-badge');
+    if (isChecked) {
+        badge.removeClass('bg-secondary').addClass('bg-warning text-dark').text('{{ __("قيد التشغيل") }}');
+    } else {
+        badge.removeClass('bg-warning text-dark').addClass('bg-secondary').text('{{ __("معطل") }}');
+    }
+}
+
+// Live sync of development message preview
+$(document).on('input', '#dev_mode_message_input', function() {
+    const text = $(this).val().trim();
+    $('#dev-banner-preview-text').text(text || '{{ __("تنبيه: المنصة حالياً في وضع التطوير والتحسين المستمر. قد تكون بعض البيانات والميزات تجريبية.") }}');
+});
 </script>
 @endsection

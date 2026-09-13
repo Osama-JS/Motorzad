@@ -15,6 +15,7 @@
     </script>
 </head>
 <body>
+@include('partials.dev-banner')
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">

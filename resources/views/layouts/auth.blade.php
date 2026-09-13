@@ -108,6 +108,7 @@
     </style>
 </head>
 <body>
+    @include('partials.dev-banner')
     <div class="auth-wrapper">
         <div class="card auth-card" style="position: relative;">
             <div class="auth-logo">

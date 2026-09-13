@@ -61,6 +61,8 @@ class SettingController extends Controller
                 'primary_color' => 'nullable|string|max:7',
                 'app_min_version' => 'nullable|string|max:20',
                 'maintenance_mode' => 'nullable|in:0,1',
+                'development_mode' => 'nullable|in:0,1',
+                'development_mode_message' => 'nullable|string|max:500',
                 'show_hotels_page' => 'nullable|in:0,1',
                 'story_en' => 'nullable|string',
                 'story_ar' => 'nullable|string',
@@ -112,7 +114,7 @@ class SettingController extends Controller
 
             // Explicitly handle checkboxes that might be unchecked
             $checkboxes = [
-                'maintenance_mode', 'show_hotels_page', 'show_homepage_stats',
+                'maintenance_mode', 'development_mode', 'show_hotels_page', 'show_homepage_stats',
                 'show_stat_bidders', 'show_stat_cars', 'show_stat_satisfaction',
                 'show_facebook', 'show_twitter', 'show_instagram', 'show_linkedin',
                 'show_tiktok', 'show_snapchat', 'show_youtube', 'show_whatsapp', 'show_telegram',
