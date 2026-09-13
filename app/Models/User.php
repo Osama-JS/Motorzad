@@ -156,4 +156,33 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->fcm_token;
     }
+
+    /**
+     * Get privacy-masked display name for bidding:
+     * e.g., مزايد #14 (س*** م***)
+     */
+    public function getMaskedBidderNameAttribute(): string
+    {
+        $name = trim($this->name ?: ($this->first_name . ' ' . $this->last_name));
+        if (empty($name)) {
+            $prefix = app()->getLocale() === 'ar' ? 'مزايد' : 'Bidder';
+            return "{$prefix} #{$this->id}";
+        }
+
+        $parts = preg_split('/\s+/u', $name);
+        $maskedParts = [];
+        foreach ($parts as $part) {
+            $len = mb_strlen($part, 'UTF-8');
+            if ($len <= 1) {
+                $maskedParts[] = $part . '***';
+            } else {
+                $first = mb_substr($part, 0, 1, 'UTF-8');
+                $maskedParts[] = $first . '***';
+            }
+        }
+
+        $maskedName = implode(' ', array_slice($maskedParts, 0, 2));
+        $prefix = app()->getLocale() === 'ar' ? 'مزايد' : 'Bidder';
+        return "{$prefix} #{$this->id} ({$maskedName})";
+    }
 }

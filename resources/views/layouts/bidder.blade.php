@@ -23,6 +23,30 @@
             document.documentElement.setAttribute('data-theme', saved);
         })();
     </script>
+
+    <!-- Pusher & Echo JS for WebSockets -->
+    @if(env('ENABLE_WEBSOCKETS', false) && env('REVERB_APP_KEY'))
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <script>
+        window.Pusher = Pusher;
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ env('REVERB_APP_KEY') }}',
+            wsHost: window.location.hostname,
+            wsPort: {{ env('REVERB_PORT', 8080) }},
+            wssPort: {{ env('REVERB_PORT', 8080) }},
+            forceTLS: false,
+            enabledTransports: ['ws', 'wss'],
+            authEndpoint: '{{ url("/broadcasting/auth") }}',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }
+        });
+    </script>
+    @endif
     @yield('css')
 </head>
 <body>

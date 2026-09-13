@@ -28,6 +28,36 @@
         stroke: #a855f7 !important;
         filter: drop-shadow(0px 0px 4px rgba(16, 185, 129, 0.4));
     }
+    .sound-toggle-btn {
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+        color: var(--text);
+    }
+    .sound-toggle-btn:hover {
+        transform: scale(1.1);
+        border-color: var(--brand-red);
+    }
+    .price-pulse {
+        animation: priceFlash 1.2s ease-out;
+    }
+    @keyframes priceFlash {
+        0% { transform: scale(1); color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.8); }
+        50% { transform: scale(1.12); color: #10b981; text-shadow: 0 0 25px rgba(16, 185, 129, 0.9); }
+        100% { transform: scale(1); }
+    }
+    @keyframes highlight-green {
+        0% { background: rgba(16, 185, 129, 0.25); }
+        100% { background: transparent; }
+    }
 /* ===== PREMIUM SINGLE AUCTION VIEW ===== */
 .auc-detail-layout {
     display: grid;
@@ -624,10 +654,15 @@ html[dir="rtl"] .currency-suffix {
         <div class="bid-panel">
             <div class="status-badge-panel">
                 @if($auction->is_live)
-                    <span class="w-badge status approved" style="padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <span class="pulse-dot" style="background:#10b981; box-shadow:0 0 8px #10b981;"></span>
-                        {{ app()->getLocale() === 'ar' ? 'مزايدة حية' : 'Live Auction' }}
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="w-badge status approved" style="padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <span class="pulse-dot" style="background:#10b981; box-shadow:0 0 8px #10b981;"></span>
+                            {{ app()->getLocale() === 'ar' ? 'مزايدة حية' : 'Live Auction' }}
+                        </span>
+                        <button type="button" id="toggleSoundBtn" class="sound-toggle-btn" onclick="toggleAuctionSound()" title="{{ __('Toggle Auction Chime') }}">
+                            <span id="soundIcon">🔊</span>
+                        </button>
+                    </div>
                     
                     <div class="timer-panel">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -742,9 +777,15 @@ html[dir="rtl"] .currency-suffix {
                 
                 <div class="feed-list" id="bidsFeedList">
                     @forelse($auction->bids as $bid)
-                        <div class="feed-item">
+                        <div class="feed-item" data-bid-id="{{ $bid->id }}">
                             <span style="font-weight: 800; color: {{ $bid->user_id === $user->id ? 'var(--brand-red-light)' : 'inherit' }}">{{ number_format($bid->amount) }} SAR</span>
-                            <span style="opacity: 0.75;">{{ $bid->user_id === $user->id ? (app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)') : (app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #') . $bid->user_id }}</span>
+                            <span style="opacity: 0.85;">
+                                @if($bid->user_id === $user->id)
+                                    {{ app()->getLocale() === 'ar' ? 'أنت (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')' : 'You (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')' }}
+                                @else
+                                    {{ $bid->user ? $bid->user->masked_bidder_name : ((app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #') . $bid->user_id) }}
+                                @endif
+                            </span>
                         </div>
                     @empty
                         <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1.5rem 0;" id="noBidsMsg">
@@ -777,12 +818,13 @@ function switchImage(thumb, src) {
         'amount' => $auction->start_price,
         'bidder' => __('Starting Price')
     ];
-    $bids = $auction->bids()->whereIn('status', ['active', 'outbid', 'won'])->oldest()->get();
+    $bids = $auction->bids()->with('user')->whereIn('status', ['active', 'outbid', 'won'])->oldest()->get();
     foreach ($bids as $bid) {
+        $bidderLabel = $bid->user ? $bid->user->masked_bidder_name : (__('Bidder') . ' #' . $bid->user_id);
         $priceHistory[] = [
             'time' => $bid->created_at->format('Y-m-d H:i:s'),
             'amount' => (float)$bid->amount,
-            'bidder' => $bid->user_id === auth()->id() ? __('You') : (__('Bidder') . ' #' . $bid->user_id)
+            'bidder' => $bid->user_id === auth()->id() ? (__('You') . ' (' . $bidderLabel . ')') : $bidderLabel
         ];
     }
 @endphp
@@ -1049,14 +1091,25 @@ function placeBidNow() {
             btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg> {{ app()->getLocale() === "ar" ? "تقديم عرض المزايدة" : "Place Your Bid" }}';
 
             if (data.success) {
-                // Update current price
-                document.getElementById('currentPriceVal').textContent = data.new_price.toLocaleString();
+                // Update current price with visual pulse
+                const priceEl = document.getElementById('currentPriceVal');
+                if (priceEl) {
+                    priceEl.textContent = data.new_price.toLocaleString();
+                    priceEl.classList.remove('price-pulse');
+                    void priceEl.offsetWidth;
+                    priceEl.classList.add('price-pulse');
+                }
+
+                // Play winning chime
+                playBidSound(true);
                 
+                const myDisplayName = '{{ __("You") }} (' + (data.bidder_display_name || '{{ auth()->user()->masked_bidder_name }}') + ')';
+
                 // Update price history array and redraw chart
                 priceHistoryData.push({
                     time: new Date().toISOString().replace('T', ' ').substring(0, 19),
                     amount: data.new_price,
-                    bidder: '{{ __("You") }}'
+                    bidder: myDisplayName
                 });
                 if (priceChart) {
                     renderPriceHistoryChart();
@@ -1072,8 +1125,11 @@ function placeBidNow() {
                 
                 const newItem = document.createElement('div');
                 newItem.className = 'feed-item';
+                if (data.bid_id) {
+                    newItem.setAttribute('data-bid-id', data.bid_id);
+                }
                 newItem.style.animation = 'highlight-green 2s ease-out';
-                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
+                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span style="opacity: 0.85;">${myDisplayName}</span>`;
                 feedList.insertBefore(newItem, feedList.firstChild);
 
                 // Update counters
@@ -1112,6 +1168,207 @@ function placeBidNow() {
         }
     });
 }
+
+// ===== REAL-TIME AUDIO EFFECTS (WEB AUDIO API) =====
+let isSoundMuted = localStorage.getItem('motorzad_bid_sound') === 'off';
+
+function updateSoundUI() {
+    const icon = document.getElementById('soundIcon');
+    if (icon) {
+        icon.textContent = isSoundMuted ? '🔇' : '🔊';
+    }
+}
+
+function toggleAuctionSound() {
+    isSoundMuted = !isSoundMuted;
+    localStorage.setItem('motorzad_bid_sound', isSoundMuted ? 'off' : 'on');
+    updateSoundUI();
+    if (!isSoundMuted) {
+        playBidSound(false);
+    }
+}
+
+function playBidSound(isMyBid = false) {
+    if (isSoundMuted) return;
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+
+        const f1 = isMyBid ? 587.33 : 523.25; // D5 or C5
+        const f2 = isMyBid ? 880.00 : 659.25; // A5 or E5
+
+        osc1.frequency.setValueAtTime(f1, now);
+        osc1.frequency.exponentialRampToValueAtTime(f2, now + 0.15);
+
+        osc2.frequency.setValueAtTime(f2, now);
+        osc2.frequency.exponentialRampToValueAtTime(f1 * 1.5, now + 0.25);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.45);
+        osc2.stop(now + 0.45);
+    } catch(e) {}
+}
+
+function playOutbidSound() {
+    if (isSoundMuted) return;
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(330, now + 0.15);
+        osc.frequency.setValueAtTime(220, now + 0.3);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+    } catch(e) {}
+}
+
+// ===== REAL-TIME WEBSOCKETS (LARAVEL ECHO & REVERB) =====
+function handleIncomingLiveBid(data) {
+    const currentPriceStr = document.getElementById('currentPriceVal').textContent.replace(/,/g, '');
+    const currentPrice = parseInt(currentPriceStr) || 0;
+    const newPrice = Number(data.current_price);
+
+    // If bid is already rendered locally, avoid duplication
+    if (data.bid_id && document.querySelector(`[data-bid-id="${data.bid_id}"]`)) {
+        return;
+    }
+
+    const isMe = data.bidder_id === {{ auth()->id() }};
+    playBidSound(isMe);
+
+    // Update current price with pulse animation
+    const priceEl = document.getElementById('currentPriceVal');
+    if (priceEl) {
+        priceEl.textContent = newPrice.toLocaleString();
+        priceEl.classList.remove('price-pulse');
+        void priceEl.offsetWidth;
+        priceEl.classList.add('price-pulse');
+    }
+
+    // Update quick bid buttons
+    updateQuickBidButtons(newPrice);
+
+    // Update minimum bid input and preview
+    const minIncrement = {{ $auction->min_bid_increment }};
+    const input = document.getElementById('bidAmountInput');
+    if (input && typeof updateTotalPreview === 'function') {
+        updateTotalPreview();
+    }
+    const maxInput = document.getElementById('maxAutoBidInput');
+    if (maxInput) {
+        maxInput.min = newPrice + (minIncrement * 2);
+    }
+
+    // Update bids count badge
+    const countBadge = document.getElementById('bidsCountBadge');
+    if (countBadge) {
+        countBadge.textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
+    }
+
+    // Prepend to feed list
+    const feedList = document.getElementById('bidsFeedList');
+    if (feedList) {
+        const noBidsMsg = document.getElementById('noBidsMsg');
+        if (noBidsMsg) noBidsMsg.remove();
+
+        const displayName = isMe 
+            ? '{{ app()->getLocale() === "ar" ? "أنت" : "You" }} (' + data.bidder_display_name + ')'
+            : data.bidder_display_name;
+
+        const newItem = document.createElement('div');
+        newItem.className = 'feed-item';
+        if (data.bid_id) {
+            newItem.setAttribute('data-bid-id', data.bid_id);
+        }
+        newItem.style.animation = 'highlight-green 2.5s ease-out';
+        newItem.innerHTML = `<span style="font-weight: 800; color: ${isMe ? 'var(--brand-red-light)' : 'inherit'};">${newPrice.toLocaleString()} SAR</span><span style="opacity: 0.85;">${displayName}</span>`;
+        feedList.insertBefore(newItem, feedList.firstChild);
+
+        // Update chart
+        priceHistoryData.push({
+            time: data.placed_at || new Date().toISOString().replace('T', ' ').substring(0, 19),
+            amount: newPrice,
+            bidder: displayName
+        });
+        if (priceChart) {
+            renderPriceHistoryChart();
+        }
+    }
+
+    // Auto-extension handling
+    if (data.is_extended && data.time_remaining_seconds !== undefined && typeof timeInSec !== 'undefined') {
+        timeInSec = data.time_remaining_seconds;
+        toastr.info('{{ app()->getLocale() === "ar" ? "تم تمديد المزاد تلقائياً لمنع القنص في اللحظات الأخيرة!" : "Auction auto-extended to prevent last-second sniping!" }}');
+    }
+}
+
+function handleUserOutbidAlert(data) {
+    playOutbidSound();
+    toastr.warning(
+        data.message || '{{ app()->getLocale() === "ar" ? "لقد تمت المزايدة بسعر أعلى من عرضك!" : "You have been outbid!" }}',
+        '{{ app()->getLocale() === "ar" ? "تنبيه مزايدة" : "Outbid Alert" }}',
+        { timeOut: 8000, progressBar: true }
+    );
+}
+
+function handleAuctionStatusChanged(data) {
+    if (data.status === 'paused') {
+        toastr.warning('{{ app()->getLocale() === "ar" ? "تم إيقاف المزاد مؤقتاً بواسطة الإدارة" : "Auction has been paused by administration" }}');
+        setTimeout(() => location.reload(), 2000);
+    } else if (data.status === 'ended' || data.status === 'sold') {
+        toastr.info('{{ app()->getLocale() === "ar" ? "انتهى المزاد الحالي" : "The auction has ended" }}');
+        setTimeout(() => location.reload(), 2000);
+    }
+}
+
+// Echo listeners connection
+document.addEventListener('DOMContentLoaded', () => {
+    updateSoundUI();
+
+    if (typeof window.Echo !== 'undefined') {
+        window.Echo.channel('auction.{{ $auction->id }}')
+            .listen('.bid.placed', function(e) {
+                handleIncomingLiveBid(e);
+            })
+            .listen('.auction.status.changed', function(e) {
+                handleAuctionStatusChanged(e);
+            });
+
+        @auth
+        window.Echo.private('App.Models.User.{{ auth()->id() }}')
+            .listen('.user.outbid', function(e) {
+                handleUserOutbidAlert(e);
+            });
+        @endauth
+    }
+});
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 @endsection

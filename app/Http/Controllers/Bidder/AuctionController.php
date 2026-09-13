@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\AuctionWatchlist;
+use App\Services\BiddingService;
 use Illuminate\Http\Request;
 
 class AuctionController extends Controller
@@ -228,7 +229,7 @@ class AuctionController extends Controller
     /**
      * Submit a bid on an auction.
      */
-    public function placeBid(Request $request, $id)
+    public function placeBid(Request $request, $id, BiddingService $biddingService)
     {
         $user = auth()->user();
         if ($user->status !== 'approved') {
@@ -245,198 +246,17 @@ class AuctionController extends Controller
         // Find in DB
         $auction = Auction::find($id);
         if ($auction) {
-            if ($auction->is_paused) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('This auction is currently paused by admin.')
-                ], 200);
-            }
-            
-            // Check if blocked from this auction
-            $isBlocked = \Illuminate\Support\Facades\DB::table('auction_blocklists')
-                ->where('auction_id', $auction->id)
-                ->where('user_id', $user->id)
-                ->exists();
-            if ($isBlocked) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('You have been blocked from participating in this auction.')
-                ], 200);
-            }
-            
-            if ($auction->status !== 'live' || now()->gt($auction->end_time)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('This auction is not accepting bids.')
-                ], 200);
-            }
+            $result = $biddingService->placeBid(
+                $auction,
+                $user,
+                floatval($amount),
+                $isAutoBid,
+                $maxAutoBid,
+                $request->ip(),
+                $request->userAgent()
+            );
 
-            $currentPrice = $auction->current_price;
-            $minBid = $currentPrice + $auction->min_bid_increment;
-
-            if ($amount < $minBid && !$auction->bids()->where('user_id', $user->id)->where('status', 'active')->exists()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('Bid must be at least :amount SAR.', ['amount' => number_format($minBid)])
-                ], 200);
-            }
-
-            if ($isAutoBid && !$maxAutoBid) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('Please specify a maximum auto bid limit.')
-                ], 200);
-            }
-            if ($isAutoBid && $maxAutoBid < $amount) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('Maximum auto bid limit must be greater than or equal to the bid amount.')
-                ], 200);
-            }
-
-            // Wallet Check: User must have enough available balance for the bid amount
-            $wallet = $user->wallet;
-            $newTotalRequired = $isAutoBid ? $maxAutoBid : $amount;
-            
-            // If the user already has an active bid on this auction, we only need the difference
-            $currentActiveBid = $auction->bids()->where('user_id', $user->id)->where('status', 'active')->first();
-            $currentActiveBidAmount = 0;
-            if ($currentActiveBid) {
-                $currentActiveBidAmount = $currentActiveBid->is_auto_bid ? max($currentActiveBid->amount, $currentActiveBid->max_auto_bid) : $currentActiveBid->amount;
-            }
-            
-            $additionalRequired = max(0, $newTotalRequired - $currentActiveBidAmount);
-            
-            if (!$wallet || $wallet->available_balance < $additionalRequired) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('Insufficient available balance. You need at least :amount SAR available in your wallet to place this bid.', ['amount' => number_format($additionalRequired)])
-                ], 200);
-            }
-
-            // Place Bid with Proxy War Logic
-            $result = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $auction, $user, $isAutoBid, $maxAutoBid, $amount) {
-                $newBidAmount = $amount;
-
-                // Get the current highest active bid (if any)
-                $currentHighestBid = $auction->bids()->where('status', 'active')->first();
-
-                // Setup proxy war variables
-                $rivalBid = null;
-                if ($currentHighestBid && $currentHighestBid->user_id !== $user->id && $currentHighestBid->is_auto_bid) {
-                    $rivalBid = $currentHighestBid;
-                }
-
-                if ($rivalBid) {
-                    $userMax = $isAutoBid ? $maxAutoBid : $newBidAmount;
-                    $rivalMax = $rivalBid->max_auto_bid;
-
-                    if ($userMax > $rivalMax) {
-                        // User wins proxy war
-                        $newBidAmount = min($rivalMax + $auction->min_bid_increment, $userMax);
-                        
-                        // Mark rival as outbid
-                        $rivalBid->update(['status' => 'outbid']);
-                    } else {
-                        // Rival wins proxy war
-                        $rivalNewAmount = min($userMax + $auction->min_bid_increment, $rivalMax);
-                        
-                        // User's bid gets placed but immediately outbid
-                        $auction->bids()->where('status', 'active')->where('user_id', $user->id)->update(['status' => 'outbid']);
-                        Bid::create([
-                            'auction_id' => $auction->id,
-                            'user_id'    => $user->id,
-                            'amount'     => $newBidAmount,
-                            'is_auto_bid'=> $isAutoBid,
-                            'max_auto_bid'=> $maxAutoBid,
-                            'status'     => 'outbid',
-                            'ip_address' => $request->ip(),
-                            'user_agent' => $request->userAgent(),
-                        ]);
-                        $auction->increment('bids_count');
-
-                        // Rival's new winning bid
-                        $auction->bids()->where('status', 'active')->where('user_id', $rivalBid->user_id)->update(['status' => 'outbid']);
-                        Bid::create([
-                            'auction_id' => $auction->id,
-                            'user_id'    => $rivalBid->user_id,
-                            'amount'     => $rivalNewAmount,
-                            'is_auto_bid'=> true,
-                            'max_auto_bid'=> $rivalMax,
-                            'status'     => 'active',
-                            'ip_address' => 'system',
-                            'user_agent' => 'proxy-bid',
-                        ]);
-                        $auction->increment('bids_count');
-                        
-                        // Update auction values
-                        $auction->update([
-                            'winning_bid_amount' => $rivalNewAmount,
-                            'winner_id' => $rivalBid->user_id
-                        ]);
-
-                        // Auto-extend logic
-                        $this->handleAutoExtend($auction);
-                        
-                        return [
-                            'success' => true,
-                            'new_price' => $rivalNewAmount,
-                            'bids_count' => $auction->bids_count,
-                            'time_left_seconds' => $auction->time_remaining,
-                            'end_time' => $auction->end_time->toISOString(),
-                            'message' => __('Your bid was placed, but you have been immediately outbid by an automatic proxy bid!')
-                        ];
-                    }
-                }
-
-                // Normal flow (or User won proxy war)
-                // Mark previous active bids as outbid
-                $auction->bids()
-                    ->where('status', 'active')
-                    ->where('user_id', '!=', $user->id)
-                    ->update(['status' => 'outbid']);
-
-                // Mark user's own previous bid as outbid
-                $auction->bids()
-                    ->where('user_id', $user->id)
-                    ->where('status', 'active')
-                    ->update(['status' => 'outbid']);
-
-                // Create new bid
-                $bid = Bid::create([
-                    'auction_id'   => $auction->id,
-                    'user_id'      => $user->id,
-                    'amount'       => $newBidAmount,
-                    'is_auto_bid'  => $isAutoBid,
-                    'max_auto_bid' => $maxAutoBid,
-                    'status'       => 'active',
-                    'ip_address'   => $request->ip(),
-                    'user_agent'   => $request->userAgent(),
-                ]);
-
-                // Update bids count and winning bid
-                $auction->increment('bids_count');
-                $auction->update([
-                    'winning_bid_amount' => $newBidAmount,
-                    'winner_id' => $user->id
-                ]);
-
-                // Auto-extend
-                $this->handleAutoExtend($auction);
-
-                return [
-                    'success' => true,
-                    'new_price' => $newBidAmount,
-                    'bids_count' => $auction->bids_count,
-                    'time_left_seconds' => $auction->time_remaining,
-                    'end_time' => $auction->end_time->toISOString(),
-                    'message' => $isAutoBid 
-                        ? __('Automatic proxy bid setup successfully at :amount (Max Limit: :max)!', ['amount' => number_format($newBidAmount), 'max' => number_format($maxAutoBid)]) 
-                        : __('Your bid has been placed successfully!')
-                ];
-            });
-
-            return response()->json($result);
+            return response()->json($result, $result['status_code'] ?? 200);
         }
 
         // Handle mock bidding
