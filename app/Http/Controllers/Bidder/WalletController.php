@@ -205,6 +205,18 @@ class WalletController extends Controller
             'receipt' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB
         ]);
 
+        // Check if user has a pending deposit request
+        $pendingExists = DepositRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($pendingExists) {
+            return response()->json([
+                'success' => false,
+                'message' => __('You already have a pending deposit request. Please wait for it to be reviewed before submitting another.'),
+            ], 422);
+        }
+
         $receiptPath = $request->file('receipt')->store('deposits/receipts', 'public');
 
         DepositRequest::create([

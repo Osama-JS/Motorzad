@@ -2,19 +2,9 @@
 @section('title', __('View Message'))
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('View Message') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.contacts.index') }}">{{ __('Contact Messages') }}</a> / 
-            {{ __('Message Details') }}
-        </div>
-    </div>
-    <div class="header-actions">
-        <a href="{{ route('admin.contacts.index') }}" class="btn btn-secondary">{{ __('Back') }}</a>
-    </div>
-</div>
+<x-admin-header :title="__('View Message')" :breadcrumb="__('Message Details')">
+    <a href="{{ route('admin.contacts.index') }}" class="btn-ultra">{{ __('Back') }}</a>
+</x-admin-header>
 
 <div class="card shadow-sm border-0">
     <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">

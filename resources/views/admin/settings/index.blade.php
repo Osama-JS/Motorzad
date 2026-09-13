@@ -2,14 +2,7 @@
 @section('title', 'إعدادات النظام')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Settings') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Settings') }}
-        </div>
-    </div>
-</div>
+<x-admin-header :title="__('Settings')" :breadcrumb="__('Settings')" />
 
 {{-- Stats Cards --}}
 <div class="row mb-4 g-3">

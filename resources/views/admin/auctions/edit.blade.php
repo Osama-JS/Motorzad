@@ -238,20 +238,12 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('Edit Auction') }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.auctions.index') }}">{{ __('Auctions') }}</a> / 
-            {{ __('Edit') }}
-        </div>
-    </div>
-    <a href="{{ route('admin.auctions.index') }}" class="btn btn-light" style="border-radius: 10px; font-weight: 600; padding: 10px 20px;">
+<x-admin-header :title="__('Edit Auction')" :breadcrumb="__('Edit')">
+    <a href="{{ route('admin.auctions.index') }}" class="btn-ultra" style="padding: 0.6rem 1.5rem; font-size: 0.95rem;">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         {{ __('Back') }}
     </a>
-</div>
+</x-admin-header>
 
 <form id="editAuctionForm" action="{{ route('admin.auctions.update', $auction->id) }}" method="POST" enctype="multipart/form-data">
     @csrf

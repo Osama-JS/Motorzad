@@ -21,12 +21,7 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Withdrawal Requests') }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Withdrawals') }}</div>
-    </div>
-</div>
+<x-admin-header :title="__('Withdrawal Requests')" :breadcrumb="__('Withdrawals')" />
 
 <div class="row mb-4">
     <div class="col-12 col-sm-6 col-lg-4 mb-3 mb-lg-0">

@@ -25,19 +25,11 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Edit News') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.news.index') }}">{{ __('News') }}</a> / 
-            {{ __('Edit News') }}
-        </div>
-    </div>
-    <a href="{{ route('admin.news.index') }}" class="btn btn-secondary">
+<x-admin-header :title="__('Edit News')" :breadcrumb="__('Edit News')">
+    <a href="{{ route('admin.news.index') }}" class="btn-ultra">
         <i class="fas fa-arrow-left me-1"></i> {{ __('Back to List') }}
     </a>
-</div>
+</x-admin-header>
 
 <form action="{{ route('admin.news.update', $news->id) }}" method="POST" enctype="multipart/form-data">
     @csrf

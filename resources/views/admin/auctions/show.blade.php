@@ -379,24 +379,16 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ app()->getLocale() === 'ar' ? 'تفاصيل المزاد' : 'Auction Details' }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.auctions.index') }}">{{ __('Auctions') }}</a> / 
-            <span class="text-muted">{{ $auction->title }}</span>
-        </div>
-    </div>
+<x-admin-header :title="app()->getLocale() === 'ar' ? 'تفاصيل المزاد' : 'Auction Details'" :breadcrumb="$auction->title">
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.auctions.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 rounded-pill">
-            <i class="fa-solid fa-arrow-left"></i> <span>{{ app()->getLocale() === 'ar' ? 'الرجوع للقائمة' : 'Back to List' }}</span>
+        <a href="{{ route('admin.auctions.index') }}" class="btn-ultra" style="background: linear-gradient(135deg, #64748b, #475569); padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-arrow-left me-2"></i> <span>{{ app()->getLocale() === 'ar' ? 'الرجوع للقائمة' : 'Back to List' }}</span>
         </a>
-        <a href="{{ route('admin.auctions.edit', $auction->id) }}" class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill">
-            <i class="fa-solid fa-pen-to-square"></i> <span>{{ __('Edit') }}</span>
+        <a href="{{ route('admin.auctions.edit', $auction->id) }}" class="btn-ultra" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-pen-to-square me-2"></i> <span>{{ __('Edit') }}</span>
         </a>
     </div>
-</div>
+</x-admin-header>
 
 {{-- Top Row: Upgraded Stats Grid --}}
 <div class="row mb-4">

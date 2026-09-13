@@ -72,20 +72,11 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('طلبات ترقية البائعين') }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <span>{{ __('طلبات البائعين') }}</span>
-        </div>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-weight-bold shadow-sm">
-            <i class="fa-solid fa-hourglass-half me-1"></i> بانتظار المراجعة: {{ $stats['pending'] }}
-        </span>
-    </div>
-</div>
+<x-admin-header :title="__('طلبات ترقية البائعين')" :breadcrumb="__('طلبات البائعين')">
+    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-weight-bold shadow-sm">
+        <i class="fa-solid fa-hourglass-half me-1"></i> بانتظار المراجعة: {{ $stats['pending'] }}
+    </span>
+</x-admin-header>
 
 {{-- 1. Statistics Cards --}}
 <div class="row mb-4 g-3">

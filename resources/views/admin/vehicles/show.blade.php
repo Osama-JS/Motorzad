@@ -279,37 +279,28 @@
 @endsection
 
 @section('content')
-<div class="page-header mb-4">
-    <div>
-        <div class="d-flex align-items-center gap-3">
-            <h1 style="font-weight: 800; letter-spacing: -0.5px; margin: 0;">{{ $vehicle->title }}</h1>
-            <div>
-                @if($vehicle->status === 'approved')
-                    <span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-check"></i> {{ __('Approved') }}</span>
-                @elseif($vehicle->status === 'pending')
-                    <span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock"></i> {{ __('Pending') }}</span>
-                @else
-                    <span class="status-indicator status-cancelled" style="background:#fee2e2; color:#b91c1c; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-xmark"></i> {{ __('Rejected') }}</span>
-                @endif
-            </div>
-        </div>
-        <div class="breadcrumb" style="font-size: 0.85rem; margin-top: 8px;">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.vehicles.index') }}">{{ __('Vehicles') }}</a> / 
-            {{ $vehicle->title }}
-        </div>
-    </div>
+<x-admin-header :title="$vehicle->title" :breadcrumb="$vehicle->title">
+    <x-slot name="titleSuffix">
+        @if($vehicle->status === 'approved')
+            <span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-check"></i> {{ __('Approved') }}</span>
+        @elseif($vehicle->status === 'pending')
+            <span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock"></i> {{ __('Pending') }}</span>
+        @else
+            <span class="status-indicator status-cancelled" style="background:#fee2e2; color:#b91c1c; padding:6px 14px; border-radius:50px; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-xmark"></i> {{ __('Rejected') }}</span>
+        @endif
+    </x-slot>
+
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.vehicles.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill font-weight-bold" style="border-width: 2px;">
-            <i class="fa-solid fa-arrow-left"></i>
+        <a href="{{ route('admin.vehicles.index') }}" class="btn-ultra" style="background: linear-gradient(135deg, #64748b, #475569); padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-arrow-left me-2"></i>
             {{ __('Back to List') }}
         </a>
-        <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 text-white font-weight-bold rounded-pill" style="border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);">
-            <i class="fa-solid fa-pen-to-square"></i>
+        <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn-ultra" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-pen-to-square me-2"></i>
             {{ __('Edit Vehicle') }}
         </a>
     </div>
-</div>
+</x-admin-header>
 
 <div class="row">
     <!-- Left Column (Gallery, Specs, Description) -->

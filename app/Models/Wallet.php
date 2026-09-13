@@ -63,7 +63,8 @@ class Wallet extends Model
      */
     public function getAvailableBalanceAttribute()
     {
-        return max(0, $this->balance - $this->frozen_balance);
+        $pendingWithdrawals = $this->withdrawalRequests()->where('status', 'pending')->sum('requested_amount');
+        return max(0, $this->balance - $this->frozen_balance - $pendingWithdrawals);
     }
 
     /**

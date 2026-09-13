@@ -34,21 +34,11 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-        <h1>{{ __('حركات الدفع الإلكتروني (هايبر باي)') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.wallets.index') }}">{{ __('إدارة المحافظ') }}</a> / 
-            {{ __('عمليات هايبر باي') }}
-        </div>
-    </div>
-    <div>
-        <a href="{{ route('admin.settings.index') }}#panel-hyperpay" class="btn btn-outline-primary">
-            ⚙️ {{ __('إعدادات البوابة') }}
-        </a>
-    </div>
-</div>
+<x-admin-header :title="__('حركات الدفع الإلكتروني (هايبر باي)')" :breadcrumb="__('عمليات هايبر باي')">
+    <a href="{{ route('admin.settings.index') }}#panel-hyperpay" class="btn-ultra">
+        ⚙️ {{ __('إعدادات البوابة') }}
+    </a>
+</x-admin-header>
 
 {{-- Stats Grid --}}
 <div class="row mb-4 g-3">

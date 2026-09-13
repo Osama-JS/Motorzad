@@ -3,16 +3,12 @@
 @section('title', 'تعديل الدور - ' . $role->name)
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Edit Role:') }} {{ $role->name }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / <a href="{{ route('admin.roles.index') }}">{{ __('Roles') }}</a> / {{ __('Edit') }}</div>
-    </div>
-    <a href="{{ route('admin.roles.index') }}" class="btn btn-ghost">
+<x-admin-header :title="__('Edit Role:') . ' ' . $role->name" :breadcrumb="__('Edit')">
+    <a href="{{ route('admin.roles.index') }}" class="btn-ultra">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         {{ __('Back') }}
     </a>
-</div>
+</x-admin-header>
 
 <div style="max-width:800px; width:100%;">
     <div class="card">

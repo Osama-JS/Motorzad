@@ -125,22 +125,12 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('تحليلات وإحصائيات المزادات الشاملة') }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.auctions.index') }}">{{ __('Auctions') }}</a> / 
-            <span>{{ __('Analytics') }}</span>
-        </div>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('admin.auctions.export-report') }}" class="btn btn-success d-flex align-items-center gap-2 px-4 rounded-pill shadow-sm fw-bold">
-            <i class="fa-solid fa-file-excel"></i>
-            <span>{{ __('تصدير التقرير المالي CSV') }}</span>
-        </a>
-    </div>
-</div>
+<x-admin-header :title="__('تحليلات وإحصائيات المزادات الشاملة')" :breadcrumb="__('Analytics')">
+    <a href="{{ route('admin.auctions.export-report') }}" class="btn-ultra" style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.6rem 1.5rem; font-size: 0.95rem;">
+        <i class="fa-solid fa-file-excel me-2"></i>
+        <span>{{ __('تصدير التقرير المالي CSV') }}</span>
+    </a>
+</x-admin-header>
 
 {{-- Interactive Filter Bar with Select2 and Custom Datepicker --}}
 <div class="card mb-4 shadow-sm border-0 rounded-4">

@@ -131,14 +131,7 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ app()->getLocale() === 'ar' ? 'سجل المزايدات العامة' : 'Global Bids Log' }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ app()->getLocale() === 'ar' ? 'المزايدات' : 'Bids' }}
-        </div>
-    </div>
-</div>
+<x-admin-header :title="app()->getLocale() === 'ar' ? 'سجل المزايدات العامة' : 'Global Bids Log'" :breadcrumb="app()->getLocale() === 'ar' ? 'المزايدات' : 'Bids'" />
 
 <div class="row mb-4 g-3">
     <!-- Total Bids -->

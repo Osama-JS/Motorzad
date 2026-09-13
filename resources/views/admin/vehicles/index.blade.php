@@ -146,16 +146,12 @@
 @endsection
 
 @section('content')
-<div class="page-header mb-4">
-    <div>
-        <h1 style="font-weight: 800; letter-spacing: -0.5px;">{{ __('Vehicles Management') }}</h1>
-        <div class="breadcrumb" style="font-size: 0.85rem;"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Vehicles') }}</div>
-    </div>
-    <a href="{{ route('admin.vehicles.create') }}" class="btn d-inline-flex align-items-center gap-2 px-4 py-2 text-white font-weight-bold rounded-pill" style="background: linear-gradient(135deg, var(--primary), #4f46e5); border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); transition: all 0.2s;">
-        <i class="fa-solid fa-plus"></i>
+<x-admin-header :title="__('Vehicles Management')" :breadcrumb="__('Vehicles')">
+    <a href="{{ route('admin.vehicles.create') }}" class="btn-ultra">
+        <i class="fa-solid fa-plus me-1"></i>
         {{ __('Add New Vehicle') }}
     </a>
-</div>
+</x-admin-header>
 
 <div class="row mb-4 g-3">
     <!-- Total Vehicles -->

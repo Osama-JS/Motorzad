@@ -126,14 +126,19 @@ class DepositController extends Controller
             'admin_note' => 'nullable|string|max:500',
         ]);
 
-        if ($deposit->status !== 'pending') {
-            return response()->json([
-                'success' => false,
-                'message' => __('This deposit request has already been processed.'),
-            ], 422);
-        }
+        DB::beginTransaction();
 
-        DB::transaction(function () use ($request, $deposit) {
+        try {
+            $deposit = DepositRequest::lockForUpdate()->findOrFail($deposit->id);
+            
+            if ($deposit->status !== 'pending') {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('This deposit request has already been processed.'),
+                ], 422);
+            }
+
             $deposit->update([
                 'status'       => $request->status,
                 'admin_note'   => $request->admin_note,
@@ -143,29 +148,44 @@ class DepositController extends Controller
 
             // ✅ Credit the wallet ONLY when approved
             if ($request->status === 'approved') {
+                $wallet = \App\Models\Wallet::lockForUpdate()->findOrFail($deposit->wallet_id);
                 $this->walletService->adjustBalance(
-                    wallet: $deposit->wallet,
+                    wallet: $wallet,
                     amount: $deposit->amount,
                     type: 'credit',
                     description: __('Deposit approved by admin') . ($request->admin_note ? ': ' . $request->admin_note : ''),
                 );
             }
 
-            // إرسال إشعار للمستخدم
-            $statusText = $request->status === 'approved' ? 'الموافقة على' : 'رفض';
-            $deposit->user->notify(new \App\Notifications\GeneralNotification(
-                'تحديث حالة الإيداع',
-                'تم ' . $statusText . ' طلب الإيداع الخاص بك بمبلغ ' . $deposit->amount . ' ريال.',
-                ['database', 'broadcast'],
-                url('/bidder/wallet')
-            ));
-        });
+            DB::commit();
 
-        return response()->json([
-            'success' => true,
-            'message' => $request->status === 'approved'
-                ? __('Deposit approved and wallet credited successfully.')
-                : __('Deposit request rejected.'),
-        ]);
+            // إرسال إشعار للمستخدم خارج الترانزاكشن
+            try {
+                $statusText = $request->status === 'approved' ? 'الموافقة على' : 'رفض';
+                $deposit->user->notify(new \App\Notifications\GeneralNotification(
+                    'تحديث حالة الإيداع',
+                    'تم ' . $statusText . ' طلب الإيداع الخاص بك بمبلغ ' . $deposit->amount . ' ريال.',
+                    ['database', 'broadcast'],
+                    url('/bidder/wallet')
+                ));
+            } catch (\Exception $e) {
+                // Ignore notification errors
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $request->status === 'approved'
+                    ? __('Deposit approved and wallet credited successfully.')
+                    : __('Deposit request rejected.'),
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء المعالجة: ' . $e->getMessage()
+            ], 500);
+        }
+
     }
 }

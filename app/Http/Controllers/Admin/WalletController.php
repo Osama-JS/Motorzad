@@ -133,6 +133,19 @@ class WalletController extends Controller
             $attachmentPath = $request->file('attachment')->store('wallet_attachments', 'public');
         }
 
+        // Prevent negative balance beyond debt ceiling when debiting
+        if ($request->type === 'debit') {
+            if ($wallet->available_balance + $wallet->debt_ceiling < $request->amount) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('Insufficient wallet balance for this debit operation, even considering the debt ceiling.'),
+                    ], 422);
+                }
+                return redirect()->back()->with('error', __('Insufficient wallet balance for this debit operation.'));
+            }
+        }
+
         $this->walletService->adjustBalance(
             $wallet,
             $request->amount,

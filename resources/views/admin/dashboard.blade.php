@@ -3,12 +3,7 @@
 @section('title', 'لوحة التحكم')
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Dashboard') }}</h1>
-        <div class="breadcrumb">{{ __('Welcome to Motorazad Management System') }}</div>
-    </div>
-</div>
+<x-admin-header :title="__('Dashboard')" :breadcrumb="__('Welcome to Motorazad Management System')" />
 
 {{-- Stats Grid --}}
 <div class="stats-grid">

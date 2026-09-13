@@ -9,12 +9,7 @@
 
 @section('content')
 <div id="page-loader"><div class="spinner"></div></div>
-<div class="page-header">
-    <div>
-        <h1>{{ __('Contact Messages') }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Contact Messages') }}</div>
-    </div>
-</div>
+<x-admin-header :title="__('Contact Messages')" :breadcrumb="__('Contact Messages')" />
 
 <div class="row mb-4 g-3">
     <!-- Total -->

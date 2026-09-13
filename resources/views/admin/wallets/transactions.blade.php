@@ -101,21 +101,11 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="fw-bold">{{ __('سجل الحركات المالية للمحفظة') }} — {{ $wallet->user->name }}</h1>
-        <div class="breadcrumb text-muted mt-1">
-            <a href="{{ route('admin.dashboard') }}" class="text-decoration-none">{{ __('الرئيسية') }}</a> / 
-            <a href="{{ route('admin.wallets.index') }}" class="text-decoration-none">{{ __('المحافظ') }}</a> / 
-            <span>{{ __('سجل المعاملات') }}</span>
-        </div>
-    </div>
-    <div class="actions">
-        <button type="button" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
-            <i class="fas fa-plus me-2"></i> {{ __('إضافة معاملة جديدة') }}
-        </button>
-    </div>
-</div>
+<x-admin-header :title="__('سجل الحركات المالية للمحفظة') . ' — ' . $wallet->user->name" :breadcrumb="__('سجل المعاملات')">
+    <button type="button" class="btn-ultra" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+        <i class="fas fa-plus me-2"></i> {{ __('إضافة معاملة جديدة') }}
+    </button>
+</x-admin-header>
 
 <!-- بطاقات الإحصائيات العلوية للتحديث الديناميكي -->
 <div class="row g-4 mb-4">

@@ -20,12 +20,7 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Wallet Management') }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Wallets') }}</div>
-    </div>
-</div>
+<x-admin-header :title="__('Wallet Management')" :breadcrumb="__('Wallets')" />
 
 <div class="row mb-4">
     <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">

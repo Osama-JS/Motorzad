@@ -154,20 +154,11 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('مركز الإشعارات والبث الذكي') }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <span>{{ __('إرسال إشعار') }}</span>
-        </div>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-primary px-3 py-2 rounded-pill font-weight-bold">
-            <i class="fa-solid fa-users me-1"></i> إجمالي المسجلين: {{ number_format($totalUsers) }}
-        </span>
-    </div>
-</div>
+<x-admin-header :title="__('مركز الإشعارات والبث الذكي')" :breadcrumb="__('إرسال إشعار')">
+    <span class="badge bg-primary px-3 py-2 rounded-pill font-weight-bold">
+        <i class="fa-solid fa-users me-1"></i> إجمالي المسجلين: {{ number_format($totalUsers) }}
+    </span>
+</x-admin-header>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">

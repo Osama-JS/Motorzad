@@ -273,22 +273,12 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1 style="font-weight: 700; color: #0f172a; margin-bottom: 8px;">{{ __('Edit Vehicle') }}</h1>
-        <div class="breadcrumb" style="color: #64748b; font-size: 0.95rem;">
-            <a href="{{ route('admin.dashboard') }}" style="color: #3b82f6; text-decoration: none;">{{ __('Dashboard') }}</a> 
-            <span class="mx-2">/</span> 
-            <a href="{{ route('admin.vehicles.index') }}" style="color: #3b82f6; text-decoration: none;">{{ __('Vehicles') }}</a> 
-            <span class="mx-2">/</span> 
-            {{ __('Edit') }}
-        </div>
-    </div>
-    <a href="{{ route('admin.vehicles.index') }}" class="btn btn-light" style="border-radius: 10px; font-weight: 600; padding: 10px 20px;">
+<x-admin-header :title="__('Edit Vehicle')" :breadcrumb="__('Edit')">
+    <a href="{{ route('admin.vehicles.index') }}" class="btn-ultra" style="padding: 0.6rem 1.5rem; font-size: 0.95rem;">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         {{ __('Back') }}
     </a>
-</div>
+</x-admin-header>
 
 <form action="{{ route('admin.vehicles.update', $vehicle->id) }}" method="POST" enctype="multipart/form-data">
     @csrf

@@ -33,12 +33,7 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('طلبات إيداع الضمان المالي') }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('طلبات الإيداع') }}</div>
-    </div>
-</div>
+<x-admin-header :title="__('طلبات إيداع الضمان المالي')" :breadcrumb="__('طلبات الإيداع')" />
 
 <div class="row mb-4">
     <div class="col-12 col-sm-6 col-lg-4 mb-3 mb-lg-0">

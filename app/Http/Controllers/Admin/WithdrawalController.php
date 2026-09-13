@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\WithdrawalRequest;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
+use App\Services\WalletService;
 
 class WithdrawalController extends Controller
 {
+    public function __construct(protected WalletService $walletService) {}
     /**
      * Display a listing of the resource.
      */
@@ -125,24 +127,34 @@ class WithdrawalController extends Controller
             'payment_method' => 'nullable|string',
         ]);
 
-        if ($withdrawal->status !== 'pending') {
-            return response()->json(['message' => 'هذا الطلب تمت معالجته مسبقاً'], 422);
-        }
-
         DB::beginTransaction();
 
         try {
+            // Lock the withdrawal request to prevent race conditions
+            $withdrawal = WithdrawalRequest::lockForUpdate()->findOrFail($withdrawal->id);
+            
+            if ($withdrawal->status !== 'pending') {
+                DB::rollBack();
+                return response()->json(['message' => 'هذا الطلب تمت معالجته مسبقاً'], 422);
+            }
+
             $status = $request->status;
             $approvedAmount = $request->approved_amount ?? $withdrawal->requested_amount;
 
             // If approved, deduct from wallet
             if ($status === 'approved') {
-                $wallet = $withdrawal->wallet;
+                $wallet = Wallet::lockForUpdate()->findOrFail($withdrawal->wallet_id);
                 if ($wallet->balance < $approvedAmount) {
+                    DB::rollBack();
                     return response()->json(['message' => 'رصيد المحفظة غير كافٍ'], 422);
                 }
                 
-                $wallet->decrement('balance', $approvedAmount);
+                $this->walletService->adjustBalance(
+                    wallet: $wallet,
+                    amount: $approvedAmount,
+                    type: 'debit',
+                    description: 'سحب رصيد (موافقة الإدارة)' . ($request->admin_notes ? ' - ' . $request->admin_notes : '')
+                );
             }
 
             $withdrawal->update([

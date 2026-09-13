@@ -16,21 +16,11 @@
 @endsection
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1>{{ __('Wallet Details for:') }} {{ $wallet->user->name }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / 
-            <a href="{{ route('admin.wallets.index') }}">{{ __('Wallets') }}</a> / 
-            {{ __('Details') }}
-        </div>
-    </div>
-    <div class="actions">
-        <button type="button" class="btn btn-primary" onclick="$('#transactionModal').modal('show')">
-            {{ __('Add Financial Transaction') }}
-        </button>
-    </div>
-</div>
+<x-admin-header :title="__('Wallet Details for:') . ' ' . $wallet->user->name" :breadcrumb="__('Details')">
+    <button type="button" class="btn-ultra" onclick="$('#transactionModal').modal('show')">
+        {{ __('Add Financial Transaction') }}
+    </button>
+</x-admin-header>
 
 <div class="row mb-4">
     <div class="col-md-3">

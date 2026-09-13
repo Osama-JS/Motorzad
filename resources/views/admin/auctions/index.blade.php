@@ -85,18 +85,12 @@
 @endsection
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1 font-weight-extrabold">{{ __('Auctions Management') }}</h1>
-        <div class="breadcrumb mb-0">
-            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('Auctions') }}
-        </div>
-    </div>
-    <a href="{{ route('admin.auctions.create') }}" class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill">
-        <i class="fa-solid fa-plus"></i>
+<x-admin-header :title="__('Auctions Management')" :breadcrumb="__('Auctions')">
+    <a href="{{ route('admin.auctions.create') }}" class="btn-ultra">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span>{{ __('Add New Auction') }}</span>
     </a>
-</div>
+</x-admin-header>
 
 {{-- Upgraded Stats Row --}}
 <div class="row mb-4">

@@ -19,16 +19,12 @@
 
 @section('content')
 <div id="page-loader"><div class="spinner"></div></div>
-<div class="page-header">
-    <div>
-        <h1>{{ __('FAQs Management') }}</h1>
-        <div class="breadcrumb"><a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a> / {{ __('FAQs') }}</div>
-    </div>
-    <button class="btn btn-primary" onclick="openAddModal()">
+<x-admin-header :title="__('FAQs Management')" :breadcrumb="__('FAQs')">
+    <button class="btn-ultra" onclick="openAddModal()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         {{ __('Add New FAQ') }}
     </button>
-</div>
+</x-admin-header>
 
 <div class="row mb-4 g-3">
     <!-- Total FAQs -->
