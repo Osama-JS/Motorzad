@@ -185,4 +185,16 @@ class User extends Authenticatable implements MustVerifyEmail
         $prefix = app()->getLocale() === 'ar' ? 'مزايد' : 'Bidder';
         return "{$prefix} #{$this->id} ({$maskedName})";
     }
+
+    /**
+     * Send the email verification notification using 6-digit OTP code.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $code = sprintf('%06d', random_int(100000, 999999));
+        \Illuminate\Support\Facades\Cache::put('email_verify_' . $this->email, $code, now()->addMinutes(15));
+        \Illuminate\Support\Facades\Cache::put('otp_attempts_email_' . $this->email, 0, now()->addMinutes(15));
+
+        app(\App\Services\MailService::class)->sendVerificationOtp($this->email, $code);
+    }
 }

@@ -55,4 +55,48 @@ class EmailVerificationTest extends TestCase
 
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
+
+    public function test_user_can_verify_email_via_otp_on_web(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('bidder');
+        $user = User::factory()->unverified()->create([
+            'status' => 'pending',
+        ]);
+        $user->assignRole('bidder');
+
+        \Illuminate\Support\Facades\Cache::put('email_verify_' . $user->email, '654321', now()->addMinutes(15));
+
+        $response = $this->actingAs($user)->post('/verify-email-otp', [
+            'otp' => '654321',
+        ]);
+
+        $response->assertRedirect(route('bidder.dashboard'));
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        $this->assertEquals('active', $user->fresh()->status);
+        $this->assertNull(\Illuminate\Support\Facades\Cache::get('email_verify_' . $user->email));
+    }
+
+    public function test_user_cannot_verify_with_invalid_otp_on_web(): void
+    {
+        $user = User::factory()->unverified()->create();
+        \Illuminate\Support\Facades\Cache::put('email_verify_' . $user->email, '654321', now()->addMinutes(15));
+
+        $response = $this->actingAs($user)->post('/verify-email-otp', [
+            'otp' => '000000',
+        ]);
+
+        $response->assertSessionHasErrors('otp');
+        $this->assertFalse($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_user_can_resend_otp_on_web(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        $user = User::factory()->unverified()->create();
+
+        $response = $this->actingAs($user)->post('/email/verification-notification');
+
+        $response->assertSessionHas('status', 'verification-otp-sent');
+        $this->assertNotNull(\Illuminate\Support\Facades\Cache::get('email_verify_' . $user->email));
+    }
 }
