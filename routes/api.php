@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BankDetailController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 | Authentication: Laravel Sanctum Token (Bearer Token in Authorization header).
 |
 */
+
+// Broadcasting authentication for mobile apps using Sanctum tokens (/api/broadcasting/auth)
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
 
 // ─── Public Routes (No Auth) ───────────────────────────────────────────────
 Route::prefix('auth')->group(function () {

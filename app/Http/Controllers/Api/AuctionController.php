@@ -379,7 +379,9 @@ class AuctionController extends Controller
 
         // Load relations including bids.user just like bidder dashboard
         $auction->load(['vehicle.images', 'vehicle.primaryImage', 'winner', 'highestBid', 'bids' => function ($query) {
-            $query->where('status', 'active')->with('user:id,first_name,last_name,profile_photo');
+            $query->whereIn('status', ['active', 'outbid', 'won'])
+                ->latest('id')
+                ->with('user:id,first_name,last_name,name,profile_photo');
         }]);
         $auction->increment('views_count');
 
@@ -483,8 +485,9 @@ class AuctionController extends Controller
         }
 
         $bids = $auction->bids()
-            ->with('user:id,first_name,last_name,profile_photo')
-            ->where('status', 'active')
+            ->with('user:id,first_name,last_name,name,profile_photo')
+            ->whereIn('status', ['active', 'outbid', 'won'])
+            ->latest('id')
             ->paginate($request->input('per_page', 20));
 
         return $this->successResponse(

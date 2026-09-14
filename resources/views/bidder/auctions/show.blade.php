@@ -61,9 +61,22 @@
 /* ===== PREMIUM SINGLE AUCTION VIEW ===== */
 .auc-detail-layout {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 1.75rem;
+    align-items: start;
     margin-bottom: 3rem;
+}
+.auc-gallery-col {
+    grid-column: 1;
+    grid-row: 1;
+}
+.auc-details-col {
+    grid-column: 1;
+    grid-row: 2;
+}
+.auc-bid-col {
+    grid-column: 2;
+    grid-row: 1 / span 2;
 }
 
 .detail-card {
@@ -72,57 +85,195 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     padding: 1.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Image Showcase */
+/* Image Showcase - Responsive & Modern */
 .image-showcase {
     position: relative;
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
-    margin-bottom: 1.5rem;
-    background: #0b0f19;
+    margin-bottom: 1rem;
+    background: #080c14;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    max-height: 480px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .main-img-wrap {
     position: relative;
-    padding-top: 56.25%; /* 16:9 */
-}
-.main-img-wrap img {
-    position: absolute;
-    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.main-img-backdrop {
+    position: absolute;
+    inset: -30px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(25px) brightness(0.4) saturate(1.2);
+    transform: scale(1.15);
+    opacity: 0.9;
+    pointer-events: none;
+    transition: background-image 0.4s ease;
+}
+.main-img-wrap img#mainShowcaseImg {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    cursor: zoom-in;
+}
+.expand-img-btn {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 5;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+}
+html[dir="rtl"] .expand-img-btn {
+    left: auto;
+    right: 12px;
+}
+.expand-img-btn:hover {
+    background: var(--brand-red);
+    color: #fff;
+    transform: scale(1.08);
 }
 
 .gallery-thumbs {
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
     overflow-x: auto;
-    padding-bottom: 0.5rem;
+    padding: 0.25rem 0.25rem 0.6rem;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(229, 62, 62, 0.4) transparent;
+}
+.gallery-thumbs::-webkit-scrollbar {
+    height: 5px;
+}
+.gallery-thumbs::-webkit-scrollbar-thumb {
+    background: rgba(229, 62, 62, 0.4);
+    border-radius: 10px;
 }
 .thumb-item {
-    width: 80px;
-    height: 55px;
+    width: 76px;
+    height: 52px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.3s;
-    background: #0b0f19;
+    transition: all 0.25s ease;
+    background: #080c14;
+    position: relative;
 }
 .thumb-item:hover {
     opacity: 0.9;
 }
 .thumb-item.active {
     border-color: var(--brand-red);
+    box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.35);
+    transform: translateY(-2px);
 }
 .thumb-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+
+/* Lightbox Modal */
+.image-lightbox-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 7, 18, 0.94);
+    backdrop-filter: blur(12px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+.image-lightbox-modal.show {
+    display: flex;
+}
+.lightbox-content {
+    position: relative;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lightbox-content img {
+    max-width: 95vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 14px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.lightbox-close {
+    position: absolute;
+    top: -45px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.75rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.2s;
+}
+html[dir="rtl"] .lightbox-close {
+    right: auto;
+    left: 0;
+}
+.lightbox-close:hover {
+    background: var(--brand-red);
+}
+
+.auction-title-main {
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
 
 /* Tabs */
 .detail-tabs {
@@ -370,14 +521,104 @@ html[dir="rtl"] .currency-suffix {
     transition: all 0.3s;
 }
 
-@media(max-width: 992px) {
+@media (max-width: 991px) {
     .auc-detail-layout {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .auc-gallery-col {
+        order: 1;
+    }
+    .auc-bid-col {
+        order: 2;
+    }
+    .auc-details-col {
+        order: 3;
     }
     .bid-panel {
         position: static;
+        top: 0;
+    }
+    .detail-card, .bid-panel {
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+    .auction-title-main {
+        font-size: 1.35rem;
+    }
+    .image-showcase {
+        max-height: 340px;
+        min-height: 200px;
     }
 }
+
+@media (max-width: 576px) {
+    .auc-detail-layout {
+        gap: 1rem;
+    }
+    .detail-card, .bid-panel {
+        padding: 1rem;
+        border-radius: 14px;
+    }
+    .auction-title-main {
+        font-size: 1.2rem;
+    }
+    .image-showcase {
+        max-height: 260px;
+        min-height: 180px;
+        border-radius: 12px;
+    }
+    .thumb-item {
+        width: 60px;
+        height: 42px;
+        border-radius: 8px;
+    }
+    .gallery-thumbs {
+        gap: 0.45rem;
+        margin-bottom: 0.85rem;
+    }
+    .specs-detail-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+    .spec-box {
+        padding: 0.75rem 0.6rem;
+        gap: 0.5rem;
+    }
+    .spec-box-icon {
+        width: 34px;
+        height: 34px;
+    }
+    .spec-box-value {
+        font-size: 0.85rem;
+    }
+    .price-summary {
+        padding: 0.9rem;
+    }
+    .price-summary .value {
+        font-size: 1.35rem;
+    }
+    .quick-bids {
+        gap: 0.35rem;
+    }
+    .quick-bid-btn {
+        padding: 0.55rem 0.25rem;
+        font-size: 0.8rem;
+    }
+    .btn-submit-bid {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .specs-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 @endsection
 
@@ -397,31 +638,50 @@ html[dir="rtl"] .currency-suffix {
 </div>
 
 <div class="auc-detail-layout">
-    {{-- Left Side: Images & Info --}}
-    <div>
-        <div class="detail-card">
-            {{-- Image slider --}}
-            <div class="image-showcase">
-                <div class="main-img-wrap">
-                    <img id="mainShowcaseImg" src="{{ $primaryImg }}" alt="{{ $auction->title }}">
+    {{-- 1. Vehicle Gallery & Title Header Card --}}
+    <div class="auc-gallery-col detail-card">
+        {{-- Image slider with responsive container and ambient blur backdrop --}}
+        <div class="image-showcase">
+            <div class="main-img-wrap">
+                <div class="main-img-backdrop" id="mainShowcaseBackdrop" style="background-image: url('{{ $primaryImg }}');"></div>
+                <img id="mainShowcaseImg" src="{{ $primaryImg }}" alt="{{ $auction->title }}" onclick="openLightbox()" title="{{ app()->getLocale() === 'ar' ? 'انقر لتكبير الصورة' : 'Click to enlarge image' }}">
+                <button type="button" class="expand-img-btn" onclick="openLightbox()" title="{{ app()->getLocale() === 'ar' ? 'تكبير الصورة' : 'Enlarge' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </button>
+            </div>
+        </div>
+
+        @if($vehicle->images->count() > 0)
+            <div class="gallery-thumbs">
+                @foreach($vehicle->images as $index => $img)
+                    <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" onclick="switchImage(this, '{{ asset('storage/' . $img->image_path) }}')">
+                        <img src="{{ asset('storage/' . $img->image_path) }}" alt="Gallery view">
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        <div class="auction-header-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                <h1 class="auction-title-main">
+                    {{ $auction->title }}
+                </h1>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <span class="w-badge" style="background: rgba(229,62,62,0.1); color: var(--brand-red-light); font-weight: 800; font-size: 0.8rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-inline-end: 4px;"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        {{ $auction->location }}
+                    </span>
+                    <span class="w-badge" style="background: var(--bg-hover); color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;">
+                        {{ $vehicle->year }} • {{ number_format($vehicle->mileage) }} KM
+                    </span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            @if($vehicle->images->count() > 0)
-                <div class="gallery-thumbs">
-                    @foreach($vehicle->images as $index => $img)
-                        <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" onclick="switchImage(this, '{{ asset('storage/' . $img->image_path) }}')">
-                            <img src="{{ asset('storage/' . $img->image_path) }}" alt="Gallery view">
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
-            <h1 style="font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 1.5rem;">
-                {{ $auction->title }}
-            </h1>
-
-            {{-- Tabs --}}
+    {{-- 2. Technical Details & Inspection Tabs Card --}}
+    <div class="auc-details-col detail-card">
+        {{-- Tabs --}}
             <div class="detail-tabs">
                 <button class="detail-tab-btn active" onclick="switchTab(this, 'specsTab')">
                     {{ app()->getLocale() === 'ar' ? 'المواصفات التقنية' : 'Specifications' }}
@@ -647,10 +907,9 @@ html[dir="rtl"] .currency-suffix {
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Right Side: Bidding Module --}}
-    <div>
+    {{-- 3. Right Side: Bidding Module Card --}}
+    <div class="auc-bid-col">
         <div class="bid-panel">
             <div class="status-badge-panel">
                 @if($auction->is_live)
@@ -818,6 +1077,14 @@ html[dir="rtl"] .currency-suffix {
     </div>
 </div>
 
+{{-- Image Lightbox Modal --}}
+<div id="imageLightboxModal" class="image-lightbox-modal" onclick="closeLightbox(event)">
+    <div class="lightbox-content">
+        <button type="button" class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <img id="lightboxImg" src="{{ $primaryImg }}" alt="{{ $auction->title }}">
+    </div>
+</div>
+
 @endsection
 
 @section('js')
@@ -827,8 +1094,34 @@ html[dir="rtl"] .currency-suffix {
 function switchImage(thumb, src) {
     document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
     thumb.classList.add('active');
-    document.getElementById('mainShowcaseImg').src = src;
+    const mainImg = document.getElementById('mainShowcaseImg');
+    const backdrop = document.getElementById('mainShowcaseBackdrop');
+    if (mainImg) {
+        mainImg.style.opacity = '0.4';
+        mainImg.src = src;
+        mainImg.onload = () => { mainImg.style.opacity = '1'; };
+    }
+    if (backdrop) {
+        backdrop.style.backgroundImage = `url('${src}')`;
+    }
 }
+
+// Lightbox Modal functions
+function openLightbox() {
+    const src = document.getElementById('mainShowcaseImg')?.src;
+    if (src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('imageLightboxModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+function closeLightbox(e) {
+    if (!e || e.target.id === 'imageLightboxModal' || e.target.classList.contains('lightbox-close')) {
+        document.getElementById('imageLightboxModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
 
 // Tabs switcher
 @php
