@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="{{ __('Motorzad — Car Auctions') }}">
     <title>@yield('title', __('Motorzad — Car Auctions'))</title>
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ file_exists(public_path('css/landing.css')) ? filemtime(public_path('css/landing.css')) : '1.1' }}">
     @stack('styles')
     <script>
         (function() {
