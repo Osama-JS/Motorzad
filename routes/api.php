@@ -18,7 +18,16 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 // Broadcasting authentication for mobile apps using Sanctum tokens (/api/broadcasting/auth)
-Broadcast::routes(['middleware' => ['auth:sanctum']]);
+Route::match(['get', 'post'], '/broadcasting/auth', function (\Illuminate\Http\Request $request) {
+    if (empty($request->channel_name) && !empty($request->getContent())) {
+        parse_str($request->getContent(), $parsed);
+        if (!empty($parsed)) {
+            $request->merge($parsed);
+        }
+    }
+    return \Illuminate\Support\Facades\Broadcast::auth($request);
+})->middleware('auth:sanctum');
+
 
 
 // ─── Public Routes (No Auth) ───────────────────────────────────────────────
