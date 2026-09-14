@@ -114,12 +114,14 @@ class BiddingService
             $currentPrice = (float) $lockedAuction->current_price;
             $minBid = $currentPrice + (float) $lockedAuction->min_bid_increment;
 
-            $hasActiveBid = $lockedAuction->bids()
-                ->where('user_id', $user->id)
-                ->where('status', 'active')
-                ->exists();
+            // Smart increment detection:
+            // If the incoming $amount is less than currentPrice, the client sent an INCREMENT amount (e.g. 500)
+            // rather than the cumulative total price (e.g. 10500). Calculate cumulative total automatically.
+            if ($amount > 0 && $amount < $currentPrice) {
+                $amount = $currentPrice + $amount;
+            }
 
-            if ($amount < $minBid && !$hasActiveBid) {
+            if ($amount < $minBid) {
                 return [
                     'success' => false,
                     'status_code' => 422,
@@ -290,6 +292,7 @@ class BiddingService
                 'bid_id'              => $bid->id,
                 'bidder_display_name' => $user->masked_bidder_name,
                 'new_price'           => $newBidAmount,
+                'bid_increment'       => max(0, (float) ($newBidAmount - $currentPrice)),
                 'bids_count'          => $lockedAuction->bids_count,
                 'time_left_seconds'   => max(0, (int) now()->diffInSeconds($lockedAuction->end_time, false)),
                 'end_time'            => $lockedAuction->end_time ? $lockedAuction->end_time->toISOString() : null,

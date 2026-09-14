@@ -720,16 +720,25 @@ html[dir="rtl"] .currency-suffix {
                 
                 <div class="feed-list" id="bidsFeedList">
                     <div class="feed-item">
-                        <span style="font-weight: 800; color: var(--brand-red-light);">{{ number_format($auctionData['current_price']) }} SAR</span>
-                        <span style="opacity: 0.65;">{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                            <span style="font-weight: 800; color: var(--brand-red-light); font-size: 0.95rem;">+5,000 SAR</span>
+                            <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($auctionData['current_price']) }} SAR</span>
+                        </div>
+                        <span style="opacity: 0.85; font-weight: 600;">{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>
                     </div>
                     <div class="feed-item">
-                        <span style="font-weight: 800;">{{ number_format($auctionData['current_price'] - 5000) }} SAR</span>
-                        <span>مزايد #4102</span>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                            <span style="font-weight: 800; color: #10b981; font-size: 0.95rem;">+5,000 SAR</span>
+                            <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($auctionData['current_price'] - 5000) }} SAR</span>
+                        </div>
+                        <span style="opacity: 0.85; font-weight: 600;">مزايد #4102</span>
                     </div>
                     <div class="feed-item">
-                        <span style="font-weight: 800;">{{ number_format($auctionData['current_price'] - 10000) }} SAR</span>
-                        <span>مزايد #1822</span>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                            <span style="font-weight: 800; color: #10b981; font-size: 0.95rem;">+5,000 SAR</span>
+                            <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($auctionData['current_price'] - 10000) }} SAR</span>
+                        </div>
+                        <span style="opacity: 0.85; font-weight: 600;">مزايد #1822</span>
                     </div>
                 </div>
             </div>
@@ -1068,7 +1077,14 @@ function placeBidNow() {
                 const feedList = document.getElementById('bidsFeedList');
                 const newItem = document.createElement('div');
                 newItem.className = 'feed-item new-bid';
-                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span>{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>`;
+                const mockInc = data.bid_increment || minIncrement;
+                newItem.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                        <span style="font-weight: 800; color: var(--brand-red-light); font-size: 0.95rem;">+${mockInc.toLocaleString()} SAR</span>
+                        <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${data.new_price.toLocaleString()} SAR</span>
+                    </div>
+                    <span style="opacity: 0.85; font-weight: 600;">{{ app()->getLocale() === 'ar' ? 'أنت (مزايد)' : 'You (Bidder)' }}</span>
+                `;
                 feedList.insertBefore(newItem, feedList.firstChild);
 
                 // Update counters
@@ -1112,7 +1128,13 @@ function placeBidNow() {
                     
                     const outbidItem = document.createElement('div');
                     outbidItem.className = 'feed-item new-bid';
-                    outbidItem.innerHTML = `<span style="font-weight: 800;">${outbidAmount.toLocaleString()} SAR</span><span>مزايد #1905</span>`;
+                    outbidItem.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                            <span style="font-weight: 800; color: #10b981; font-size: 0.95rem;">+${minIncrement.toLocaleString()} SAR</span>
+                            <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${outbidAmount.toLocaleString()} SAR</span>
+                        </div>
+                        <span style="opacity: 0.85; font-weight: 600;">مزايد #1905</span>
+                    `;
                     feedList.insertBefore(outbidItem, feedList.firstChild);
                     
                     document.getElementById('bidsCountBadge').textContent = `${data.bids_count + 1} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;

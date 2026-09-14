@@ -1133,6 +1133,7 @@ class AuctionController extends Controller
 
         return $this->successResponse([
             'new_price'         => $result['new_price'],
+            'bid_increment'     => $result['bid_increment'] ?? null,
             'current_price'     => $auction->current_price,
             'bids_count'        => $auction->bids_count,
             'end_time'          => $auction->end_time ? $auction->end_time->toISOString() : null,

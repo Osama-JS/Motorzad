@@ -22,6 +22,7 @@ class BidPlacedEvent implements ShouldBroadcastNow
     public $bidsCount;
     public $bidderId;
     public $bidderDisplayName;
+    public $bidIncrement;
     public $timeRemainingSeconds;
     public $endTime;
     public $isExtended;
@@ -35,6 +36,17 @@ class BidPlacedEvent implements ShouldBroadcastNow
         $this->auctionId = $auction->id;
         $this->bidId = $bid->id;
         $this->currentPrice = (float) $bid->amount;
+
+        // Calculate increment over previous bid or start price
+        $prevBid = $auction->bids()
+            ->where('id', '<', $bid->id)
+            ->whereIn('status', ['active', 'outbid'])
+            ->orderBy('id', 'desc')
+            ->first();
+        $prevAmount = $prevBid ? (float) $prevBid->amount : (float) $auction->start_price;
+        $diff = (float) $bid->amount - $prevAmount;
+        $this->bidIncrement = $diff > 0 ? $diff : (float) $auction->min_bid_increment;
+
         $this->minNextBid = (float) ($bid->amount + $auction->min_bid_increment);
         $this->bidsCount = (int) $auction->bids_count;
         $this->bidderId = $bidder->id;
@@ -72,6 +84,7 @@ class BidPlacedEvent implements ShouldBroadcastNow
             'auction_id'             => $this->auctionId,
             'bid_id'                 => $this->bidId,
             'current_price'          => $this->currentPrice,
+            'bid_increment'          => $this->bidIncrement,
             'min_next_bid'           => $this->minNextBid,
             'bids_count'             => $this->bidsCount,
             'bidder_id'              => $this->bidderId,

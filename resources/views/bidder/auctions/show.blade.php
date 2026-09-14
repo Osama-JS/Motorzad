@@ -776,15 +776,35 @@ html[dir="rtl"] .currency-suffix {
                 </div>
                 
                 <div class="feed-list" id="bidsFeedList">
+                    @php
+                        $bidsList = $auction->bids->sortBy('id')->values();
+                        $bidIncrements = [];
+                        $prevAmount = (float) $auction->start_price;
+                        foreach ($bidsList as $b) {
+                            $diff = (float) $b->amount - $prevAmount;
+                            $bidIncrements[$b->id] = $diff > 0 ? $diff : (float) $auction->min_bid_increment;
+                            $prevAmount = (float) $b->amount;
+                        }
+                    @endphp
                     @forelse($auction->bids as $bid)
+                        @php
+                            $incVal = $bidIncrements[$bid->id] ?? (float) $auction->min_bid_increment;
+                            $isMe = $bid->user_id === $user->id;
+                            $displayName = $isMe
+                                ? (app()->getLocale() === 'ar' ? 'أنت (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')' : 'You (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')')
+                                : ($bid->user ? $bid->user->masked_bidder_name : ((app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #') . $bid->user_id));
+                        @endphp
                         <div class="feed-item" data-bid-id="{{ $bid->id }}">
-                            <span style="font-weight: 800; color: {{ $bid->user_id === $user->id ? 'var(--brand-red-light)' : 'inherit' }}">{{ number_format($bid->amount) }} SAR</span>
-                            <span style="opacity: 0.85;">
-                                @if($bid->user_id === $user->id)
-                                    {{ app()->getLocale() === 'ar' ? 'أنت (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')' : 'You (' . ($bid->user ? $bid->user->masked_bidder_name : '#' . $bid->user_id) . ')' }}
-                                @else
-                                    {{ $bid->user ? $bid->user->masked_bidder_name : ((app()->getLocale() === 'ar' ? 'مزايد #' : 'Bidder #') . $bid->user_id) }}
-                                @endif
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                <span style="font-weight: 800; color: {{ $isMe ? 'var(--brand-red-light)' : '#10b981' }}; font-size: 0.95rem;">
+                                    +{{ number_format($incVal) }} SAR
+                                </span>
+                                <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">
+                                    {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($bid->amount) }} SAR
+                                </span>
+                            </div>
+                            <span style="opacity: 0.9; font-weight: 600;">
+                                {{ $displayName }}
                             </span>
                         </div>
                     @empty
@@ -1129,7 +1149,14 @@ function placeBidNow() {
                     newItem.setAttribute('data-bid-id', data.bid_id);
                 }
                 newItem.style.animation = 'highlight-green 2s ease-out';
-                newItem.innerHTML = `<span style="font-weight: 800; color: var(--brand-red-light);">${data.new_price.toLocaleString()} SAR</span><span style="opacity: 0.85;">${myDisplayName}</span>`;
+                const myInc = (data.bid_increment !== undefined && data.bid_increment !== null) ? Number(data.bid_increment) : (incrementAmount || {{ $auction->min_bid_increment }});
+                newItem.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                        <span style="font-weight: 800; color: var(--brand-red-light); font-size: 0.95rem;">+${myInc.toLocaleString()} SAR</span>
+                        <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${data.new_price.toLocaleString()} SAR</span>
+                    </div>
+                    <span style="opacity: 0.9; font-weight: 600;">${myDisplayName}</span>
+                `;
                 feedList.insertBefore(newItem, feedList.firstChild);
 
                 // Update counters
@@ -1308,7 +1335,15 @@ function handleIncomingLiveBid(data) {
             newItem.setAttribute('data-bid-id', data.bid_id);
         }
         newItem.style.animation = 'highlight-green 2.5s ease-out';
-        newItem.innerHTML = `<span style="font-weight: 800; color: ${isMe ? 'var(--brand-red-light)' : 'inherit'};">${newPrice.toLocaleString()} SAR</span><span style="opacity: 0.85;">${displayName}</span>`;
+        const incAmount = (data.bid_increment !== undefined && data.bid_increment !== null) ? Number(data.bid_increment) : (newPrice - currentPrice > 0 ? (newPrice - currentPrice) : minIncrement);
+        const incColor = isMe ? 'var(--brand-red-light)' : '#10b981';
+        newItem.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                <span style="font-weight: 800; color: ${incColor}; font-size: 0.95rem;">+${incAmount.toLocaleString()} SAR</span>
+                <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${newPrice.toLocaleString()} SAR</span>
+            </div>
+            <span style="opacity: 0.9; font-weight: 600;">${displayName}</span>
+        `;
         feedList.insertBefore(newItem, feedList.firstChild);
 
         // Update chart
