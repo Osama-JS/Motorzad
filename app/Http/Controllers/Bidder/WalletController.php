@@ -346,5 +346,36 @@ class WalletController extends Controller
             return redirect()->route('bidder.wallet.index')->with('error', __('Verification error: :msg', ['msg' => $e->getMessage()]));
         }
     }
+
+    /**
+     * Display customer's full payments and deposit requests history.
+     */
+    public function paymentsHistory(Request $request)
+    {
+        $user = auth()->user();
+        $tab = $request->input('tab', 'all');
+
+        // 1. Bank transfer deposit requests
+        $bankTransfers = DepositRequest::where('user_id', $user->id)
+            ->with('bankAccount')
+            ->latest()
+            ->paginate(10, ['*'], 'transfers_page')
+            ->withQueryString();
+
+        // 2. Electronic gateway transactions (HyperPay)
+        $onlinePayments = HyperpayTransaction::where('user_id', $user->id)
+            ->latest()
+            ->paginate(10, ['*'], 'online_page')
+            ->withQueryString();
+
+        $stats = [
+            'bank_transfers_count' => DepositRequest::where('user_id', $user->id)->count(),
+            'bank_transfers_approved_total' => DepositRequest::where('user_id', $user->id)->where('status', 'approved')->sum('amount'),
+            'online_payments_count' => HyperpayTransaction::where('user_id', $user->id)->count(),
+            'online_payments_paid_total' => HyperpayTransaction::where('user_id', $user->id)->where('status', 'paid')->sum('amount'),
+        ];
+
+        return view('bidder.wallet.payments-history', compact('user', 'bankTransfers', 'onlinePayments', 'stats', 'tab'));
+    }
 }
 

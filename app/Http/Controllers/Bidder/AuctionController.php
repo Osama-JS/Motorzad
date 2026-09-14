@@ -209,6 +209,7 @@ class AuctionController extends Controller
         $auction = Auction::with(['vehicle', 'vehicle.images', 'highestBid', 'bids.user'])->find($id);
 
         if ($auction) {
+            $auction->syncStatusJustInTime();
             $isWatched = $auction->watchlist()->where('user_id', $user->id)->exists();
             return view('bidder.auctions.show', compact('auction', 'isWatched', 'user'));
         }

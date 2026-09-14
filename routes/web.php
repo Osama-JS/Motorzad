@@ -247,6 +247,7 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::get('/wallet/transactions/{id}/invoice', [\App\Http\Controllers\Bidder\WalletController::class, 'invoice'])->name('wallet.invoice');
     Route::post('/wallet/withdraw', [\App\Http\Controllers\Bidder\WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
     Route::post('/wallet/deposit', [\App\Http\Controllers\Bidder\WalletController::class, 'requestDeposit'])->name('wallet.deposit');
+    Route::get('/wallet/payments-history', [\App\Http\Controllers\Bidder\WalletController::class, 'paymentsHistory'])->name('wallet.payments-history');
     Route::post('/wallet/hyperpay/initiate', [\App\Http\Controllers\Bidder\WalletController::class, 'initiateHyperPay'])->name('wallet.hyperpay.initiate');
     Route::get('/wallet/hyperpay/checkout/{id}', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCheckout'])->name('wallet.hyperpay.checkout');
     Route::get('/wallet/hyperpay/callback', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCallback'])->name('wallet.hyperpay.callback');

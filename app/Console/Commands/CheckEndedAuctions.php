@@ -37,8 +37,12 @@ class CheckEndedAuctions extends Command
         if ($toStart->isNotEmpty()) {
             $this->info("Found {$toStart->count()} auctions to start.");
             foreach ($toStart as $auction) {
-                $auction->update(['status' => 'live']);
-                $this->line("-> Started auction ID: {$auction->id} ({$auction->title})");
+                try {
+                    $auctionService->startAuction($auction);
+                    $this->line("-> Successfully started auction ID: {$auction->id} ({$auction->title})");
+                } catch (\Exception $e) {
+                    $this->error("--> Error starting auction ID {$auction->id}: " . $e->getMessage());
+                }
             }
         } else {
             $this->line("No upcoming auctions to start.");

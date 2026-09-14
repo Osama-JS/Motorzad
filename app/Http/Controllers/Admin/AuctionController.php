@@ -18,7 +18,7 @@ class AuctionController extends Controller
             'total' => Auction::count(),
             'live' => Auction::where('status', 'live')->count(),
             'scheduled' => Auction::where('status', 'scheduled')->count(),
-            'completed' => Auction::where('status', 'completed')->count(),
+            'completed' => Auction::whereIn('status', ['sold', 'ended', 'completed'])->count(),
         ];
         
         $vehicles = Vehicle::all();
@@ -137,7 +137,7 @@ class AuctionController extends Controller
             'deposit_amount' => 'required|numeric|min:0',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
-            'status' => 'required|in:draft,scheduled,live,completed,cancelled',
+            'status' => 'required|in:draft,scheduled,live,ended,sold,cancelled,completed',
             'location_ar' => 'nullable|string|max:255',
             'location_en' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
@@ -148,12 +148,20 @@ class AuctionController extends Controller
             'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
+        if ($validated['status'] === 'completed') {
+            $validated['status'] = 'sold';
+        }
+
         $validated['deposit_required'] = $request->has('deposit_required');
         $validated['is_featured'] = $request->has('is_featured');
 
         $validated['created_by'] = auth()->id();
 
         $auction = Auction::create($validated);
+
+        if ($auction->status === 'live') {
+            $this->auctionService->startAuction($auction);
+        }
 
         if ($request->hasFile('images')) {
             $primaryIndex = (int) $request->input('primary_image_index', 0);
@@ -202,7 +210,7 @@ class AuctionController extends Controller
             'deposit_amount' => 'required|numeric|min:0',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
-            'status' => 'required|in:draft,scheduled,live,completed,cancelled',
+            'status' => 'required|in:draft,scheduled,live,ended,sold,cancelled,completed',
             'location_ar' => 'nullable|string|max:255',
             'location_en' => 'nullable|string|max:255',
             'commission_rate' => 'nullable|numeric|min:0|max:100',
@@ -214,10 +222,28 @@ class AuctionController extends Controller
             'auto_extend_minutes' => 'nullable|integer|min:0'
         ]);
 
+        if ($validated['status'] === 'completed') {
+            $validated['status'] = 'sold';
+        }
+
         $validated['deposit_required'] = $request->has('deposit_required');
         $validated['is_featured'] = $request->has('is_featured');
 
+        $oldStatus = $auction->status;
+        $newStatus = $validated['status'];
+
         $auction->update($validated);
+
+        // Trigger lifecycle service actions if status changed
+        if ($oldStatus !== $newStatus) {
+            if ($newStatus === 'live') {
+                $this->auctionService->startAuction($auction);
+            } elseif (in_array($newStatus, ['ended', 'sold'])) {
+                $this->auctionService->endAuction($auction);
+            } elseif ($newStatus === 'cancelled') {
+                $this->auctionService->cancelAuction($auction);
+            }
+        }
 
         // Handle deleted images
         if ($request->filled('deleted_images')) {

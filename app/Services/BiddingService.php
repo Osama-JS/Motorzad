@@ -101,8 +101,17 @@ class BiddingService
                 ];
             }
 
+            // Just-in-time status check: auto-start if scheduled and time arrived, or end if expired
+            if ($lockedAuction->status === 'scheduled' && $lockedAuction->start_time && now()->gte($lockedAuction->start_time)) {
+                app(\App\Services\AuctionService::class)->startAuction($lockedAuction);
+                $lockedAuction->refresh();
+            }
+
             // Check if auction is live and has not ended
-            if ($lockedAuction->status !== 'live' || now()->gt($lockedAuction->end_time)) {
+            if ($lockedAuction->status !== 'live' || ($lockedAuction->end_time && now()->gt($lockedAuction->end_time))) {
+                if ($lockedAuction->status === 'live' && $lockedAuction->end_time && now()->gt($lockedAuction->end_time)) {
+                    app(\App\Services\AuctionService::class)->endAuction($lockedAuction);
+                }
                 return [
                     'success' => false,
                     'status_code' => 422,

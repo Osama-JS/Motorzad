@@ -138,16 +138,52 @@ class Auction extends Model
         return $this->highestBid?->amount ?? $this->start_price;
     }
 
+    /**
+     * Check and synchronize auction status just-in-time based on real-time clock.
+     * Prevents auctions from being stuck in 'scheduled' or 'live' even if cron delays.
+     */
+    public function syncStatusJustInTime(): self
+    {
+        $now = now();
+
+        // 1. Auto-start if scheduled and start time has arrived
+        if ($this->status === 'scheduled' && $this->start_time && $now->gte($this->start_time)) {
+            if ($this->end_time && $now->gte($this->end_time)) {
+                // Time completely expired -> end auction
+                $this->status = 'live';
+                app(\App\Services\AuctionService::class)->endAuction($this);
+            } else {
+                app(\App\Services\AuctionService::class)->startAuction($this);
+            }
+            $this->refresh();
+        }
+        // 2. Auto-end if live and end time has passed
+        elseif ($this->status === 'live' && $this->end_time && $now->gte($this->end_time)) {
+            app(\App\Services\AuctionService::class)->endAuction($this);
+            $this->refresh();
+        }
+
+        return $this;
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────
 
     public function scopeLive($query)
     {
-        return $query->where('status', 'live');
+        return $query->where(function ($q) {
+            $q->where('status', 'live')
+              ->orWhere(function ($sub) {
+                  $sub->where('status', 'scheduled')
+                      ->where('start_time', '<=', now())
+                      ->where('end_time', '>', now());
+              });
+        });
     }
 
     public function scopeUpcoming($query)
     {
-        return $query->where('status', 'scheduled');
+        return $query->where('status', 'scheduled')
+                     ->where('start_time', '>', now());
     }
 
     public function scopeFeatured($query)

@@ -83,9 +83,13 @@
             @endif
 
             <div class="nav-section-title">{{ __('Account') }}</div>
-            <a href="{{ route('bidder.wallet.index') }}" class="nav-item {{ request()->routeIs('bidder.wallet.*') ? 'active' : '' }}">
+            <a href="{{ route('bidder.wallet.index') }}" class="nav-item {{ request()->routeIs('bidder.wallet.index') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 <span>{{ __('My Wallet') }}</span>
+            </a>
+            <a href="{{ route('bidder.wallet.payments-history') }}" class="nav-item {{ request()->routeIs('bidder.wallet.payments-history') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>{{ __('سجل المدفوعات والشحن') }}</span>
             </a>
             <a href="{{ route('kyc.index') }}" class="nav-item {{ request()->routeIs('kyc.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

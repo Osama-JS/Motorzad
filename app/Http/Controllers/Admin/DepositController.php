@@ -161,11 +161,16 @@ class DepositController extends Controller
 
             // إرسال إشعار للمستخدم خارج الترانزاكشن
             try {
-                $statusText = $request->status === 'approved' ? 'الموافقة على' : 'رفض';
+                $isApproved = $request->status === 'approved';
+                $title = $isApproved ? 'تمت الموافقة على الإيداع البنكي' : 'تم رفض طلب الإيداع البنكي';
+                $body = $isApproved 
+                    ? 'تمت الموافقة على طلب الإيداع البنكي بمبلغ ' . number_format($deposit->amount, 2) . ' ريال وإيداعه في محفظتك بنجاح.'
+                    : 'تم رفض طلب الإيداع البنكي بمبلغ ' . number_format($deposit->amount, 2) . ' ريال.' . ($request->admin_note ? ' السبب: ' . $request->admin_note : '');
+
                 $deposit->user->notify(new \App\Notifications\GeneralNotification(
-                    'تحديث حالة الإيداع',
-                    'تم ' . $statusText . ' طلب الإيداع الخاص بك بمبلغ ' . $deposit->amount . ' ريال.',
-                    ['database', 'broadcast'],
+                    $title,
+                    $body,
+                    ['database', 'broadcast', 'fcm'],
                     url('/bidder/wallet')
                 ));
             } catch (\Exception $e) {

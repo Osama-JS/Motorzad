@@ -375,6 +375,8 @@ class AuctionController extends Controller
             ], 403);
         }
 
+        $auction->syncStatusJustInTime();
+
         // Load relations including bids.user just like bidder dashboard
         $auction->load(['vehicle.images', 'vehicle.primaryImage', 'winner', 'highestBid', 'bids' => function ($query) {
             $query->where('status', 'active')->with('user:id,first_name,last_name,profile_photo');
