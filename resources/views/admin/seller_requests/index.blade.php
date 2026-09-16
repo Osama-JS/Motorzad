@@ -452,7 +452,8 @@
     // Open Approve Modal
     function openApproveModal(id, name) {
         document.getElementById('approve_user_name').innerText = name;
-        document.getElementById('approveForm').action = "{{ url('admin/seller-requests') }}/" + id + "/approve";
+        let approveUrl = "{{ route('admin.seller-requests.approve', ':id') }}";
+        document.getElementById('approveForm').action = approveUrl.replace(':id', id);
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));
         modal.show();
     }
@@ -460,7 +461,8 @@
     // Open Reject Modal
     function openRejectModal(id, name) {
         document.getElementById('reject_user_name').innerText = name;
-        document.getElementById('rejectForm').action = "{{ url('admin/seller-requests') }}/" + id + "/reject";
+        let rejectUrl = "{{ route('admin.seller-requests.reject', ':id') }}";
+        document.getElementById('rejectForm').action = rejectUrl.replace(':id', id);
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectModal'));
         modal.show();
     }
@@ -473,7 +475,8 @@
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('detailsModal'));
         modal.show();
 
-        fetch("{{ url('admin/seller-requests') }}/" + id)
+        let showUrl = "{{ route('admin.seller-requests.show', ':id') }}";
+        fetch(showUrl.replace(':id', id))
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
