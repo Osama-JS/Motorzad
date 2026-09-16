@@ -452,7 +452,7 @@
     // Open Approve Modal
     function openApproveModal(id, name) {
         document.getElementById('approve_user_name').innerText = name;
-        let approveUrl = "{{ route('admin.seller-requests.approve', ':id') }}";
+        let approveUrl = "{{ route('admin.seller-requests.approve', ':id', false) }}";
         document.getElementById('approveForm').action = approveUrl.replace(':id', id);
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('approveModal'));
         modal.show();
@@ -461,7 +461,7 @@
     // Open Reject Modal
     function openRejectModal(id, name) {
         document.getElementById('reject_user_name').innerText = name;
-        let rejectUrl = "{{ route('admin.seller-requests.reject', ':id') }}";
+        let rejectUrl = "{{ route('admin.seller-requests.reject', ':id', false) }}";
         document.getElementById('rejectForm').action = rejectUrl.replace(':id', id);
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rejectModal'));
         modal.show();
@@ -475,7 +475,7 @@
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('detailsModal'));
         modal.show();
 
-        let showUrl = "{{ route('admin.seller-requests.show', ':id') }}";
+        let showUrl = "{{ route('admin.seller-requests.show', ':id', false) }}";
         fetch(showUrl.replace(':id', id))
             .then(res => res.json())
             .then(data => {
