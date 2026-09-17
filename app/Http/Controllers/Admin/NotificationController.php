@@ -86,7 +86,9 @@ class NotificationController extends Controller
             return back()->with('error', 'لا يوجد مستخدمين مستهدفين للإرسال.');
         }
 
-        // Send notifications via queue
+        \Illuminate\Support\Facades\Log::info("Admin broadcast notification: '{$request->title}' to {$users->count()} users via channels: " . implode(', ', $request->channels));
+
+        // Send notifications
         Notification::send($users, new GeneralNotification(
             $request->title,
             $request->message,

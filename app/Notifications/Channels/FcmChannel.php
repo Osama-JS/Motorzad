@@ -25,15 +25,20 @@ class FcmChannel
         $fcmToken = $notifiable->routeNotificationFor('fcm', $notification);
 
         if (!$fcmToken) {
+            Log::info("FCM push skipped: User #{$notifiable->id} ({$notifiable->email}) does not have an fcm_token registered.");
             return;
         }
 
         $message = $notification->toFcm($notifiable);
         $credentialsPath = config('services.firebase.credentials', storage_path('app/firebase_credentials.json'));
-
         if (!file_exists($credentialsPath)) {
-            Log::info("FCM push skipped: Service account file not found at [{$credentialsPath}]. Add firebase_credentials.json to enable mobile push notifications.");
-            return;
+            $fallback = base_path($credentialsPath);
+            if (file_exists($fallback)) {
+                $credentialsPath = $fallback;
+            } else {
+                Log::warning("FCM push skipped: Service account file not found at [{$credentialsPath}]. Add firebase_credentials.json to enable mobile push notifications.");
+                return;
+            }
         }
 
         $credentials = json_decode(file_get_contents($credentialsPath), true);
@@ -91,7 +96,9 @@ class FcmChannel
                     ],
                 ]);
 
-            if (!$response->successful()) {
+            if ($response->successful()) {
+                Log::info("FCM push sent successfully to User #{$notifiable->id}. Response: " . $response->body());
+            } else {
                 Log::error('FCM HTTP v1 Send Failed: [' . $response->status() . '] ' . $response->body());
             }
         } catch (\Throwable $e) {

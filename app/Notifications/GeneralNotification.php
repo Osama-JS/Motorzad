@@ -58,7 +58,7 @@ class GeneralNotification extends Notification implements ShouldBroadcast
             $via[] = 'mail';
         }
 
-        if (in_array('fcm', $this->channels) && $notifiable->fcm_token) {
+        if (in_array('fcm', $this->channels)) {
             $via[] = FcmChannel::class;
         }
 
