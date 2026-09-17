@@ -108,6 +108,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('mobile')->plainTextToken;
 
+        // Save FCM token if provided in registration
+        $fcmToken = $request->input('fcm_token', $request->input('device_token'));
+        if (!empty($fcmToken)) {
+            $user->forceFill(['fcm_token' => $fcmToken])->save();
+            \Illuminate\Support\Facades\Log::info("FCM token saved on register for User #{$user->id} ({$user->email})");
+        }
+
         $dataPayload = [
             'token' => $token,
             'user' => new UserResource($user->load('wallet')),
@@ -190,6 +197,13 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        // Save FCM / device token if passed during login
+        $fcmToken = $request->input('fcm_token', $request->input('device_token'));
+        if (!empty($fcmToken)) {
+            $user->forceFill(['fcm_token' => $fcmToken])->save();
+            \Illuminate\Support\Facades\Log::info("FCM token saved on login for User #{$user->id} ({$user->email})");
+        }
 
         // Revoke old tokens (optional: keep only latest)
         $user->tokens()->delete();

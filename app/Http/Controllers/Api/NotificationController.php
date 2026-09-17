@@ -51,13 +51,20 @@ class NotificationController extends Controller
      */
     public function updateFcmToken(Request $request)
     {
-        $request->validate([
-            'fcm_token' => 'required|string',
-        ]);
+        $token = $request->input('fcm_token', $request->input('device_token'));
 
-        $request->user()->update([
-            'fcm_token' => $request->fcm_token,
-        ]);
+        if (empty($token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'fcm_token or device_token is required.'
+            ], 422);
+        }
+
+        $request->user()->forceFill([
+            'fcm_token' => $token,
+        ])->save();
+
+        \Illuminate\Support\Facades\Log::info("FCM Token updated via API for User #{$request->user()->id} ({$request->user()->email})");
 
         return response()->json(['success' => true, 'message' => 'تم تحديث توكن الإشعارات بنجاح']);
     }
