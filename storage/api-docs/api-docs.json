@@ -1511,6 +1511,11 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
+                                    },
+                                    "fcm_token": {
+                                        "description": "Optional FCM device token for push notifications",
+                                        "type": "string",
+                                        "example": "fcm_token_string..."
                                     }
                                 },
                                 "type": "object"
@@ -1520,23 +1525,41 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Registration successful",
+                        "description": "Registration successful - OTP sent to email",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "requires_verification": {
                                             "type": "boolean",
                                             "example": true
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Registration successful. Please complete your profile."
+                                            "example": "تم إنشاء الحساب بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني لتأكيد الحساب."
                                         },
-                                        "token": {
-                                            "type": "string"
-                                        },
-                                        "user": {
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
+                                                "action": {
+                                                    "type": "string",
+                                                    "example": "verify_otp"
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -1570,7 +1593,7 @@
                     "Authentication"
                 ],
                 "summary": "Login user",
-                "description": "Authenticates a user and returns an access token.",
+                "description": "Authenticates a user and returns an access token. If account email is not verified, dispatches an OTP to email and returns 403 with requires_verification: true and action: verify_otp.",
                 "operationId": "loginUser",
                 "parameters": [
                     {
@@ -1606,6 +1629,11 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
+                                    },
+                                    "fcm_token": {
+                                        "description": "Optional FCM device token for push notifications",
+                                        "type": "string",
+                                        "example": "fcm_token_string..."
                                     }
                                 },
                                 "type": "object"
@@ -1634,8 +1662,53 @@
                                                     "type": "string",
                                                     "example": "1|abc..."
                                                 },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
                                                 "user": {
                                                     "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Account not verified OR account suspended",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "requires_verification": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "حسابك غير موثق بعد. تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني لتوثيق وتفعيل الحساب."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "action": {
+                                                    "type": "string",
+                                                    "example": "verify_otp"
+                                                },
+                                                "resend_in": {
+                                                    "type": "integer",
+                                                    "example": 60
                                                 }
                                             },
                                             "type": "object"
@@ -1661,7 +1734,8 @@
                                             "example": "Invalid credentials."
                                         },
                                         "data": {
-                                            "type": "object"
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -2126,7 +2200,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OTP sent successfully",
+                        "description": "OTP sent successfully to email",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2141,10 +2215,42 @@
                                         },
                                         "data": {
                                             "properties": {
-                                                "otp": {
-                                                    "description": "Only in local/debug mode",
-                                                    "type": "string",
-                                                    "example": "123456"
+                                                "resend_in": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 900
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Please wait 45 seconds before requesting another code."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "retry_after": {
+                                                    "type": "integer",
+                                                    "example": 45
                                                 }
                                             },
                                             "type": "object"
@@ -2167,7 +2273,7 @@
                     "Authentication"
                 ],
                 "summary": "Reset Password",
-                "description": "Verifies the OTP and sets a new password.",
+                "description": "Verifies the OTP and sets a new password. Enforces max 5 incorrect attempts before invalidating code.",
                 "operationId": "resetPassword",
                 "parameters": [
                     {
@@ -2202,8 +2308,9 @@
                                         "example": "user@example.com"
                                     },
                                     "otp": {
+                                        "description": "6-digit OTP code",
                                         "type": "string",
-                                        "example": "123456"
+                                        "example": "482019"
                                     },
                                     "password": {
                                         "type": "string",
@@ -2270,6 +2377,30 @@
                             }
                         }
                     },
+                    "429": {
+                        "description": "Too many failed attempts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Too many failed attempts. This code has been invalidated. Please request a new code."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Validation error"
                     }
@@ -2282,7 +2413,7 @@
                     "Authentication"
                 ],
                 "summary": "Verify user email",
-                "description": "Verifies the authenticated user's email using the 6-digit OTP code sent during registration.",
+                "description": "Verifies the authenticated user's email using the 6-digit OTP code sent during registration. Max 5 attempts.",
                 "operationId": "verifyEmail",
                 "parameters": [
                     {
@@ -2309,8 +2440,9 @@
                                 ],
                                 "properties": {
                                     "otp": {
+                                        "description": "6-digit OTP code",
                                         "type": "string",
-                                        "example": "123456"
+                                        "example": "482019"
                                     }
                                 },
                                 "type": "object"
@@ -2360,6 +2492,30 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Invalid or expired OTP code."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many failed attempts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Too many incorrect attempts. Please request a new verification code."
                                         },
                                         "data": {
                                             "type": "object",
@@ -2422,10 +2578,42 @@
                                         },
                                         "data": {
                                             "properties": {
-                                                "otp": {
-                                                    "description": "Only in local/debug mode",
-                                                    "type": "string",
-                                                    "example": "123456"
+                                                "resend_in": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 900
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Please wait 45 seconds before requesting another code."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "retry_after": {
+                                                    "type": "integer",
+                                                    "example": 45
                                                 }
                                             },
                                             "type": "object"
@@ -4015,7 +4203,7 @@
                     "Authentication"
                 ],
                 "summary": "Send an OTP code",
-                "description": "Generates a 6-digit OTP and sends it via phone or email. In local or debug mode, the code is returned in the response for easy testing.",
+                "description": "Generates a cryptographically secure 6-digit OTP code and dispatches it. If an unverified user tries with phone only, a 403 error is returned requiring email verification. If an unverified user provides an email, the OTP is sent to the email and requires_verification: true is returned so the app redirects to the OTP screen.",
                 "operationId": "sendOtp",
                 "parameters": [
                     {
@@ -4071,17 +4259,89 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "OTP sent successfully."
+                                            "example": "OTP sent successfully to your email."
                                         },
                                         "data": {
                                             "properties": {
-                                                "otp": {
-                                                    "description": "Only returned in debug/local environments",
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 300
+                                                },
+                                                "resend_in": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "requires_verification": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "action": {
                                                     "type": "string",
-                                                    "example": "123456"
+                                                    "example": "verify_otp"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Account not verified - Email required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "requires_email": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "حسابك غير موثق بعد، يجب استخدام البريد الإلكتروني لتسجيل الدخول وتوثيق حسابك."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "action": {
+                                                    "type": "string",
+                                                    "example": "use_email_verification"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Please wait 45 seconds before requesting another code."
+                                        },
+                                        "retry_after": {
+                                            "type": "integer",
+                                            "example": 45
                                         }
                                     },
                                     "type": "object"
@@ -4121,7 +4381,7 @@
                     "Authentication"
                 ],
                 "summary": "Verify OTP code and authenticate",
-                "description": "Verifies the OTP code. If correct and user exists, authenticates them. If they do not exist, automatically registers them as a bidder and returns access token.",
+                "description": "Verifies the 6-digit OTP code against the cached code. If verified, confirms email/account, optionally registers the provided fcm_token, and issues a Bearer access_token. Max 5 incorrect attempts before code invalidation.",
                 "operationId": "verifyOtp",
                 "parameters": [
                     {
@@ -4162,8 +4422,14 @@
                                         "example": "user@example.com"
                                     },
                                     "code": {
+                                        "description": "6-digit OTP code",
                                         "type": "string",
-                                        "example": "123456"
+                                        "example": "482019"
+                                    },
+                                    "fcm_token": {
+                                        "description": "Optional FCM device token for push notifications",
+                                        "type": "string",
+                                        "example": "fcm_token_string..."
                                     }
                                 },
                                 "type": "object"
@@ -4192,6 +4458,10 @@
                                                     "type": "string",
                                                     "example": "1|abc..."
                                                 },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
                                                 "user": {
                                                     "type": "object"
                                                 }
@@ -4216,10 +4486,59 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Invalid or expired OTP code."
+                                            "example": "رمز التحقق غير صحيح. المحاولات المتبقية: 4"
                                         },
                                         "data": {
-                                            "type": "object"
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Account suspended or blocked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many failed attempts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تجاوز الحد الأقصى للمحاولات الخاطئة (5 محاولات). تم إبطال الرمز، يرجى طلب رمز جديد."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"

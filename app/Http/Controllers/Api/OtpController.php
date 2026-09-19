@@ -26,7 +26,7 @@ class OtpController extends Controller
         path: "/api/otp/send",
         summary: "Send an OTP code",
         operationId: "sendOtp",
-        description: "Generates a 6-digit OTP and sends it via phone or email. In local or debug mode, the code is returned in the response for easy testing.",
+        description: "Generates a cryptographically secure 6-digit OTP code and dispatches it. If an unverified user tries with phone only, a 403 error is returned requiring email verification. If an unverified user provides an email, the OTP is sent to the email and requires_verification: true is returned so the app redirects to the OTP screen.",
         tags: ["Authentication"],
         parameters: [
             new OA\Parameter(
@@ -54,10 +54,47 @@ class OtpController extends Controller
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
-                        new OA\Property(property: "message", type: "string", example: "OTP sent successfully."),
-                        new OA\Property(property: "data", type: "object", properties: [
-                            new OA\Property(property: "otp", type: "string", example: "123456", description: "Only returned in debug/local environments")
-                        ])
+                        new OA\Property(property: "message", type: "string", example: "OTP sent successfully to your email."),
+                        new OA\Property(
+                            property: "data",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "expires_in", type: "integer", example: 300),
+                                new OA\Property(property: "resend_in", type: "integer", example: 60),
+                                new OA\Property(property: "requires_verification", type: "boolean", example: false),
+                                new OA\Property(property: "action", type: "string", example: "verify_otp"),
+                                new OA\Property(property: "email", type: "string", example: "user@example.com")
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Account not verified - Email required",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "requires_email", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "حسابك غير موثق بعد، يجب استخدام البريد الإلكتروني لتسجيل الدخول وتوثيق حسابك."),
+                        new OA\Property(
+                            property: "data",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "action", type: "string", example: "use_email_verification")
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 429,
+                description: "Rate limit exceeded",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
+                        new OA\Property(property: "retry_after", type: "integer", example: 45)
                     ]
                 )
             ),
@@ -92,6 +129,24 @@ class OtpController extends Controller
             return $this->apiResponse(true, __('Validation failed.'), $validator->errors(), null, 422);
         }
 
+        // Condition 1: If user attempts with phone only and account is not verified yet
+        if ($request->filled('phone') && !$request->filled('email')) {
+            $user = User::where('phone', $request->phone)
+                ->where('country_code', $request->country_code)
+                ->first();
+
+            if (!$user || is_null($user->email_verified_at)) {
+                return response()->json([
+                    'error' => true,
+                    'requires_email' => true,
+                    'message' => __('حسابك غير موثق بعد، يجب استخدام البريد الإلكتروني لتسجيل الدخول وتوثيق حسابك.'),
+                    'data' => [
+                        'action' => 'use_email_verification'
+                    ]
+                ], 403);
+            }
+        }
+
         $identifier = $request->filled('email') 
             ? $request->email 
             : $request->country_code . $request->phone;
@@ -114,9 +169,15 @@ class OtpController extends Controller
         // Generate a cryptographically secure 6-digit OTP
         $code = sprintf('%06d', random_int(100000, 999999));
 
+        $isUnverified = false;
+
         // If email was provided, dispatch real SMTP email
         if ($request->filled('email')) {
-            $sendResult = $this->mailService->sendOtp($request->email, $code, 'login', 5);
+            $user = User::where('email', $request->email)->first();
+            $isUnverified = $user && is_null($user->email_verified_at);
+            $purpose = $isUnverified ? 'verification' : 'login';
+
+            $sendResult = $this->mailService->sendOtp($request->email, $code, $purpose, 5);
             if (!$sendResult['success']) {
                 return $this->apiResponse(true, $sendResult['message'], null, null, 500);
             }
@@ -130,18 +191,25 @@ class OtpController extends Controller
         Log::info("OTP generated and sent to: {$identifier} -> Code: {$code}");
 
         $responseData = [
-            'expires_in' => 300, // seconds
-            'resend_in'  => 60,  // seconds
+            'expires_in'            => 300, // seconds
+            'resend_in'             => 60,  // seconds
+            'requires_verification' => $isUnverified,
+            'action'                => 'verify_otp',
+            'email'                 => $request->email ?? null,
         ];
 
-        return $this->apiResponse(false, __('OTP sent successfully to your email.'), $responseData);
+        $message = $isUnverified
+            ? __('تم إرسال رمز التحقق إلى بريدك الإلكتروني لتوثيق وتفعيل حسابك. يرجى إدخال الرمز لتأكيد ملكية الحساب.')
+            : __('OTP sent successfully to your email.');
+
+        return $this->apiResponse(false, $message, $responseData);
     }
 
     #[OA\Post(
         path: "/api/otp/verify",
         summary: "Verify OTP code and authenticate",
         operationId: "verifyOtp",
-        description: "Verifies the OTP code. If correct and user exists, authenticates them. If they do not exist, automatically registers them as a bidder and returns access token.",
+        description: "Verifies the 6-digit OTP code against the cached code. If verified, confirms email/account, optionally registers the provided fcm_token, and issues a Bearer access_token. Max 5 incorrect attempts before code invalidation.",
         tags: ["Authentication"],
         parameters: [
             new OA\Parameter(
@@ -160,7 +228,8 @@ class OtpController extends Controller
                     new OA\Property(property: "phone", type: "string", example: "500000000"),
                     new OA\Property(property: "country_code", type: "string", example: "+966"),
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
-                    new OA\Property(property: "code", type: "string", example: "123456")
+                    new OA\Property(property: "code", type: "string", example: "482019", description: "6-digit OTP code"),
+                    new OA\Property(property: "fcm_token", type: "string", example: "fcm_token_string...", description: "Optional FCM device token for push notifications")
                 ]
             )
         ),
@@ -174,6 +243,7 @@ class OtpController extends Controller
                         new OA\Property(property: "message", type: "string", example: "Verification successful."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
+                            new OA\Property(property: "token_type", type: "string", example: "Bearer"),
                             new OA\Property(property: "user", type: "object")
                         ])
                     ]
@@ -185,8 +255,30 @@ class OtpController extends Controller
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "Invalid or expired OTP code."),
-                        new OA\Property(property: "data", type: "object")
+                        new OA\Property(property: "message", type: "string", example: "رمز التحقق غير صحيح. المحاولات المتبقية: 4"),
+                        new OA\Property(property: "data", type: "object", nullable: true)
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Account suspended or blocked",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة."),
+                        new OA\Property(property: "data", type: "object", nullable: true)
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 429,
+                description: "Too many failed attempts",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم تجاوز الحد الأقصى للمحاولات الخاطئة (5 محاولات). تم إبطال الرمز، يرجى طلب رمز جديد."),
+                        new OA\Property(property: "data", type: "object", nullable: true)
                     ]
                 )
             ),
@@ -226,7 +318,7 @@ class OtpController extends Controller
             ? $request->email 
             : $request->country_code . $request->phone;
 
-        $cachedCode = Cache::get('otp_' . $identifier);
+        $cachedCode = Cache::get('otp_' . $identifier) ?: Cache::get('email_verify_' . $identifier);
         $attemptsKey = 'otp_attempts_' . $identifier;
         $attempts = (int) Cache::get($attemptsKey, 0);
 
@@ -238,6 +330,7 @@ class OtpController extends Controller
             $attempts++;
             if ($attempts >= 5) {
                 Cache::forget('otp_' . $identifier);
+                Cache::forget('email_verify_' . $identifier);
                 Cache::forget($attemptsKey);
                 return $this->apiResponse(true, __('Too many failed attempts. This code has been invalidated. Please request a new code.'), null, null, 429);
             }
@@ -247,6 +340,7 @@ class OtpController extends Controller
 
         // OTP verified successfully, remove from cache
         Cache::forget('otp_' . $identifier);
+        Cache::forget('email_verify_' . $identifier);
         Cache::forget($attemptsKey);
         Cache::forget('otp_throttle_' . $identifier);
 
@@ -258,6 +352,17 @@ class OtpController extends Controller
             $user = User::where('phone', $request->phone)
                 ->where('country_code', $request->country_code)
                 ->first();
+        }
+
+        // Check if account is blocked or suspended
+        if ($user && in_array($user->status, ['blocked', 'suspended', 'rejected'])) {
+            return $this->apiResponse(
+                true,
+                __('Your account has been suspended or blocked. Please contact support.'),
+                null,
+                null,
+                403
+            );
         }
 
         // If existing user verified via email, mark as verified
@@ -312,6 +417,13 @@ class OtpController extends Controller
             $user->assignRole('bidder');
         }
 
+        // Save FCM token if provided in request
+        $fcmToken = $request->input('fcm_token', $request->input('device_token'));
+        if (!empty($fcmToken)) {
+            $user->forceFill(['fcm_token' => $fcmToken])->save();
+            Log::info("FCM token saved on OTP verify for User #{$user->id} ({$user->email})");
+        }
+
         // Generate Sanctum token
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -320,7 +432,8 @@ class OtpController extends Controller
             $isNewUser ? __('Registration and login successful.') : __('Verification and login successful.'),
             [
                 'access_token' => $token,
-                'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
+                'token'        => $token,
+                'user'         => new UserResource($user->load(['wallet', 'latestKycRequest'])),
             ],
             null,
             200
@@ -332,10 +445,16 @@ class OtpController extends Controller
      */
     protected function apiResponse(bool $error, string $message, $data = null, $extra = null, int $statusCode = 200)
     {
-        return response()->json([
-            'error' => $error,
+        $payload = [
+            'error'   => $error,
             'message' => $message,
-            'data' => $data
-        ], $statusCode);
+            'data'    => $data
+        ];
+
+        if (!is_null($extra) && is_array($extra)) {
+            $payload = array_merge($payload, $extra);
+        }
+
+        return response()->json($payload, $statusCode);
     }
 }

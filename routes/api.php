@@ -32,15 +32,15 @@ Route::match(['get', 'post'], '/broadcasting/auth', function (\Illuminate\Http\R
 
 // ─── Public Routes (No Auth) ───────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:6,1');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
 });
 
 Route::prefix('otp')->group(function () {
-    Route::post('send', [\App\Http\Controllers\Api\OtpController::class, 'sendOtp']);
-    Route::post('verify', [\App\Http\Controllers\Api\OtpController::class, 'verifyOtp']);
+    Route::post('send', [\App\Http\Controllers\Api\OtpController::class, 'sendOtp'])->middleware('throttle:6,1');
+    Route::post('verify', [\App\Http\Controllers\Api\OtpController::class, 'verifyOtp'])->middleware('throttle:10,1');
 });
 
 // HyperPay Asynchronous Webhook

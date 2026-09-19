@@ -52,20 +52,26 @@ class AuthController extends Controller
                     new OA\Property(property: "phone", type: "string", example: "500000000"),
                     new OA\Property(property: "country_code", type: "string", example: "+966"),
                     new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
-                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "password123")
+                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "fcm_token", type: "string", example: "fcm_token_string...", description: "Optional FCM device token for push notifications")
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 201,
-                description: "Registration successful",
+                description: "Registration successful - OTP sent to email",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "success", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "Registration successful. Please complete your profile."),
-                        new OA\Property(property: "token", type: "string"),
-                        new OA\Property(property: "user", type: "object")
+                        new OA\Property(property: "error", type: "boolean", example: false),
+                        new OA\Property(property: "requires_verification", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم إنشاء الحساب بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني لتأكيد الحساب."),
+                        new OA\Property(property: "data", type: "object", properties: [
+                            new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
+                            new OA\Property(property: "token", type: "string", example: "1|abc..."),
+                            new OA\Property(property: "action", type: "string", example: "verify_otp"),
+                            new OA\Property(property: "user", type: "object")
+                        ])
                     ]
                 )
             ),
@@ -101,9 +107,13 @@ class AuthController extends Controller
 
         $user->assignRole('bidder');
 
-        // Generate 6-digit OTP for email verification
-        $code = (string) mt_rand(100000, 999999);
+        // Generate a cryptographically secure 6-digit OTP for email verification
+        $code = sprintf('%06d', random_int(100000, 999999));
         Cache::put('email_verify_' . $user->email, $code, now()->addMinutes(15));
+        Cache::put('otp_' . $user->email, $code, now()->addMinutes(15));
+        Cache::put('otp_throttle_' . $user->email, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+        Cache::put('otp_attempts_' . $user->email, 0, now()->addMinutes(15));
+
         $this->mailService->sendVerificationOtp($user->email, $code);
 
         $token = $user->createToken('mobile')->plainTextToken;
@@ -116,18 +126,17 @@ class AuthController extends Controller
         }
 
         $dataPayload = [
-            'token' => $token,
-            'user' => new UserResource($user->load('wallet')),
+            'access_token' => $token,
+            'token'        => $token,
+            'action'       => 'verify_otp',
+            'user'         => new UserResource($user->load('wallet')),
         ];
 
-        if (config('app.debug') || app()->environment('local')) {
-            $dataPayload['otp'] = $code;
-        }
-
         return response()->json([
-            'success' => true,
-            'message' => __('Registration successful. Please verify your email.'),
-            'data' => $dataPayload
+            'error'                 => false,
+            'requires_verification' => true,
+            'message'               => __('تم إنشاء الحساب بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني لتأكيد الحساب.'),
+            'data'                  => $dataPayload
         ], 201);
     }
 
@@ -138,7 +147,7 @@ class AuthController extends Controller
         path: "/api/auth/login",
         summary: "Login user",
         operationId: "loginUser",
-        description: "Authenticates a user and returns an access token.",
+        description: "Authenticates a user and returns an access token. If account email is not verified, dispatches an OTP to email and returns 403 with requires_verification: true and action: verify_otp.",
         tags: ["Authentication"],
         parameters: [
             new OA\Parameter(name: "Accept-Language", in: "header", required: false, schema: new OA\Schema(type: "string", default: "en", enum: ["en", "ar"]))
@@ -149,7 +158,8 @@ class AuthController extends Controller
                 required: ["email", "password"],
                 properties: [
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "password123")
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "fcm_token", type: "string", example: "fcm_token_string...", description: "Optional FCM device token for push notifications")
                 ]
             )
         ),
@@ -163,7 +173,24 @@ class AuthController extends Controller
                         new OA\Property(property: "message", type: "string", example: "Login successful."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
+                            new OA\Property(property: "token", type: "string", example: "1|abc..."),
                             new OA\Property(property: "user", type: "object")
+                        ])
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Account not verified OR account suspended",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "requires_verification", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "حسابك غير موثق بعد. تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني لتوثيق وتفعيل الحساب."),
+                        new OA\Property(property: "data", type: "object", properties: [
+                            new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                            new OA\Property(property: "action", type: "string", example: "verify_otp"),
+                            new OA\Property(property: "resend_in", type: "integer", example: 60)
                         ])
                     ]
                 )
@@ -175,7 +202,7 @@ class AuthController extends Controller
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Invalid credentials."),
-                        new OA\Property(property: "data", type: "object")
+                        new OA\Property(property: "data", type: "object", nullable: true)
                     ]
                 )
             )
@@ -190,13 +217,46 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => __('Invalid credentials.'),
-                'data' => null,
+                'data'    => null,
             ], 401);
         }
 
         $user = Auth::user();
+
+        // 1. Check account status (blocked / suspended)
+        if (in_array($user->status, ['blocked', 'suspended', 'rejected'])) {
+            Auth::logout();
+            return response()->json([
+                'error'   => true,
+                'message' => __('حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة.'),
+                'data'    => null,
+            ], 403);
+        }
+
+        // 2. Condition 1: Check if account email is verified
+        if (is_null($user->email_verified_at)) {
+            // Generate secure OTP
+            $code = sprintf('%06d', random_int(100000, 999999));
+            Cache::put('otp_' . $user->email, $code, now()->addMinutes(5));
+            Cache::put('email_verify_' . $user->email, $code, now()->addMinutes(15));
+            Cache::put('otp_throttle_' . $user->email, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+            Cache::put('otp_attempts_' . $user->email, 0, now()->addMinutes(5));
+
+            $this->mailService->sendOtp($user->email, $code, 'verification', 5);
+
+            return response()->json([
+                'error'                 => true,
+                'requires_verification' => true,
+                'message'               => __('حسابك غير موثق بعد. تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني لتوثيق وتفعيل الحساب.'),
+                'data'                  => [
+                    'email'     => $user->email,
+                    'action'    => 'verify_otp',
+                    'resend_in' => 60,
+                ]
+            ], 403);
+        }
 
         // Save FCM / device token if passed during login
         $fcmToken = $request->input('fcm_token', $request->input('device_token'));
@@ -211,11 +271,12 @@ class AuthController extends Controller
         $token = $user->createToken('mobile')->plainTextToken;
 
         return response()->json([
-            'error' => false,
+            'error'   => false,
             'message' => __('Login successful.'),
-            'data' => [
+            'data'    => [
                 'access_token' => $token,
-                'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
+                'token'        => $token,
+                'user'         => new UserResource($user->load(['wallet', 'latestKycRequest'])),
             ]
         ]);
     }
@@ -242,7 +303,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'success' => true,
+            'error'   => false,
             'message' => __('Logged out successfully.'),
         ]);
     }
@@ -571,13 +632,27 @@ class AuthController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: "OTP sent successfully",
+                description: "OTP sent successfully to email",
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Password reset OTP sent to your email."),
                         new OA\Property(property: "data", type: "object", properties: [
-                            new OA\Property(property: "otp", type: "string", example: "123456", description: "Only in local/debug mode")
+                            new OA\Property(property: "resend_in", type: "integer", example: 60),
+                            new OA\Property(property: "expires_in", type: "integer", example: 900)
+                        ])
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 429,
+                description: "Rate limit exceeded",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
+                        new OA\Property(property: "data", type: "object", properties: [
+                            new OA\Property(property: "retry_after", type: "integer", example: 45)
                         ])
                     ]
                 )
@@ -593,26 +668,37 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Generate a 6-digit OTP
-        $code = (string) mt_rand(100000, 999999);
+        // 60-second throttle protection per email
+        $throttleKey = 'otp_throttle_reset_' . $user->email;
+        if (Cache::has($throttleKey)) {
+            $secondsLeft = Cache::get($throttleKey) - now()->timestamp;
+            if ($secondsLeft > 0) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => __('Please wait :seconds seconds before requesting another code.', ['seconds' => $secondsLeft]),
+                    'data'    => ['retry_after' => $secondsLeft]
+                ], 429);
+            }
+        }
+
+        // Generate a cryptographically secure 6-digit OTP
+        $code = sprintf('%06d', random_int(100000, 999999));
 
         // Store OTP in Cache for 15 minutes
         Cache::put('reset_pwd_' . $user->email, $code, now()->addMinutes(15));
+        Cache::put($throttleKey, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+        Cache::put('reset_pwd_attempts_' . $user->email, 0, now()->addMinutes(15));
 
         // Send OTP using MailService
         $this->mailService->sendPasswordResetOtp($user->email, $code);
 
-        $responseData = new \stdClass();
-        if (config('app.debug') || app()->environment('local')) {
-            $responseData = [
-                'otp' => $code
-            ];
-        }
-
         return response()->json([
-            'error' => false,
+            'error'   => false,
             'message' => __('Password reset OTP sent to your email.'),
-            'data' => $responseData
+            'data'    => [
+                'resend_in'  => 60,
+                'expires_in' => 900,
+            ]
         ]);
     }
 
@@ -623,7 +709,7 @@ class AuthController extends Controller
         path: "/api/auth/reset-password",
         summary: "Reset Password",
         operationId: "resetPassword",
-        description: "Verifies the OTP and sets a new password.",
+        description: "Verifies the OTP and sets a new password. Enforces max 5 incorrect attempts before invalidating code.",
         tags: ["Authentication"],
         parameters: [
             new OA\Parameter(name: "Accept-Language", in: "header", required: false, schema: new OA\Schema(type: "string", default: "en", enum: ["en", "ar"]))
@@ -634,7 +720,7 @@ class AuthController extends Controller
                 required: ["email", "otp", "password", "password_confirmation"],
                 properties: [
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
-                    new OA\Property(property: "otp", type: "string", example: "123456"),
+                    new OA\Property(property: "otp", type: "string", example: "482019", description: "6-digit OTP code"),
                     new OA\Property(property: "password", type: "string", format: "password", example: "newpassword123"),
                     new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "newpassword123")
                 ]
@@ -663,6 +749,17 @@ class AuthController extends Controller
                     ]
                 )
             ),
+            new OA\Response(
+                response: 429,
+                description: "Too many failed attempts",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Too many failed attempts. This code has been invalidated. Please request a new code."),
+                        new OA\Property(property: "data", type: "object", nullable: true)
+                    ]
+                )
+            ),
             new OA\Response(response: 422, description: "Validation error")
         ]
     )]
@@ -675,27 +772,42 @@ class AuthController extends Controller
         ]);
 
         $cachedCode = Cache::get('reset_pwd_' . $request->email);
+        $attemptsKey = 'reset_pwd_attempts_' . $request->email;
+        $attempts = (int) Cache::get($attemptsKey, 0);
 
-        $isMasterCode = (config('app.debug') || app()->environment('local')) && $request->otp === '123456';
-
-        if (!$cachedCode && !$isMasterCode) {
+        if (!$cachedCode) {
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => __('Invalid or expired OTP code.'),
-                'data' => null,
+                'data'    => null,
             ], 400);
         }
 
-        if ($cachedCode !== $request->otp && !$isMasterCode) {
+        // Absolute verification against cached code - No master code allowed
+        if ($cachedCode !== $request->otp) {
+            $attempts++;
+            if ($attempts >= 5) {
+                Cache::forget('reset_pwd_' . $request->email);
+                Cache::forget($attemptsKey);
+                return response()->json([
+                    'error'   => true,
+                    'message' => __('Too many failed attempts. This code has been invalidated. Please request a new code.'),
+                    'data'    => null,
+                ], 429);
+            }
+            Cache::put($attemptsKey, $attempts, now()->addMinutes(15));
+
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => __('Invalid or expired OTP code.'),
-                'data' => null,
+                'data'    => null,
             ], 400);
         }
 
         // Verify successful
         Cache::forget('reset_pwd_' . $request->email);
+        Cache::forget($attemptsKey);
+        Cache::forget('otp_throttle_reset_' . $request->email);
 
         $user = User::where('email', $request->email)->first();
         $user->update([
@@ -706,9 +818,9 @@ class AuthController extends Controller
         $user->tokens()->delete();
 
         return response()->json([
-            'error' => false,
-            'message' => __('Password reset successfully. You can now login.'),
-            'data' => null,
+            'error'   => false,
+            'message' => __('Password reset successfully. You can now login with your new password.'),
+            'data'    => null,
         ]);
     }
 
@@ -719,7 +831,7 @@ class AuthController extends Controller
         path: "/api/auth/email/verify",
         summary: "Verify user email",
         operationId: "verifyEmail",
-        description: "Verifies the authenticated user's email using the 6-digit OTP code sent during registration.",
+        description: "Verifies the authenticated user's email using the 6-digit OTP code sent during registration. Max 5 attempts.",
         tags: ["Authentication"],
         security: [["bearerAuth" => []]],
         parameters: [
@@ -730,7 +842,7 @@ class AuthController extends Controller
             content: new OA\JsonContent(
                 required: ["otp"],
                 properties: [
-                    new OA\Property(property: "otp", type: "string", example: "123456")
+                    new OA\Property(property: "otp", type: "string", example: "482019", description: "6-digit OTP code")
                 ]
             )
         ),
@@ -759,6 +871,17 @@ class AuthController extends Controller
                     ]
                 )
             ),
+            new OA\Response(
+                response: 429,
+                description: "Too many failed attempts",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Too many incorrect attempts. Please request a new verification code."),
+                        new OA\Property(property: "data", type: "object", nullable: true)
+                    ]
+                )
+            ),
             new OA\Response(response: 422, description: "Validation error")
         ]
     )]
@@ -772,41 +895,48 @@ class AuthController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             return response()->json([
-                'error' => false,
+                'error'   => false,
                 'message' => __('Email is already verified.'),
-                'data' => [
+                'data'    => [
                     'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
                 ]
             ]);
         }
 
-        $cachedCode = Cache::get('email_verify_' . $user->email);
-        $isMasterCode = (config('app.debug') || app()->environment('local')) && $request->otp === '123456';
+        // Brute-force protection: max 5 attempts
+        $attemptsKey = 'otp_attempts_verify_' . $user->email;
+        $attempts = (int) Cache::get($attemptsKey, 0);
 
-        if (!$cachedCode && !$isMasterCode) {
+        if ($attempts >= 5) {
             return response()->json([
-                'error' => true,
-                'message' => __('Invalid or expired OTP code.'),
-                'data' => null,
-            ], 400);
+                'error'   => true,
+                'message' => __('Too many incorrect attempts. Please request a new verification code.'),
+                'data'    => null,
+            ], 429);
         }
 
-        if ($cachedCode !== $request->otp && !$isMasterCode) {
+        $cachedCode = Cache::get('email_verify_' . $user->email) ?? Cache::get('otp_' . $user->email);
+
+        if (!$cachedCode || $cachedCode !== $request->otp) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(15));
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => __('Invalid or expired OTP code.'),
-                'data' => null,
+                'data'    => null,
             ], 400);
         }
 
         // OTP verified successfully
         Cache::forget('email_verify_' . $user->email);
+        Cache::forget('otp_' . $user->email);
+        Cache::forget($attemptsKey);
+        Cache::forget('otp_throttle_resend_' . $user->email);
         $user->markEmailAsVerified();
 
         return response()->json([
-            'error' => false,
+            'error'   => false,
             'message' => __('Email verified successfully.'),
-            'data' => [
+            'data'    => [
                 'user' => new UserResource($user->load(['wallet', 'latestKycRequest'])),
             ]
         ]);
@@ -834,7 +964,21 @@ class AuthController extends Controller
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Verification OTP sent to your email."),
                         new OA\Property(property: "data", type: "object", properties: [
-                            new OA\Property(property: "otp", type: "string", example: "123456", description: "Only in local/debug mode")
+                            new OA\Property(property: "resend_in", type: "integer", example: 60),
+                            new OA\Property(property: "expires_in", type: "integer", example: 900)
+                        ])
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 429,
+                description: "Rate limit exceeded",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
+                        new OA\Property(property: "data", type: "object", properties: [
+                            new OA\Property(property: "retry_after", type: "integer", example: 45)
                         ])
                     ]
                 )
@@ -858,27 +1002,42 @@ class AuthController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => __('Email is already verified.'),
-                'data' => null,
+                'data'    => null,
             ], 400);
         }
 
-        $code = (string) mt_rand(100000, 999999);
-        Cache::put('email_verify_' . $user->email, $code, now()->addMinutes(15));
-        $this->mailService->sendVerificationOtp($user->email, $code);
-
-        $dataPayload = new \stdClass();
-        if (config('app.debug') || app()->environment('local')) {
-            $dataPayload = [
-                'otp' => $code
-            ];
+        // 60-second throttle protection
+        $throttleKey = 'otp_throttle_resend_' . $user->email;
+        if (Cache::has($throttleKey)) {
+            $secondsLeft = (int) Cache::get($throttleKey) - now()->timestamp;
+            if ($secondsLeft > 0) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => __('Please wait :seconds seconds before requesting another code.', ['seconds' => $secondsLeft]),
+                    'data'    => ['retry_after' => $secondsLeft],
+                ], 429);
+            }
         }
 
+        // Cryptographically secure random 6-digit OTP
+        $code = sprintf('%06d', random_int(100000, 999999));
+
+        Cache::put('email_verify_' . $user->email, $code, now()->addMinutes(15));
+        Cache::put('otp_' . $user->email, $code, now()->addMinutes(15));
+        Cache::put($throttleKey, now()->addSeconds(60)->timestamp, now()->addSeconds(60));
+        Cache::put('otp_attempts_verify_' . $user->email, 0, now()->addMinutes(15));
+
+        $this->mailService->sendVerificationOtp($user->email, $code);
+
         return response()->json([
-            'error' => false,
+            'error'   => false,
             'message' => __('Verification OTP sent to your email.'),
-            'data' => $dataPayload,
+            'data'    => [
+                'resend_in'  => 60,
+                'expires_in' => 900,
+            ],
         ]);
     }
 
