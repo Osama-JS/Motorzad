@@ -40,6 +40,9 @@ class OtpController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
+                example: [
+                    "email" => "user@example.com"
+                ],
                 properties: [
                     new OA\Property(property: "phone", type: "string", example: "500000000"),
                     new OA\Property(property: "country_code", type: "string", example: "+966"),
@@ -52,16 +55,27 @@ class OtpController extends Controller
                 response: 200,
                 description: "OTP sent successfully",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "تم إرسال رمز التحقق إلى بريدك الإلكتروني لتوثيق وتفعيل حسابك. يرجى إدخال الرمز لتأكيد ملكية الحساب.",
+                        "data" => [
+                            "expires_in" => 300,
+                            "resend_in" => 60,
+                            "requires_verification" => true,
+                            "action" => "verify_otp",
+                            "email" => "user@example.com"
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
-                        new OA\Property(property: "message", type: "string", example: "OTP sent successfully to your email."),
+                        new OA\Property(property: "message", type: "string", example: "تم إرسال رمز التحقق إلى بريدك الإلكتروني..."),
                         new OA\Property(
                             property: "data",
                             type: "object",
                             properties: [
                                 new OA\Property(property: "expires_in", type: "integer", example: 300),
                                 new OA\Property(property: "resend_in", type: "integer", example: 60),
-                                new OA\Property(property: "requires_verification", type: "boolean", example: false),
+                                new OA\Property(property: "requires_verification", type: "boolean", example: true),
                                 new OA\Property(property: "action", type: "string", example: "verify_otp"),
                                 new OA\Property(property: "email", type: "string", example: "user@example.com")
                             ]
@@ -73,6 +87,14 @@ class OtpController extends Controller
                 response: 403,
                 description: "Account not verified - Email required",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "requires_email" => true,
+                        "message" => "حسابك غير موثق بعد، يجب استخدام البريد الإلكتروني لتسجيل الدخول وتوثيق حسابك.",
+                        "data" => [
+                            "action" => "use_email_verification"
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "requires_email", type: "boolean", example: true),
@@ -91,6 +113,11 @@ class OtpController extends Controller
                 response: 429,
                 description: "Rate limit exceeded",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Please wait 45 seconds before requesting another code.",
+                        "retry_after" => 45
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
@@ -102,6 +129,13 @@ class OtpController extends Controller
                 response: 422,
                 description: "Validation error",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Validation failed.",
+                        "data" => [
+                            "email" => ["The email field is required when phone is not present."]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Validation failed."),
@@ -224,6 +258,11 @@ class OtpController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["code"],
+                example: [
+                    "email" => "user@example.com",
+                    "code" => "482019",
+                    "fcm_token" => "fcm_token_example_string..."
+                ],
                 properties: [
                     new OA\Property(property: "phone", type: "string", example: "500000000"),
                     new OA\Property(property: "country_code", type: "string", example: "+966"),
@@ -238,13 +277,50 @@ class OtpController extends Controller
                 response: 200,
                 description: "Successful authentication",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "تم التحقق وتسجيل الدخول بنجاح.",
+                        "data" => [
+                            "access_token" => "1|mSjX9bN4gY72Kz...",
+                            "token_type" => "Bearer",
+                            "token" => "1|mSjX9bN4gY72Kz...",
+                            "user" => [
+                                "id" => 12,
+                                "first_name" => "أحمد",
+                                "last_name" => "المطيري",
+                                "full_name" => "أحمد المطيري",
+                                "email" => "user@example.com",
+                                "phone" => "500000000",
+                                "country_code" => "+966",
+                                "status" => "active",
+                                "kyc_level" => 0,
+                                "email_verified" => true,
+                                "identity_verified" => false,
+                                "roles" => ["bidder"]
+                            ]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Verification successful."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
                             new OA\Property(property: "token_type", type: "string", example: "Bearer"),
-                            new OA\Property(property: "user", type: "object")
+                            new OA\Property(property: "token", type: "string", example: "1|abc..."),
+                            new OA\Property(property: "user", type: "object", properties: [
+                                new OA\Property(property: "id", type: "integer", example: 12),
+                                new OA\Property(property: "first_name", type: "string", example: "أحمد"),
+                                new OA\Property(property: "last_name", type: "string", example: "المطيري"),
+                                new OA\Property(property: "full_name", type: "string", example: "أحمد المطيري"),
+                                new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                                new OA\Property(property: "phone", type: "string", example: "500000000"),
+                                new OA\Property(property: "country_code", type: "string", example: "+966"),
+                                new OA\Property(property: "status", type: "string", example: "active"),
+                                new OA\Property(property: "kyc_level", type: "integer", example: 0),
+                                new OA\Property(property: "email_verified", type: "boolean", example: true),
+                                new OA\Property(property: "identity_verified", type: "boolean", example: false),
+                                new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "bidder"))
+                            ])
                         ])
                     ]
                 )
@@ -253,6 +329,11 @@ class OtpController extends Controller
                 response: 400,
                 description: "Invalid or expired OTP code",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "رمز التحقق غير صحيح. المحاولات المتبقية: 4",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "رمز التحقق غير صحيح. المحاولات المتبقية: 4"),
@@ -264,6 +345,11 @@ class OtpController extends Controller
                 response: 403,
                 description: "Account suspended or blocked",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة."),
@@ -275,6 +361,11 @@ class OtpController extends Controller
                 response: 429,
                 description: "Too many failed attempts",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "تم تجاوز الحد الأقصى للمحاولات الخاطئة (5 محاولات). تم إبطال الرمز، يرجى طلب رمز جديد.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "تم تجاوز الحد الأقصى للمحاولات الخاطئة (5 محاولات). تم إبطال الرمز، يرجى طلب رمز جديد."),
@@ -286,6 +377,13 @@ class OtpController extends Controller
                 response: 422,
                 description: "Validation error",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Validation failed.",
+                        "data" => [
+                            "code" => ["The code field is required."]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Validation failed."),

@@ -1483,20 +1483,20 @@
                                 "properties": {
                                     "first_name": {
                                         "type": "string",
-                                        "example": "John"
+                                        "example": "محمد"
                                     },
                                     "last_name": {
                                         "type": "string",
-                                        "example": "Doe"
+                                        "example": "الغامدي"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john@example.com"
+                                        "example": "mohammed@example.com"
                                     },
                                     "phone": {
                                         "type": "string",
-                                        "example": "500000000"
+                                        "example": "501112233"
                                     },
                                     "country_code": {
                                         "type": "string",
@@ -1505,12 +1505,12 @@
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "P@ssw0rd123"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "P@ssw0rd123"
                                     },
                                     "fcm_token": {
                                         "description": "Optional FCM device token for push notifications",
@@ -1519,6 +1519,16 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "first_name": "محمد",
+                                "last_name": "الغامدي",
+                                "email": "mohammed@example.com",
+                                "phone": "501112233",
+                                "country_code": "+966",
+                                "password": "P@ssw0rd123",
+                                "password_confirmation": "P@ssw0rd123",
+                                "fcm_token": "fcm_token_example_string..."
                             }
                         }
                     }
@@ -1557,6 +1567,59 @@
                                                     "example": "verify_otp"
                                                 },
                                                 "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "محمد"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "الغامدي"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "محمد الغامدي"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "mohammed@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "501112233"
+                                                        },
+                                                        "country_code": {
+                                                            "type": "string",
+                                                            "example": "+966"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "pending"
+                                                        },
+                                                        "kyc_level": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "email_verified": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "identity_verified": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "bidder"
+                                                            }
+                                                        }
+                                                    },
                                                     "type": "object"
                                                 }
                                             },
@@ -1564,6 +1627,32 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "requires_verification": true,
+                                    "message": "تم إنشاء الحساب بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني لتأكيد الحساب.",
+                                    "data": {
+                                        "access_token": "1|plainTextToken...",
+                                        "token": "1|plainTextToken...",
+                                        "action": "verify_otp",
+                                        "user": {
+                                            "id": 15,
+                                            "first_name": "محمد",
+                                            "last_name": "الغامدي",
+                                            "full_name": "محمد الغامدي",
+                                            "email": "mohammed@example.com",
+                                            "phone": "501112233",
+                                            "country_code": "+966",
+                                            "status": "pending",
+                                            "kyc_level": 0,
+                                            "email_verified": false,
+                                            "identity_verified": false,
+                                            "roles": [
+                                                "bidder"
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1637,6 +1726,11 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com",
+                                "password": "password123",
+                                "fcm_token": "fcm_token_example_string..."
                             }
                         }
                     }
@@ -1667,6 +1761,59 @@
                                                     "example": "1|abc..."
                                                 },
                                                 "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "أحمد"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "المطيري"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "أحمد المطيري"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "500000000"
+                                                        },
+                                                        "country_code": {
+                                                            "type": "string",
+                                                            "example": "+966"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "active"
+                                                        },
+                                                        "kyc_level": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "email_verified": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "identity_verified": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "bidder"
+                                                            }
+                                                        }
+                                                    },
                                                     "type": "object"
                                                 }
                                             },
@@ -1674,6 +1821,30 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Login successful.",
+                                    "data": {
+                                        "access_token": "1|plainTextToken...",
+                                        "token": "1|plainTextToken...",
+                                        "user": {
+                                            "id": 12,
+                                            "first_name": "أحمد",
+                                            "last_name": "المطيري",
+                                            "full_name": "أحمد المطيري",
+                                            "email": "user@example.com",
+                                            "phone": "500000000",
+                                            "country_code": "+966",
+                                            "status": "active",
+                                            "kyc_level": 0,
+                                            "email_verified": true,
+                                            "identity_verified": false,
+                                            "roles": [
+                                                "bidder"
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1715,6 +1886,16 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "requires_verification": true,
+                                    "message": "حسابك غير موثق بعد. تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني لتوثيق وتفعيل الحساب.",
+                                    "data": {
+                                        "email": "user@example.com",
+                                        "action": "verify_otp",
+                                        "resend_in": 60
+                                    }
                                 }
                             }
                         }
@@ -1739,6 +1920,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Invalid credentials.",
+                                    "data": null
                                 }
                             }
                         }
@@ -2194,6 +2380,9 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com"
                             }
                         }
                     }
@@ -2228,6 +2417,14 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Password reset OTP sent to your email.",
+                                    "data": {
+                                        "resend_in": 60,
+                                        "expires_in": 900
+                                    }
                                 }
                             }
                         }
@@ -2257,12 +2454,32 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Please wait 45 seconds before requesting another code.",
+                                    "data": {
+                                        "retry_after": 45
+                                    }
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "User not found"
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The selected email is invalid.",
+                                    "errors": {
+                                        "email": [
+                                            "The selected email is invalid."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2315,15 +2532,21 @@
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "newpassword123"
+                                        "example": "NewSecretPassword123!"
                                     },
                                     "password_confirmation": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "newpassword123"
+                                        "example": "NewSecretPassword123!"
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com",
+                                "otp": "482019",
+                                "password": "NewSecretPassword123!",
+                                "password_confirmation": "NewSecretPassword123!"
                             }
                         }
                     }
@@ -2341,7 +2564,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Password reset successfully. You can now login."
+                                            "example": "Password reset successfully. You can now login with your new password."
                                         },
                                         "data": {
                                             "type": "object",
@@ -2349,6 +2572,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Password reset successfully. You can now login with your new password.",
+                                    "data": null
                                 }
                             }
                         }
@@ -2373,6 +2601,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Invalid or expired OTP code.",
+                                    "data": null
                                 }
                             }
                         }
@@ -2397,12 +2630,30 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Too many failed attempts. This code has been invalidated. Please request a new code.",
+                                    "data": null
                                 }
                             }
                         }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "The password confirmation does not match.",
+                                    "errors": {
+                                        "password": [
+                                            "The password confirmation does not match."
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2446,6 +2697,9 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "otp": "482019"
                             }
                         }
                     }
@@ -2468,6 +2722,59 @@
                                         "data": {
                                             "properties": {
                                                 "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "محمد"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "الغامدي"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "محمد الغامدي"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "mohammed@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "501112233"
+                                                        },
+                                                        "country_code": {
+                                                            "type": "string",
+                                                            "example": "+966"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "active"
+                                                        },
+                                                        "kyc_level": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "email_verified": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "identity_verified": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "bidder"
+                                                            }
+                                                        }
+                                                    },
                                                     "type": "object"
                                                 }
                                             },
@@ -2475,6 +2782,28 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Email verified successfully.",
+                                    "data": {
+                                        "user": {
+                                            "id": 15,
+                                            "first_name": "محمد",
+                                            "last_name": "الغامدي",
+                                            "full_name": "محمد الغامدي",
+                                            "email": "mohammed@example.com",
+                                            "phone": "501112233",
+                                            "country_code": "+966",
+                                            "status": "active",
+                                            "kyc_level": 0,
+                                            "email_verified": true,
+                                            "identity_verified": false,
+                                            "roles": [
+                                                "bidder"
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -2499,6 +2828,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Invalid or expired OTP code.",
+                                    "data": null
                                 }
                             }
                         }
@@ -2523,6 +2857,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Too many incorrect attempts. Please request a new verification code.",
+                                    "data": null
                                 }
                             }
                         }
@@ -2591,6 +2930,14 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Verification OTP sent to your email.",
+                                    "data": {
+                                        "resend_in": 60,
+                                        "expires_in": 900
+                                    }
                                 }
                             }
                         }
@@ -2620,6 +2967,13 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Please wait 45 seconds before requesting another code.",
+                                    "data": {
+                                        "retry_after": 45
+                                    }
                                 }
                             }
                         }
@@ -2644,6 +2998,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Email is already verified.",
+                                    "data": null
                                 }
                             }
                         }
@@ -4242,6 +4601,9 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com"
                             }
                         }
                     }
@@ -4259,7 +4621,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "OTP sent successfully to your email."
+                                            "example": "تم إرسال رمز التحقق إلى بريدك الإلكتروني..."
                                         },
                                         "data": {
                                             "properties": {
@@ -4273,7 +4635,7 @@
                                                 },
                                                 "requires_verification": {
                                                     "type": "boolean",
-                                                    "example": false
+                                                    "example": true
                                                 },
                                                 "action": {
                                                     "type": "string",
@@ -4288,6 +4650,17 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "تم إرسال رمز التحقق إلى بريدك الإلكتروني لتوثيق وتفعيل حسابك. يرجى إدخال الرمز لتأكيد ملكية الحساب.",
+                                    "data": {
+                                        "expires_in": 300,
+                                        "resend_in": 60,
+                                        "requires_verification": true,
+                                        "action": "verify_otp",
+                                        "email": "user@example.com"
+                                    }
                                 }
                             }
                         }
@@ -4321,6 +4694,14 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "requires_email": true,
+                                    "message": "حسابك غير موثق بعد، يجب استخدام البريد الإلكتروني لتسجيل الدخول وتوثيق حسابك.",
+                                    "data": {
+                                        "action": "use_email_verification"
+                                    }
                                 }
                             }
                         }
@@ -4345,6 +4726,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Please wait 45 seconds before requesting another code.",
+                                    "retry_after": 45
                                 }
                             }
                         }
@@ -4368,6 +4754,15 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Validation failed.",
+                                    "data": {
+                                        "email": [
+                                            "The email field is required when phone is not present."
+                                        ]
+                                    }
                                 }
                             }
                         }
@@ -4433,6 +4828,11 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com",
+                                "code": "482019",
+                                "fcm_token": "fcm_token_example_string..."
                             }
                         }
                     }
@@ -4462,7 +4862,64 @@
                                                     "type": "string",
                                                     "example": "Bearer"
                                                 },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abc..."
+                                                },
                                                 "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "أحمد"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "المطيري"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string",
+                                                            "example": "أحمد المطيري"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "500000000"
+                                                        },
+                                                        "country_code": {
+                                                            "type": "string",
+                                                            "example": "+966"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "active"
+                                                        },
+                                                        "kyc_level": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        },
+                                                        "email_verified": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "identity_verified": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "bidder"
+                                                            }
+                                                        }
+                                                    },
                                                     "type": "object"
                                                 }
                                             },
@@ -4470,6 +4927,31 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "تم التحقق وتسجيل الدخول بنجاح.",
+                                    "data": {
+                                        "access_token": "1|mSjX9bN4gY72Kz...",
+                                        "token_type": "Bearer",
+                                        "token": "1|mSjX9bN4gY72Kz...",
+                                        "user": {
+                                            "id": 12,
+                                            "first_name": "أحمد",
+                                            "last_name": "المطيري",
+                                            "full_name": "أحمد المطيري",
+                                            "email": "user@example.com",
+                                            "phone": "500000000",
+                                            "country_code": "+966",
+                                            "status": "active",
+                                            "kyc_level": 0,
+                                            "email_verified": true,
+                                            "identity_verified": false,
+                                            "roles": [
+                                                "bidder"
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -4494,6 +4976,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "رمز التحقق غير صحيح. المحاولات المتبقية: 4",
+                                    "data": null
                                 }
                             }
                         }
@@ -4518,6 +5005,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "حسابك معطل أو محظور. يرجى التواصل مع إدارة المنصة.",
+                                    "data": null
                                 }
                             }
                         }
@@ -4542,6 +5034,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "تم تجاوز الحد الأقصى للمحاولات الخاطئة (5 محاولات). تم إبطال الرمز، يرجى طلب رمز جديد.",
+                                    "data": null
                                 }
                             }
                         }
@@ -4565,6 +5062,15 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error": true,
+                                    "message": "Validation failed.",
+                                    "data": {
+                                        "code": [
+                                            "The code field is required."
+                                        ]
+                                    }
                                 }
                             }
                         }

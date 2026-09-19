@@ -45,14 +45,24 @@ class AuthController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["first_name", "last_name", "email", "password", "password_confirmation"],
+                example: [
+                    "first_name" => "محمد",
+                    "last_name" => "الغامدي",
+                    "email" => "mohammed@example.com",
+                    "phone" => "501112233",
+                    "country_code" => "+966",
+                    "password" => "P@ssw0rd123",
+                    "password_confirmation" => "P@ssw0rd123",
+                    "fcm_token" => "fcm_token_example_string..."
+                ],
                 properties: [
-                    new OA\Property(property: "first_name", type: "string", example: "John"),
-                    new OA\Property(property: "last_name", type: "string", example: "Doe"),
-                    new OA\Property(property: "email", type: "string", format: "email", example: "john@example.com"),
-                    new OA\Property(property: "phone", type: "string", example: "500000000"),
+                    new OA\Property(property: "first_name", type: "string", example: "محمد"),
+                    new OA\Property(property: "last_name", type: "string", example: "الغامدي"),
+                    new OA\Property(property: "email", type: "string", format: "email", example: "mohammed@example.com"),
+                    new OA\Property(property: "phone", type: "string", example: "501112233"),
                     new OA\Property(property: "country_code", type: "string", example: "+966"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
-                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "P@ssw0rd123"),
+                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "P@ssw0rd123"),
                     new OA\Property(property: "fcm_token", type: "string", example: "fcm_token_string...", description: "Optional FCM device token for push notifications")
                 ]
             )
@@ -62,6 +72,30 @@ class AuthController extends Controller
                 response: 201,
                 description: "Registration successful - OTP sent to email",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "requires_verification" => true,
+                        "message" => "تم إنشاء الحساب بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني لتأكيد الحساب.",
+                        "data" => [
+                            "access_token" => "1|plainTextToken...",
+                            "token" => "1|plainTextToken...",
+                            "action" => "verify_otp",
+                            "user" => [
+                                "id" => 15,
+                                "first_name" => "محمد",
+                                "last_name" => "الغامدي",
+                                "full_name" => "محمد الغامدي",
+                                "email" => "mohammed@example.com",
+                                "phone" => "501112233",
+                                "country_code" => "+966",
+                                "status" => "pending",
+                                "kyc_level" => 0,
+                                "email_verified" => false,
+                                "identity_verified" => false,
+                                "roles" => ["bidder"]
+                            ]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "requires_verification", type: "boolean", example: true),
@@ -70,7 +104,20 @@ class AuthController extends Controller
                             new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
                             new OA\Property(property: "token", type: "string", example: "1|abc..."),
                             new OA\Property(property: "action", type: "string", example: "verify_otp"),
-                            new OA\Property(property: "user", type: "object")
+                            new OA\Property(property: "user", type: "object", properties: [
+                                new OA\Property(property: "id", type: "integer", example: 15),
+                                new OA\Property(property: "first_name", type: "string", example: "محمد"),
+                                new OA\Property(property: "last_name", type: "string", example: "الغامدي"),
+                                new OA\Property(property: "full_name", type: "string", example: "محمد الغامدي"),
+                                new OA\Property(property: "email", type: "string", example: "mohammed@example.com"),
+                                new OA\Property(property: "phone", type: "string", example: "501112233"),
+                                new OA\Property(property: "country_code", type: "string", example: "+966"),
+                                new OA\Property(property: "status", type: "string", example: "pending"),
+                                new OA\Property(property: "kyc_level", type: "integer", example: 0),
+                                new OA\Property(property: "email_verified", type: "boolean", example: false),
+                                new OA\Property(property: "identity_verified", type: "boolean", example: false),
+                                new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "bidder"))
+                            ])
                         ])
                     ]
                 )
@@ -78,7 +125,14 @@ class AuthController extends Controller
             new OA\Response(
                 response: 422,
                 description: "Validation error",
-                content: new OA\JsonContent(example: ['message' => 'The email has already been taken.', 'errors' => ['email' => ['The email has already been taken.']]])
+                content: new OA\JsonContent(
+                    example: [
+                        "message" => "The email has already been taken.",
+                        "errors" => [
+                            "email" => ["The email has already been taken."]
+                        ]
+                    ]
+                )
             )
         ]
     )]
@@ -156,6 +210,11 @@ class AuthController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["email", "password"],
+                example: [
+                    "email" => "user@example.com",
+                    "password" => "password123",
+                    "fcm_token" => "fcm_token_example_string..."
+                ],
                 properties: [
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
                     new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
@@ -168,13 +227,48 @@ class AuthController extends Controller
                 response: 200,
                 description: "Login successful",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "Login successful.",
+                        "data" => [
+                            "access_token" => "1|plainTextToken...",
+                            "token" => "1|plainTextToken...",
+                            "user" => [
+                                "id" => 12,
+                                "first_name" => "أحمد",
+                                "last_name" => "المطيري",
+                                "full_name" => "أحمد المطيري",
+                                "email" => "user@example.com",
+                                "phone" => "500000000",
+                                "country_code" => "+966",
+                                "status" => "active",
+                                "kyc_level" => 0,
+                                "email_verified" => true,
+                                "identity_verified" => false,
+                                "roles" => ["bidder"]
+                            ]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Login successful."),
                         new OA\Property(property: "data", type: "object", properties: [
                             new OA\Property(property: "access_token", type: "string", example: "1|abc..."),
                             new OA\Property(property: "token", type: "string", example: "1|abc..."),
-                            new OA\Property(property: "user", type: "object")
+                            new OA\Property(property: "user", type: "object", properties: [
+                                new OA\Property(property: "id", type: "integer", example: 12),
+                                new OA\Property(property: "first_name", type: "string", example: "أحمد"),
+                                new OA\Property(property: "last_name", type: "string", example: "المطيري"),
+                                new OA\Property(property: "full_name", type: "string", example: "أحمد المطيري"),
+                                new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                                new OA\Property(property: "phone", type: "string", example: "500000000"),
+                                new OA\Property(property: "country_code", type: "string", example: "+966"),
+                                new OA\Property(property: "status", type: "string", example: "active"),
+                                new OA\Property(property: "kyc_level", type: "integer", example: 0),
+                                new OA\Property(property: "email_verified", type: "boolean", example: true),
+                                new OA\Property(property: "identity_verified", type: "boolean", example: false),
+                                new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "bidder"))
+                            ])
                         ])
                     ]
                 )
@@ -183,6 +277,16 @@ class AuthController extends Controller
                 response: 403,
                 description: "Account not verified OR account suspended",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "requires_verification" => true,
+                        "message" => "حسابك غير موثق بعد. تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني لتوثيق وتفعيل الحساب.",
+                        "data" => [
+                            "email" => "user@example.com",
+                            "action" => "verify_otp",
+                            "resend_in" => 60
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "requires_verification", type: "boolean", example: true),
@@ -199,6 +303,11 @@ class AuthController extends Controller
                 response: 401,
                 description: "Invalid credentials",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Invalid credentials.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Invalid credentials."),
@@ -624,6 +733,9 @@ class AuthController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["email"],
+                example: [
+                    "email" => "user@example.com"
+                ],
                 properties: [
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com")
                 ]
@@ -634,6 +746,14 @@ class AuthController extends Controller
                 response: 200,
                 description: "OTP sent successfully to email",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "Password reset OTP sent to your email.",
+                        "data" => [
+                            "resend_in" => 60,
+                            "expires_in" => 900
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Password reset OTP sent to your email."),
@@ -648,6 +768,13 @@ class AuthController extends Controller
                 response: 429,
                 description: "Rate limit exceeded",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Please wait 45 seconds before requesting another code.",
+                        "data" => [
+                            "retry_after" => 45
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
@@ -657,7 +784,18 @@ class AuthController extends Controller
                     ]
                 )
             ),
-            new OA\Response(response: 404, description: "User not found")
+            new OA\Response(
+                response: 404,
+                description: "User not found",
+                content: new OA\JsonContent(
+                    example: [
+                        "message" => "The selected email is invalid.",
+                        "errors" => [
+                            "email" => ["The selected email is invalid."]
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function forgotPassword(Request $request): JsonResponse
@@ -718,11 +856,17 @@ class AuthController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["email", "otp", "password", "password_confirmation"],
+                example: [
+                    "email" => "user@example.com",
+                    "otp" => "482019",
+                    "password" => "NewSecretPassword123!",
+                    "password_confirmation" => "NewSecretPassword123!"
+                ],
                 properties: [
                     new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
                     new OA\Property(property: "otp", type: "string", example: "482019", description: "6-digit OTP code"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "newpassword123"),
-                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "newpassword123")
+                    new OA\Property(property: "password", type: "string", format: "password", example: "NewSecretPassword123!"),
+                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "NewSecretPassword123!")
                 ]
             )
         ),
@@ -731,9 +875,14 @@ class AuthController extends Controller
                 response: 200,
                 description: "Password reset successfully",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "Password reset successfully. You can now login with your new password.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
-                        new OA\Property(property: "message", type: "string", example: "Password reset successfully. You can now login."),
+                        new OA\Property(property: "message", type: "string", example: "Password reset successfully. You can now login with your new password."),
                         new OA\Property(property: "data", type: "object", nullable: true)
                     ]
                 )
@@ -742,6 +891,11 @@ class AuthController extends Controller
                 response: 400,
                 description: "Invalid or expired OTP",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Invalid or expired OTP code.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Invalid or expired OTP code."),
@@ -753,6 +907,11 @@ class AuthController extends Controller
                 response: 429,
                 description: "Too many failed attempts",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Too many failed attempts. This code has been invalidated. Please request a new code.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Too many failed attempts. This code has been invalidated. Please request a new code."),
@@ -760,7 +919,18 @@ class AuthController extends Controller
                     ]
                 )
             ),
-            new OA\Response(response: 422, description: "Validation error")
+            new OA\Response(
+                response: 422,
+                description: "Validation error",
+                content: new OA\JsonContent(
+                    example: [
+                        "message" => "The password confirmation does not match.",
+                        "errors" => [
+                            "password" => ["The password confirmation does not match."]
+                        ]
+                    ]
+                )
+            )
         ]
     )]
     public function resetPassword(Request $request): JsonResponse
@@ -841,6 +1011,9 @@ class AuthController extends Controller
             required: true,
             content: new OA\JsonContent(
                 required: ["otp"],
+                example: [
+                    "otp" => "482019"
+                ],
                 properties: [
                     new OA\Property(property: "otp", type: "string", example: "482019", description: "6-digit OTP code")
                 ]
@@ -851,11 +1024,44 @@ class AuthController extends Controller
                 response: 200,
                 description: "Email verified successfully",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "Email verified successfully.",
+                        "data" => [
+                            "user" => [
+                                "id" => 15,
+                                "first_name" => "محمد",
+                                "last_name" => "الغامدي",
+                                "full_name" => "محمد الغامدي",
+                                "email" => "mohammed@example.com",
+                                "phone" => "501112233",
+                                "country_code" => "+966",
+                                "status" => "active",
+                                "kyc_level" => 0,
+                                "email_verified" => true,
+                                "identity_verified" => false,
+                                "roles" => ["bidder"]
+                            ]
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Email verified successfully."),
                         new OA\Property(property: "data", type: "object", properties: [
-                            new OA\Property(property: "user", type: "object")
+                            new OA\Property(property: "user", type: "object", properties: [
+                                new OA\Property(property: "id", type: "integer", example: 15),
+                                new OA\Property(property: "first_name", type: "string", example: "محمد"),
+                                new OA\Property(property: "last_name", type: "string", example: "الغامدي"),
+                                new OA\Property(property: "full_name", type: "string", example: "محمد الغامدي"),
+                                new OA\Property(property: "email", type: "string", example: "mohammed@example.com"),
+                                new OA\Property(property: "phone", type: "string", example: "501112233"),
+                                new OA\Property(property: "country_code", type: "string", example: "+966"),
+                                new OA\Property(property: "status", type: "string", example: "active"),
+                                new OA\Property(property: "kyc_level", type: "integer", example: 0),
+                                new OA\Property(property: "email_verified", type: "boolean", example: true),
+                                new OA\Property(property: "identity_verified", type: "boolean", example: false),
+                                new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "bidder"))
+                            ])
                         ])
                     ]
                 )
@@ -864,6 +1070,11 @@ class AuthController extends Controller
                 response: 400,
                 description: "Invalid or expired OTP",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Invalid or expired OTP code.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Invalid or expired OTP code."),
@@ -875,6 +1086,11 @@ class AuthController extends Controller
                 response: 429,
                 description: "Too many failed attempts",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Too many incorrect attempts. Please request a new verification code.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Too many incorrect attempts. Please request a new verification code."),
@@ -960,6 +1176,14 @@ class AuthController extends Controller
                 response: 200,
                 description: "Verification OTP sent successfully",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "Verification OTP sent to your email.",
+                        "data" => [
+                            "resend_in" => 60,
+                            "expires_in" => 900
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: false),
                         new OA\Property(property: "message", type: "string", example: "Verification OTP sent to your email."),
@@ -974,6 +1198,13 @@ class AuthController extends Controller
                 response: 429,
                 description: "Rate limit exceeded",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Please wait 45 seconds before requesting another code.",
+                        "data" => [
+                            "retry_after" => 45
+                        ]
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Please wait 45 seconds before requesting another code."),
@@ -987,6 +1218,11 @@ class AuthController extends Controller
                 response: 400,
                 description: "Email is already verified",
                 content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Email is already verified.",
+                        "data" => null
+                    ],
                     properties: [
                         new OA\Property(property: "error", type: "boolean", example: true),
                         new OA\Property(property: "message", type: "string", example: "Email is already verified."),
