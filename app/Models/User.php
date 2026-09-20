@@ -75,6 +75,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'bank_name',
         'account_number',
         'auto_bid_enabled',
+        'fcm_token',
     ];
 
     public function wallet()

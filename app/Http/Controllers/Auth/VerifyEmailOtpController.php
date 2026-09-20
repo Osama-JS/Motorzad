@@ -32,13 +32,11 @@ class VerifyEmailOtpController extends Controller
         $attemptsKey = 'otp_attempts_email_' . $user->email;
         $attempts = (int) Cache::get($attemptsKey, 0);
 
-        $isMasterCode = (config('app.debug') || app()->environment('local')) && $request->otp === '123456';
-
-        if (!$cachedCode && !$isMasterCode) {
+        if (!$cachedCode) {
             return back()->withErrors(['otp' => __('انتهت صلاحية رمز التحقق أو أنه غير صالح. يرجى طلب رمز جديد.')]);
         }
 
-        if ($cachedCode !== $request->otp && !$isMasterCode) {
+        if ($cachedCode !== $request->otp) {
             $attempts++;
             if ($attempts >= 5) {
                 Cache::forget('email_verify_' . $user->email);

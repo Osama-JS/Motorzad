@@ -474,6 +474,10 @@
 @endsection
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+
 <script>
     // Audience Selector Toggle
     function selectAudience(audience, cardEl) {
@@ -484,7 +488,9 @@
         const specificBox = document.getElementById('specific_user_box');
         if (audience === 'specific') {
             specificBox.style.display = 'block';
-            document.getElementById('specific_user_id').focus();
+            if (typeof $ !== 'undefined' && $('.select2-user-search').length) {
+                $('.select2-user-search').select2('open');
+            }
         } else {
             specificBox.style.display = 'none';
         }
@@ -520,85 +526,118 @@
         document.getElementById('notif_message').value = templates[key].message;
         document.getElementById('notif_url').value = templates[key].url;
         updateLivePreview();
-        toastr.info('تم تطبيق بيانات القالب بنجاح');
+        if (typeof toastr !== 'undefined') {
+            toastr.info('تم تطبيق بيانات القالب بنجاح');
+        }
     }
 
     // Live Preview Synchronization
     function updateLivePreview() {
-        const titleVal = document.getElementById('notif_title').value.trim();
-        const msgVal = document.getElementById('notif_message').value.trim();
-        const urlVal = document.getElementById('notif_url').value.trim();
+        const titleInput = document.getElementById('notif_title');
+        const msgInput = document.getElementById('notif_message');
+        const urlInput = document.getElementById('notif_url');
+
+        const titleVal = titleInput ? titleInput.value.trim() : '';
+        const msgVal = msgInput ? msgInput.value.trim() : '';
+        const urlVal = urlInput ? urlInput.value.trim() : '';
 
         // Title
         const defaultTitle = 'عنوان الإشعار التجريبي';
-        document.getElementById('preview_title').innerText = titleVal || defaultTitle;
-        document.getElementById('preview_inapp_title').innerText = titleVal || 'إشعار المنصة الداخلي';
+        const previewTitle = document.getElementById('preview_title');
+        const inappTitle = document.getElementById('preview_inapp_title');
+        if (previewTitle) previewTitle.innerText = titleVal || defaultTitle;
+        if (inappTitle) inappTitle.innerText = titleVal || 'إشعار المنصة الداخلي';
 
         // Message
         const defaultMsg = 'سيظهر نص الرسالة وتفاصيل الإشعار هنا مباشرة أثناء الكتابة...';
-        document.getElementById('preview_body').innerText = msgVal || defaultMsg;
-        document.getElementById('preview_inapp_body').innerText = msgVal || 'معاينة التنبيه في شريط الإشعارات العلوي للموقع.';
+        const previewBody = document.getElementById('preview_body');
+        const inappBody = document.getElementById('preview_inapp_body');
+        if (previewBody) previewBody.innerText = msgVal || defaultMsg;
+        if (inappBody) inappBody.innerText = msgVal || 'معاينة التنبيه في شريط الإشعارات العلوي للموقع.';
 
         // Character count
-        document.getElementById('charCount').innerText = msgVal.length;
+        const charCount = document.getElementById('charCount');
+        if (charCount) charCount.innerText = msgVal.length;
 
         // URL Link Badge
-        document.getElementById('preview_link_badge').style.display = urlVal ? 'block' : 'none';
+        const linkBadge = document.getElementById('preview_link_badge');
+        if (linkBadge) linkBadge.style.display = urlVal ? 'block' : 'none';
     }
 
     document.addEventListener('DOMContentLoaded', function() {
         updateLivePreview();
 
+        // Initialize Select2 if jQuery is loaded
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            let dir = $('html').attr('dir') || 'rtl';
+            $('.select2-user-search').select2({
+                dir: dir,
+                width: '100%',
+                placeholder: "{{ __('ابحث واختر المستخدم...') }}",
+                allowClear: true
+            });
+        }
+
         // AJAX Form Submission
         const form = document.getElementById('send-notification-form');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري بث الإشعارات...';
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري بث الإشعارات...';
 
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(async response => {
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    toastr.success(data.message || 'تم إرسال الإشعار بنجاح لجميع المستهدفين.');
-                    form.reset();
-                    selectAudience('all', document.querySelector('.audience-option-card'));
-                    updateLivePreview();
-                } else {
-                    toastr.error(data.message || 'حدث خطأ أثناء الإرسال.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                toastr.error('حدث خطأ غير متوقع أثناء الاتصال بالخادم.');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    || document.querySelector('input[name="_token"]')?.value;
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken || ''
+                    }
+                })
+                .then(async response => {
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(data.message || 'تم إرسال الإشعار بنجاح لجميع المستهدفين.');
+                        } else {
+                            alert(data.message || 'تم إرسال الإشعار بنجاح');
+                        }
+                        form.reset();
+                        const firstAudienceCard = document.querySelector('.audience-option-card');
+                        if (firstAudienceCard) {
+                            selectAudience('all', firstAudienceCard);
+                        }
+                        updateLivePreview();
+                    } else {
+                        const errMsg = data.message || (data.errors ? Object.values(data.errors).flat().join('\n') : 'حدث خطأ أثناء الإرسال.');
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error(errMsg);
+                        } else {
+                            alert(errMsg);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('حدث خطأ غير متوقع أثناء الاتصال بالخادم.');
+                    } else {
+                        alert('حدث خطأ أثناء الاتصال بالخادم.');
+                    }
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                });
             });
-    });
-
-    $(document).ready(function() {
-        // Initialize Searchable Select2 for Users
-        let dir = $('html').attr('dir') || 'rtl';
-        $('.select2-user-search').select2({
-            dir: dir,
-            width: '100%',
-            placeholder: "{{ __('ابحث واختر المستخدم...') }}",
-            allowClear: true
-        });
+        }
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 @endsection

@@ -37,7 +37,9 @@ return [
 
     'firebase' => [
         'project_id' => env('FIREBASE_PROJECT_ID'),
-        'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase_credentials.json')),
+        'credentials' => env('FIREBASE_CREDENTIALS')
+            ? (file_exists(env('FIREBASE_CREDENTIALS')) ? env('FIREBASE_CREDENTIALS') : base_path(env('FIREBASE_CREDENTIALS')))
+            : storage_path('app/firebase_credentials.json'),
     ],
 
 ];
