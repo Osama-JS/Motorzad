@@ -43,6 +43,11 @@ class SellerRequestController extends Controller
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
+        // Filter by template_id
+        if ($request->filled('template_id')) {
+            $query->where('form_template_id', $request->input('template_id'));
+        }
+
         // Sorting: pending first, then latest
         $requests = $query->orderByRaw("FIELD(status, 'pending') DESC")
             ->latest()
@@ -65,7 +70,25 @@ class SellerRequestController extends Controller
      */
     public function show(SellerRequest $sellerRequest)
     {
-        $sellerRequest->load(['user.wallet', 'user.latestKycRequest']);
+        $sellerRequest->load(['user.wallet', 'user.latestKycRequest', 'template.fields']);
+
+        $dynamicAnswers = [];
+        if (is_array($sellerRequest->data)) {
+            foreach ($sellerRequest->data as $key => $value) {
+                // Find matching field in the template
+                $field = null;
+                if ($sellerRequest->template) {
+                    $field = $sellerRequest->template->fields->where('name', $key)->first();
+                }
+
+                $dynamicAnswers[] = [
+                    'key' => $key,
+                    'label' => $field ? $field->label : $key,
+                    'type' => $field ? $field->type : 'unknown',
+                    'value' => $value
+                ];
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -75,6 +98,7 @@ class SellerRequestController extends Controller
                 'created_at' => $sellerRequest->created_at->format('Y-m-d H:i'),
                 'updated_at' => $sellerRequest->updated_at->format('Y-m-d H:i'),
                 'admin_notes' => $sellerRequest->admin_notes,
+                'dynamic_answers' => $dynamicAnswers,
                 'user' => [
                     'id' => $sellerRequest->user->id,
                     'name' => $sellerRequest->user->full_name,

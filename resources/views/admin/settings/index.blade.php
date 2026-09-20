@@ -531,6 +531,26 @@
                         </div>
                         <label class="switch"><input type="checkbox" name="maintenance_mode" value="1" {{ \App\Models\Setting::get('maintenance_mode')=='1'?'checked':'' }}><span class="slider"></span></label>
                     </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            <span>{{ __('قالب تسجيل البائعين (Seller Request Form Template)') }}</span>
+                        </label>
+                        <select name="seller_request_template_id" class="form-select">
+                            <option value="">{{ __('الافتراضي (Default) / أقدم قالب مفعل') }}</option>
+                            @foreach($formTemplates as $template)
+                                <option value="{{ $template->id }}" {{ \App\Models\Setting::get('seller_request_template_id') == $template->id ? 'selected' : '' }}>
+                                    {{ $template->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fa-solid fa-file-signature text-info me-1"></i>
+                            {{ __('سيتم استخدام هذا القالب لتوليد الأسئلة والحقول في صفحة "انضم كبائع" للمستخدمين.') }}
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>

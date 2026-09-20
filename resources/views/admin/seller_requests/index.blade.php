@@ -532,6 +532,8 @@
                             <small class="text-muted d-block mb-1">ملاحظات الإدارة المسجلة:</small>
                             <div class="text-dark small">${req.admin_notes || 'لا توجد ملاحظات مسجلة.'}</div>
                         </div>
+
+                        ${renderDynamicAnswers(req.dynamic_answers)}
                         
                         <div class="text-muted small text-end mt-3">
                             تاريخ تقديم الطلب: ${req.created_at}
@@ -544,6 +546,47 @@
             .catch(err => {
                 bodyEl.innerHTML = '<div class="alert alert-danger mb-0">حدث خطأ أثناء الاتصال بالخادم.</div>';
             });
+    }
+
+    // Helper to render dynamic answers elegantly
+    function renderDynamicAnswers(answers) {
+        if (!answers || answers.length === 0) return '';
+        
+        let html = '<div class="mt-4"><h6 class="fw-bold mb-3"><i class="fa-solid fa-clipboard-list text-primary me-2"></i>إجابات نموذج التسجيل</h6><div class="row g-3">';
+        
+        answers.forEach(ans => {
+            let valueHtml = '';
+            let val = ans.value;
+            
+            if (val === null || val === '') {
+                valueHtml = '<span class="text-muted fst-italic">لم يتم الإجابة</span>';
+            } else if (typeof val === 'string' && val.startsWith('/storage/')) {
+                // It's a file
+                if (val.endsWith('.pdf')) {
+                    valueHtml = `<a href="${val}" target="_blank" class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill"><i class="fa-regular fa-file-pdf me-1"></i> عرض ملف PDF</a>`;
+                } else if (val.endsWith('.jpg') || val.endsWith('.jpeg') || val.endsWith('.png')) {
+                    valueHtml = `<a href="${val}" target="_blank"><img src="${val}" alt="${ans.label}" class="img-thumbnail rounded" style="max-height: 120px; max-width:100%; object-fit: cover;"></a>`;
+                } else {
+                    valueHtml = `<a href="${val}" target="_blank" class="btn btn-sm btn-outline-primary px-3 py-1 rounded-pill"><i class="fa-solid fa-download me-1"></i> تحميل الملف</a>`;
+                }
+            } else if (ans.type === 'checkbox') {
+                valueHtml = val == '1' ? '<span class="badge bg-success">نعم</span>' : '<span class="badge bg-secondary">لا</span>';
+            } else {
+                valueHtml = `<div class="text-dark">${val}</div>`;
+            }
+
+            html += `
+                <div class="col-12 col-md-6">
+                    <div class="p-3 border rounded-3 bg-white h-100 shadow-sm">
+                        <small class="text-muted d-block mb-2 fw-bold" style="font-size: 0.85rem;">${ans.label}</small>
+                        ${valueHtml}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+        return html;
     }
 
     $(document).ready(function() {

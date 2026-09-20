@@ -17,8 +17,9 @@ class SettingController extends Controller
         ];
         
         $liveAuctions = \App\Models\Auction::whereIn('status', ['live', 'scheduled'])->latest()->get();
+        $formTemplates = \App\Models\FormTemplate::where('is_active', true)->get();
 
-        return view('admin.settings.index', compact('stats', 'liveAuctions'));
+        return view('admin.settings.index', compact('stats', 'liveAuctions', 'formTemplates'));
     }
 
     public function update(Request $request)
@@ -89,6 +90,7 @@ class SettingController extends Controller
                 'stats_satisfaction' => 'nullable|string|max:50',
                 'stats_satisfaction_unit' => 'nullable|string|max:20',
                 'hero_auction_id' => 'nullable|exists:auctions,id',
+                'seller_request_template_id' => 'nullable|exists:form_templates,id',
                 'hyperpay_enabled' => 'nullable|in:0,1',
                 'hyperpay_mode' => 'nullable|in:test,live',
                 'hyperpay_access_token' => 'nullable|string',

@@ -116,6 +116,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('seller-requests/{sellerRequest}', [\App\Http\Controllers\Admin\SellerRequestController::class, 'show'])->name('seller-requests.show');
     Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
     Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
+    
+    // Form Templates
+    Route::patch('form-templates/{form_template}/toggle-status', [\App\Http\Controllers\Admin\FormTemplateController::class, 'toggleStatus'])->name('form-templates.toggle-status');
+    Route::post('form-templates/{form_template}/clone', [\App\Http\Controllers\Admin\FormTemplateController::class, 'clone'])->name('form-templates.clone');
+    Route::resource('form-templates', \App\Http\Controllers\Admin\FormTemplateController::class);
+    
     // Settings Routes
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');

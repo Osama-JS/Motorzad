@@ -353,14 +353,167 @@
                 </div>
             </div>
 
-            <div class="action-area">
-                <form action="{{ route('bidder.become-seller.store') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn-upgrade-premium">
-                        {{ app()->getLocale() === 'ar' ? 'تقديم طلب الترقية الآن' : 'Submit Upgrade Request Now' }}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-                    </button>
-                </form>
+            <div class="action-area w-100" style="max-width: 700px; margin: 0 auto; text-align: right;">
+                @if($template)
+                    <div class="card shadow-sm border-0 rounded-4 p-4 text-start" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05) !important;">
+                        <h4 class="mb-4 text-center fw-bold" style="color: var(--text);">{{ $template->name }}</h4>
+                        
+                        @if ($errors->any())
+                            <div class="alert alert-danger rounded-3 border-0 shadow-sm mb-4">
+                                <ul class="mb-0 ps-3">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @php
+                            $totalSteps = 1;
+                            if($template) {
+                                $totalSteps = 1 + $template->fields->where('type', 'step-divider')->count();
+                            }
+                        @endphp
+
+                        <form action="{{ route('bidder.become-seller.store') }}" method="POST" enctype="multipart/form-data" 
+                            x-data="{ 
+                                formData: {{ Js::from(old('data', [])) }},
+                                currentStep: 1,
+                                totalSteps: {{ $totalSteps }},
+                                nextStep() {
+                                    if (this.currentStep < this.totalSteps) this.currentStep++;
+                                    window.scrollTo({ top: document.querySelector('.premium-seller-card').offsetTop - 50, behavior: 'smooth' });
+                                },
+                                prevStep() {
+                                    if (this.currentStep > 1) this.currentStep--;
+                                    window.scrollTo({ top: document.querySelector('.premium-seller-card').offsetTop - 50, behavior: 'smooth' });
+                                }
+                            }">
+                            @csrf
+                            <input type="hidden" name="template_id" value="{{ $template->id }}">
+
+                            @if($totalSteps > 1)
+                            <div class="mb-5 px-3">
+                                <div class="progress" style="height: 8px; border-radius: 10px; background: rgba(255,255,255,0.05);">
+                                    <div class="progress-bar" role="progressbar" :style="'width: ' + ((currentStep / totalSteps) * 100) + '%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.4s ease;'" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2 text-muted small fw-bold">
+                                    <span>{{ __('الخطوة') }} <span x-text="currentStep"></span> {{ __('من') }} <span x-text="totalSteps"></span></span>
+                                    <span x-text="Math.round((currentStep / totalSteps) * 100) + '%'"></span>
+                                </div>
+                            </div>
+                            @endif
+
+                            <div class="row g-4">
+                                @php $currentStepNumber = 1; @endphp
+                                @foreach($template->fields as $field)
+                                    @if($field->type === 'step-divider')
+                                        @php $currentStepNumber++; @endphp
+                                    @else
+                                        <div class="col-12" x-show="currentStep === {{ $currentStepNumber }} {{ $field->depends_on_field_name ? '&& formData[\''. $field->depends_on_field_name .'\'] == \''. addslashes($field->depends_on_value) .'\'' : '' }}" x-transition>
+                                            @if($field->type !== 'html')
+                                                <label class="form-label fw-bold mb-2" style="color: var(--text);">
+                                                    {{ $field->label }}
+                                                    @if($field->is_required)
+                                                        <span class="text-danger ms-1">*</span>
+                                                    @endif
+                                                </label>
+                                            @endif
+
+                                            @if($field->type === 'text')
+                                                <input type="text" name="data[{{ $field->name }}]" x-model="formData['{{ $field->name }}']" class="form-control form-control-lg bg-transparent" style="color: var(--text); border-color: rgba(150,150,150,0.2);" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                            
+                                            @elseif($field->type === 'textarea')
+                                                <textarea name="data[{{ $field->name }}]" x-model="formData['{{ $field->name }}']" class="form-control bg-transparent" rows="3" style="color: var(--text); border-color: rgba(150,150,150,0.2);" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}"></textarea>
+                                            
+                                            @elseif($field->type === 'file')
+                                                <input type="file" name="data[{{ $field->name }}]" class="form-control form-control-lg bg-transparent" style="color: var(--text); border-color: rgba(150,150,150,0.2);" accept=".jpg,.jpeg,.png,.pdf" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                                <small class="text-muted d-block mt-1">يسمح بصور أو ملفات PDF (بحد أقصى 10 ميجابايت)</small>
+
+                                            @elseif($field->type === 'date')
+                                                <input type="date" name="data[{{ $field->name }}]" x-model="formData['{{ $field->name }}']" class="form-control form-control-lg bg-transparent" style="color: var(--text); border-color: rgba(150,150,150,0.2);" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+
+                                            @elseif($field->type === 'select')
+                                                <select name="data[{{ $field->name }}]" x-model="formData['{{ $field->name }}']" class="form-select form-select-lg bg-transparent" style="color: var(--text); border-color: rgba(150,150,150,0.2);" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                                    <option value="" disabled>-- يرجى الاختيار --</option>
+                                                    @if(is_array($field->options))
+                                                        @foreach($field->options as $option)
+                                                            <option value="{{ $option }}">{{ $option }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                                
+                                            @elseif($field->type === 'multi-select')
+                                                <select name="data[{{ $field->name }}][]" x-model="formData['{{ $field->name }}']" class="form-select form-select-lg bg-transparent" multiple style="color: var(--text); border-color: rgba(150,150,150,0.2); height: 120px;" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                                    @if(is_array($field->options))
+                                                        @foreach($field->options as $option)
+                                                            <option value="{{ $option }}">{{ $option }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                                <small class="text-muted d-block mt-1">يمكنك اختيار أكثر من عنصر عبر الضغط على (Ctrl) أو (Cmd)</small>
+                                            
+                                            @elseif($field->type === 'radio')
+                                                <div>
+                                                    @if(is_array($field->options))
+                                                        @foreach($field->options as $idx => $option)
+                                                            <div class="form-check form-check-inline mt-2">
+                                                                <input class="form-check-input" type="radio" name="data[{{ $field->name }}]" value="{{ $option }}" x-model="formData['{{ $field->name }}']" id="rad_{{ $field->name }}_{{ $idx }}" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                                                <label class="form-check-label" for="rad_{{ $field->name }}_{{ $idx }}" style="color: var(--text);">{{ $option }}</label>
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
+                                                </div>
+
+                                            @elseif($field->type === 'checkbox')
+                                                <div class="form-check form-switch mt-2">
+                                                    <input class="form-check-input" type="checkbox" name="data[{{ $field->name }}]" value="1" x-model="formData['{{ $field->name }}']" id="chk_{{ $field->name }}" :required="{{ $field->is_required ? 'currentStep === '.$currentStepNumber : 'false' }}">
+                                                    <label class="form-check-label" for="chk_{{ $field->name }}" style="color: var(--text);">{{ __('نعم، أوافق') }}</label>
+                                                </div>
+
+                                            @elseif($field->type === 'html')
+                                                @if($field->label)
+                                                    <h4 class="mb-3 fw-bold" style="color: var(--text);">{{ $field->label }}</h4>
+                                                @endif
+                                                <div class="p-4 rounded-3 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-muted); line-height: 1.8;">
+                                                    {!! $field->description !!}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+
+                            <div class="mt-5 d-flex gap-3 justify-content-between align-items-center flex-wrap">
+                                <template x-if="currentStep > 1">
+                                    <button type="button" @click="prevStep()" class="btn btn-outline-secondary px-4 py-3 rounded-pill fw-bold" style="border-color: rgba(150,150,150,0.3); color: var(--text);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><path d="m15 18-6-6 6-6"></path></svg>
+                                        {{ __('السابق') }}
+                                    </button>
+                                </template>
+                                <div x-show="currentStep === 1" class="d-none d-md-block"></div>
+
+                                <template x-if="currentStep < totalSteps">
+                                    <button type="button" @click="nextStep()" class="btn-upgrade-premium flex-grow-1 mx-md-5 justify-content-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);">
+                                        {{ __('التالي') }}
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ms-2"><path d="m9 18 6-6-6-6"></path></svg>
+                                    </button>
+                                </template>
+
+                                <template x-if="currentStep === totalSteps">
+                                    <button type="submit" class="btn-upgrade-premium flex-grow-1 mx-md-5 justify-content-center">
+                                        {{ app()->getLocale() === 'ar' ? 'إرسال طلب التسجيل' : 'Submit Registration Request' }}
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ms-2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </form>
+                    </div>
+                @else
+                    <div class="alert alert-warning">
+                        لا يوجد نموذج تسجيل متاح حالياً. يرجى التواصل مع الإدارة.
+                    </div>
+                @endif
             </div>
         @endif
     </div>

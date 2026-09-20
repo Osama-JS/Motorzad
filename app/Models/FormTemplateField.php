@@ -6,32 +6,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SellerRequest extends Model
+class FormTemplateField extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'form_template_id',
-        'data',
-        'status',
-        'admin_notes',
+        'name',
+        'label',
+        'description',
+        'type',
+        'is_required',
+        'options',
+        'validation_rules',
+        'order',
+        'depends_on_field_name',
+        'depends_on_value',
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'is_required' => 'boolean',
+        'options' => 'array',
+        'order' => 'integer',
     ];
 
     /**
-     * Get the user that submitted the request.
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the template used for this request.
+     * Get the template that owns the field.
      */
     public function template(): BelongsTo
     {
