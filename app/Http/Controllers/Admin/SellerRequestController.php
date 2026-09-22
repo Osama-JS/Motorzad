@@ -58,6 +58,8 @@ class SellerRequestController extends Controller
         $stats = [
             'total' => SellerRequest::count(),
             'pending' => SellerRequest::where('status', 'pending')->count(),
+            'under_review' => SellerRequest::where('status', 'under_review')->count(),
+            'action_required' => SellerRequest::where('status', 'action_required')->count(),
             'approved' => SellerRequest::where('status', 'approved')->count(),
             'rejected' => SellerRequest::where('status', 'rejected')->count(),
         ];
@@ -72,23 +74,53 @@ class SellerRequestController extends Controller
     {
         $sellerRequest->load(['user.wallet', 'user.latestKycRequest', 'template.fields']);
 
+        if ($sellerRequest->status === 'pending') {
+            $sellerRequest->update(['status' => 'under_review']);
+        }
+
         $dynamicAnswers = [];
-        if (is_array($sellerRequest->data)) {
-            foreach ($sellerRequest->data as $key => $value) {
-                // Find matching field in the template
-                $field = null;
-                if ($sellerRequest->template) {
-                    $field = $sellerRequest->template->fields->where('name', $key)->first();
+        
+        if ($sellerRequest->template && $sellerRequest->template->fields) {
+            foreach ($sellerRequest->template->fields as $field) {
+                // تخطي حقول الفواصل الإضافية والنصوص الثابتة لأنها ليست أسئلة
+                if (in_array($field->type, ['html', 'step-divider'])) {
+                    continue;
                 }
+                
+                $value = isset($sellerRequest->data[$field->name]) ? $sellerRequest->data[$field->name] : null;
 
                 $dynamicAnswers[] = [
+                    'key' => $field->name,
+                    'label' => $field->label,
+                    'type' => $field->type,
+                    'value' => $value
+                ];
+            }
+        } elseif (is_array($sellerRequest->data)) {
+            // حالة احتياطية إذا تم حذف القالب
+            foreach ($sellerRequest->data as $key => $value) {
+                $dynamicAnswers[] = [
                     'key' => $key,
-                    'label' => $field ? $field->label : $key,
-                    'type' => $field ? $field->type : 'unknown',
+                    'label' => $key,
+                    'type' => 'unknown',
                     'value' => $value
                 ];
             }
         }
+
+        // Fetch history of previous requests
+        $history = SellerRequest::where('user_id', $sellerRequest->user_id)
+            ->where('id', '!=', $sellerRequest->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($req) {
+                return [
+                    'id' => $req->id,
+                    'status' => $req->status,
+                    'admin_notes' => $req->admin_notes,
+                    'created_at' => $req->created_at->format('Y-m-d H:i'),
+                ];
+            });
 
         return response()->json([
             'success' => true,
@@ -107,9 +139,13 @@ class SellerRequestController extends Controller
                     'city' => $sellerRequest->user->city ?? 'غير محدد',
                     'balance' => number_format($sellerRequest->user->wallet?->balance ?? 0, 2),
                     'profile_photo_url' => $sellerRequest->user->profile_photo_url,
-                    'identity_verified' => (bool)$sellerRequest->user->identity_verified_at,
-                    'kyc_status' => $sellerRequest->user->latestKycRequest?->status ?? 'none',
-                ]
+                    'identity_verified' => (bool)$sellerRequest->user->identity_verified_at || $sellerRequest->user->status === 'approved',
+                    'kyc_status' => $sellerRequest->user->latestKycRequest?->status ?? ($sellerRequest->user->status === 'approved' ? 'approved' : 'none'),
+                    'registration_date' => $sellerRequest->user->created_at->format('Y-m-d'),
+                    'auctions_count' => \App\Models\Bid::where('user_id', $sellerRequest->user->id)->distinct('auction_id')->count('auction_id'),
+                    'reports_count' => 0, // Placeholder as there's no reports table yet
+                ],
+                'history' => $history
             ]
         ]);
     }
@@ -119,11 +155,11 @@ class SellerRequestController extends Controller
      */
     public function approve(Request $request, SellerRequest $sellerRequest)
     {
-        if ($sellerRequest->status !== 'pending') {
+        if (!in_array($sellerRequest->status, ['pending', 'under_review'])) {
             if ($request->wantsJson() || $request->ajax()) {
-                return response()->json(['success' => false, 'message' => __('الطلب غير معلق حالياً.')], 400);
+                return response()->json(['success' => false, 'message' => __('الطلب غير متاح للقبول حالياً.')], 400);
             }
-            return redirect()->back()->with('error', __('الطلب غير معلق حالياً.'));
+            return redirect()->back()->with('error', __('الطلب غير متاح للقبول حالياً.'));
         }
 
         // Assign seller role and update kyc level
@@ -161,11 +197,11 @@ class SellerRequestController extends Controller
      */
     public function reject(Request $request, SellerRequest $sellerRequest)
     {
-        if ($sellerRequest->status !== 'pending') {
+        if (!in_array($sellerRequest->status, ['pending', 'under_review'])) {
             if ($request->wantsJson() || $request->ajax()) {
-                return response()->json(['success' => false, 'message' => __('الطلب غير معلق حالياً.')], 400);
+                return response()->json(['success' => false, 'message' => __('الطلب غير متاح للرفض حالياً.')], 400);
             }
-            return redirect()->back()->with('error', __('الطلب غير معلق حالياً.'));
+            return redirect()->back()->with('error', __('الطلب غير متاح للرفض حالياً.'));
         }
 
         $request->validate([
@@ -195,5 +231,46 @@ class SellerRequestController extends Controller
         }
 
         return redirect()->back()->with('success', __('تم رفض طلب البائع بنجاح وتسجيل السبب.'));
+    }
+
+    /**
+     * Request modification for the specified seller request.
+     */
+    public function requestModification(Request $request, SellerRequest $sellerRequest)
+    {
+        if (!in_array($sellerRequest->status, ['pending', 'under_review'])) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('الطلب غير متاح للتعديل حالياً.')], 400);
+            }
+            return redirect()->back()->with('error', __('الطلب غير متاح للتعديل حالياً.'));
+        }
+
+        $request->validate([
+            'admin_notes' => 'required|string|max:500'
+        ]);
+
+        // Update request status
+        $sellerRequest->update([
+            'status' => 'action_required',
+            'admin_notes' => $request->input('admin_notes')
+        ]);
+
+        // Send Notification to User
+        try {
+            \Illuminate\Support\Facades\Notification::send($sellerRequest->user, new \App\Notifications\GeneralNotification(
+                'مطلوب تعديل على طلب ترقية الحساب',
+                'يرجى مراجعة طلب الترقية وتعديله حسب ملاحظات الإدارة: ' . $request->input('admin_notes'),
+                ['database'],
+                url('/bidder/seller-subscription')
+            ));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Seller request modification notification failed: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => __('تم إرسال طلب التعديل للمستخدم بنجاح.')]);
+        }
+
+        return redirect()->back()->with('success', __('تم إرسال طلب التعديل للمستخدم بنجاح.'));
     }
 }

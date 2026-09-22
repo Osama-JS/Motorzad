@@ -5,6 +5,64 @@
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/admin/data-views.css') }}">
 <style>
+    /* SaaS Delete Modal Styles */
+    .modal-saas-delete .modal-content {
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .modal-saas-delete .icon-container {
+        width: 72px;
+        height: 72px;
+        border-radius: 24px;
+        background: #fef2f2;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15), inset 0 0 0 1px rgba(239, 68, 68, 0.05);
+        position: relative;
+    }
+    .modal-saas-delete .icon-container::after {
+        content: '';
+        position: absolute;
+        inset: -6px;
+        border-radius: 28px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-red {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(1.05); }
+    }
+    .modal-saas-delete .btn-cancel {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .modal-saas-delete .btn-cancel:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+    .modal-saas-delete .btn-delete {
+        background: linear-gradient(to bottom, #ef4444, #dc2626);
+        border: 1px solid #b91c1c;
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1);
+        transition: all 0.2s;
+    }
+    .modal-saas-delete .btn-delete:hover {
+        background: linear-gradient(to bottom, #dc2626, #b91c1c);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+        transform: translateY(-1px);
+    }
+
+
     /* Template Card Styles */
     .template-card {
         background: var(--bg-card, #ffffff);
@@ -187,10 +245,74 @@
         background: rgba(245, 158, 11, 0.06);
     }
     .template-action-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.2);
         color: #ef4444;
-        border-color: rgba(239, 68, 68, 0.3);
-        background: rgba(239, 68, 68, 0.06);
     }
+
+    /* Professional Table Styles */
+    .table-custom {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    .table-custom thead th {
+        background-color: var(--bg-body, #f8fafc);
+        color: var(--text-muted, #64748b);
+        font-weight: 700;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 2px solid var(--border, #e2e8f0);
+        white-space: nowrap;
+    }
+    .table-custom thead th:first-child {
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    .table-custom thead th:last-child {
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+    .table-custom tbody tr {
+        transition: all 0.2s ease;
+    }
+    .table-custom tbody tr:hover {
+        background-color: var(--bg-body, #f8fafc);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+    .table-custom tbody td {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border, #f1f5f9);
+        vertical-align: middle;
+    }
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .table-action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        color: var(--text-muted, #64748b);
+        background: transparent;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+    .table-action-btn:hover {
+        background: var(--bg-body, #f1f5f9);
+        border-color: var(--border, #e2e8f0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .table-action-btn.edit:hover { color: #3b82f6; }
+    .table-action-btn.clone:hover { color: #8b5cf6; }
+    .table-action-btn.toggle:hover { color: #10b981; }
+    .table-action-btn.delete:hover { color: #ef4444; }
 
     /* Empty state */
     .empty-state-box {
@@ -319,86 +441,92 @@
 
 @if($templates->count() > 0)
 {{-- 3. Table View (Default) --}}
-<div id="table-view-container" class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted">
-                <tr>
-                    <th class="px-4 py-3">{{ __('رقم') }}</th>
-                    <th class="py-3">{{ __('اسم القالب') }}</th>
-                    <th class="py-3">{{ __('الوصف') }}</th>
-                    <th class="py-3">{{ __('عدد الحقول') }}</th>
-                    <th class="py-3 text-center">{{ __('الطلبات') }}</th>
-                    <th class="py-3">{{ __('الحالة') }}</th>
-                    <th class="py-3">{{ __('تاريخ الإنشاء') }}</th>
-                    <th class="px-4 py-3 text-end">{{ __('إجراءات') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($templates as $template)
+<div id="table-view-container" class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
                     <tr>
-                        <td class="px-4 py-3 fw-bold text-muted">#{{ $template->id }}</td>
-                        <td class="py-3 fw-semibold text-dark">{{ $template->name }}</td>
-                        <td class="py-3 text-muted small" style="max-width: 200px;">
-                            <span class="d-inline-block text-truncate" style="max-width: 180px;">{{ $template->description ?? '---' }}</span>
-                        </td>
-                        <td class="py-3">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">
-                                <i class="fa-solid fa-layer-group me-1"></i>{{ $template->fields_count }}
-                            </span>
-                        </td>
-                        <td class="py-3 text-center">
-                            @if($template->seller_requests_count > 0)
-                                <a href="{{ route('admin.seller-requests.index', ['template_id' => $template->id]) }}" class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-1 text-decoration-none" title="{{ __('عرض الطلبات المرتبطة') }}">
-                                    <i class="fa-solid fa-file-lines me-1"></i>{{ $template->seller_requests_count }}
-                                </a>
-                            @else
-                                <span class="badge bg-light text-muted border rounded-pill px-3 py-1">0</span>
-                            @endif
-                        </td>
-                        <td class="py-3">
-                            @if($template->is_active)
-                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
-                                    <span class="status-dot active me-1"></span>{{ __('مفعل') }}
+                        <th>{{ __('رقم') }}</th>
+                        <th>{{ __('اسم القالب') }}</th>
+                        <th>{{ __('الوصف') }}</th>
+                        <th>{{ __('عدد الحقول') }}</th>
+                        <th class="text-center">{{ __('الطلبات') }}</th>
+                        <th>{{ __('الحالة') }}</th>
+                        <th>{{ __('تاريخ الإنشاء') }}</th>
+                        <th class="text-end">{{ __('إجراءات') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($templates as $template)
+                        <tr>
+                            <td class="fw-bold text-muted">#{{ $template->id }}</td>
+                            <td class="fw-bold text-dark fs-6">{{ $template->name }}</td>
+                            <td>
+                                <span class="d-inline-block text-truncate text-muted small" style="max-width: 220px;" title="{{ $template->description }}">
+                                    {{ $template->description ?: '---' }}
                                 </span>
-                            @else
-                                <span class="badge bg-secondary bg-opacity-10 text-muted rounded-pill px-3 py-1">
-                                    <span class="status-dot inactive me-1"></span>{{ __('معطل') }}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-bold">
+                                    <i class="fa-solid fa-layer-group me-1"></i>{{ $template->fields_count }}
                                 </span>
-                            @endif
-                        </td>
-                        <td class="py-3 text-muted small">{{ $template->created_at->format('Y-m-d') }}</td>
-                        <td class="px-4 py-3 text-end">
-                            <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                <a href="{{ route('admin.form-templates.edit', $template->id) }}" class="btn btn-sm btn-light border px-3" title="{{ __('تعديل') }}">
-                                    <i class="fa-solid fa-pen text-primary"></i>
-                                </a>
-                                <form action="{{ route('admin.form-templates.clone', $template->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-light border px-3" title="{{ __('نسخ / تكرار') }}">
-                                        <i class="fa-regular fa-copy text-info"></i>
-                                    </button>
-                                </form>
-                                <form action="{{ route('admin.form-templates.toggle-status', $template->id) }}" method="POST" class="d-inline">
+                            </td>
+                            <td class="text-center">
+                                @if($template->seller_requests_count > 0)
+                                    <a href="{{ route('admin.seller-requests.index', ['template_id' => $template->id]) }}" class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 text-decoration-none fw-bold" title="{{ __('عرض الطلبات المرتبطة') }}">
+                                        <i class="fa-solid fa-file-lines me-1"></i>{{ $template->seller_requests_count }}
+                                    </a>
+                                @else
+                                    <span class="badge bg-secondary bg-opacity-10 text-muted rounded-pill px-3 py-2 fw-bold">0</span>
+                                @endif
+                            </td>
+                            <td>
+                                <form action="{{ route('admin.form-templates.toggle-status', $template->id) }}" method="POST" class="d-inline ajax-toggle-form">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-sm btn-light border px-3" title="{{ $template->is_active ? __('تعطيل') : __('تفعيل') }}">
-                                        <i class="fa-solid {{ $template->is_active ? 'fa-toggle-on text-success' : 'fa-toggle-off text-muted' }}"></i>
+                                    <button type="submit" class="btn btn-sm border-0 p-0 shadow-none bg-transparent" title="{{ $template->is_active ? __('انقر للتعطيل') : __('انقر للتفعيل') }}">
+                                        @if($template->is_active)
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-bold" style="cursor: pointer; transition: all 0.2s;">
+                                                <i class="fa-solid fa-toggle-on fs-6 align-middle me-1"></i> {{ __('مفعل') }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary bg-opacity-10 text-muted rounded-pill px-3 py-2 fw-bold" style="cursor: pointer; transition: all 0.2s;">
+                                                <i class="fa-solid fa-toggle-off fs-6 align-middle me-1"></i> {{ __('معطل') }}
+                                            </span>
+                                        @endif
                                     </button>
                                 </form>
-                                <form action="{{ route('admin.form-templates.destroy', $template->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('هل أنت متأكد من حذف هذا القالب نهائياً؟') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-light border px-3" title="{{ __('حذف') }}">
-                                        <i class="fa-solid fa-trash-can text-danger"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                            </td>
+                            <td class="text-muted small fw-semibold">
+                                <i class="fa-regular fa-calendar me-1"></i>{{ $template->created_at->format('Y-m-d') }}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{{ route('admin.form-templates.edit', $template->id) }}" class="table-action-btn edit" title="{{ __('تعديل') }}">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form action="{{ route('admin.form-templates.clone', $template->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="table-action-btn clone" title="{{ __('نسخ / تكرار') }}">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('admin.form-templates.destroy', $template->id) }}" method="POST" class="d-inline ajax-delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="table-action-btn delete" title="{{ __('حذف') }}">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -415,11 +543,21 @@
                         </div>
                         <div class="flex-grow-1 min-width-0">
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h5 class="template-title text-truncate">{{ $template->name }}</h5>
-                                <span class="d-flex align-items-center gap-1 text-nowrap" style="font-size: 0.75rem; font-weight: 700; color: {{ $template->is_active ? '#10b981' : '#94a3b8' }};">
-                                    <span class="status-dot {{ $template->is_active ? 'active' : 'inactive' }}"></span>
-                                    {{ $template->is_active ? __('مفعل') : __('معطل') }}
-                                </span>
+                                <form action="{{ route('admin.form-templates.toggle-status', $template->id) }}" method="POST" class="d-inline mb-1 ajax-toggle-form">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm border-0 p-0 shadow-none bg-transparent" title="{{ $template->is_active ? __('انقر للتعطيل') : __('انقر للتفعيل') }}">
+                                        @if($template->is_active)
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+                                                <i class="fa-solid fa-toggle-on fs-6 align-middle me-1"></i> {{ __('مفعل') }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary bg-opacity-10 text-muted rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+                                                <i class="fa-solid fa-toggle-off fs-6 align-middle me-1"></i> {{ __('معطل') }}
+                                            </span>
+                                        @endif
+                                    </button>
+                                </form>
                             </div>
                             <p class="template-desc">{{ $template->description ?: __('بدون وصف') }}</p>
                         </div>
@@ -459,14 +597,8 @@
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </form>
-                        <form action="{{ route('admin.form-templates.toggle-status', $template->id) }}" method="POST" style="display: contents;">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="template-action-btn toggle" title="{{ $template->is_active ? __('تعطيل') : __('تفعيل') }}">
-                                <i class="fa-solid {{ $template->is_active ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
-                            </button>
-                        </form>
-                        <form action="{{ route('admin.form-templates.destroy', $template->id) }}" method="POST" style="display: contents;" onsubmit="return confirm('{{ __('هل أنت متأكد من حذف هذا القالب نهائياً؟') }}')">
+
+                        <form action="{{ route('admin.form-templates.destroy', $template->id) }}" method="POST" style="display: contents;" class="ajax-delete-form">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="template-action-btn danger" title="{{ __('حذف') }}">
@@ -510,6 +642,25 @@
         </div>
     </div>
 @endif
+
+{{-- Delete Confirmation Modal --}}
+<div class="modal fade modal-saas-delete" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content">
+            <div class="modal-body p-4 pt-5 text-center">
+                <div class="icon-container">
+                    <i class="fa-solid fa-trash-can fa-2x"></i>
+                </div>
+                <h4 class="fw-bold mb-2 text-dark" style="font-size: 1.25rem;">{{ __('هل أنت متأكد من الحذف؟') }}</h4>
+                <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">{{ __('هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف القالب بجميع حقوله وبياناته بشكل دائم من النظام.') }}</p>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-2 d-flex flex-nowrap gap-3">
+                <button type="button" class="btn btn-cancel rounded-3 py-2 w-50 m-0" data-bs-dismiss="modal">{{ __('تراجع') }}</button>
+                <button type="button" class="btn btn-delete rounded-3 py-2 w-50 m-0" id="confirmDeleteBtn">{{ __('تأكيد الحذف') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js')
@@ -542,6 +693,155 @@
             toggleTemplateView('grid');
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Helper to show generic toast
+        function showToast(message, type = 'success') {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: type,
+                    title: message
+                });
+            } else {
+                alert(message);
+            }
+        }
+
+        // Handle Status Toggle via AJAX
+        document.querySelectorAll('.ajax-toggle-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                let btn = form.querySelector('button');
+                let originalHtml = btn.innerHTML;
+                
+                // Show tiny spinner inside badge instead of replacing whole HTML
+                let icon = btn.querySelector('i');
+                if(icon) {
+                    icon.className = 'spinner-border spinner-border-sm me-1';
+                }
+                btn.disabled = true;
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(new FormData(form)).toString()
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if(res.ok && data.success) {
+                        showToast(data.message, 'success');
+                        
+                        // Update all identical forms (Table and Grid view)
+                        document.querySelectorAll('form[action="'+form.action+'"]').forEach(f => {
+                            let fBtn = f.querySelector('button');
+                            if(data.is_active) {
+                                fBtn.innerHTML = `
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-bold" style="cursor: pointer; transition: all 0.2s;">
+                                        <i class="fa-solid fa-toggle-on fs-6 align-middle me-1"></i> {{ __('مفعل') }}
+                                    </span>
+                                `;
+                                fBtn.title = "{{ __('انقر للتعطيل') }}";
+                            } else {
+                                fBtn.innerHTML = `
+                                    <span class="badge bg-secondary bg-opacity-10 text-muted rounded-pill px-3 py-2 fw-bold" style="cursor: pointer; transition: all 0.2s;">
+                                        <i class="fa-solid fa-toggle-off fs-6 align-middle me-1"></i> {{ __('معطل') }}
+                                    </span>
+                                `;
+                                fBtn.title = "{{ __('انقر للتفعيل') }}";
+                            }
+                            fBtn.disabled = false;
+                        });
+                    } else {
+                        showToast(data.message || 'حدث خطأ', 'error');
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    showToast('حدث خطأ أثناء الاتصال بالخادم', 'error');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            });
+        });
+
+        // Handle Delete via AJAX with Custom Modal
+        let formToDelete = null;
+
+        document.querySelectorAll('.ajax-delete-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                formToDelete = form;
+                
+                let deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                deleteModal.show();
+            });
+        });
+
+        document.getElementById('confirmDeleteBtn')?.addEventListener('click', function() {
+            if(!formToDelete) return;
+            
+            let form = formToDelete;
+            let btn = form.querySelector('button');
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+            btn.disabled = true;
+
+            // Hide the modal
+            let modalInstance = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            if(modalInstance) modalInstance.hide();
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(new FormData(form)).toString()
+            })
+            .then(async res => {
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    showToast(data.message, 'success');
+                    
+                    // Fade out Table Row
+                    let tr = form.closest('tr');
+                    if(tr) {
+                        tr.style.transition = 'all 0.4s ease';
+                        tr.style.opacity = '0';
+                        tr.style.transform = 'translateY(10px)';
+                        setTimeout(() => tr.remove(), 400);
+                    }
+                    
+                    // Fade out Grid Card
+                    let cardCol = form.closest('.col-12.col-md-6.col-xl-4');
+                    if(cardCol) {
+                        cardCol.style.transition = 'all 0.4s ease';
+                        cardCol.style.opacity = '0';
+                        cardCol.style.transform = 'scale(0.95)';
+                        setTimeout(() => cardCol.remove(), 400);
+                    }
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                showToast('حدث خطأ أثناء الاتصال بالخادم', 'error');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        });
+    });
 </script>
 @endsection
-

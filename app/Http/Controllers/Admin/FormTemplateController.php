@@ -113,10 +113,23 @@ class FormTemplateController extends Controller
 
             DB::commit();
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إنشاء قالب النماذج بنجاح!',
+                    'redirect' => route('admin.form-templates.index')
+                ]);
+            }
             return redirect()->route('admin.form-templates.index')->with('success', 'تم إنشاء قالب النماذج بنجاح!');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء حفظ القالب: ' . $e->getMessage()
+                ], 500);
+            }
             return back()->withInput()->with('error', 'حدث خطأ أثناء حفظ القالب: ' . $e->getMessage());
         }
     }
@@ -207,10 +220,23 @@ class FormTemplateController extends Controller
 
             DB::commit();
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم تحديث القالب بنجاح!',
+                    'redirect' => route('admin.form-templates.index')
+                ]);
+            }
             return redirect()->route('admin.form-templates.index')->with('success', 'تم تحديث القالب بنجاح!');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء تحديث القالب: ' . $e->getMessage()
+                ], 500);
+            }
             return back()->withInput()->with('error', 'حدث خطأ أثناء تحديث القالب: ' . $e->getMessage());
         }
     }
@@ -218,37 +244,52 @@ class FormTemplateController extends Controller
     /**
      * Remove the specified template from storage.
      */
-    public function destroy(FormTemplate $formTemplate)
+    public function destroy(Request $request, FormTemplate $formTemplate)
     {
         // Check if it's the active template in settings
         $activeTemplateId = \App\Models\Setting::get('seller_request_template_id');
         
         if ($activeTemplateId == $formTemplate->id) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'لا يمكن حذف القالب لأنه محدد كالقالب الافتراضي في إعدادات النظام. يرجى تغيير الإعدادات أولاً.'], 403);
+            }
             return back()->with('error', 'لا يمكن حذف القالب لأنه محدد كالقالب الافتراضي في إعدادات النظام. يرجى تغيير الإعدادات أولاً.');
         }
 
         $formTemplate->delete();
         
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'تم حذف القالب بنجاح.']);
+        }
         return redirect()->route('admin.form-templates.index')->with('success', 'تم حذف القالب بنجاح.');
     }
 
     /**
      * Toggle the active status of the template.
      */
-    public function toggleStatus(FormTemplate $formTemplate)
+    public function toggleStatus(Request $request, FormTemplate $formTemplate)
     {
         $formTemplate->update([
             'is_active' => !$formTemplate->is_active
         ]);
 
         $statusText = $formTemplate->is_active ? 'تفعيل' : 'تعطيل';
+        
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true, 
+                'is_active' => $formTemplate->is_active,
+                'message' => "تم {$statusText} القالب بنجاح."
+            ]);
+        }
+        
         return back()->with('success', "تم {$statusText} القالب بنجاح.");
     }
 
     /**
      * Clone the specified template.
      */
-    public function clone(FormTemplate $formTemplate)
+    public function clone(Request $request, FormTemplate $formTemplate)
     {
         try {
             DB::beginTransaction();
@@ -268,9 +309,16 @@ class FormTemplateController extends Controller
             }
 
             DB::commit();
+            
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => __('تم استنساخ القالب بنجاح. يمكنك الآن تعديله.')]);
+            }
             return redirect()->route('admin.form-templates.index')->with('success', __('تم استنساخ القالب بنجاح. يمكنك الآن تعديله.'));
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => __('حدث خطأ أثناء نسخ القالب: ') . $e->getMessage()], 500);
+            }
             return back()->with('error', __('حدث خطأ أثناء نسخ القالب: ') . $e->getMessage());
         }
     }

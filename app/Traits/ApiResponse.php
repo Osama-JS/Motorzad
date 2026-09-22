@@ -43,12 +43,16 @@ trait ApiResponse
      * @param mixed $errors
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function errorResponse(string $message = null, int $code = 400, $errors = null): JsonResponse
+    protected function errorResponse(string $message = null, int $code = 400, $errors = null, string $errorCode = null): JsonResponse
     {
         $response = [
             'success' => false,
             'message' => $message,
         ];
+
+        if (!is_null($errorCode)) {
+            $response['error_code'] = $errorCode;
+        }
 
         if (!is_null($errors)) {
             $response['errors'] = $errors;

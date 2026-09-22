@@ -6428,15 +6428,75 @@
                                         "data": {
                                             "properties": {
                                                 "status": {
-                                                    "description": "Can be: seller, pending, rejected, none",
+                                                    "description": "Can be: seller, pending, rejected, action_required, under_review, draft, none",
                                                     "type": "string",
                                                     "example": "pending"
                                                 },
                                                 "admin_notes": {
-                                                    "description": "Present if status is rejected",
+                                                    "description": "Present if status is rejected or action_required",
                                                     "type": "string",
                                                     "example": "Identity proof is not clear.",
                                                     "nullable": true
+                                                },
+                                                "template": {
+                                                    "description": "The dynamic form template to render if status is none, draft, action_required or rejected",
+                                                    "type": "object",
+                                                    "example": {
+                                                        "id": 1,
+                                                        "name": "Seller Request V1",
+                                                        "fields": [
+                                                            {
+                                                                "name": "full_name",
+                                                                "type": "text",
+                                                                "is_required": true,
+                                                                "ui_hint": {
+                                                                    "keyboard": "default"
+                                                                }
+                                                            },
+                                                            {
+                                                                "name": "city",
+                                                                "type": "select",
+                                                                "is_required": true,
+                                                                "options": [],
+                                                                "ui_hint": {
+                                                                    "keyboard": "default",
+                                                                    "widget": "bottom_sheet_picker"
+                                                                },
+                                                                "data_source_url": "http://localhost/Motorzad/public/api/locations/cities"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "nullable": true
+                                                },
+                                                "draft_data": {
+                                                    "description": "Previously saved or rejected data to pre-fill the form",
+                                                    "type": "object",
+                                                    "example": {
+                                                        "full_name": "أحمد محمد"
+                                                    },
+                                                    "nullable": true
+                                                },
+                                                "timeline": {
+                                                    "description": "A stepped progress bar indicating the user's journey to become a seller",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "step": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "إنشاء الحساب"
+                                                            },
+                                                            "status": {
+                                                                "description": "Can be: completed, current, locked, pending, under_review, action_required, rejected",
+                                                                "type": "string",
+                                                                "example": "completed"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -6464,8 +6524,50 @@
                     "Seller"
                 ],
                 "summary": "Submit Seller Subscription Request",
-                "description": "Submits a request to upgrade the authenticated user to a seller role. Requires KYC verification to be approved. Admin approval is required.",
+                "description": "Submits a request to upgrade the authenticated user to a seller role. Supports flattened JSON payloads with Base64 files, or traditional multipart/form-data. Admin approval is required.",
                 "operationId": "fbdca613536660625b0b3a0905271e83",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "template_id": 1,
+                                    "is_draft": false,
+                                    "full_name": "أحمد محمد",
+                                    "cities": [
+                                        "الرياض",
+                                        "جدة"
+                                    ],
+                                    "national_id_image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
+                                }
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "template_id"
+                                ],
+                                "properties": {
+                                    "template_id": {
+                                        "description": "ID of the form template being submitted",
+                                        "type": "integer"
+                                    },
+                                    "is_draft": {
+                                        "description": "Set to true to bypass required validations and save as draft",
+                                        "type": "boolean"
+                                    },
+                                    "data": {
+                                        "description": "Dynamic key-value pairs matching the template fields. e.g. data[national_id]=1234567890. For files, send as binary data.",
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successfully submitted the request",
@@ -6487,8 +6589,8 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request - Already a seller or KYC not approved",
+                    "403": {
+                        "description": "Forbidden - KYC not approved",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6500,6 +6602,66 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Please complete identity verification to become a seller."
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "KYC_REQUIRED"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "الحقل الاسم الكامل مطلوب."
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "VALIDATION_FAILED"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "full_name": [
+                                                    "الحقل الاسم الكامل مطلوب."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate Limit - Request already processing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Your request is already being processed."
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "RATE_LIMIT_EXCEEDED"
                                         }
                                     },
                                     "type": "object"

@@ -116,6 +116,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('seller-requests/{sellerRequest}', [\App\Http\Controllers\Admin\SellerRequestController::class, 'show'])->name('seller-requests.show');
     Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
     Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
+    Route::post('seller-requests/{sellerRequest}/modification', [\App\Http\Controllers\Admin\SellerRequestController::class, 'requestModification'])->name('seller-requests.modification');
     
     // Form Templates
     Route::patch('form-templates/{form_template}/toggle-status', [\App\Http\Controllers\Admin\FormTemplateController::class, 'toggleStatus'])->name('form-templates.toggle-status');

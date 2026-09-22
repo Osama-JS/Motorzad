@@ -146,15 +146,17 @@
 <div x-data="formBuilder()" class="row justify-content-center">
     <div class="col-lg-8">
         
-        @if ($errors->any())
-            <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4">
-                <ul class="mb-0 ps-3">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <div id="formErrorsContainer">
+            @if ($errors->any())
+                <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4">
+                    <ul class="mb-0 ps-3">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
 
         <form action="{{ route('admin.form-templates.store') }}" method="POST" id="templateForm">
             @csrf
@@ -201,8 +203,8 @@
                                 {{-- Top Accent Line --}}
                                 <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px; opacity: 0.8; border-radius: 16px 16px 0 0;"></div>
 
-                                {{-- Hidden Name Input --}}
-                                <input type="hidden" :name="'fields['+index+'][name]'" x-model="field.name">
+                                {{-- Hidden Name Input (Auto-generated from label) --}}
+                                <input type="hidden" :name="'fields['+index+'][name]'" :value="field.name || slugifyArabic(field.label || '')">
 
                                 {{-- Card Header --}}
                                 <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-light bg-opacity-50">
@@ -538,7 +540,7 @@
             addField() {
                 this.fields.push({
                     id: this.fieldIdCounter++,
-                    name: 'field_' + Math.random().toString(36).substr(2, 6),
+                    name: '',
                     label: '',
                     type: 'text',
                     is_required: true,
@@ -557,7 +559,128 @@
             }
         }))
     })
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('templateForm');
+        if(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get submit button (there might be multiple, get the one in the top header or preview)
+                let btn = document.activeElement;
+                if(!btn || btn.type !== 'submit') {
+                    btn = form.querySelector('button[type="submit"]');
+                }
+                
+                let originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> جاري الحفظ...';
+                btn.disabled = true;
+
+                // Clear previous errors
+                document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                let errorContainer = document.getElementById('formErrorsContainer');
+                if(errorContainer) errorContainer.innerHTML = '';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(form)
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if(res.ok && data.success) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'تم الحفظ بنجاح',
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = data.redirect;
+                            });
+                        } else {
+                            alert(data.message);
+                            window.location.href = data.redirect;
+                        }
+                    } else if (res.status === 422) {
+                        // Validation errors
+                        let errorsHtml = '<div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4"><ul class="mb-0 ps-3">';
+                        for(let key in data.errors) {
+                            errorsHtml += `<li>${data.errors[key][0]}</li>`;
+                            // Try to highlight field
+                            let fieldName = key;
+                            if (key.includes('.')) {
+                                const parts = key.split('.');
+                                fieldName = `${parts[0]}[${parts[1]}][${parts[2]}]`;
+                            }
+                            let field = form.querySelector(`[name="${fieldName}"]`);
+                            if(field) field.classList.add('is-invalid');
+                        }
+                        errorsHtml += '</ul></div>';
+                        
+                        if(errorContainer) {
+                            errorContainer.innerHTML = errorsHtml;
+                        }
+                        
+                        // Scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    } else {
+                        // Generic error
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('خطأ', data.message || 'حدث خطأ غير متوقع', 'error');
+                        } else {
+                            alert(data.message || 'حدث خطأ غير متوقع');
+                        }
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('خطأ', 'حدث خطأ أثناء الاتصال بالخادم', 'error');
+                    } else {
+                        alert('حدث خطأ أثناء الاتصال بالخادم');
+                    }
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            });
+        }
+    });
+
+    // Helper to generate clean API keys from Arabic/English titles
+    window.slugifyArabic = function(text) {
+        if (!text) return 'field_' + Math.floor(Math.random() * 1000);
+        
+        const arMap = {
+            'أ':'a','إ':'e','آ':'a','ا':'a','ب':'b','ت':'t','ث':'th',
+            'ج':'j','ح':'h','خ':'kh','د':'d','ذ':'dh','ر':'r','ز':'z',
+            'س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a',
+            'غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n',
+            'ه':'h','و':'w','ي':'y','ة':'a','ى':'a','ئ':'e','ء':'a','ؤ':'o',
+            ' ':'_','-':'_'
+        };
+
+        let slug = '';
+        for (let i = 0; i < text.length; i++) {
+            let char = text[i];
+            if (arMap[char]) {
+                slug += arMap[char];
+            } else if (/[a-zA-Z0-9_]/.test(char)) {
+                slug += char.toLowerCase();
+            }
+        }
+        
+        slug = slug.replace(/_+/g, '_').replace(/^_|_$/g, '');
+        return slug || 'field_' + Math.floor(Math.random() * 1000);
+    };
 </script>
 @endsection
-
-
