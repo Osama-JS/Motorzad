@@ -43,18 +43,64 @@ class SellerSubscriptionController extends Controller
                                     'name' => 'Seller Request V1',
                                     'fields' => [
                                         [
+                                            'name' => 'step_1',
+                                            'type' => 'step-divider',
+                                            'label' => 'البيانات الشخصية'
+                                        ],
+                                        [
+                                            'name' => 'info_msg',
+                                            'type' => 'html',
+                                            'label' => 'تنبيه',
+                                            'description' => '<p>يرجى إدخال بياناتك بدقة.</p>'
+                                        ],
+                                        [
                                             'name' => 'full_name',
                                             'type' => 'text',
                                             'is_required' => true,
                                             'ui_hint' => ['keyboard' => 'default']
                                         ],
                                         [
+                                            'name' => 'about_store',
+                                            'type' => 'textarea',
+                                            'is_required' => false
+                                        ],
+                                        [
+                                            'name' => 'national_id_image',
+                                            'type' => 'file',
+                                            'is_required' => true,
+                                            'ui_hint' => ['picker' => 'image_and_pdf']
+                                        ],
+                                        [
                                             'name' => 'city',
                                             'type' => 'select',
                                             'is_required' => true,
                                             'options' => [],
-                                            'ui_hint' => ['keyboard' => 'default', 'widget' => 'bottom_sheet_picker'],
+                                            'ui_hint' => ['widget' => 'bottom_sheet_picker'],
                                             'data_source_url' => 'http://localhost/Motorzad/public/api/locations/cities'
+                                        ],
+                                        [
+                                            'name' => 'services',
+                                            'type' => 'multi-select',
+                                            'is_required' => false,
+                                            'options' => ['صيانة', 'تلميع', 'فحص'],
+                                            'ui_hint' => ['widget' => 'bottom_sheet_picker']
+                                        ],
+                                        [
+                                            'name' => 'company_size',
+                                            'type' => 'radio',
+                                            'is_required' => true,
+                                            'options' => ['صغيرة', 'متوسطة', 'كبيرة']
+                                        ],
+                                        [
+                                            'name' => 'birth_date',
+                                            'type' => 'date',
+                                            'is_required' => true
+                                        ],
+                                        [
+                                            'name' => 'terms_agreed',
+                                            'type' => 'checkbox',
+                                            'is_required' => true,
+                                            'ui_hint' => ['widget' => 'switch']
                                         ]
                                     ]
                                 ]
@@ -180,8 +226,13 @@ class SellerSubscriptionController extends Controller
                             'template_id' => 1,
                             'is_draft' => false,
                             'full_name' => 'أحمد محمد',
-                            'cities' => ['الرياض', 'جدة'],
-                            'national_id_image' => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...'
+                            'about_store' => 'متجر متخصص في صيانة السيارات.',
+                            'national_id_image' => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+                            'city' => 'الرياض',
+                            'services' => ['صيانة', 'فحص'],
+                            'company_size' => 'متوسطة',
+                            'birth_date' => '1990-01-15',
+                            'terms_agreed' => true
                         ]
                     )
                 ),
