@@ -93,9 +93,14 @@ class FormTemplateController extends Controller
                 $optionsArray = null;
                 if (in_array($fieldData['type'], ['select', 'radio', 'multi-select']) && !empty($fieldData['options'])) {
                     // split by comma, trim, filter empty
-                    $optionsArray = array_values(array_filter(array_map('trim', explode(',', $fieldData['options'])), function($val) {
+                    $cleanOptions = str_replace('،', ',', $fieldData['options']);
+                    $flatArray = array_values(array_filter(array_map('trim', explode(',', $cleanOptions)), function($val) {
                         return $val !== '';
                     }));
+                    $optionsArray = [];
+                    foreach($flatArray as $idx => $val) {
+                        $optionsArray[] = ['id' => $idx, 'title' => $val];
+                    }
                 }
 
                 $template->fields()->create([
@@ -143,8 +148,12 @@ class FormTemplateController extends Controller
         
         // Prepare options string for Alpine JS
         foreach ($formTemplate->fields as $field) {
-            if (is_array($field->options)) {
-                $field->options_string = implode(', ', $field->options);
+            if (is_array($field->options) && count($field->options) > 0) {
+                if (isset($field->options[0]) && is_array($field->options[0]) && isset($field->options[0]['title'])) {
+                    $field->options_string = implode(', ', array_column($field->options, 'title'));
+                } else {
+                    $field->options_string = implode(', ', $field->options);
+                }
             } else {
                 $field->options_string = '';
             }
@@ -196,9 +205,14 @@ class FormTemplateController extends Controller
             foreach ($request->fields as $fieldData) {
                 $optionsArray = null;
                 if (in_array($fieldData['type'], ['select', 'radio', 'multi-select']) && !empty($fieldData['options'])) {
-                    $optionsArray = array_values(array_filter(array_map('trim', explode(',', $fieldData['options'])), function($val) {
+                    $cleanOptions = str_replace('،', ',', $fieldData['options']);
+                    $flatArray = array_values(array_filter(array_map('trim', explode(',', $cleanOptions)), function($val) {
                         return $val !== '';
                     }));
+                    $optionsArray = [];
+                    foreach($flatArray as $idx => $val) {
+                        $optionsArray[] = ['id' => $idx, 'title' => $val];
+                    }
                 }
 
                 $name = !empty($fieldData['name']) ? $fieldData['name'] : 'field_' . Str::random(6);

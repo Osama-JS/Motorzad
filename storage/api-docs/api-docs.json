@@ -6492,9 +6492,18 @@
                                                                 "type": "multi-select",
                                                                 "is_required": false,
                                                                 "options": [
-                                                                    "صيانة",
-                                                                    "تلميع",
-                                                                    "فحص"
+                                                                    {
+                                                                        "id": 0,
+                                                                        "title": "صيانة"
+                                                                    },
+                                                                    {
+                                                                        "id": 1,
+                                                                        "title": "تلميع"
+                                                                    },
+                                                                    {
+                                                                        "id": 2,
+                                                                        "title": "فحص"
+                                                                    }
                                                                 ],
                                                                 "ui_hint": {
                                                                     "widget": "bottom_sheet_picker"
@@ -6505,9 +6514,18 @@
                                                                 "type": "radio",
                                                                 "is_required": true,
                                                                 "options": [
-                                                                    "صغيرة",
-                                                                    "متوسطة",
-                                                                    "كبيرة"
+                                                                    {
+                                                                        "id": 0,
+                                                                        "title": "صغيرة"
+                                                                    },
+                                                                    {
+                                                                        "id": 1,
+                                                                        "title": "متوسطة"
+                                                                    },
+                                                                    {
+                                                                        "id": 2,
+                                                                        "title": "كبيرة"
+                                                                    }
                                                                 ]
                                                             },
                                                             {
@@ -6597,12 +6615,12 @@
                                     "full_name": "أحمد محمد",
                                     "about_store": "متجر متخصص في صيانة السيارات.",
                                     "national_id_image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
-                                    "city": "الرياض",
+                                    "city": 15,
                                     "services": [
-                                        "صيانة",
-                                        "فحص"
+                                        0,
+                                        2
                                     ],
-                                    "company_size": "متوسطة",
+                                    "company_size": 1,
                                     "birth_date": "1990-01-15",
                                     "terms_agreed": true
                                 }

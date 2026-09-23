@@ -71,6 +71,16 @@ class SellerSubscriptionController extends Controller
                                             'ui_hint' => ['picker' => 'image_and_pdf']
                                         ],
                                         [
+                                            'name' => 'account_type',
+                                            'type' => 'select',
+                                            'is_required' => true,
+                                            'options' => [
+                                                ['id' => 0, 'title' => 'أفراد'],
+                                                ['id' => 1, 'title' => 'شركات']
+                                            ],
+                                            'ui_hint' => ['widget' => 'bottom_sheet_picker']
+                                        ],
+                                        [
                                             'name' => 'city',
                                             'type' => 'select',
                                             'is_required' => true,
@@ -82,14 +92,22 @@ class SellerSubscriptionController extends Controller
                                             'name' => 'services',
                                             'type' => 'multi-select',
                                             'is_required' => false,
-                                            'options' => ['صيانة', 'تلميع', 'فحص'],
+                                            'options' => [
+                                                ['id' => 0, 'title' => 'صيانة'],
+                                                ['id' => 1, 'title' => 'تلميع'],
+                                                ['id' => 2, 'title' => 'فحص']
+                                            ],
                                             'ui_hint' => ['widget' => 'bottom_sheet_picker']
                                         ],
                                         [
                                             'name' => 'company_size',
                                             'type' => 'radio',
                                             'is_required' => true,
-                                            'options' => ['صغيرة', 'متوسطة', 'كبيرة']
+                                            'options' => [
+                                                ['id' => 0, 'title' => 'صغيرة'],
+                                                ['id' => 1, 'title' => 'متوسطة'],
+                                                ['id' => 2, 'title' => 'كبيرة']
+                                            ]
                                         ],
                                         [
                                             'name' => 'birth_date',
@@ -228,9 +246,10 @@ class SellerSubscriptionController extends Controller
                             'full_name' => 'أحمد محمد',
                             'about_store' => 'متجر متخصص في صيانة السيارات.',
                             'national_id_image' => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
-                            'city' => 'الرياض',
-                            'services' => ['صيانة', 'فحص'],
-                            'company_size' => 'متوسطة',
+                            'account_type' => 1,
+                            'city' => 15,
+                            'services' => [0, 2],
+                            'company_size' => 1,
                             'birth_date' => '1990-01-15',
                             'terms_agreed' => true
                         ]
@@ -398,6 +417,38 @@ class SellerSubscriptionController extends Controller
             $isDraft = filter_var($request->input('is_draft', false), FILTER_VALIDATE_BOOLEAN);
             $inputValue = $request->input("{$prefix}{$field->name}");
             
+            // Map numeric ID to string title for static options
+            if (in_array($field->type, ['select', 'radio', 'multi-select']) && !empty($field->options)) {
+                $optionsDict = array_column($field->options, 'title', 'id');
+                if ($field->type === 'multi-select' && is_array($inputValue)) {
+                    $mappedArray = [];
+                    foreach ($inputValue as $val) {
+                        if (is_numeric($val) && isset($optionsDict[(int)$val])) {
+                            $mappedArray[] = $optionsDict[(int)$val];
+                        } else {
+                            $mappedArray[] = $val;
+                        }
+                    }
+                    $inputValue = $mappedArray;
+                    if ($hasDataWrapper) {
+                        $submittedData[$field->name] = $inputValue;
+                        $request->merge(['data' => $submittedData]);
+                    } else {
+                        $request->merge([$field->name => $inputValue]);
+                    }
+                } elseif (!is_array($inputValue) && $inputValue !== null && $inputValue !== '') {
+                    if (is_numeric($inputValue) && isset($optionsDict[(int)$inputValue])) {
+                        $inputValue = $optionsDict[(int)$inputValue];
+                        if ($hasDataWrapper) {
+                            $submittedData[$field->name] = $inputValue;
+                            $request->merge(['data' => $submittedData]);
+                        } else {
+                            $request->merge([$field->name => $inputValue]);
+                        }
+                    }
+                }
+            }
+            
             $hasOldFile = $field->type === 'file' && !empty($oldData[$field->name]);
             $isNewFileUpload = $field->type === 'file' && $request->hasFile("{$prefix}{$field->name}");
             $isBase64Upload = $field->type === 'file' && !$isNewFileUpload && !empty($inputValue) && is_string($inputValue) && str_starts_with($inputValue, 'data:');
@@ -446,9 +497,16 @@ class SellerSubscriptionController extends Controller
                 $ruleSet[] = 'array';
                 // Only enforce static options validation if options actually exist (skip for Remote URLs)
                 if (is_array($field->options) && count($field->options) > 0) {
-                    $rules["{$prefix}{$field->name}.*"] = ['string', \Illuminate\Validation\Rule::in($field->options)];
+                    $titles = array_column($field->options, 'title');
+                    $rules["{$prefix}{$field->name}.*"] = ['string', \Illuminate\Validation\Rule::in($titles)];
                 } else {
                     $rules["{$prefix}{$field->name}.*"] = ['string'];
+                }
+            } elseif (in_array($field->type, ['select', 'radio'])) {
+                $ruleSet[] = 'string';
+                if (is_array($field->options) && count($field->options) > 0) {
+                    $titles = array_column($field->options, 'title');
+                    $ruleSet[] = \Illuminate\Validation\Rule::in($titles);
                 }
             } else {
                 $ruleSet[] = 'string';
