@@ -4288,6 +4288,310 @@
                 ]
             }
         },
+        "/api/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get user notifications with pagination",
+                "description": "Returns a paginated list of the authenticated user notifications, ordered by newest first, with support for filtering by unread/read.",
+                "operationId": "6d56a555955089a73fdf3f7229e8ead8",
+                "parameters": [
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter notifications: all, unread, or read",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "all",
+                                "unread",
+                                "read"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (default: 15, max: 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of notifications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "message": "تم جلب الإشعارات بنجاح.",
+                                    "data": [
+                                        {
+                                            "id": "9d1a8e32-2023-4318-8f85-3b91fa876251",
+                                            "title": "⚡ تم تجاوز عرضك في المزاد!",
+                                            "body": "قام مزايد آخر بتقديم عرض أعلى على تويوتا لاندكروزر بقيمة 155,000 ريال.",
+                                            "action_url": "https://motorzad.com/bidder/auctions/5",
+                                            "type": "outbid",
+                                            "extra_data": {
+                                                "auction_id": 5,
+                                                "new_price": 155000,
+                                                "type": "outbid"
+                                            },
+                                            "read": false,
+                                            "read_at": null,
+                                            "created_at": "2026-09-24T12:30:00.000000Z",
+                                            "created_at_human": "منذ 5 دقائق"
+                                        }
+                                    ],
+                                    "meta": {
+                                        "unread_count": 3,
+                                        "current_page": 1,
+                                        "last_page": 3,
+                                        "per_page": 15,
+                                        "total": 38,
+                                        "has_more_pages": true,
+                                        "next_page_url": "https://motorzad.com/api/notifications?page=2",
+                                        "prev_page_url": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get unread notifications count",
+                "description": "Returns the total number of unread notifications for badge display in the mobile app header/tabs.",
+                "operationId": "f3e05b69d516049be949f02a45e0eedd",
+                "responses": {
+                    "200": {
+                        "description": "Unread count returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "data": {
+                                        "unread_count": 4
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark single notification as read",
+                "description": "Marks a specific notification by UUID as read and returns the updated unread count.",
+                "operationId": "89d94089af487b4bafdd6b9db9c55478",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Notification UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "9d1a8e32-2023-4318-8f85-3b91fa876251"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification marked as read successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "message": "تم تحديد الإشعار كمقروء.",
+                                    "data": {
+                                        "id": "9d1a8e32-2023-4318-8f85-3b91fa876251",
+                                        "read": true,
+                                        "read_at": "2026-09-24T12:35:10.000000Z",
+                                        "unread_count": 2
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": true,
+                                    "message": "الإشعار غير موجود أو لا تملك صلاحية الوصول إليه.",
+                                    "data": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/read-all": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications as read",
+                "description": "Marks all unread notifications of the user as read in one batch.",
+                "operationId": "718a717f6b5121abe1eb63ece7684028",
+                "responses": {
+                    "200": {
+                        "description": "All notifications marked as read",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "message": "تم تحديد جميع الإشعارات كمقروءة بنجاح.",
+                                    "data": {
+                                        "unread_count": 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/fcm-token": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Register or update FCM Device Token",
+                "description": "Registers or updates the Firebase Cloud Messaging device push token for the authenticated user. Calling this is required for the user to receive mobile push notifications.",
+                "operationId": "e2ed36db9de89aad08a0f7d7e19b0135",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fcm_token"
+                                ],
+                                "properties": {
+                                    "fcm_token": {
+                                        "description": "FCM push registration token generated by FirebaseMessaging SDK on Android/iOS",
+                                        "type": "string",
+                                        "example": "eKJ...fcm_device_token_from_firebase_sdk..."
+                                    },
+                                    "device_token": {
+                                        "description": "Alias for fcm_token",
+                                        "type": "string",
+                                        "example": "eKJ...fcm_device_token_from_firebase_sdk..."
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "fcm_token": "eKJ...fcm_device_token_from_firebase_sdk..."
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "FCM token updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "message": "تم تحديث رمز إشعارات الجهاز (FCM Token) بنجاح.",
+                                    "data": {
+                                        "fcm_token": "eKJ...fcm_device_token_from_firebase_sdk..."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Token is missing",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": true,
+                                    "message": "يجب إرسال رمز الجهاز (fcm_token).",
+                                    "data": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/orders": {
             "get": {
                 "tags": [
@@ -6478,6 +6782,24 @@
                                                                 }
                                                             },
                                                             {
+                                                                "name": "account_type",
+                                                                "type": "select",
+                                                                "is_required": true,
+                                                                "options": [
+                                                                    {
+                                                                        "id": 0,
+                                                                        "title": "أفراد"
+                                                                    },
+                                                                    {
+                                                                        "id": 1,
+                                                                        "title": "شركات"
+                                                                    }
+                                                                ],
+                                                                "ui_hint": {
+                                                                    "widget": "bottom_sheet_picker"
+                                                                }
+                                                            },
+                                                            {
                                                                 "name": "city",
                                                                 "type": "select",
                                                                 "is_required": true,
@@ -6615,6 +6937,7 @@
                                     "full_name": "أحمد محمد",
                                     "about_store": "متجر متخصص في صيانة السيارات.",
                                     "national_id_image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
+                                    "account_type": 1,
                                     "city": 15,
                                     "services": [
                                         0,
@@ -7696,6 +8019,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Notifications",
+            "description": "API endpoints for managing user in-app and push notifications"
+        },
         {
             "name": "Auctions",
             "description": "Auctions"

@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::prefix('notifications')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::get('/unread-count', [\App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
         Route::post('/fcm-token', [\App\Http\Controllers\Api\NotificationController::class, 'updateFcmToken']);
         Route::post('/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
         Route::post('/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);

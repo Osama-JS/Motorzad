@@ -261,8 +261,9 @@ class AuctionService
                             'amount' => number_format($deposit->amount, 2),
                             'title' => $auction->title
                         ]),
-                        ['database'],
-                        url('/bidder/wallet')
+                        ['database', 'fcm'],
+                        url('/bidder/wallet'),
+                        ['type' => 'deposit_refund', 'auction_id' => $auction->id]
                     ));
                 }
             } catch (\Throwable $e) {
@@ -303,8 +304,9 @@ class AuctionService
                         __('تم إلغاء حجز مبلغ الضمان :amount ريال وإعادته لرصيد محفظتك المتاح.', [
                             'amount' => number_format($deposit->amount, 2)
                         ]),
-                        ['database'],
-                        url('/bidder/wallet')
+                        ['database', 'fcm'],
+                        url('/bidder/wallet'),
+                        ['type' => 'deposit_refund', 'auction_id' => $auction->id]
                     ));
                 }
             } catch (\Throwable $e) {
