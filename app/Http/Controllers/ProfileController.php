@@ -69,9 +69,33 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // 1. Check wallet balance
+        if ($user->wallet && $user->wallet->balance > 0) {
+            return Redirect::back()->withErrors(['userDeletion' => __('لا يمكن حذف الحساب لوجود رصيد متاح في المحفظة. يرجى سحب الرصيد أولاً.')]);
+        }
 
-        $user->delete();
+        // 2. Check active or scheduled auctions
+        $hasActiveAuctions = \App\Models\Auction::where('created_by', $user->id)
+            ->whereIn('status', ['live', 'scheduled'])
+            ->exists();
+            
+        if ($hasActiveAuctions) {
+            return Redirect::back()->withErrors(['userDeletion' => __('لا يمكن حذف الحساب لوجود مزادات نشطة أو مجدولة.')]);
+        }
+
+        // 3. Check active bids
+        $hasActiveBids = \App\Models\Bid::where('user_id', $user->id)
+            ->active()
+            ->exists();
+            
+        if ($hasActiveBids) {
+            return Redirect::back()->withErrors(['userDeletion' => __('لا يمكن حذف الحساب لوجود مزايدات نشطة لك في مزادات حالية.')]);
+        }
+
+        $user->is_deleted = true;
+        $user->save();
+
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

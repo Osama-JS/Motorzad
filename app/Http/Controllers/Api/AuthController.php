@@ -324,7 +324,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt(array_merge($request->only('email', 'password'), ['is_deleted' => false]))) {
             return response()->json([
                 'error'   => true,
                 'message' => __('Invalid credentials.'),
@@ -1318,6 +1318,120 @@ class AuthController extends Controller
             'data' => [
                 'auto_bid_enabled' => $user->auto_bid_enabled
             ],
+        ]);
+    }
+
+    /**
+     * Delete user account.
+     */
+    #[OA\Delete(
+        path: "/api/auth/account",
+        summary: "Delete user account",
+        operationId: "deleteAccount",
+        description: "Deletes the authenticated user's account after verifying password and business rules.",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        parameters: [
+            new OA\Parameter(name: "Accept-Language", in: "header", required: false, schema: new OA\Schema(type: "string", default: "en", enum: ["en", "ar"]))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["password"],
+                properties: [
+                    new OA\Property(property: "password", type: "string", example: "P@ssw0rd123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Account deleted successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: false),
+                        new OA\Property(property: "message", type: "string", example: "تم حذف حسابك بنجاح.")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400, 
+                description: "Business logic error (e.g. active balance or auctions)",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "لا يمكن حذف الحساب لوجود رصيد متاح في المحفظة. يرجى سحب الرصيد أولاً.")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422, 
+                description: "Validation error (incorrect password)",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "error", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "كلمة المرور غير صحيحة.")
+                    ]
+                )
+            )
+        ]
+    )]
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'error' => true,
+                'message' => __('كلمة المرور غير صحيحة.'),
+            ], 422);
+        }
+
+        // 1. Check wallet balance
+        if ($user->wallet && $user->wallet->balance > 0) {
+            return response()->json([
+                'error' => true,
+                'message' => __('لا يمكن حذف الحساب لوجود رصيد متاح في المحفظة. يرجى سحب الرصيد أولاً.')
+            ], 400);
+        }
+
+        // 2. Check active or scheduled auctions
+        $hasActiveAuctions = \App\Models\Auction::where('created_by', $user->id)
+            ->whereIn('status', ['live', 'scheduled'])
+            ->exists();
+            
+        if ($hasActiveAuctions) {
+            return response()->json([
+                'error' => true,
+                'message' => __('لا يمكن حذف الحساب لوجود مزادات نشطة أو مجدولة.')
+            ], 400);
+        }
+
+        // 3. Check active bids
+        $hasActiveBids = \App\Models\Bid::where('user_id', $user->id)
+            ->active()
+            ->exists();
+            
+        if ($hasActiveBids) {
+            return response()->json([
+                'error' => true,
+                'message' => __('لا يمكن حذف الحساب لوجود مزايدات نشطة لك في مزادات حالية.')
+            ], 400);
+        }
+
+        $user->is_deleted = true;
+        $user->save();
+
+        // Revoke all tokens
+        $user->tokens()->delete();
+
+        return response()->json([
+            'error' => false,
+            'message' => __('تم حذف حسابك بنجاح.'),
         ]);
     }
 }

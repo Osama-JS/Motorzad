@@ -78,6 +78,9 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Auto Bid Settings
         Route::post('auto-bid-settings', [AuthController::class, 'updateAutoBidSettings']);
+
+        // Account Deletion
+        Route::delete('account', [AuthController::class, 'deleteAccount']);
     });
 
     // KYC

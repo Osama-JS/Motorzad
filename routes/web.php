@@ -81,6 +81,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
         Route::post('/kyc', [\App\Http\Controllers\KycController::class, 'store'])->name('kyc.store');
     });
+
+    // Account Deletion for Mobile Webview / Google Play Policy
+    Route::get('/account-deletion', [\App\Http\Controllers\AccountDeletionController::class, 'show'])->name('account.delete.show');
+    Route::post('/account-deletion', [\App\Http\Controllers\AccountDeletionController::class, 'destroy'])->name('account.delete.confirm');
 });
 
 // مسارات إدارة حركات المحفظة المخصصة بالمعيار الصناعي (ذات أولوية توجيه عليا)

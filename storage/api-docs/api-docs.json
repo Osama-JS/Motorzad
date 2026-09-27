@@ -3069,6 +3069,117 @@
                 ]
             }
         },
+        "/api/auth/account": {
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Delete user account",
+                "description": "Deletes the authenticated user's account after verifying password and business rules.",
+                "operationId": "deleteAccount",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "example": "P@ssw0rd123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Account deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم حذف حسابك بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Business logic error (e.g. active balance or auctions)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لا يمكن حذف الحساب لوجود رصيد متاح في المحفظة. يرجى سحب الرصيد أولاً."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (incorrect password)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "كلمة المرور غير صحيحة."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/bank-details": {
             "get": {
                 "tags": [
@@ -6478,6 +6589,24 @@
                                                                 }
                                                             },
                                                             {
+                                                                "name": "account_type",
+                                                                "type": "select",
+                                                                "is_required": true,
+                                                                "options": [
+                                                                    {
+                                                                        "id": 0,
+                                                                        "title": "أفراد"
+                                                                    },
+                                                                    {
+                                                                        "id": 1,
+                                                                        "title": "شركات"
+                                                                    }
+                                                                ],
+                                                                "ui_hint": {
+                                                                    "widget": "bottom_sheet_picker"
+                                                                }
+                                                            },
+                                                            {
                                                                 "name": "city",
                                                                 "type": "select",
                                                                 "is_required": true,
@@ -6615,6 +6744,7 @@
                                     "full_name": "أحمد محمد",
                                     "about_store": "متجر متخصص في صيانة السيارات.",
                                     "national_id_image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
+                                    "account_type": 1,
                                     "city": 15,
                                     "services": [
                                         0,
