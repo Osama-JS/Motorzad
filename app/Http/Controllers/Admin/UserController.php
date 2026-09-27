@@ -298,14 +298,42 @@ class UserController extends Controller
         }
 
         if ($newStatus === 'approved') {
-            \Illuminate\Support\Facades\Mail::raw('يسعدنا إخبارك بأنه تم قبول طلب التحقق (KYC) الخاص بك بنجاح. حسابك الآن موثق بالكامل ويمكنك استخدام كافة مميزات المنصة.', function ($message) use ($user) {
-                $message->to($user->email)->subject('تم قبول توثيق حسابك ✅ - موتورزاد');
-            });
+            try {
+                $user->notify(new \App\Notifications\GeneralNotification(
+                    'تم توثيق حسابك بنجاح 🎉',
+                    'يسعدنا إخبارك بأنه تم قبول طلب التحقق (KYC) الخاص بك بنجاح. حسابك الآن موثق بالكامل ويمكنك استخدام كافة مميزات المنصة.',
+                    ['database', 'fcm'],
+                    url('/bidder/profile'),
+                    ['type' => 'kyc_approved']
+                ));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to send KYC approval notification: " . $e->getMessage());
+            }
+
+            try {
+                \Illuminate\Support\Facades\Mail::raw('يسعدنا إخبارك بأنه تم قبول طلب التحقق (KYC) الخاص بك بنجاح. حسابك الآن موثق بالكامل ويمكنك استخدام كافة مميزات المنصة.', function ($message) use ($user) {
+                    $message->to($user->email)->subject('تم قبول توثيق حسابك ✅ - موتورزاد');
+                });
+            } catch (\Throwable $e) {}
         } elseif ($newStatus === 'rejected') {
             $note = $request->note ? "\nسبب الرفض: " . $request->note : "";
-            \Illuminate\Support\Facades\Mail::raw('نأسف لإخبارك بأنه تم رفض طلب التحقق (KYC) الخاص بك.' . $note . "\nيرجى إعادة رفع المستندات بشكل أوضح.", function ($message) use ($user) {
-                $message->to($user->email)->subject('تم رفض توثيق حسابك ❌ - موتورزاد');
-            });
+            try {
+                $user->notify(new \App\Notifications\GeneralNotification(
+                    'تحديث بخصوص توثيق الحساب (KYC)',
+                    'نأسف لإخبارك بأنه تم رفض طلب التحقق (KYC) الخاص بك.' . ($request->note ? " السبب: {$request->note}." : '') . ' يرجى إعادة رفع المستندات.',
+                    ['database', 'fcm'],
+                    url('/bidder/kyc'),
+                    ['type' => 'kyc_rejected', 'note' => $request->note]
+                ));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to send KYC rejection notification: " . $e->getMessage());
+            }
+
+            try {
+                \Illuminate\Support\Facades\Mail::raw('نأسف لإخبارك بأنه تم رفض طلب التحقق (KYC) الخاص بك.' . $note . "\nيرجى إعادة رفع المستندات بشكل أوضح.", function ($message) use ($user) {
+                    $message->to($user->email)->subject('تم رفض توثيق حسابك ❌ - موتورزاد');
+                });
+            } catch (\Throwable $e) {}
         }
 
         return response()->json([
