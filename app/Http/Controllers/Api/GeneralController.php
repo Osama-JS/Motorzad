@@ -40,7 +40,8 @@ class GeneralController extends Controller
                             'support_whatsapp_url' => 'https://wa.me/966500000000',
                             'whatsapp_url' => 'https://wa.me/966500000000',
                             'twitter_url' => 'https://twitter.com/Motorzad',
-                            'telegram_url' => 'https://t.me/Motorzad'
+                            'telegram_url' => 'https://t.me/Motorzad',
+                            'account_deletion_url' => 'https://motorzad.com/account-deletion'
                         ]
                     ]
                 )
@@ -65,6 +66,8 @@ class GeneralController extends Controller
 
         $settings = Setting::whereIn('key', $keys)->pluck('value', 'key');
         
+        $settings['account_deletion_url'] = url('/account-deletion');
+
         return response()->json([
             'success' => true,
             'data' => $settings

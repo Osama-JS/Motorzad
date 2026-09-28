@@ -89,6 +89,7 @@
                     <option value="approved">{{ __('Approved') }}</option>
                     <option value="pending">{{ __('Pending') }}</option>
                     <option value="rejected">{{ __('Rejected') }}</option>
+                    <option value="deleted">{{ __('Deleted Accounts') }}</option>
                 </select>
             </div>
             <div class="col-md-2">

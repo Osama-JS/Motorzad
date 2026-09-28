@@ -19,6 +19,7 @@ class UserController extends Controller
             'pending' => User::where('is_deleted', false)->where('status', 'pending')->count(),
             'rejected' => User::where('is_deleted', false)->where('status', 'rejected')->count(),
             'unverified' => User::where('is_deleted', false)->whereNull('email_verified_at')->count(),
+            'deleted' => User::where('is_deleted', true)->count(),
         ];
         
         $roles = Role::all();
@@ -30,7 +31,14 @@ class UserController extends Controller
      */
     public function getData(Request $request)
     {
-        $query = User::with(['roles', 'latestKycRequest'])->where('is_deleted', false);
+        $query = User::with(['roles', 'latestKycRequest']);
+        
+        // Filter by deleted status
+        if ($request->filled('status') && $request->status === 'deleted') {
+            $query->where('is_deleted', true);
+        } else {
+            $query->where('is_deleted', false);
+        }
 
         // Filtering
         if ($request->filled('search')) {
@@ -43,7 +51,7 @@ class UserController extends Controller
             });
         }
 
-        if ($request->filled('status') && $request->status !== 'all') {
+        if ($request->filled('status') && $request->status !== 'all' && $request->status !== 'deleted') {
             $query->where('status', $request->status);
         }
 
@@ -58,7 +66,9 @@ class UserController extends Controller
         $users = $query->latest()->paginate($perPage);
 
         $data = $users->map(function($user) {
-            if ($user->status === 'approved') {
+            if ($user->is_deleted) {
+                $statusBadge = '<span class="badge" style="background-color: #dc3545; color: white;">'.__("حساب محذوف").' 🗑️</span>';
+            } elseif ($user->status === 'approved') {
                 $statusBadge = '<span class="badge badge-success">'.__("Approved").' ✅</span>';
             } elseif ($user->status === 'rejected') {
                 $statusBadge = '<span class="badge badge-danger">'.__("Rejected").' ❌</span>';
