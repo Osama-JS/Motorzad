@@ -44,6 +44,14 @@ Route::get('/', function () {
 Route::get('/auctions', [\App\Http\Controllers\Frontend\AuctionController::class, 'index'])->name('frontend.auctions.index');
 Route::get('/auctions/{id}', [\App\Http\Controllers\Frontend\AuctionController::class, 'show'])->name('frontend.auctions.show');
 
+// Standalone Payment Gateway Routes (Web & Mobile WebView)
+Route::prefix('payments')->name('payments.')->group(function () {
+    Route::get('/checkout/{transaction}', [\App\Http\Controllers\Web\PaymentController::class, 'checkout'])->name('checkout');
+    Route::match(['get', 'post'], '/callback', [\App\Http\Controllers\Web\PaymentController::class, 'callback'])->name('callback');
+    Route::get('/success', [\App\Http\Controllers\Web\PaymentController::class, 'success'])->name('success');
+    Route::get('/failure', [\App\Http\Controllers\Web\PaymentController::class, 'failure'])->name('failure');
+});
+
 // Mobile Developer Documentation
 Route::get('/mobile-docs', function () {
     return view('docs.index');

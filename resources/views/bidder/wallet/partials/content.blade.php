@@ -473,107 +473,143 @@
                 </div>
             </div>
 
-            {{-- Method Switching Pills --}}
-            <div class="px-4 pb-2">
-                <ul class="nav nav-pills nav-fill p-1 rounded-3" style="background: var(--bg-hover, rgba(255,255,255,0.05)); border: 1px solid var(--border);">
-                    <li class="nav-item">
-                        <button class="nav-link active fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="online-pay-tab" data-bs-toggle="pill" data-bs-target="#tab-online-pay" type="button" style="border-radius:8px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                            <span>{{ __('دفع إلكتروني فوري (مدى / فيزا)') }}</span>
-                            <span class="badge bg-success small py-1 px-2" style="font-size:0.7rem;">{{ __('رصيد لحظي') }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="bank-transfer-tab" data-bs-toggle="pill" data-bs-target="#tab-bank-transfer" type="button" style="border-radius:8px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg>
-                            <span>{{ __('تحويل بنكي يدوي') }}</span>
-                        </button>
-                    </li>
-                </ul>
-            </div>
+            @php
+                $isHpEnabled = \App\Models\Setting::get('hyperpay_enabled', '0') == '1';
+                $isMadaEnabled = $isHpEnabled && \App\Models\Setting::get('payment_method_mada_enabled', '1') == '1';
+                $isVisaEnabled = $isHpEnabled && \App\Models\Setting::get('payment_method_visa_master_enabled', '1') == '1';
+                $isAppleEnabled = $isHpEnabled && \App\Models\Setting::get('payment_method_apple_pay_enabled', '1') == '1';
+                $isBankTransferEnabled = \App\Models\Setting::get('payment_method_bank_transfer_enabled', '1') == '1';
+                $hasOnlineMethods = $isMadaEnabled || $isVisaEnabled || $isAppleEnabled;
+                $defaultOnlineBrand = $isMadaEnabled ? 'mada' : ($isVisaEnabled ? 'visa_master' : ($isAppleEnabled ? 'apple_pay' : ''));
+                $onlineCount = ($isMadaEnabled ? 1 : 0) + ($isVisaEnabled ? 1 : 0) + ($isAppleEnabled ? 1 : 0);
+                $colClass = $onlineCount === 1 ? 'col-12' : ($onlineCount === 2 ? 'col-6' : 'col-4');
+                $minDeposit = (float) \App\Models\Setting::get('hyperpay_min_deposit', 10);
+                $maxDeposit = (float) \App\Models\Setting::get('hyperpay_max_deposit', 500000);
+            @endphp
 
-            <div class="tab-content">
-                {{-- 1. ONLINE PAYMENT TAB (HYPERPAY) --}}
-                <div class="tab-pane fade show active" id="tab-online-pay" role="tabpanel">
-                    <form id="hyperpayDepositForm" onsubmit="event.preventDefault(); submitHyperPayDeposit();">
-                        <div class="modal-body p-4 pt-2">
-                            {{-- Payment Methods Selection --}}
-                            <p class="fw-bold small text-muted mb-2">1. {{ __('اختر وسيلة الدفع الإلكتروني:') }}</p>
-                            <div class="row g-3 mb-4">
-                                <div class="col-4">
-                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
-                                        <input type="radio" name="hp_brand" value="mada" class="d-none hp-radio" checked>
-                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid #10b981; background:rgba(16,185,129,0.06); transition:all .2s;">
-                                            <div style="font-size:1.5rem; margin-bottom:4px;">💳</div>
-                                            <strong class="d-block" style="font-size:0.9rem;">مدى (Mada)</strong>
-                                            <small class="text-muted" style="font-size:0.75rem;">بطاقات البنوك السعودية</small>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="col-4">
-                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
-                                        <input type="radio" name="hp_brand" value="visa_master" class="d-none hp-radio">
-                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid var(--border); transition:all .2s;">
-                                            <div style="font-size:1.5rem; margin-bottom:4px;">🌐</div>
-                                            <strong class="d-block" style="font-size:0.9rem;">Visa / Master</strong>
-                                            <small class="text-muted" style="font-size:0.75rem;">البطاقات الائتمانية</small>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="col-4">
-                                    <label class="w-100 hp-method-label" style="cursor:pointer;">
-                                        <input type="radio" name="hp_brand" value="apple_pay" class="d-none hp-radio">
-                                        <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid var(--border); transition:all .2s;">
-                                            <div style="font-size:1.5rem; margin-bottom:4px;">🍏</div>
-                                            <strong class="d-block" style="font-size:0.9rem;">Apple Pay</strong>
-                                            <small class="text-muted" style="font-size:0.75rem;">الدفع عبر آبل</small>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {{-- Amount Input --}}
-                            <p class="fw-bold small text-muted mb-2">2. {{ __('حدد المبلغ المراد إيداعه في المحفظة:') }}</p>
-                            <div class="mb-3">
-                                <div class="input-group input-group-lg">
-                                    <input type="number" id="hp_amount" name="hp_amount" class="form-control fw-bold fs-4 px-3" step="1" min="10" max="500000" placeholder="500" value="500" required style="border-radius:8px 0 0 8px;">
-                                    <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text);border-color:var(--border);">{{ __('ر.س') }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mt-1 text-muted" style="font-size:0.75rem;">
-                                    <span>الحد الأدنى: 10 ر.س</span>
-                                    <span>الحد الأقصى: 500,000 ر.س</span>
-                                </div>
-                            </div>
-
-                            {{-- Quick Amount Chips --}}
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(200);">+ 200</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(500);">+ 500</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(1000);">+ 1,000</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(5000);">+ 5,000</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(10000);">+ 10,000</button>
-                            </div>
-
-                            {{-- Guarantee Note --}}
-                            <div class="p-3 rounded-3 d-flex align-items-center gap-3" style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2);">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                <span class="small" style="color:var(--text-secondary);">{{ __('يتم إيداع الرصيد في محفظتك بشكل فوري وتلقائي بمجرد نجاح المصادقة البنكية (3D Secure).') }}</span>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer border-top-0 px-4 pb-4 pt-0 d-flex justify-content-start gap-2">
-                            <button type="submit" id="hpSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#e53e3e,#c53030); border-radius:8px;">
-                                <span id="hpBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-                                <span>{{ __('الانتقال للدفع الآمن الآن') }} ←</span>
-                            </button>
-                            <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius:8px;">{{ __('إلغاء') }}</button>
-                        </div>
-                    </form>
+            @if(!$hasOnlineMethods && !$isBankTransferEnabled)
+                <div class="modal-body p-4 text-center">
+                    <div class="p-4 rounded-4" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <span style="font-size: 2.5rem;">⚠️</span>
+                        <h6 class="fw-bold mt-2 text-danger">{{ __('عمليات شحن المحفظة معطلة مؤقتاً') }}</h6>
+                        <p class="text-muted small mb-0">{{ __('يرجى التواصل مع إدارة المنصة للمساعدة في تغذية حسابك.') }}</p>
+                    </div>
                 </div>
+            @else
+                {{-- Method Switching Pills --}}
+                @if($hasOnlineMethods && $isBankTransferEnabled)
+                <div class="px-4 pb-2">
+                    <ul class="nav nav-pills nav-fill p-1 rounded-3" style="background: var(--bg-hover, rgba(255,255,255,0.05)); border: 1px solid var(--border);">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="online-pay-tab" data-bs-toggle="pill" data-bs-target="#tab-online-pay" type="button" style="border-radius:8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                <span>{{ __('دفع إلكتروني فوري (مدى / فيزا)') }}</span>
+                                <span class="badge bg-success small py-1 px-2" style="font-size:0.7rem;">{{ __('رصيد لحظي') }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold py-2 d-flex align-items-center justify-content-center gap-2" id="bank-transfer-tab" data-bs-toggle="pill" data-bs-target="#tab-bank-transfer" type="button" style="border-radius:8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg>
+                                <span>{{ __('تحويل بنكي يدوي') }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                @endif
 
-                {{-- 2. MANUAL BANK TRANSFER TAB --}}
-                <div class="tab-pane fade" id="tab-bank-transfer" role="tabpanel">
-                    <form id="depositForm" enctype="multipart/form-data">
+                <div class="tab-content">
+                    @if($hasOnlineMethods)
+                    {{-- 1. ONLINE PAYMENT TAB (HYPERPAY) --}}
+                    <div class="tab-pane fade show active" id="tab-online-pay" role="tabpanel">
+                        <form id="hyperpayDepositForm" onsubmit="event.preventDefault(); submitHyperPayDeposit();">
+                            <div class="modal-body p-4 pt-2">
+                                {{-- Payment Methods Selection --}}
+                                <p class="fw-bold small text-muted mb-2">1. {{ __('اختر وسيلة الدفع الإلكتروني:') }}</p>
+                                <div class="row g-3 mb-4">
+                                    @if($isMadaEnabled)
+                                    <div class="{{ $colClass }}">
+                                        <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                            <input type="radio" name="hp_brand" value="mada" class="d-none hp-radio" {{ $defaultOnlineBrand === 'mada' ? 'checked' : '' }}>
+                                            <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid {{ $defaultOnlineBrand === 'mada' ? '#10b981' : 'var(--border)' }}; background:{{ $defaultOnlineBrand === 'mada' ? 'rgba(16,185,129,0.06)' : 'transparent' }}; transition:all .2s;">
+                                                <div style="font-size:1.5rem; margin-bottom:4px;">💳</div>
+                                                <strong class="d-block" style="font-size:0.9rem;">مدى (Mada)</strong>
+                                                <small class="text-muted" style="font-size:0.75rem;">بطاقات البنوك السعودية</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endif
+
+                                    @if($isVisaEnabled)
+                                    <div class="{{ $colClass }}">
+                                        <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                            <input type="radio" name="hp_brand" value="visa_master" class="d-none hp-radio" {{ $defaultOnlineBrand === 'visa_master' ? 'checked' : '' }}>
+                                            <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid {{ $defaultOnlineBrand === 'visa_master' ? '#10b981' : 'var(--border)' }}; background:{{ $defaultOnlineBrand === 'visa_master' ? 'rgba(16,185,129,0.06)' : 'transparent' }}; transition:all .2s;">
+                                                <div style="font-size:1.5rem; margin-bottom:4px;">🌐</div>
+                                                <strong class="d-block" style="font-size:0.9rem;">Visa / Master</strong>
+                                                <small class="text-muted" style="font-size:0.75rem;">البطاقات الائتمانية</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endif
+
+                                    @if($isAppleEnabled)
+                                    <div class="{{ $colClass }}">
+                                        <label class="w-100 hp-method-label" style="cursor:pointer;">
+                                            <input type="radio" name="hp_brand" value="apple_pay" class="d-none hp-radio" {{ $defaultOnlineBrand === 'apple_pay' ? 'checked' : '' }}>
+                                            <div class="p-3 rounded-3 text-center hp-card position-relative" style="border:2px solid {{ $defaultOnlineBrand === 'apple_pay' ? '#10b981' : 'var(--border)' }}; background:{{ $defaultOnlineBrand === 'apple_pay' ? 'rgba(16,185,129,0.06)' : 'transparent' }}; transition:all .2s;">
+                                                <div style="font-size:1.5rem; margin-bottom:4px;">🍏</div>
+                                                <strong class="d-block" style="font-size:0.9rem;">Apple Pay</strong>
+                                                <small class="text-muted" style="font-size:0.75rem;">الدفع عبر آبل</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                {{-- Amount Input --}}
+                                <p class="fw-bold small text-muted mb-2">2. {{ __('حدد المبلغ المراد إيداعه في المحفظة:') }}</p>
+                                <div class="mb-3">
+                                    <div class="input-group input-group-lg">
+                                        <input type="number" id="hp_amount" name="hp_amount" class="form-control fw-bold fs-4 px-3" step="1" min="{{ $minDeposit }}" max="{{ $maxDeposit }}" placeholder="500" value="500" required style="border-radius:8px 0 0 8px;">
+                                        <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text);border-color:var(--border);">{{ __('ر.س') }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1 text-muted" style="font-size:0.75rem;">
+                                        <span>{{ __('الحد الأدنى:') }} {{ number_format($minDeposit, 0) }} {{ __('ر.س') }}</span>
+                                        <span>{{ __('الحد الأقصى:') }} {{ number_format($maxDeposit, 0) }} {{ __('ر.س') }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Quick Amount Chips --}}
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(200);">+ 200</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(500);">+ 500</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(1000);">+ 1,000</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(5000);">+ 5,000</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="$('#hp_amount').val(10000);">+ 10,000</button>
+                                </div>
+
+                                {{-- Guarantee Note --}}
+                                <div class="p-3 rounded-3 d-flex align-items-center gap-3" style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    <span class="small" style="color:var(--text-secondary);">{{ __('يتم إيداع الرصيد في محفظتك بشكل فوري وتلقائي بمجرد نجاح المصادقة البنكية (3D Secure).') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-top-0 px-4 pb-4 pt-0 d-flex justify-content-start gap-2">
+                                <button type="submit" id="hpSubmitBtn" class="btn px-4 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#e53e3e,#c53030); border-radius:8px;">
+                                    <span id="hpBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    <span>{{ __('الانتقال للدفع الآمن الآن') }} ←</span>
+                                </button>
+                                <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius:8px;">{{ __('إلغاء') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                    @endif
+
+                    @if($isBankTransferEnabled)
+                    {{-- 2. MANUAL BANK TRANSFER TAB --}}
+                    <div class="tab-pane fade {{ !$hasOnlineMethods ? 'show active' : '' }}" id="tab-bank-transfer" role="tabpanel">
+                        <form id="depositForm" enctype="multipart/form-data">
                         @csrf
                         <div class="modal-body p-4 pt-2">
                             <div class="row g-4">
@@ -675,7 +711,9 @@
                         </div>
                     </form>
                 </div>
+                @endif
             </div>
+            @endif
         </div>
     </div>
 </div>

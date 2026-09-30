@@ -49,9 +49,10 @@ class HyperPayService
     /**
      * Get secret Access Token.
      */
-    public function getAccessToken(): string
+    public function getAccessToken(): ?string
     {
-        return Setting::get('hyperpay_access_token', '');
+        $val = Setting::get('hyperpay_access_token');
+        return !empty($val) ? (string) $val : null;
     }
 
     /**
@@ -119,7 +120,7 @@ class HyperPayService
         $accessToken = $this->getAccessToken();
 
         if (empty($entityId) || empty($accessToken)) {
-            throw new \Exception(__('HyperPay configuration credentials are missing. Please contact administration.'));
+            throw new \Exception(__('بيانات الربط مع بوابة هايبر باي غير مكتملة (يرجى إدخال رمز التخويل Access Token ومعرف الكيان Entity ID من لوحة تحكم الإدارة -> الإعدادات).'));
         }
 
         // Generate unique internal transaction ID
@@ -225,7 +226,7 @@ class HyperPayService
         $accessToken = $this->getAccessToken();
 
         if (empty($entityId) || empty($accessToken)) {
-            throw new \Exception(__('Missing gateway credentials for status verification.'));
+            throw new \Exception(__('بيانات الربط مع بوابة هايبر باي غير مكتملة للتحقق من العملية.'));
         }
 
         $endpoint = rtrim($this->getBaseUrl(), '/') . "/v1/checkouts/{$checkoutId}/payment";

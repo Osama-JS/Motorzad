@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70" width="120" height="70">
+  <rect width="120" height="70" rx="8" fill="#ffffff"/>
+  <rect x="2" y="2" width="116" height="66" rx="6" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <!-- Mada stylized representation -->
+  <path d="M22 46V24h7.5l5.5 13.5L40.5 24H48v22h-6V33.5l-5 12.5h-4l-5-12.5V46H22z" fill="#007953"/>
+  <path d="M52 35c0-6.6 4.8-11.5 11.5-11.5S75 28.4 75 35s-4.8 11.5-11.5 11.5S52 41.6 52 35zm17 0c0-3.5-2.2-6-5.5-6s-5.5 2.5-5.5 6 2.2 6 5.5 6 5.5-2.5 5.5-6z" fill="#8dc63f"/>
+  <circle cx="88" cy="35" r="10" fill="#00a3e0"/>
+</svg>

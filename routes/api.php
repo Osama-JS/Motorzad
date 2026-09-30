@@ -63,6 +63,9 @@ Route::prefix('auctions')->group(function () {
     Route::get('/{auction}', [\App\Http\Controllers\Api\GeneralController::class, 'showAuction'])->whereNumber('auction');
 });
 
+// ─── Public Payment Methods ────────────────────────────────────────────────
+Route::get('wallet/payment-methods', [WalletController::class, 'paymentMethods']);
+
 // ─── Authenticated Routes ──────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 

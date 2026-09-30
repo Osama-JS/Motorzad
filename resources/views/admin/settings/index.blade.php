@@ -571,13 +571,95 @@
                     {{-- Gateway Enable Switch --}}
                     <div class="toggle-row">
                         <div class="toggle-info">
-                            <strong>{{ __('تفعيل بوابة هايبر باي') }}</strong>
+                            <strong>{{ __('تفعيل بوابة هايبر باي (HyperPay Gateway)') }}</strong>
                             <span>{{ __('السماح للمستخدمين بشحن محافظهم المالية عبر البطاقات البنكية ومدى') }}</span>
                         </div>
                         <label class="switch">
                             <input type="checkbox" name="hyperpay_enabled" value="1" {{ \App\Models\Setting::get('hyperpay_enabled') == '1' ? 'checked' : '' }}>
                             <span class="slider"></span>
                         </label>
+                    </div>
+
+                    {{-- Payment Methods Control (Web & Mobile App) --}}
+                    <div class="p-3 my-4" style="background:var(--bg-input); border-radius:var(--radius); border:1px solid var(--border);">
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size:1.2rem;">🎛️</span>
+                                <h4 class="mb-0" style="font-size:1rem; color:var(--text); font-weight:700;">{{ __('التحكم بوسائل الدفع المتاحة (للويب وتطبيق الجوال)') }}</h4>
+                            </div>
+                            <span class="badge bg-primary px-2 py-1" style="font-size:0.75rem;">{{ __('Web & Mobile API') }}</span>
+                        </div>
+                        <p class="text-muted small mb-3">{{ __('حدد وسائل الدفع المعتمدة التي تظهر في صفحة شحن المحفظة بالموقع ويتم إرجاعها لتطبيق الموبايل عبر الـ API:') }}</p>
+                        
+                        <div class="row g-3">
+                            {{-- Mada --}}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background:var(--bg-card); border:1px solid var(--border);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:1.6rem;">💳</div>
+                                        <div>
+                                            <strong class="d-block" style="font-size:0.92rem;">{{ __('بطاقات مدى (Mada)') }}</strong>
+                                            <small class="text-muted">{{ __('بوابة الدفع الإلكتروني (هايبر باي)') }}</small>
+                                        </div>
+                                    </div>
+                                    <label class="switch mb-0">
+                                        <input type="checkbox" name="payment_method_mada_enabled" value="1" {{ \App\Models\Setting::get('payment_method_mada_enabled', '1') == '1' ? 'checked' : '' }}>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {{-- Visa / MasterCard --}}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background:var(--bg-card); border:1px solid var(--border);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:1.6rem;">🌐</div>
+                                        <div>
+                                            <strong class="d-block" style="font-size:0.92rem;">{{ __('Visa / MasterCard') }}</strong>
+                                            <small class="text-muted">{{ __('البطاقات الائتمانية (هايبر باي)') }}</small>
+                                        </div>
+                                    </div>
+                                    <label class="switch mb-0">
+                                        <input type="checkbox" name="payment_method_visa_master_enabled" value="1" {{ \App\Models\Setting::get('payment_method_visa_master_enabled', '1') == '1' ? 'checked' : '' }}>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {{-- Apple Pay --}}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background:var(--bg-card); border:1px solid var(--border);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:1.6rem;">🍏</div>
+                                        <div>
+                                            <strong class="d-block" style="font-size:0.92rem;">{{ __('Apple Pay') }}</strong>
+                                            <small class="text-muted">{{ __('الدفع السريع عبر آبل (هايبر باي)') }}</small>
+                                        </div>
+                                    </div>
+                                    <label class="switch mb-0">
+                                        <input type="checkbox" name="payment_method_apple_pay_enabled" value="1" {{ \App\Models\Setting::get('payment_method_apple_pay_enabled', '1') == '1' ? 'checked' : '' }}>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {{-- Bank Transfer --}}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background:var(--bg-card); border:1px solid var(--border);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:1.6rem;">🏦</div>
+                                        <div>
+                                            <strong class="d-block" style="font-size:0.92rem;">{{ __('التحويل البنكي اليدوي') }}</strong>
+                                            <small class="text-muted">{{ __('رفع إيصال الحوالة للتدقيق اليدوي') }}</small>
+                                        </div>
+                                    </div>
+                                    <label class="switch mb-0">
+                                        <input type="checkbox" name="payment_method_bank_transfer_enabled" value="1" {{ \App\Models\Setting::get('payment_method_bank_transfer_enabled', '1') == '1' ? 'checked' : '' }}>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Environment Mode --}}
@@ -855,6 +937,10 @@ $(function(){
         if(!fd.has('maintenance_mode'))fd.append('maintenance_mode','0');
         if(!fd.has('show_hotels_page'))fd.append('show_hotels_page','0');
         if(!fd.has('hyperpay_enabled'))fd.append('hyperpay_enabled','0');
+        if(!fd.has('payment_method_mada_enabled'))fd.append('payment_method_mada_enabled','0');
+        if(!fd.has('payment_method_visa_master_enabled'))fd.append('payment_method_visa_master_enabled','0');
+        if(!fd.has('payment_method_apple_pay_enabled'))fd.append('payment_method_apple_pay_enabled','0');
+        if(!fd.has('payment_method_bank_transfer_enabled'))fd.append('payment_method_bank_transfer_enabled','0');
         btn.prop('disabled',true);$('#saveBtnText').addClass('d-none');$('#saveBtnLoading').removeClass('d-none');
         $.ajax({url:$(this).attr('action'),method:'POST',data:fd,processData:false,contentType:false,
             success:function(r){

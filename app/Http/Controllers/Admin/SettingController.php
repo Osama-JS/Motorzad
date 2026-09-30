@@ -17,7 +17,9 @@ class SettingController extends Controller
         ];
         
         $liveAuctions = \App\Models\Auction::whereIn('status', ['live', 'scheduled'])->latest()->get();
-        $formTemplates = \App\Models\FormTemplate::where('is_active', true)->get();
+        $formTemplates = \Illuminate\Support\Facades\Schema::hasTable('form_templates') 
+            ? \App\Models\FormTemplate::where('is_active', true)->get() 
+            : collect();
 
         return view('admin.settings.index', compact('stats', 'liveAuctions', 'formTemplates'));
     }
@@ -90,8 +92,12 @@ class SettingController extends Controller
                 'stats_satisfaction' => 'nullable|string|max:50',
                 'stats_satisfaction_unit' => 'nullable|string|max:20',
                 'hero_auction_id' => 'nullable|exists:auctions,id',
-                'seller_request_template_id' => 'nullable|exists:form_templates,id',
+                'seller_request_template_id' => 'nullable' . (\Illuminate\Support\Facades\Schema::hasTable('form_templates') ? '|exists:form_templates,id' : ''),
                 'hyperpay_enabled' => 'nullable|in:0,1',
+                'payment_method_mada_enabled' => 'nullable|in:0,1',
+                'payment_method_visa_master_enabled' => 'nullable|in:0,1',
+                'payment_method_apple_pay_enabled' => 'nullable|in:0,1',
+                'payment_method_bank_transfer_enabled' => 'nullable|in:0,1',
                 'hyperpay_mode' => 'nullable|in:test,live',
                 'hyperpay_access_token' => 'nullable|string',
                 'hyperpay_entity_id_mada' => 'nullable|string',
@@ -119,7 +125,8 @@ class SettingController extends Controller
                 'show_stat_bidders', 'show_stat_cars', 'show_stat_satisfaction',
                 'show_facebook', 'show_twitter', 'show_instagram', 'show_linkedin',
                 'show_tiktok', 'show_snapchat', 'show_youtube', 'show_whatsapp', 'show_telegram',
-                'hyperpay_enabled'
+                'hyperpay_enabled', 'payment_method_mada_enabled', 'payment_method_visa_master_enabled',
+                'payment_method_apple_pay_enabled', 'payment_method_bank_transfer_enabled'
             ];
             foreach ($checkboxes as $checkbox) {
                 if (!array_key_exists($checkbox, $data)) {

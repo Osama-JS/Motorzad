@@ -3759,7 +3759,7 @@
                     "Wallet"
                 ],
                 "summary": "Initialize HyperPay Checkout Session",
-                "description": "Creates a new HyperPay checkout session for mobile or web clients to pay using Mada, Visa/Mastercard, or Apple Pay.",
+                "description": "Creates a new HyperPay checkout session for mobile or web clients to pay using Mada, Visa/Mastercard, or Apple Pay, returning a WebView payment_url.",
                 "operationId": "73e1d779217cf565eff0121120aa006c",
                 "requestBody": {
                     "required": true,
@@ -3800,9 +3800,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "error": {
                                             "type": "boolean",
-                                            "example": true
+                                            "example": false
                                         },
                                         "data": {
                                             "properties": {
@@ -3811,7 +3811,7 @@
                                                     "example": 12
                                                 },
                                                 "checkout_id": {
-                                                    "description": "HyperPay checkout ID to pass to mobile SDK",
+                                                    "description": "HyperPay checkout ID",
                                                     "type": "string",
                                                     "example": "8A8294174B7E6CA0014B829..."
                                                 },
@@ -3835,6 +3835,15 @@
                                                 "currency": {
                                                     "type": "string",
                                                     "example": "SAR"
+                                                },
+                                                "payment_url": {
+                                                    "description": "Dedicated URL to open inside Flutter WebView",
+                                                    "type": "string",
+                                                    "example": "http://localhost/Motorzad/public/payments/checkout/12?token=abc...&source=app"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "a1b2c3d4e5f6..."
                                                 },
                                                 "base_url": {
                                                     "type": "string",
@@ -3863,9 +3872,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
+                                        "error": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
@@ -8093,6 +8102,86 @@
                                             "iban": "SA09876543210987654321",
                                             "beneficiary_name": "شركة موترزاد",
                                             "logo_url": null
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/payment-methods": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Available Deposit Payment Methods",
+                "description": "Returns the list of active payment methods enabled by administration for wallet top-up (Mada, Visa/Master, Apple Pay, Bank Transfer).",
+                "operationId": "5212555d155177c5ac8af8e65935be73",
+                "responses": {
+                    "200": {
+                        "description": "List of available payment methods",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "data": [
+                                        {
+                                            "id": "mada",
+                                            "name": "بطاقة مدى (Mada)",
+                                            "name_en": "Mada Debit Card",
+                                            "type": "hyperpay",
+                                            "brand": "mada",
+                                            "logo_url": "http://localhost/Motorzad/public/images/payments/mada.svg",
+                                            "description": "شحن فوري ولحظي عبر بطاقات الصراف والبنوك السعودية",
+                                            "requires_webview": true,
+                                            "min_amount": 10,
+                                            "max_amount": 500000,
+                                            "currency": "SAR"
+                                        },
+                                        {
+                                            "id": "visa_master",
+                                            "name": "فيزا / ماستركارد (Visa / MasterCard)",
+                                            "name_en": "Visa / MasterCard",
+                                            "type": "hyperpay",
+                                            "brand": "visa_master",
+                                            "logo_url": "http://localhost/Motorzad/public/images/payments/visa_master.svg",
+                                            "description": "البطاقات الائتمانية الدولية مع حماية 3D-Secure",
+                                            "requires_webview": true,
+                                            "min_amount": 10,
+                                            "max_amount": 500000,
+                                            "currency": "SAR"
+                                        },
+                                        {
+                                            "id": "bank_transfer",
+                                            "name": "التحويل البنكي اليدوي",
+                                            "name_en": "Bank Transfer",
+                                            "type": "bank_transfer",
+                                            "brand": "bank_transfer",
+                                            "logo_url": "http://localhost/Motorzad/public/images/payments/bank_transfer.svg",
+                                            "description": "التحويل المباشر لحسابات المنصة ورفع صورة الإيصال",
+                                            "requires_webview": false,
+                                            "min_amount": 1,
+                                            "max_amount": null,
+                                            "currency": "SAR"
                                         }
                                     ]
                                 }

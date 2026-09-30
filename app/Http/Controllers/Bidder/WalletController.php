@@ -266,11 +266,32 @@ class WalletController extends Controller
             'brand'  => 'required|in:mada,visa_master,apple_pay',
         ]);
 
+        $brand = $request->brand;
+        if (!\App\Models\Setting::get('hyperpay_enabled', '0')) {
+            return response()->json([
+                'success' => false,
+                'message' => __('بوابة الدفع الإلكتروني معطلة حالياً.'),
+            ], 422);
+        }
+
+        $isBrandEnabled = match ($brand) {
+            'mada'        => \App\Models\Setting::get('payment_method_mada_enabled', '1') == '1',
+            'visa_master' => \App\Models\Setting::get('payment_method_visa_master_enabled', '1') == '1',
+            'apple_pay'   => \App\Models\Setting::get('payment_method_apple_pay_enabled', '1') == '1',
+            default       => false,
+        };
+
+        if (!$isBrandEnabled) {
+            return response()->json([
+                'success' => false,
+                'message' => __('طريقة الدفع المختارة معطلة حالياً من قبل الإدارة.'),
+            ], 422);
+        }
+
         try {
             $user = auth()->user();
             $amount = (float) $request->amount;
-            $brand = $request->brand;
-            $returnUrl = route('bidder.wallet.hyperpay.callback');
+            $returnUrl = route('payments.callback', ['source' => 'web']);
 
             $checkoutData = $this->hyperPayService->prepareCheckout(
                 user: $user,
@@ -280,9 +301,16 @@ class WalletController extends Controller
                 returnUrl: $returnUrl
             );
 
+            $token = hash_hmac('sha256', $checkoutData['transaction_id'] . $checkoutData['merchant_transaction_id'], config('app.key'));
+            $redirectUrl = route('payments.checkout', [
+                'transaction' => $checkoutData['transaction_id'],
+                'token'       => $token,
+                'source'      => 'web',
+            ]);
+
             return response()->json([
                 'success'      => true,
-                'redirect_url' => route('bidder.wallet.hyperpay.checkout', $checkoutData['transaction_id']),
+                'redirect_url' => $redirectUrl,
                 'data'         => $checkoutData,
             ]);
         } catch (\Exception $e) {

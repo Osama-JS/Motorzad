@@ -9,6 +9,7 @@ use App\Http\Resources\WalletTransactionResource;
 use App\Http\Resources\WithdrawalRequestResource;
 use App\Models\BankAccount;
 use App\Models\DepositRequest;
+use App\Models\Setting;
 use App\Models\WithdrawalRequest;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -521,5 +522,154 @@ class WalletController extends Controller
         ]);
 
         return $this->successResponse($accounts);
+    }
+
+    /**
+     * Get enabled payment methods for wallet deposit (HyperPay + Bank Transfer).
+     */
+    #[OA\Get(
+        path: '/api/wallet/payment-methods',
+        summary: 'Get Available Deposit Payment Methods',
+        description: 'Returns the list of active payment methods enabled by administration for wallet top-up (Mada, Visa/Master, Apple Pay, Bank Transfer).',
+        security: [['bearerAuth' => []]],
+        tags: ['Wallet'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of available payment methods',
+                content: new OA\JsonContent(
+                    example: [
+                        'error' => false,
+                        'data' => [
+                            [
+                                'id' => 'mada',
+                                'name' => 'بطاقة مدى (Mada)',
+                                'name_en' => 'Mada Debit Card',
+                                'type' => 'hyperpay',
+                                'brand' => 'mada',
+                                'logo_url' => 'http://localhost/Motorzad/public/images/payments/mada.svg',
+                                'description' => 'شحن فوري ولحظي عبر بطاقات الصراف والبنوك السعودية',
+                                'requires_webview' => true,
+                                'min_amount' => 10.0,
+                                'max_amount' => 500000.0,
+                                'currency' => 'SAR'
+                            ],
+                            [
+                                'id' => 'visa_master',
+                                'name' => 'فيزا / ماستركارد (Visa / MasterCard)',
+                                'name_en' => 'Visa / MasterCard',
+                                'type' => 'hyperpay',
+                                'brand' => 'visa_master',
+                                'logo_url' => 'http://localhost/Motorzad/public/images/payments/visa_master.svg',
+                                'description' => 'البطاقات الائتمانية الدولية مع حماية 3D-Secure',
+                                'requires_webview' => true,
+                                'min_amount' => 10.0,
+                                'max_amount' => 500000.0,
+                                'currency' => 'SAR'
+                            ],
+                            [
+                                'id' => 'bank_transfer',
+                                'name' => 'التحويل البنكي اليدوي',
+                                'name_en' => 'Bank Transfer',
+                                'type' => 'bank_transfer',
+                                'brand' => 'bank_transfer',
+                                'logo_url' => 'http://localhost/Motorzad/public/images/payments/bank_transfer.svg',
+                                'description' => 'التحويل المباشر لحسابات المنصة ورفع صورة الإيصال',
+                                'requires_webview' => false,
+                                'min_amount' => 1.0,
+                                'max_amount' => null,
+                                'currency' => 'SAR'
+                            ]
+                        ]
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated',
+                content: new OA\JsonContent(example: ['message' => 'Unauthenticated.'])
+            )
+        ]
+    )]
+    public function paymentMethods(): JsonResponse
+    {
+        $isHyperPayEnabled = (bool) Setting::get('hyperpay_enabled', '0');
+        $minDeposit = (float) Setting::get('hyperpay_min_deposit', 10);
+        $maxDeposit = (float) Setting::get('hyperpay_max_deposit', 500000);
+
+        $methods = [];
+
+        // 1. Mada
+        if ($isHyperPayEnabled && Setting::get('payment_method_mada_enabled', '1') == '1') {
+            $methods[] = [
+                'id'               => 'mada',
+                'name'             => __('بطاقة مدى (Mada)'),
+                'name_en'          => 'Mada Debit Card',
+                'type'             => 'hyperpay',
+                'brand'            => 'mada',
+                'logo_url'         => asset('images/payments/mada.svg'),
+                'description'      => __('شحن فوري ولحظي عبر بطاقات الصراف والبنوك السعودية'),
+                'requires_webview' => true,
+                'min_amount'       => $minDeposit,
+                'max_amount'       => $maxDeposit,
+                'currency'         => 'SAR',
+            ];
+        }
+
+        // 2. Visa / MasterCard
+        if ($isHyperPayEnabled && Setting::get('payment_method_visa_master_enabled', '1') == '1') {
+            $methods[] = [
+                'id'               => 'visa_master',
+                'name'             => __('فيزا / ماستركارد (Visa / MasterCard)'),
+                'name_en'          => 'Visa / MasterCard',
+                'type'             => 'hyperpay',
+                'brand'            => 'visa_master',
+                'logo_url'         => asset('images/payments/visa_master.svg'),
+                'description'      => __('البطاقات الائتمانية الدولية مع حماية 3D-Secure'),
+                'requires_webview' => true,
+                'min_amount'       => $minDeposit,
+                'max_amount'       => $maxDeposit,
+                'currency'         => 'SAR',
+            ];
+        }
+
+        // 3. Apple Pay
+        if ($isHyperPayEnabled && Setting::get('payment_method_apple_pay_enabled', '1') == '1') {
+            $methods[] = [
+                'id'               => 'apple_pay',
+                'name'             => 'Apple Pay',
+                'name_en'          => 'Apple Pay',
+                'type'             => 'hyperpay',
+                'brand'            => 'apple_pay',
+                'logo_url'         => asset('images/payments/apple_pay.svg'),
+                'description'      => __('الدفع السريع والآمن عبر أجهزة آبل'),
+                'requires_webview' => true,
+                'min_amount'       => $minDeposit,
+                'max_amount'       => $maxDeposit,
+                'currency'         => 'SAR',
+            ];
+        }
+
+        // 4. Bank Transfer
+        if (Setting::get('payment_method_bank_transfer_enabled', '1') == '1') {
+            $methods[] = [
+                'id'               => 'bank_transfer',
+                'name'             => __('التحويل البنكي اليدوي'),
+                'name_en'          => 'Bank Transfer',
+                'type'             => 'bank_transfer',
+                'brand'            => 'bank_transfer',
+                'logo_url'         => asset('images/payments/bank_transfer.svg'),
+                'description'      => __('التحويل المباشر لحسابات المنصة ورفع صورة الإيصال'),
+                'requires_webview' => false,
+                'min_amount'       => 1.0,
+                'max_amount'       => null,
+                'currency'         => 'SAR',
+            ];
+        }
+
+        return response()->json([
+            'error' => false,
+            'data'  => $methods,
+        ]);
     }
 }

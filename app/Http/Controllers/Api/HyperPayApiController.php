@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\HyperpayTransaction;
+use App\Models\Setting;
 use App\Services\HyperPayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class HyperPayApiController extends Controller
     #[OA\Post(
         path: '/api/wallet/hyperpay/checkout',
         summary: 'Initialize HyperPay Checkout Session',
-        description: 'Creates a new HyperPay checkout session for mobile or web clients to pay using Mada, Visa/Mastercard, or Apple Pay.',
+        description: 'Creates a new HyperPay checkout session for mobile or web clients to pay using Mada, Visa/Mastercard, or Apple Pay, returning a WebView payment_url.',
         security: [['bearerAuth' => []]],
         tags: ['Wallet'],
         requestBody: new OA\RequestBody(
@@ -40,18 +41,20 @@ class HyperPayApiController extends Controller
                 description: 'Session initialized successfully',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'error', type: 'boolean', example: false),
                         new OA\Property(
                             property: 'data',
                             type: 'object',
                             properties: [
                                 new OA\Property(property: 'transaction_id', type: 'integer', example: 12),
-                                new OA\Property(property: 'checkout_id', type: 'string', example: '8A8294174B7E6CA0014B829...', description: 'HyperPay checkout ID to pass to mobile SDK'),
+                                new OA\Property(property: 'checkout_id', type: 'string', example: '8A8294174B7E6CA0014B829...', description: 'HyperPay checkout ID'),
                                 new OA\Property(property: 'merchant_transaction_id', type: 'string', example: 'MZ-HP-20260905143000-A1B2C'),
                                 new OA\Property(property: 'brand', type: 'string', example: 'mada'),
                                 new OA\Property(property: 'widget_brands', type: 'string', example: 'MADA'),
                                 new OA\Property(property: 'amount', type: 'number', format: 'float', example: 500.00),
                                 new OA\Property(property: 'currency', type: 'string', example: 'SAR'),
+                                new OA\Property(property: 'payment_url', type: 'string', example: 'http://localhost/Motorzad/public/payments/checkout/12?token=abc...&source=app', description: 'Dedicated URL to open inside Flutter WebView'),
+                                new OA\Property(property: 'token', type: 'string', example: 'a1b2c3d4e5f6...'),
                                 new OA\Property(property: 'base_url', type: 'string', example: 'https://eu-test.oppwa.com'),
                                 new OA\Property(property: 'script_url', type: 'string', example: 'https://eu-test.oppwa.com/v1/paymentWidgets.js?checkoutId=8A82...'),
                             ]
@@ -65,7 +68,7 @@ class HyperPayApiController extends Controller
                 description: 'Validation or Gateway Error',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'error', type: 'boolean', example: true),
                         new OA\Property(property: 'message', type: 'string', example: 'The minimum deposit amount is 10.00 SAR')
                     ]
                 )
@@ -79,23 +82,57 @@ class HyperPayApiController extends Controller
             'brand'  => 'required|in:mada,visa_master,apple_pay',
         ]);
 
+        $brand = $validated['brand'];
+
+        if (!$this->hyperPayService->isEnabled()) {
+            return response()->json([
+                'error'   => true,
+                'message' => __('HyperPay payment gateway is currently disabled.'),
+            ], 422);
+        }
+
+        $isBrandEnabled = match ($brand) {
+            'mada'        => Setting::get('payment_method_mada_enabled', '1') == '1',
+            'visa_master' => Setting::get('payment_method_visa_master_enabled', '1') == '1',
+            'apple_pay'   => Setting::get('payment_method_apple_pay_enabled', '1') == '1',
+            default       => false,
+        };
+
+        if (!$isBrandEnabled) {
+            return response()->json([
+                'error'   => true,
+                'message' => __('This payment method is currently disabled by administration.'),
+            ], 422);
+        }
+
         try {
             $user = $request->user();
             $data = $this->hyperPayService->prepareCheckout(
                 user: $user,
                 amount: (float) $validated['amount'],
-                brand: $validated['brand'],
+                brand: $brand,
                 channel: 'api'
             );
 
+            // Generate secure HMAC token for WebView authentication without web session cookies
+            $token = hash_hmac('sha256', $data['transaction_id'] . $data['merchant_transaction_id'], config('app.key'));
+            $paymentUrl = route('payments.checkout', [
+                'transaction' => $data['transaction_id'],
+                'token'       => $token,
+                'source'      => 'app',
+            ]);
+
+            $data['payment_url'] = $paymentUrl;
+            $data['token']       = $token;
+
             return response()->json([
-                'success' => true,
+                'error'   => false,
                 'data'    => $data,
                 'message' => __('Checkout session initialized successfully.'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'error'   => true,
                 'message' => $e->getMessage(),
             ], 422);
         }
@@ -172,6 +209,7 @@ class HyperPayApiController extends Controller
 
         if (!$transaction) {
             return response()->json([
+                'error'   => true,
                 'success' => false,
                 'message' => __('Transaction not found.'),
             ], 404);
@@ -180,6 +218,7 @@ class HyperPayApiController extends Controller
         // If already paid, return success immediately (idempotent)
         if ($transaction->status === 'paid') {
             return response()->json([
+                'error'   => false,
                 'success' => true,
                 'message' => __('Payment already verified and credited.'),
                 'data'    => [
@@ -204,6 +243,7 @@ class HyperPayApiController extends Controller
                 $this->hyperPayService->processSuccessfulPayment($transaction, $paymentData);
 
                 return response()->json([
+                    'error'   => false,
                     'success' => true,
                     'message' => __('Payment successful! An amount of :amount SAR has been credited to your wallet.', [
                         'amount' => number_format($transaction->amount, 2),
@@ -223,6 +263,7 @@ class HyperPayApiController extends Controller
                 $errorDesc = $paymentData['result']['description'] ?? __('The payment could not be processed.');
 
                 return response()->json([
+                    'error'   => true,
                     'success' => false,
                     'message' => __('Payment Failed: :desc', ['desc' => $errorDesc]),
                     'data'    => [
@@ -234,6 +275,7 @@ class HyperPayApiController extends Controller
             }
         } catch (\Exception $e) {
             return response()->json([
+                'error'   => true,
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
