@@ -8289,6 +8289,145 @@
                     }
                 ]
             }
+        },
+        "/api/wallet/payments-history": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Payments & Deposit History",
+                "description": "Returns the authenticated user's payment history (matching bidder/wallet/payments-history web page), including dashboard statistics (bank transfer totals, electronic totals, wallet balance), and paginated items filterable by payment type (all, bank_transfer, electronic).",
+                "operationId": "c8645b247c4ccceadf510c26e66959a2",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by payment type: all (default), bank_transfer (bank receipts), electronic (HyperPay gateway)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "all",
+                                "bank_transfer",
+                                "electronic"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number (default: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 15, max: 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payments history retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "error": false,
+                                    "data": {
+                                        "stats": {
+                                            "bank_transfers_count": 3,
+                                            "bank_transfers_approved_total": 15000,
+                                            "online_payments_count": 2,
+                                            "online_payments_paid_total": 5000,
+                                            "total_deposited_amount": 20000,
+                                            "wallet_available_balance": 12500.5,
+                                            "wallet_held_balance": 2000,
+                                            "currency": "SAR"
+                                        },
+                                        "items": [
+                                            {
+                                                "id": 12,
+                                                "type": "electronic",
+                                                "type_label": "الدفع الإلكتروني (البوابة)",
+                                                "amount": 5000,
+                                                "currency": "SAR",
+                                                "status": "paid",
+                                                "status_label": "مدفوع بنجاح",
+                                                "created_at": "2026-09-28T14:30:00.000000Z",
+                                                "created_at_formatted": "2026-09-28 14:30",
+                                                "details": {
+                                                    "transaction_id": "TX-1727526600-9988",
+                                                    "checkout_id": "8ACDA7A082F8E7F0.uat01-vm-tx02",
+                                                    "brand": "mada",
+                                                    "brand_name": "MADA",
+                                                    "brand_logo": "http://localhost/Motorzad/public/images/payments/mada.svg",
+                                                    "card_last4": "4008",
+                                                    "result_description": "Transaction succeeded",
+                                                    "paid_at": "2026-09-28 14:31"
+                                                }
+                                            },
+                                            {
+                                                "id": 45,
+                                                "type": "bank_transfer",
+                                                "type_label": "التحويل البنكي",
+                                                "amount": 15000,
+                                                "currency": "SAR",
+                                                "status": "approved",
+                                                "status_label": "تم الاعتماد وإيداع الرصيد",
+                                                "created_at": "2026-09-25T10:15:00.000000Z",
+                                                "created_at_formatted": "2026-09-25 10:15",
+                                                "details": {
+                                                    "bank_name": "مصرف الراجحي",
+                                                    "iban": "SA0380000000608010167519",
+                                                    "account_number": "608010167519",
+                                                    "account_name": "شركة موتورزاد للمزادات",
+                                                    "receipt_url": "http://localhost/Motorzad/public/storage/receipts/transfer_123.jpg",
+                                                    "admin_note": null,
+                                                    "processed_at": "2026-09-25 11:00"
+                                                }
+                                            }
+                                        ],
+                                        "pagination": {
+                                            "current_page": 1,
+                                            "per_page": 15,
+                                            "last_page": 1,
+                                            "total": 2,
+                                            "has_more": false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {

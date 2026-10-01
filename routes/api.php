@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('transactions', [WalletController::class, 'transactions']);
         Route::get('deposits', [WalletController::class, 'deposits']);
         Route::get('withdrawals', [WalletController::class, 'withdrawals']);
+        Route::get('payments-history', [WalletController::class, 'paymentsHistory']);
         Route::post('deposit', [WalletController::class, 'requestDeposit']);
         Route::post('withdraw', [WalletController::class, 'requestWithdrawal']);
 
