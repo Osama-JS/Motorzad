@@ -55,9 +55,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        $user->sendEmailVerificationNotification();
+        $request->session()->put('pending_verification_email', $user->email);
 
         // Redirect to verification notice as a mandatory first step
-        return redirect()->route('verification.notice');
+        return redirect()->route('verification.notice')->with('status', 'verification-link-sent');
     }
 }

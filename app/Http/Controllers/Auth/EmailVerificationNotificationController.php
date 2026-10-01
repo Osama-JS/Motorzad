@@ -13,10 +13,14 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $email = $request->session()->get('pending_verification_email');
+        if (!$email) {
+            return redirect()->route('login');
+        }
 
-        if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false));
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user || $user->hasVerifiedEmail()) {
+            return redirect()->route('login');
         }
 
         // Rate limiting: 60 seconds between resend requests

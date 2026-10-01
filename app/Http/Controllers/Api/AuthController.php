@@ -841,6 +841,104 @@ class AuthController extends Controller
     }
 
     /**
+     * Verify Forgot Password OTP (Check if code is valid before reset).
+     */
+    #[OA\Post(
+        path: "/api/auth/verify-reset-otp",
+        summary: "Verify Forgot Password OTP",
+        operationId: "verifyResetOtp",
+        description: "Checks if the OTP sent for password reset is valid without actually resetting the password. Useful for multi-step mobile screens.",
+        tags: ["Authentication"],
+        parameters: [
+            new OA\Parameter(name: "Accept-Language", in: "header", required: false, schema: new OA\Schema(type: "string", default: "en", enum: ["en", "ar"]))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "otp"],
+                example: [
+                    "email" => "user@example.com",
+                    "otp" => "482019"
+                ],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
+                    new OA\Property(property: "otp", type: "string", example: "482019", description: "6-digit OTP code")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "OTP is valid",
+                content: new OA\JsonContent(
+                    example: [
+                        "error" => false,
+                        "message" => "OTP is valid. You can proceed to reset password.",
+                        "data" => null
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Invalid or expired OTP",
+                content: new OA\JsonContent(
+                    example: [
+                        "error" => true,
+                        "message" => "Invalid or expired OTP code.",
+                        "data" => null
+                    ]
+                )
+            )
+        ]
+    )]
+    public function verifyResetOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $cachedCode = Cache::get('reset_pwd_' . $request->email);
+        $attemptsKey = 'reset_pwd_attempts_' . $request->email;
+        $attempts = (int) Cache::get($attemptsKey, 0);
+
+        if (!$cachedCode) {
+            return response()->json([
+                'error'   => true,
+                'message' => __('Invalid or expired OTP code.'),
+                'data'    => null,
+            ], 400);
+        }
+
+        if ($cachedCode !== $request->otp) {
+            $attempts++;
+            if ($attempts >= 5) {
+                Cache::forget('reset_pwd_' . $request->email);
+                Cache::forget($attemptsKey);
+                return response()->json([
+                    'error'   => true,
+                    'message' => __('Too many failed attempts. This code has been invalidated. Please request a new code.'),
+                    'data'    => null,
+                ], 429);
+            }
+            Cache::put($attemptsKey, $attempts, now()->addMinutes(15));
+
+            return response()->json([
+                'error'   => true,
+                'message' => __('Invalid or expired OTP code.'),
+                'data'    => null,
+            ], 400);
+        }
+
+        // Return success, but keep the code in cache for the actual reset-password endpoint
+        return response()->json([
+            'error'   => false,
+            'message' => __('OTP is valid. You can proceed to reset password.'),
+            'data'    => null,
+        ]);
+    }
+
+    /**
      * Reset Password - Verify OTP and Change Password.
      */
     #[OA\Post(

@@ -2484,6 +2484,89 @@
                 }
             }
         },
+        "/api/auth/verify-reset-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify Forgot Password OTP",
+                "description": "Checks if the OTP sent for password reset is valid without actually resetting the password. Useful for multi-step mobile screens.",
+                "operationId": "verifyResetOtp",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "en",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "482019"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "email": "user@example.com",
+                                "otp": "482019"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP is valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": false,
+                                    "message": "OTP is valid. You can proceed to reset password.",
+                                    "data": null
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "error": true,
+                                    "message": "Invalid or expired OTP code.",
+                                    "data": null
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/reset-password": {
             "post": {
                 "tags": [

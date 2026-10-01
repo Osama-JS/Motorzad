@@ -61,7 +61,7 @@
         </p>
         <div class="email-badge">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span>{{ auth()->user()->email }}</span>
+            <span>{{ $email ?? session('pending_verification_email') }}</span>
         </div>
         <small class="d-block mt-2 text-muted" style="font-size: 0.78rem;">
             {{ __('صلاحية الرمز 15 دقيقة. يرجى مراجعة صندوق الوارد أو مجلد الرسائل غير المرغوب فيها (Spam).') }}
@@ -131,12 +131,9 @@
 
 {{-- Logout Option --}}
 <div style="text-align: center; margin-top: 1rem;">
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="btn btn-link text-muted" style="font-size: 0.8rem; text-decoration: none; opacity: 0.7;">
-            ← {{ __('تسجيل الخروج أو استخدام بريد آخر') }}
-        </button>
-    </form>
+    <a href="{{ route('login') }}" class="btn btn-link text-muted" style="font-size: 0.8rem; text-decoration: none; opacity: 0.7;">
+        ← {{ __('تسجيل الخروج أو استخدام بريد آخر') }}
+    </a>
 </div>
 
 @push('scripts')

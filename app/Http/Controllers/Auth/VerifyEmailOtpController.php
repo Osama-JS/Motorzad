@@ -22,10 +22,18 @@ class VerifyEmailOtpController extends Controller
             'otp.size' => __('يجب أن يتكون رمز التحقق من 6 أرقام بالضبط.'),
         ]);
 
-        $user = $request->user();
+        $email = $request->session()->get('pending_verification_email');
+        if (!$email) {
+            return redirect()->route('login');
+        }
+
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            return redirect()->route('login');
+        }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended($this->getRedirectUrl($user));
+            return redirect()->route('login');
         }
 
         $cachedCode = Cache::get('email_verify_' . $user->email);
@@ -60,6 +68,9 @@ class VerifyEmailOtpController extends Controller
             $user->status = 'active';
             $user->save();
         }
+
+        \Illuminate\Support\Facades\Auth::login($user);
+        $request->session()->forget('pending_verification_email');
 
         return redirect()->intended($this->getRedirectUrl($user))->with('success', __('تم تأكيد بريدك الإلكتروني بنجاح! أهلاً بك في منصة موتورزاد.'));
     }

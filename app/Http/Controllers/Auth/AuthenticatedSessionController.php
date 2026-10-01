@@ -26,6 +26,15 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = $request->user();
+
+        if (is_null($user->email_verified_at)) {
+            $user->sendEmailVerificationNotification();
+            Auth::guard('web')->logout();
+            $request->session()->put('pending_verification_email', $user->email);
+            return redirect()->route('verification.notice')->with('error', __('يجب توثيق البريد الإلكتروني أولاً لتتمكن من الدخول.'));
+        }
+
         $request->session()->regenerate();
 
         if ($request->user()->hasRole('admin')) {
