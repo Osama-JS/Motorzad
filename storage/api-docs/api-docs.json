@@ -7808,6 +7808,40 @@
                 ]
             }
         },
+        "/api/wallet/transactions/{id}/invoice": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Transaction Invoice HTML",
+                "description": "Returns the rendered HTML string for a specific transaction invoice. The mobile app can render this HTML in a WebView or pass it to a PDF printer.",
+                "operationId": "73de3c156ae061fa8b2094a2ee68e86c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "404": {
+                        "description": "Transaction not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/wallet/withdraw": {
             "post": {
                 "tags": [
@@ -8146,6 +8180,69 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/online-payments": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Online Payments History",
+                "description": "Returns a paginated list of electronic gateway transactions (HyperPay) for the authenticated user.",
+                "operationId": "bb1812ae7389698c35a548dd8d5ab33e",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/payments-summary": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get Payments Summary Stats",
+                "description": "Returns statistics about the user's bank transfers and online payments (HyperPay).",
+                "operationId": "adf12848b9acb0d2238fe148fec415b0",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response"
                     }
                 },
                 "security": [

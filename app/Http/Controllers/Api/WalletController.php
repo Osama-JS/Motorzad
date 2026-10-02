@@ -7,8 +7,10 @@ use App\Http\Resources\DepositRequestResource;
 use App\Http\Resources\WalletResource;
 use App\Http\Resources\WalletTransactionResource;
 use App\Http\Resources\WithdrawalRequestResource;
+use App\Http\Resources\HyperpayTransactionResource;
 use App\Models\BankAccount;
 use App\Models\DepositRequest;
+use App\Models\HyperpayTransaction;
 use App\Models\Setting;
 use App\Models\WithdrawalRequest;
 use App\Services\WalletService;
@@ -149,6 +151,41 @@ class WalletController extends Controller
                 'per_page'     => $transactions->perPage(),
             ]
         );
+    }
+
+    /**
+     * Get transaction invoice HTML.
+     */
+    #[OA\Get(
+        path: '/api/wallet/transactions/{id}/invoice',
+        summary: 'Get Transaction Invoice HTML',
+        description: 'Returns the rendered HTML string for a specific transaction invoice. The mobile app can render this HTML in a WebView or pass it to a PDF printer.',
+        security: [['bearerAuth' => []]],
+        tags: ['Wallet'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'Transaction ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response'
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Transaction not found'
+            )
+        ]
+    )]
+    public function invoice(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        $transaction = \App\Models\WalletTransaction::where('wallet_id', $user->wallet->id)->findOrFail($id);
+
+        $html = view('bidder.wallet.invoice', compact('user', 'transaction'))->render();
+
+        return $this->successResponse([
+            'html' => $html
+        ]);
     }
 
     /**
@@ -467,6 +504,84 @@ class WalletController extends Controller
                 'per_page'     => $withdrawals->perPage(),
             ]
         );
+    }
+
+    /**
+     * Get online payments history (HyperPay transactions).
+     */
+    #[OA\Get(
+        path: '/api/wallet/online-payments',
+        summary: 'Get Online Payments History',
+        description: 'Returns a paginated list of electronic gateway transactions (HyperPay) for the authenticated user.',
+        security: [['bearerAuth' => []]],
+        tags: ['Wallet'],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, description: 'Page number', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Items per page', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated'
+            )
+        ]
+    )]
+    public function onlinePayments(Request $request): JsonResponse
+    {
+        $payments = HyperpayTransaction::where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate($request->input('per_page', 15));
+
+        return $this->successResponse(
+            HyperpayTransactionResource::collection($payments->items()),
+            null,
+            200,
+            [
+                'current_page' => $payments->currentPage(),
+                'last_page'    => $payments->lastPage(),
+                'total'        => $payments->total(),
+                'per_page'     => $payments->perPage(),
+            ]
+        );
+    }
+
+    /**
+     * Get payments history summary/stats.
+     */
+    #[OA\Get(
+        path: '/api/wallet/payments-summary',
+        summary: 'Get Payments Summary Stats',
+        description: 'Returns statistics about the user\'s bank transfers and online payments (HyperPay).',
+        security: [['bearerAuth' => []]],
+        tags: ['Wallet'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successful Response'
+            )
+        ]
+    )]
+    public function paymentsSummary(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+
+        $stats = [
+            'bank_transfers_count' => DepositRequest::where('user_id', $userId)->count(),
+            'bank_transfers_approved_total' => (float) DepositRequest::where('user_id', $userId)
+                ->where('status', 'approved')
+                ->sum('amount'),
+            
+            'online_payments_count' => HyperpayTransaction::where('user_id', $userId)->count(),
+            'online_payments_paid_total' => (float) HyperpayTransaction::where('user_id', $userId)
+                ->where('status', 'paid')
+                ->sum('amount'),
+        ];
+
+        return $this->successResponse($stats);
     }
 
     /**
