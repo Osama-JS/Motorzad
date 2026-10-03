@@ -1090,15 +1090,6 @@ function placeBidNow() {
                 // Update counters
                 document.getElementById('bidsCountBadge').textContent = `${data.bids_count} {{ app()->getLocale() === 'ar' ? 'مزايدات' : 'Bids' }}`;
 
-                // Set next bid recommendation
-                input.value = data.new_price + minIncrement;
-                input.min = data.new_price + minIncrement;
-
-                // Update max auto bid input min
-                const maxInput = document.getElementById('maxAutoBidInput');
-                if (maxInput) {
-                    maxInput.min = data.new_price + minIncrement * 2;
-                }
 
                 // Simulate auto-extend if time remaining is less than 2 minutes (120 seconds)
                 if (typeof timeInSec !== 'undefined' && timeInSec > 0 && timeInSec <= 120) {

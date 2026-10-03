@@ -265,7 +265,7 @@ $(document).ready(function() {
     });
 
     function markAsRead(id, card) {
-        const url = `/bidder/notifications/${id}/read`;
+        const url = `{{ url('/bidder/notifications') }}/${id}/read`;
         
         BidderAjax.post(url, {}, {
             onSuccess: function(response) {
@@ -291,7 +291,7 @@ $(document).ready(function() {
         const originalHtml = btn.html();
         btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 
-        const url = '/bidder/notifications/all/read';
+        const url = "{{ url('/bidder/notifications/all/read') }}";
 
         BidderAjax.post(url, {}, {
             onSuccess: function(response) {

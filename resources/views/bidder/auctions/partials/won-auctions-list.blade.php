@@ -81,10 +81,27 @@
                     </a>
                     
                     @if($payBadgeClass !== 'paid')
+                        @php
+                            $fmtMoney = fn($v) => number_format((float) $v, fmod((float) $v, 1) ? 2 : 0);
+                            $coBid        = (float) ($order->bid_amount ?? $winningAmount);
+                            $coCommission = (float) ($order->commission_amount ?? 0);
+                            $coVat        = (float) ($order->vat_amount ?? 0);
+                            $coDeposit    = (float) ($order->deposit_amount ?? ($isMock ? 0 : ($auc->deposit_amount ?? 0)));
+                            $coTotal      = (float) ($order->total_amount ?? ($coBid + $coCommission + $coVat));
+                            $coRef        = $order ? ('ORD-' . str_pad($order->id, 6, '0', STR_PAD_LEFT)) : ('AUC-' . str_pad($id, 6, '0', STR_PAD_LEFT));
+                        @endphp
                         <button class="btn-action-view complete-purchase-btn" 
                                 data-id="{{ $id }}"
                                 data-title="{{ $title }}"
-                                data-amount="{{ number_format($winningAmount) }}">
+                                data-meta="{{ trim($make . ' ' . $model . ' • ' . $year, ' •') }}"
+                                data-image="{{ $imageUrl }}"
+                                data-ref="{{ $coRef }}"
+                                data-bid="{{ $fmtMoney($coBid) }}"
+                                data-commission="{{ $coCommission > 0 ? $fmtMoney($coCommission) : '' }}"
+                                data-vat="{{ $coVat > 0 ? $fmtMoney($coVat) : '' }}"
+                                data-deposit="{{ $coDeposit > 0 ? $fmtMoney($coDeposit) : '' }}"
+                                data-amount="{{ $fmtMoney($coTotal) }}"
+                                data-amount-raw="{{ round($coTotal, 2) }}">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-inline-end: 0.2rem;"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                             {{ app()->getLocale() === 'ar' ? 'إتمام الشراء' : 'Complete Purchase' }}
                         </button>
