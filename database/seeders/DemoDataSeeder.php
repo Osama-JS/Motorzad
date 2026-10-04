@@ -498,7 +498,7 @@ class DemoDataSeeder extends Seeder
         $this->command->info('6/10 Seeding Financials & HyperPay Transactions...');
 
         foreach ($bidderUsers as $idx => $bUser) {
-            $w = $bUser->wallet;
+            $w = $bUser->wallet()->first();
 
             // Deposit 1 (HyperPay Visa/Mada)
             WalletTransaction::create([

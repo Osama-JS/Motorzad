@@ -345,7 +345,7 @@ class AuthController extends Controller
         }
 
         // 2. Condition 1: Check if account email is verified
-        if (is_null($user->email_verified_at)) {
+        if (is_null($user->email_verified_at) && !$user->hasRole('admin')) {
             // Generate secure OTP
             $code = sprintf('%06d', random_int(100000, 999999));
             Cache::put('otp_' . $user->email, $code, now()->addMinutes(5));

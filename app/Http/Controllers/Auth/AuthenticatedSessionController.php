@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        if (is_null($user->email_verified_at)) {
+        if (is_null($user->email_verified_at) && !$user->hasRole('admin')) {
             $user->sendEmailVerificationNotification();
             Auth::guard('web')->logout();
             $request->session()->put('pending_verification_email', $user->email);
