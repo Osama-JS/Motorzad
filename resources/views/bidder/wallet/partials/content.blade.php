@@ -439,7 +439,7 @@
                             if(input && netDisplay) {
                                 input.addEventListener('input', function() {
                                     const val = parseFloat(this.value) || 0;
-                                    netDisplay.textContent = val.toFixed(2) + ' SAR';
+                                    netDisplay.textContent = val.toFixed(2) + ' {{ __('SAR') }}';
                                 });
                             }
                         });
@@ -678,9 +678,14 @@
                                     <div class="mb-4">
                                         <label class="form-label fw-bold small text-muted mb-2">* {{ __('المبلغ المحوّل') }}</label>
                                         <div class="input-group">
-                                            <input type="number" name="amount" class="form-control form-control-lg px-3" step="0.01" min="1" required placeholder="0.00" style="border-radius:8px 0 0 8px;">
+                                            <input type="number" id="depositAmountInput" name="amount" class="form-control form-control-lg px-3" step="0.01" min="1" required placeholder="0.00" style="border-radius:8px 0 0 8px;">
                                             <span class="input-group-text fw-bold" style="border-radius:0 8px 8px 0;background:var(--bg-input);color:var(--text-muted);border-color:var(--border);">{{ __('ر.س') }}</span>
                                         </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-muted mb-2">{{ __('ملاحظات التحويل / الرقم المرجعي') }}</label>
+                                        <textarea id="depositNotesInput" name="notes" class="form-control px-3 py-2" rows="2" placeholder="{{ __('رقم الحوالة أو مرجع المزاد...') }}" style="border-radius:8px;"></textarea>
                                     </div>
 
                                     <div class="mb-1">

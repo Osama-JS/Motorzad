@@ -55,7 +55,7 @@
                 {{-- Winning Amount --}}
                 <div class="price-tag">
                     <span class="label">{{ app()->getLocale() === 'ar' ? 'سعر الفوز' : 'Winning Amount' }}</span>
-                    <span class="amount won-amount">{{ number_format($winningAmount) }} SAR</span>
+                    <span class="amount won-amount">{{ number_format($winningAmount) }} {{ __('SAR') }}</span>
                 </div>
 
                 {{-- Status Badges --}}
@@ -92,6 +92,7 @@
                         @endphp
                         <button class="btn-action-view complete-purchase-btn" 
                                 data-id="{{ $id }}"
+                                data-order-id="{{ $order ? $order->id : '' }}"
                                 data-title="{{ $title }}"
                                 data-meta="{{ trim($make . ' ' . $model . ' • ' . $year, ' •') }}"
                                 data-image="{{ $imageUrl }}"

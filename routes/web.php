@@ -270,7 +270,11 @@ Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->g
     Route::post('/wallet/hyperpay/initiate', [\App\Http\Controllers\Bidder\WalletController::class, 'initiateHyperPay'])->name('wallet.hyperpay.initiate');
     Route::get('/wallet/hyperpay/checkout/{id}', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCheckout'])->name('wallet.hyperpay.checkout');
     Route::get('/wallet/hyperpay/callback', [\App\Http\Controllers\Bidder\WalletController::class, 'hyperPayCallback'])->name('wallet.hyperpay.callback');
-
+    
+    // Order Payments Placeholder
+    Route::get('/payments/checkout/{order}', function($order) {
+        return "<h2>بوابة الدفع (HyperPay) قيد الإنشاء 🚀</h2><p>مسار الدفع للطلب رقم: {$order} سيوجهك قريباً إلى بوابة مدى/فيزا الخاصة بـ HyperPay.</p><a href='/Motorzad/public/bidder/won-auctions'>العودة للمزادات الفائزة</a>";
+    })->name('payments.checkout');
     // Auctions Routes
     Route::get('/global-search', [\App\Http\Controllers\Bidder\AuctionController::class, 'globalSearch'])->name('global-search');
     Route::get('/won-auctions', [\App\Http\Controllers\Bidder\AuctionController::class, 'wonAuctions'])->name('auctions.won');

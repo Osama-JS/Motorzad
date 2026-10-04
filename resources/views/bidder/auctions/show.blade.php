@@ -955,7 +955,7 @@ html[dir="rtl"] .currency-suffix {
                     <span class="price-label">{{ app()->getLocale() === 'ar' ? 'أقل مبلغ للمزايدة' : 'Minimum Bid Amount' }}</span>
                     <span class="value" id="currentPriceVal">{{ number_format($auction->current_price) }}</span>
                 </div>
-                <span style="font-weight: 800; color: var(--text-secondary);">SAR</span>
+                <span style="font-weight: 800; color: var(--text-secondary);">{{ __('SAR') }}</span>
             </div>
 
             @if($auction->is_live)
@@ -976,15 +976,15 @@ html[dir="rtl"] .currency-suffix {
                     </label>
                     <div class="bid-input-wrap">
                         <input type="number" id="bidAmountInput" value="{{ $auction->min_bid_increment }}" min="{{ $auction->min_bid_increment }}" step="{{ $auction->min_bid_increment }}">
-                        <span class="currency-suffix">SAR</span>
+                        <span class="currency-suffix">{{ __('SAR') }}</span>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                         <small style="font-weight: 700; color: var(--text-muted);">
-                            {{ app()->getLocale() === 'ar' ? 'الزيادة الدنيا' : 'Minimum increment' }}: +{{ number_format($auction->min_bid_increment) }} SAR
+                            {{ app()->getLocale() === 'ar' ? 'الزيادة الدنيا' : 'Minimum increment' }}: +{{ number_format($auction->min_bid_increment) }} {{ __('SAR') }}
                         </small>
                         <div style="font-weight: 800; color: var(--brand-red); font-size: 0.95rem; background: var(--brand-red-glow); padding: 0.25rem 0.75rem; border-radius: 100px;">
-                            {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} <span id="totalBidPreview">{{ number_format($auction->current_price + $auction->min_bid_increment) }}</span> SAR
+                            {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} <span id="totalBidPreview">{{ number_format($auction->current_price + $auction->min_bid_increment) }}</span> {{ __('SAR') }}
                         </div>
                     </div>
                 </div>
@@ -996,7 +996,7 @@ html[dir="rtl"] .currency-suffix {
                     </label>
                     <div class="bid-input-wrap">
                         <input type="number" id="maxAutoBidInput" placeholder="{{ app()->getLocale() === 'ar' ? 'أدخل أقصى سعر' : 'Enter max amount' }}" min="{{ $auction->current_price + $auction->min_bid_increment * 2 }}" step="{{ $auction->min_bid_increment }}">
-                        <span class="currency-suffix">SAR</span>
+                        <span class="currency-suffix">{{ __('SAR') }}</span>
                     </div>
                     <small style="display: block; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-muted); text-align: center;">
                         {{ app()->getLocale() === 'ar' ? 'سيقوم النظام بالمزايدة بالنيابة عنك حتى هذا الحد' : 'System will automatically bid up to this limit' }}
@@ -1020,7 +1020,7 @@ html[dir="rtl"] .currency-suffix {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #10b981; flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                     <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
                         <strong>{{ app()->getLocale() === 'ar' ? 'ضمان المزاد مطلوب' : 'Auction Deposit Required' }}</strong><br>
-                        {{ app()->getLocale() === 'ar' ? 'مبلغ التأمين:' : 'Required Deposit:' }} {{ number_format($auction->deposit_amount) }} SAR
+                        {{ app()->getLocale() === 'ar' ? 'مبلغ التأمين:' : 'Required Deposit:' }} {{ number_format($auction->deposit_amount) }} {{ __('SAR') }}
                     </div>
                 </div>
             @endif
@@ -1056,10 +1056,10 @@ html[dir="rtl"] .currency-suffix {
                         <div class="feed-item" data-bid-id="{{ $bid->id }}">
                             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
                                 <span style="font-weight: 800; color: {{ $isMe ? 'var(--brand-red-light)' : '#10b981' }}; font-size: 0.95rem;">
-                                    +{{ number_format($incVal) }} SAR
+                                    +{{ number_format($incVal) }} {{ __('SAR') }}
                                 </span>
                                 <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">
-                                    {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($bid->amount) }} SAR
+                                    {{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} {{ number_format($bid->amount) }} {{ __('SAR') }}
                                 </span>
                             </div>
                             <span style="opacity: 0.9; font-weight: 600;">
@@ -1154,7 +1154,7 @@ function renderPriceHistoryChart() {
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     });
     const dataPoints = priceHistoryData.map(item => item.amount);
-    const tooltips = priceHistoryData.map(item => `${item.bidder}: ${item.amount.toLocaleString()} SAR`);
+    const tooltips = priceHistoryData.map(item => `${item.bidder}: ${item.amount.toLocaleString()} {{ __('SAR') }}`);
 
     if (priceChart) {
         priceChart.destroy();
@@ -1227,7 +1227,7 @@ function renderPriceHistoryChart() {
                             size: 10
                         },
                         callback: function(value) {
-                            return value.toLocaleString() + ' SAR';
+                            return value.toLocaleString() + ' {{ __('SAR') }}';
                         }
                     }
                 }
@@ -1445,8 +1445,8 @@ function placeBidNow() {
                 const myInc = (data.bid_increment !== undefined && data.bid_increment !== null) ? Number(data.bid_increment) : (incrementAmount || {{ $auction->min_bid_increment }});
                 newItem.innerHTML = `
                     <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
-                        <span style="font-weight: 800; color: var(--brand-red-light); font-size: 0.95rem;">+${myInc.toLocaleString()} SAR</span>
-                        <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${data.new_price.toLocaleString()} SAR</span>
+                        <span style="font-weight: 800; color: var(--brand-red-light); font-size: 0.95rem;">+${myInc.toLocaleString()} {{ __('SAR') }}</span>
+                        <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${data.new_price.toLocaleString()} {{ __('SAR') }}</span>
                     </div>
                     <span style="opacity: 0.9; font-weight: 600;">${myDisplayName}</span>
                 `;
@@ -1632,8 +1632,8 @@ function handleIncomingLiveBid(data) {
         const incColor = isMe ? 'var(--brand-red-light)' : '#10b981';
         newItem.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
-                <span style="font-weight: 800; color: ${incColor}; font-size: 0.95rem;">+${incAmount.toLocaleString()} SAR</span>
-                <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${newPrice.toLocaleString()} SAR</span>
+                <span style="font-weight: 800; color: ${incColor}; font-size: 0.95rem;">+${incAmount.toLocaleString()} {{ __('SAR') }}</span>
+                <span style="font-size: 0.72rem; opacity: 0.75; color: var(--text-muted);">{{ app()->getLocale() === 'ar' ? 'الإجمالي:' : 'Total:' }} ${newPrice.toLocaleString()} {{ __('SAR') }}</span>
             </div>
             <span style="opacity: 0.9; font-weight: 600;">${displayName}</span>
         `;

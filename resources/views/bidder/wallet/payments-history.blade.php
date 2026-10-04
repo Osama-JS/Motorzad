@@ -125,28 +125,28 @@
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="premium-card p-3 h-100">
                 <div class="text-muted small fw-bold mb-1">{{ __('إجمالي الشحن البنكي المعتمد') }}</div>
-                <div class="fs-4 fw-bold text-success">{{ number_format($stats['bank_transfers_approved_total'], 2) }} <small class="fs-6">SAR</small></div>
+                <div class="fs-4 fw-bold text-success">{{ number_format($stats['bank_transfers_approved_total'], 2) }} <small class="fs-6">{{ __('SAR') }}</small></div>
                 <div class="text-muted" style="font-size: 0.72rem;">{{ $stats['bank_transfers_count'] }} {{ __('طلب تحويل') }}</div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="premium-card p-3 h-100">
                 <div class="text-muted small fw-bold mb-1">{{ __('إجمالي الدفع الإلكتروني (البوابة)') }}</div>
-                <div class="fs-4 fw-bold text-primary">{{ number_format($stats['online_payments_paid_total'], 2) }} <small class="fs-6">SAR</small></div>
+                <div class="fs-4 fw-bold text-primary">{{ number_format($stats['online_payments_paid_total'], 2) }} <small class="fs-6">{{ __('SAR') }}</small></div>
                 <div class="text-muted" style="font-size: 0.72rem;">{{ $stats['online_payments_count'] }} {{ __('عملية دفع') }}</div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="premium-card p-3 h-100">
                 <div class="text-muted small fw-bold mb-1">{{ __('رصيد المحفظة المتاح') }}</div>
-                <div class="fs-4 fw-bold text-success">{{ number_format($user->wallet->available_balance ?? 0, 2) }} <small class="fs-6">SAR</small></div>
+                <div class="fs-4 fw-bold text-success">{{ number_format($user->wallet->available_balance ?? 0, 2) }} <small class="fs-6">{{ __('SAR') }}</small></div>
                 <div class="text-muted" style="font-size: 0.72rem;">{{ __('جاهز للمزايدة وسداد الالتزامات') }}</div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="premium-card p-3 h-100">
                 <div class="text-muted small fw-bold mb-1">{{ __('الرصيد المحجوز كضمانات') }}</div>
-                <div class="fs-4 fw-bold text-warning">{{ number_format($user->wallet->held_balance ?? 0, 2) }} <small class="fs-6">SAR</small></div>
+                <div class="fs-4 fw-bold text-warning">{{ number_format($user->wallet->held_balance ?? 0, 2) }} <small class="fs-6">{{ __('SAR') }}</small></div>
                 <div class="text-muted" style="font-size: 0.72rem;">{{ __('يُسترد تلقائياً فور انتهاء المزاد') }}</div>
             </div>
         </div>
@@ -201,7 +201,7 @@
                             @endif
                         </td>
                         <td>
-                            <strong class="text-success fs-6">+{{ number_format($deposit->amount, 2) }} SAR</strong>
+                            <strong class="text-success fs-6">+{{ number_format($deposit->amount, 2) }} {{ __('SAR') }}</strong>
                         </td>
                         <td>
                             @if($deposit->receipt_path)
@@ -289,7 +289,7 @@
                             <span class="brand-pill">{{ strtoupper($tx->brand ?? 'CARD') }}</span>
                         </td>
                         <td>
-                            <strong class="text-primary fs-6">{{ number_format($tx->amount, 2) }} SAR</strong>
+                            <strong class="text-primary fs-6">{{ number_format($tx->amount, 2) }} {{ __('SAR') }}</strong>
                         </td>
                         <td>
                             <span dir="ltr">{{ $tx->created_at->format('Y-m-d H:i') }}</span>

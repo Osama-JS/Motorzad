@@ -1047,7 +1047,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
         <div class="stat-info">
-            <span class="stat-val">{{ number_format($totalValue) }} SAR</span>
+            <span class="stat-val">{{ number_format($totalValue) }} {{ __('SAR') }}</span>
             <span class="stat-lbl">{{ app()->getLocale() === 'ar' ? 'إجمالي القيمة الفائزة' : 'Total Winning Value' }}</span>
         </div>
     </div>
@@ -1159,25 +1159,25 @@
                                 <div class="cp-invoice-rows">
                                     <div class="cp-row">
                                         <span class="k">{{ $isAr ? 'سعر الفوز بالمزاد' : 'Winning bid' }}</span>
-                                        <span class="v"><span id="cp-bid"></span><small>SAR</small></span>
+                                        <span class="v"><span id="cp-bid"></span><small>{{ __('SAR') }}</small></span>
                                     </div>
                                     <div class="cp-row" id="cp-row-commission">
                                         <span class="k">{{ $isAr ? 'عمولة المنصة' : 'Platform commission' }}</span>
-                                        <span class="v"><span id="cp-commission"></span><small>SAR</small></span>
+                                        <span class="v"><span id="cp-commission"></span><small>{{ __('SAR') }}</small></span>
                                     </div>
                                     <div class="cp-row" id="cp-row-vat">
                                         <span class="k">{{ $isAr ? 'ضريبة القيمة المضافة' : 'VAT' }}</span>
-                                        <span class="v"><span id="cp-vat"></span><small>SAR</small></span>
+                                        <span class="v"><span id="cp-vat"></span><small>{{ __('SAR') }}</small></span>
                                     </div>
                                     <div class="cp-row" id="cp-row-deposit">
                                         <span class="k">{{ $isAr ? 'مبلغ التأمين المحجوز' : 'Held deposit' }} <span class="tag">{{ $isAr ? 'محجوز' : 'Held' }}</span></span>
-                                        <span class="v"><span id="cp-deposit"></span><small>SAR</small></span>
+                                        <span class="v"><span id="cp-deposit"></span><small>{{ __('SAR') }}</small></span>
                                     </div>
                                 </div>
                                 <div class="cp-total">
                                     <div>
                                         <div class="cp-total-label">{{ $isAr ? 'المبلغ المطلوب سداده' : 'Amount due' }}</div>
-                                        <span class="cp-total-amount"><span id="modal-total-amount"></span><span class="cur">SAR</span></span>
+                                        <span class="cp-total-amount"><span id="modal-total-amount"></span><span class="cur">{{ __('SAR') }}</span></span>
                                     </div>
                                     <button type="button" class="cp-copy-amount" id="cp-copy-amount" data-copy="">
                                         <svg class="ic-copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1287,13 +1287,17 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                     {{ $isAr ? 'عملية آمنة ومُراجَعة من فريق موتورزاد' : 'Secure & verified by the Motorazad team' }}
                 </span>
-                <div class="cp-actions">
+                <div class="cp-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
                     <button type="button" class="cp-btn cp-btn-ghost" data-bs-dismiss="modal">
                         {{ $isAr ? 'إغلاق' : 'Close' }}
                     </button>
-                    <a href="{{ route('bidder.wallet.index') }}" class="cp-btn cp-btn-primary" id="cp-go-wallet">
+                    <a href="{{ route('bidder.wallet.index') }}" class="cp-btn cp-btn-primary" id="cp-go-wallet" style="background: white; color: var(--text); border: 1px solid var(--border);">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                        {{ $isAr ? 'إرفاق الإيصال من المحفظة' : 'Attach Receipt in Wallet' }}
+                        {{ $isAr ? 'إرفاق إيصال تحويل' : 'Attach Receipt' }}
+                    </a>
+                    <a href="#" class="cp-btn cp-btn-primary" id="cp-pay-online" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; color: white;">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        {{ $isAr ? 'الدفع إلكترونياً (مدى / فيزا)' : 'Pay Online' }}
                         <svg class="cp-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
                 </div>
@@ -1406,6 +1410,23 @@ $(document).ready(function() {
 
         $('#modal-total-amount').text(d.amount || '');
         $('#cp-copy-amount').attr('data-copy', d.amountRaw || '');
+
+        const baseUrl = "{{ route('bidder.wallet.index') }}";
+        const amountRaw = d.amountRaw || '';
+        const ref = d.ref || '';
+        $('#cp-go-wallet').attr('href', baseUrl + '?auto_deposit=1&amount=' + encodeURIComponent(amountRaw) + '&ref=' + encodeURIComponent(ref));
+
+        const checkoutRouteTemplate = "{{ route('bidder.payments.checkout', ['order' => 'ORDER_ID_PLACEHOLDER']) }}";
+        
+        if (d.orderId) {
+            $('#cp-pay-online').attr('href', checkoutRouteTemplate.replace('ORDER_ID_PLACEHOLDER', d.orderId)).show();
+        } else if (d.id) {
+            // Fallback for mock data testing
+            $('#cp-pay-online').attr('href', checkoutRouteTemplate.replace('ORDER_ID_PLACEHOLDER', 'mock_' + d.id)).show();
+        } else {
+            // Hide the button if there is no actual order yet (fallback case)
+            $('#cp-pay-online').hide();
+        }
 
         cpModal.show();
     });

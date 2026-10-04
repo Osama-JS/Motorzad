@@ -237,6 +237,29 @@ $(document).ready(function() {
     window.addEventListener('popstate', function() {
         loadWalletContent(window.location.href, '#wallet-container');
     });
+
+    // Auto-open and auto-fill deposit modal based on URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('auto_deposit')) {
+        const amount = urlParams.get('amount');
+        const ref = urlParams.get('ref');
+        
+        if (amount) {
+            $('#depositAmountInput').val(amount).prop('readonly', true);
+        }
+        if (ref) {
+            $('#depositNotesInput').val('سداد مرجع: ' + ref).prop('readonly', true);
+        }
+        
+        // Remove params from URL so it doesn't trigger again on refresh
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+
+        // Open modal slightly after page load to ensure styles/scripts are ready
+        setTimeout(function() {
+            openDepositModal();
+        }, 500);
+    }
 });
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
