@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('auctions:check-ended')->everyMinute();
+Schedule::command(\Spatie\Health\Commands\RunHealthChecksCommand::class)->everyMinute();

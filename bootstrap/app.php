@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->preventRequestsDuringMaintenance(except: [
+            'admin/*',
+            'admin',
+        ]);
+
         $middleware->prepend(\App\Http\Middleware\HandleBroadcastAuth::class);
 
         $middleware->web(append: [

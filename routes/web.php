@@ -109,6 +109,13 @@ Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role:admin'])->gro
 
 // Admin Management Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('system-status', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-status');
+    Route::post('system-status/clear-cache', [\App\Http\Controllers\Admin\SystemHealthController::class, 'clearCache'])->name('system-status.clear-cache');
+    Route::post('system-status/restart-queue', [\App\Http\Controllers\Admin\SystemHealthController::class, 'restartQueue'])->name('system-status.restart-queue');
+    Route::post('system-status/optimize-clear', [\App\Http\Controllers\Admin\SystemHealthController::class, 'optimizeClear'])->name('system-status.optimize-clear');
+    Route::post('system-status/toggle-maintenance', [\App\Http\Controllers\Admin\SystemHealthController::class, 'toggleMaintenance'])->name('system-status.toggle-maintenance');
+    Route::get('system-status/json', \Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class)->name('system-status.json');
+    
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/global-search', [\App\Http\Controllers\Admin\DashboardController::class, 'globalSearch'])->name('global-search');
     Route::get('pages/data', [\App\Http\Controllers\Admin\PageController::class, 'getData'])->name('pages.data');
