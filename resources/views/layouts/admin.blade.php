@@ -212,5 +212,7 @@
         });
     </script>
     @yield('js')
+    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
