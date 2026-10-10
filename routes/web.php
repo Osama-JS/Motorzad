@@ -151,7 +151,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('backups', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
     Route::post('backups', [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backups.store');
     Route::get('backups/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
+    Route::delete('backups/bulk', [\App\Http\Controllers\Admin\BackupController::class, 'bulkDestroy'])->name('backups.bulk');
     Route::delete('backups/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backups.destroy');
+    Route::post('backups/settings', [\App\Http\Controllers\Admin\BackupController::class, 'updateSettings'])->name('backups.settings');
 
     // Contact Messages
     Route::get('contacts/data', [\App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contacts.data');
