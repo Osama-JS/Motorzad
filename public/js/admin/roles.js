@@ -219,7 +219,14 @@ function renderRolesTable(data) {
     } else {
         data.forEach(role => {
             let permissionsHtml = generatePermissionsHtml(role.permissions);
+            let isSystem = role.is_system || ['admin', 'seller', 'bidder'].includes(role.name);
             
+            let deleteActionHtml = isSystem ? '' : `
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteRole(${role.id})">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>${__('Delete', 'حذف')}</a></li>
+            `;
+
             let actionsHtml = `
                 <div class="dropdown action-dropdown text-center">
                     <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -227,16 +234,16 @@ function renderRolesTable(data) {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
                         <li><a class="dropdown-item text-primary" href="javascript:void(0)" onclick="editRole(${role.id})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>${__('Edit', 'تعديل')}</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteRole(${role.id})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>${__('Delete', 'حذف')}</a></li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>${isSystem ? __('Edit Permissions', 'تعديل الصلاحيات') : __('Edit', 'تعديل')}</a></li>
+                        ${deleteActionHtml}
                     </ul>
                 </div>
             `;
 
+            let systemBadge = isSystem ? ` <span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem; font-weight: 600;">${__('Core', 'أساسي')}</span>` : '';
+
             html += '<tr>';
-            html += '<td class="align-middle fw-bold col-toggle-0">' + role.name + '</td>';
+            html += '<td class="align-middle fw-bold col-toggle-0">' + role.name + systemBadge + '</td>';
             html += '<td class="align-middle col-toggle-1">' + permissionsHtml + '</td>';
             html += '<td class="align-middle text-center col-toggle-2"><span class="badge bg-light text-dark px-3 py-2 border">' + role.users_count + '</span></td>';
             html += '<td class="align-middle col-toggle-3">' + actionsHtml + '</td>';
@@ -253,7 +260,25 @@ function renderRolesGrid(data) {
     } else {
         data.forEach(role => {
             let permissionsHtml = generatePermissionsHtml(role.permissions);
+            let isSystem = role.is_system || ['admin', 'seller', 'bidder'].includes(role.name);
+            let systemBadge = isSystem ? ` <span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;">${__('Core Role', 'دور أساسي')}</span>` : '';
             
+            let buttonsHtml = isSystem ? `
+                <button class="btn btn-sm btn-outline-primary px-3 w-100" onclick="editRole(${role.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    ${__('Edit Permissions', 'تعديل الصلاحيات')}
+                </button>
+            ` : `
+                <button class="btn btn-sm btn-outline-primary px-3 flex-grow-1" onclick="editRole(${role.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    ${__('Edit', 'تعديل')}
+                </button>
+                <button class="btn btn-sm btn-outline-danger px-3" onclick="deleteRole(${role.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    ${__('Delete', 'حذف')}
+                </button>
+            `;
+
             html += `
             <div class="col-12 col-md-6 col-xl-4">
                 <div class="card h-100 border-0 shadow-sm user-grid-card position-relative overflow-hidden">
@@ -261,7 +286,7 @@ function renderRolesGrid(data) {
                         <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle col-toggle-0" style="width: 64px; height: 64px;">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
-                        <h5 class="fw-bold mb-1 col-toggle-0">${role.name}</h5>
+                        <h5 class="fw-bold mb-1 col-toggle-0">${role.name}${systemBadge}</h5>
                         <p class="text-muted small mb-3 col-toggle-2">${role.users_count} ${__('Users', 'مستخدمين')}</p>
                         
                         <div class="p-3 bg-light rounded-3 mb-3 col-toggle-1">
@@ -270,14 +295,7 @@ function renderRolesGrid(data) {
                         </div>
 
                         <div class="d-flex gap-2 justify-content-center mt-auto col-toggle-3">
-                            <button class="btn btn-sm btn-outline-primary px-3 flex-grow-1" onclick="editRole(${role.id})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                ${__('Edit', 'تعديل')}
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger px-3" onclick="deleteRole(${role.id})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                ${__('Delete', 'حذف')}
-                            </button>
+                            ${buttonsHtml}
                         </div>
                     </div>
                 </div>
@@ -335,6 +353,17 @@ window.editRole = function(id) {
                 $('#edit_role_id').val(res.role.id);
                 $('#edit_name').val(res.role.name);
                 
+                let isSystem = res.is_system || ['admin', 'seller', 'bidder'].includes(res.role.name);
+                if (isSystem) {
+                    $('#edit_name').prop('readonly', true).addClass('bg-light').css('cursor', 'not-allowed');
+                    $('#edit_system_role_badge').removeClass('d-none');
+                    $('#edit_system_role_notice').removeClass('d-none');
+                } else {
+                    $('#edit_name').prop('readonly', false).removeClass('bg-light').css('cursor', 'text');
+                    $('#edit_system_role_badge').addClass('d-none');
+                    $('#edit_system_role_notice').addClass('d-none');
+                }
+
                 // Clear all checkboxes
                 $('.edit-perm-checkbox').prop('checked', false);
                 
@@ -355,6 +384,12 @@ window.editRole = function(id) {
 };
 
 window.deleteRole = function(id) {
+    let targetRole = (window.currentRolesData || []).find(r => r.id === id);
+    if (targetRole && (targetRole.is_system || ['admin', 'seller', 'bidder'].includes(targetRole.name))) {
+        toastr.warning(__('Cannot delete a core system role.', 'لا يمكن حذف دور أساسي للنظام.'));
+        return;
+    }
+
     Swal.fire({
         title: window.RoleConfig.trans.deleteRole,
         text: window.RoleConfig.trans.deleteDesc,

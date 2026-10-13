@@ -46,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Auction::class, AuctionPolicy::class);
 
+        // Super Admin Bypass: Users with 'admin' role automatically have all permissions
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('admin') ? true : null;
+        });
+
         // Apply dynamic SMTP mail configuration from database settings
         \App\Services\MailConfigService::applySettings();
 

@@ -12,14 +12,47 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Permissions
+        // 1. Create Granular System Permissions
         $permissions = [
+            // Core & Platform
+            'access-admin-panel',
             'view-auctions',
             'place-bids',
             'create-auctions',
             'manage-own-auctions',
+
+            // Admin Modules
             'manage-all-auctions',
+            'manage-vehicles',
+            'manage-bids',
             'manage-users',
+            'manage-roles',
+            'manage-seller-requests',
+
+            // Financial & Wallets
+            'manage-wallets',
+            'manage-withdrawals',
+            'manage-deposits',
+            'manage-bank-accounts',
+
+            // Content & Support
+            'manage-notifications',
+            'send-notifications',
+            'manage-contacts',
+            'manage-pages',
+            'manage-news',
+            'manage-faqs',
+            'manage-marketing',
+
+            // Technical Support
+            'manage-tickets',
+            'reply-tickets',
+
+            // System & Technical
+            'manage-settings',
+            'manage-backups',
+            'view-system-health',
+            'manage-system-health',
         ];
 
         foreach ($permissions as $p) {

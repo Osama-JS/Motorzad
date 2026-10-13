@@ -193,8 +193,18 @@
                     <input type="hidden" id="edit_role_id" name="id">
                     <div class="row g-3">
                         <div class="col-md-12 form-group">
-                            <label>{{ __('Role Name') }} <span class="text-danger">*</span></label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="mb-0">{{ __('Role Name') }} <span class="text-danger">*</span></label>
+                                <span class="badge bg-warning text-dark d-none" id="edit_system_role_badge">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    {{ __('دور نظام أساسي (محمي)') }}
+                                </span>
+                            </div>
                             <input type="text" id="edit_name" name="name" class="form-control" required style="background: var(--bg-input); color: var(--text-color); border: 1px solid var(--border);">
+                            <small class="text-muted d-none mt-1" id="edit_system_role_notice">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warning me-1"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                {{ __('لا يمكن تغيير اسم هذا الدور لأنه محوري في منطق عمل المنصة، ولكن يمكنك تخصيص صلاحياته بحرية.') }}
+                            </small>
                         </div>
                         <div class="col-md-12 form-group">
                             <label>{{ __('Permissions') }} <span class="text-danger">*</span></label>

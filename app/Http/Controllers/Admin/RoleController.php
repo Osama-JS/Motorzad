@@ -32,6 +32,7 @@ class RoleController extends \App\Http\Controllers\Controller
             $data[] = [
                 'id' => $role->id,
                 'name' => $role->name,
+                'is_system' => in_array($role->name, ['admin', 'seller', 'bidder']),
                 'permissions' => $role->permissions->pluck('name')->toArray(),
                 'users_count' => $role->users->count()
             ];
@@ -83,6 +84,7 @@ class RoleController extends \App\Http\Controllers\Controller
         return response()->json([
             'success' => true,
             'role' => $role,
+            'is_system' => in_array($role->name, ['admin', 'seller', 'bidder']),
             'permissions' => $rolePermissions
         ]);
     }
@@ -95,12 +97,19 @@ class RoleController extends \App\Http\Controllers\Controller
 
     public function update(Request $request, Role $role)
     {
+        $isSystemRole = in_array($role->name, ['admin', 'seller', 'bidder']);
+
+        if (!$isSystemRole) {
+            $request->validate([
+                'name' => 'required|unique:roles,name,' . $role->id,
+            ]);
+            $role->update(['name' => $request->name]);
+        }
+
         $request->validate([
-            'name' => 'required|unique:roles,name,' . $role->id,
             'permissions' => 'array'
         ]);
 
-        $role->update(['name' => $request->name]);
         $permissions = $request->has('permissions') ? array_map('intval', $request->permissions) : [];
         $role->syncPermissions($permissions);
 
@@ -116,6 +125,17 @@ class RoleController extends \App\Http\Controllers\Controller
 
     public function destroy(Role $role)
     {
+        if (in_array($role->name, ['admin', 'seller', 'bidder'])) {
+            $msg = __('Cannot delete a core system role.');
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ], 403);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+
         if ($role->users()->count() > 0) {
             if (request()->ajax()) {
                 return response()->json([

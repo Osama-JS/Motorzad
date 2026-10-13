@@ -18,7 +18,7 @@ class CheckUserStatus
         if (auth()->check()) {
             $user = auth()->user();
             
-            if ($user->hasRole('admin') || $request->routeIs('kyc.*') || $request->routeIs('logout') || $request->routeIs('verification.*')) {
+            if ($user->hasRole('admin') || $user->can('access-admin-panel') || $request->routeIs('kyc.*') || $request->routeIs('logout') || $request->routeIs('verification.*')) {
                 return $next($request);
             }
 

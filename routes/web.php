@@ -71,10 +71,10 @@ Route::get('lang/{locale}', function ($locale) {
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
-    if ($user->hasRole('admin')) {
+    if ($user->hasRole('admin') || $user->can('access-admin-panel')) {
         return redirect()->route('admin.dashboard');
     }
-    if ($user->hasRole('bidder')) {
+    if ($user->hasRole('bidder') || $user->hasRole('seller')) {
         return redirect()->route('bidder.dashboard');
     }
     return view('dashboard');
@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // مسارات إدارة حركات المحفظة المخصصة بالمعيار الصناعي (ذات أولوية توجيه عليا)
-Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role_or_permission:admin|manage-wallets'])->group(function () {
     // جلب سجل الحركات للجدول
     Route::get('/transactions', [WalletTransactionController::class, 'index'])->name('transactions.index');
     // حفظ معاملة جديدة من النافذة المنبثقة
@@ -108,138 +108,181 @@ Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role:admin'])->gro
 });
 
 // Admin Management Routes
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('system-status', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-status');
-    Route::post('system-status/clear-cache', [\App\Http\Controllers\Admin\SystemHealthController::class, 'clearCache'])->name('system-status.clear-cache');
-    Route::post('system-status/restart-queue', [\App\Http\Controllers\Admin\SystemHealthController::class, 'restartQueue'])->name('system-status.restart-queue');
-    Route::post('system-status/optimize-clear', [\App\Http\Controllers\Admin\SystemHealthController::class, 'optimizeClear'])->name('system-status.optimize-clear');
-    Route::post('system-status/toggle-maintenance', [\App\Http\Controllers\Admin\SystemHealthController::class, 'toggleMaintenance'])->name('system-status.toggle-maintenance');
-    Route::get('system-status/json', \Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class)->name('system-status.json');
-    
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role_or_permission:admin|access-admin-panel'])->group(function () {
+    // ─── Dashboard & Global Search (Requires access-admin-panel) ─────────
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/global-search', [\App\Http\Controllers\Admin\DashboardController::class, 'globalSearch'])->name('global-search');
-    Route::get('pages/data', [\App\Http\Controllers\Admin\PageController::class, 'getData'])->name('pages.data');
-    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
-    Route::get('roles/data', [\App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles.data');
-    Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
-    Route::get('permissions/data', [\App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions.data');
-    Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
-    Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
-    Route::post('users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
-    Route::post('users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verify'])->name('users.verify');
-    Route::post('users/{user}/verify-identity', [\App\Http\Controllers\Admin\UserController::class, 'verifyIdentity'])->name('users.verify-identity');
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    
-    // Seller Requests
-    Route::get('seller-requests', [\App\Http\Controllers\Admin\SellerRequestController::class, 'index'])->name('seller-requests.index');
-    Route::get('seller-requests/{sellerRequest}', [\App\Http\Controllers\Admin\SellerRequestController::class, 'show'])->name('seller-requests.show');
-    Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
-    Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
-    Route::post('seller-requests/{sellerRequest}/modification', [\App\Http\Controllers\Admin\SellerRequestController::class, 'requestModification'])->name('seller-requests.modification');
-    
-    // Form Templates
-    Route::patch('form-templates/{form_template}/toggle-status', [\App\Http\Controllers\Admin\FormTemplateController::class, 'toggleStatus'])->name('form-templates.toggle-status');
-    Route::post('form-templates/{form_template}/clone', [\App\Http\Controllers\Admin\FormTemplateController::class, 'clone'])->name('form-templates.clone');
-    Route::resource('form-templates', \App\Http\Controllers\Admin\FormTemplateController::class);
-    
-    // Settings Routes
-    Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
-    Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-    Route::post('settings/test-email', [\App\Http\Controllers\Admin\SettingController::class, 'sendTestEmail'])->name('settings.test-email');
 
-    // Backup Management
-    Route::get('backups', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
-    Route::post('backups', [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backups.store');
-    Route::get('backups/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
-    Route::delete('backups/bulk', [\App\Http\Controllers\Admin\BackupController::class, 'bulkDestroy'])->name('backups.bulk');
-    Route::delete('backups/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backups.destroy');
-    Route::post('backups/settings', [\App\Http\Controllers\Admin\BackupController::class, 'updateSettings'])->name('backups.settings');
-
-    // Contact Messages
-    Route::get('contacts/data', [\App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contacts.data');
-    Route::get('contacts', [\App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('contacts.index');
-    Route::get('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'show'])->name('contacts.show');
-    Route::delete('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'destroy'])->name('contacts.destroy');
-
-
-     // Bank Accounts Management
-    Route::get('bank-accounts/data', [App\Http\Controllers\Admin\BankAccountController::class, 'getData'])->name('bank-accounts.data');
-    Route::post('bank-accounts/{id}/toggle-active', [App\Http\Controllers\Admin\BankAccountController::class, 'toggleActive'])->name('bank-accounts.toggle-active');
-    Route::resource('bank-accounts', App\Http\Controllers\Admin\BankAccountController::class);
-
-    // FAQs Management
-    Route::get('faqs/data', [\App\Http\Controllers\Admin\FaqController::class, 'getData'])->name('faqs.data');
-    Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
-    Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
-
-    // News Management
-    Route::get('news/data', [\App\Http\Controllers\Admin\NewsController::class, 'getData'])->name('news.data');
-    Route::post('news/{news}/toggle-active', [\App\Http\Controllers\Admin\NewsController::class, 'toggleActive'])->name('news.toggle-active');
-    Route::resource('news', \App\Http\Controllers\Admin\NewsController::class);
-
-    // Features Management
-    Route::get('features/data', [\App\Http\Controllers\Admin\FeatureController::class, 'getData'])->name('features.data');
-    Route::post('features/{feature}/toggle-active', [\App\Http\Controllers\Admin\FeatureController::class, 'toggleActive'])->name('features.toggle-active');
-    Route::resource('features', \App\Http\Controllers\Admin\FeatureController::class);
-
-    // Testimonials Management
-    Route::get('testimonials/data', [\App\Http\Controllers\Admin\TestimonialController::class, 'getData'])->name('testimonials.data');
-    Route::post('testimonials/{testimonial}/toggle-active', [\App\Http\Controllers\Admin\TestimonialController::class, 'toggleActive'])->name('testimonials.toggle-active');
-    Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
-
-    // Wallets Management
-    Route::get('wallets/data', [\App\Http\Controllers\Admin\WalletController::class, 'getData'])->name('wallets.data');
-    Route::get('wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');
-    // Withdrawals Management
-    Route::prefix('wallets/withdrawals')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('withdrawals.index');
-        Route::get('/{withdrawal}/details', [\App\Http\Controllers\Admin\WithdrawalController::class, 'show'])->name('withdrawals.show');
-        Route::post('/{withdrawal}/process', [\App\Http\Controllers\Admin\WithdrawalController::class, 'process'])->name('withdrawals.process');
+    // ─── System Health & Diagnostics ────────────────────────────────────
+    Route::middleware('permission:manage-system-health')->group(function () {
+        Route::get('system-status', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-status');
+        Route::post('system-status/clear-cache', [\App\Http\Controllers\Admin\SystemHealthController::class, 'clearCache'])->name('system-status.clear-cache');
+        Route::post('system-status/restart-queue', [\App\Http\Controllers\Admin\SystemHealthController::class, 'restartQueue'])->name('system-status.restart-queue');
+        Route::post('system-status/optimize-clear', [\App\Http\Controllers\Admin\SystemHealthController::class, 'optimizeClear'])->name('system-status.optimize-clear');
+        Route::post('system-status/toggle-maintenance', [\App\Http\Controllers\Admin\SystemHealthController::class, 'toggleMaintenance'])->name('system-status.toggle-maintenance');
+        Route::get('system-status/json', \Spatie\Health\Http\Controllers\HealthCheckJsonResultsController::class)->name('system-status.json');
     });
 
-    Route::get('wallets/online-payments', [\App\Http\Controllers\Admin\WalletController::class, 'onlinePayments'])->name('wallets.online-payments');
-    Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
-    Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
-    Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
+    // ─── Roles & Permissions Management ─────────────────────────────────
+    Route::middleware('permission:manage-roles')->group(function () {
+        Route::get('roles/data', [\App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles.data');
+        Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+        Route::get('permissions/data', [\App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions.data');
+        Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
+    });
 
-    // Deposit Requests Management (previously MISSING)
-    Route::get('deposits/data', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.data');
-    Route::get('deposits', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.index');
-    Route::get('deposits/{deposit}', [\App\Http\Controllers\Admin\DepositController::class, 'show'])->name('deposits.show');
-    Route::post('deposits/{deposit}/process', [\App\Http\Controllers\Admin\DepositController::class, 'process'])->name('deposits.process');
+    // ─── Users Management ───────────────────────────────────────────────
+    Route::middleware('permission:manage-users')->group(function () {
+        Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
+        Route::post('users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
+        Route::post('users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verify'])->name('users.verify');
+        Route::post('users/{user}/verify-identity', [\App\Http\Controllers\Admin\UserController::class, 'verifyIdentity'])->name('users.verify-identity');
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    });
 
-    // Notifications Management
-    Route::get('notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
-    Route::post('notifications/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('notifications.send');
-    Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.mark_read');
-    Route::get('notifications/latest-unread', [\App\Http\Controllers\Admin\NotificationController::class, 'getLatestUnread'])->name('notifications.latest_unread');
+    // ─── Seller Requests & Dynamic Form Templates ───────────────────────
+    Route::middleware('permission:manage-seller-requests')->group(function () {
+        Route::get('seller-requests', [\App\Http\Controllers\Admin\SellerRequestController::class, 'index'])->name('seller-requests.index');
+        Route::get('seller-requests/{sellerRequest}', [\App\Http\Controllers\Admin\SellerRequestController::class, 'show'])->name('seller-requests.show');
+        Route::post('seller-requests/{sellerRequest}/approve', [\App\Http\Controllers\Admin\SellerRequestController::class, 'approve'])->name('seller-requests.approve');
+        Route::post('seller-requests/{sellerRequest}/reject', [\App\Http\Controllers\Admin\SellerRequestController::class, 'reject'])->name('seller-requests.reject');
+        Route::post('seller-requests/{sellerRequest}/modification', [\App\Http\Controllers\Admin\SellerRequestController::class, 'requestModification'])->name('seller-requests.modification');
 
-    // Auctions Management
-    Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
-    Route::get('auctions/analytics', [\App\Http\Controllers\Admin\AuctionController::class, 'analytics'])->name('auctions.analytics');
-    Route::get('auctions/export-report', [\App\Http\Controllers\Admin\AuctionController::class, 'exportReport'])->name('auctions.export-report');
-    Route::post('auctions/{auction}/pause', [\App\Http\Controllers\Admin\AuctionController::class, 'pause'])->name('auctions.pause');
-    Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
-    Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
-    Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])->name('auctions.force-end');
-    Route::post('auctions/{auction}/block-user', [\App\Http\Controllers\Admin\AuctionController::class, 'blockUser'])->name('auctions.block-user');
-    Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
+        Route::patch('form-templates/{form_template}/toggle-status', [\App\Http\Controllers\Admin\FormTemplateController::class, 'toggleStatus'])->name('form-templates.toggle-status');
+        Route::post('form-templates/{form_template}/clone', [\App\Http\Controllers\Admin\FormTemplateController::class, 'clone'])->name('form-templates.clone');
+        Route::resource('form-templates', \App\Http\Controllers\Admin\FormTemplateController::class);
+    });
 
-    // Bids Management
-    Route::get('bids/data', [\App\Http\Controllers\Admin\BidController::class, 'getData'])->name('bids.data');
-    Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
-    Route::post('bids/{bid}/void', [\App\Http\Controllers\Admin\BidController::class, 'void'])->name('bids.void');
+    // ─── Settings Routes ────────────────────────────────────────────────
+    Route::middleware('permission:manage-settings')->group(function () {
+        Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/test-email', [\App\Http\Controllers\Admin\SettingController::class, 'sendTestEmail'])->name('settings.test-email');
+    });
 
-    // Vehicles Management
-    Route::post('vehicles/decode-vin', [\App\Http\Controllers\Admin\VehicleController::class, 'decodeVin'])->name('vehicles.decode-vin');
-    Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
-    Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])->name('vehicles.approve');
-    Route::post('vehicles/{vehicle}/reject', [\App\Http\Controllers\Admin\VehicleController::class, 'reject'])->name('vehicles.reject');
-    Route::delete('vehicles/images/{image}', [\App\Http\Controllers\Admin\VehicleController::class, 'deleteImage'])->name('vehicles.delete-image');
-    Route::post('vehicles/images/{image}/set-primary', [\App\Http\Controllers\Admin\VehicleController::class, 'setPrimaryImage'])->name('vehicles.set-primary-image');
-    Route::post('vehicles/images/reorder', [\App\Http\Controllers\Admin\VehicleController::class, 'reorderImages'])->name('vehicles.images.reorder');
-    Route::post('vehicles/images/{image}/update', [\App\Http\Controllers\Admin\VehicleController::class, 'updateImage'])->name('vehicles.images.update');
-    Route::resource('vehicles', \App\Http\Controllers\Admin\VehicleController::class);
+    // ─── Backup Management ──────────────────────────────────────────────
+    Route::middleware('permission:manage-backups')->group(function () {
+        Route::get('backups', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
+        Route::post('backups', [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backups.store');
+        Route::get('backups/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
+        Route::delete('backups/bulk', [\App\Http\Controllers\Admin\BackupController::class, 'bulkDestroy'])->name('backups.bulk');
+        Route::delete('backups/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backups.destroy');
+        Route::post('backups/settings', [\App\Http\Controllers\Admin\BackupController::class, 'updateSettings'])->name('backups.settings');
+    });
+
+    // ─── Contact Messages ───────────────────────────────────────────────
+    Route::middleware('permission:manage-contacts')->group(function () {
+        Route::get('contacts/data', [\App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contacts.data');
+        Route::get('contacts', [\App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('contacts.index');
+        Route::get('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'show'])->name('contacts.show');
+        Route::delete('contacts/{contact}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'destroy'])->name('contacts.destroy');
+    });
+
+    // ─── Bank Accounts Management ───────────────────────────────────────
+    Route::middleware('permission:manage-bank-accounts')->group(function () {
+        Route::get('bank-accounts/data', [App\Http\Controllers\Admin\BankAccountController::class, 'getData'])->name('bank-accounts.data');
+        Route::post('bank-accounts/{id}/toggle-active', [App\Http\Controllers\Admin\BankAccountController::class, 'toggleActive'])->name('bank-accounts.toggle-active');
+        Route::resource('bank-accounts', App\Http\Controllers\Admin\BankAccountController::class);
+    });
+
+    // ─── FAQs Management ────────────────────────────────────────────────
+    Route::middleware('permission:manage-faqs')->group(function () {
+        Route::get('faqs/data', [\App\Http\Controllers\Admin\FaqController::class, 'getData'])->name('faqs.data');
+        Route::post('faqs/{faq}/toggle-active', [\App\Http\Controllers\Admin\FaqController::class, 'toggleActive'])->name('faqs.toggle-active');
+        Route::resource('faqs', \App\Http\Controllers\Admin\FaqController::class);
+    });
+
+    // ─── News Management ────────────────────────────────────────────────
+    Route::middleware('permission:manage-news')->group(function () {
+        Route::get('news/data', [\App\Http\Controllers\Admin\NewsController::class, 'getData'])->name('news.data');
+        Route::post('news/{news}/toggle-active', [\App\Http\Controllers\Admin\NewsController::class, 'toggleActive'])->name('news.toggle-active');
+        Route::resource('news', \App\Http\Controllers\Admin\NewsController::class);
+    });
+
+    // ─── Content Pages ──────────────────────────────────────────────────
+    Route::middleware('permission:manage-pages')->group(function () {
+        Route::get('pages/data', [\App\Http\Controllers\Admin\PageController::class, 'getData'])->name('pages.data');
+        Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+    });
+
+    // ─── Marketing Features & Testimonials ──────────────────────────────
+    Route::middleware('permission:manage-marketing')->group(function () {
+        Route::get('features/data', [\App\Http\Controllers\Admin\FeatureController::class, 'getData'])->name('features.data');
+        Route::post('features/{feature}/toggle-active', [\App\Http\Controllers\Admin\FeatureController::class, 'toggleActive'])->name('features.toggle-active');
+        Route::resource('features', \App\Http\Controllers\Admin\FeatureController::class);
+
+        Route::get('testimonials/data', [\App\Http\Controllers\Admin\TestimonialController::class, 'getData'])->name('testimonials.data');
+        Route::post('testimonials/{testimonial}/toggle-active', [\App\Http\Controllers\Admin\TestimonialController::class, 'toggleActive'])->name('testimonials.toggle-active');
+        Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
+    });
+
+    // ─── Wallets Management ─────────────────────────────────────────────
+    Route::middleware('permission:manage-wallets')->group(function () {
+        Route::get('wallets/data', [\App\Http\Controllers\Admin\WalletController::class, 'getData'])->name('wallets.data');
+        Route::get('wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');
+        Route::get('wallets/online-payments', [\App\Http\Controllers\Admin\WalletController::class, 'onlinePayments'])->name('wallets.online-payments');
+        Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
+        Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
+        Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
+    });
+
+    // ─── Withdrawals Management ─────────────────────────────────────────
+    Route::middleware('permission:manage-withdrawals')->group(function () {
+        Route::prefix('wallets/withdrawals')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('withdrawals.index');
+            Route::get('/{withdrawal}/details', [\App\Http\Controllers\Admin\WithdrawalController::class, 'show'])->name('withdrawals.show');
+            Route::post('/{withdrawal}/process', [\App\Http\Controllers\Admin\WithdrawalController::class, 'process'])->name('withdrawals.process');
+        });
+    });
+
+    // ─── Deposit Requests Management ────────────────────────────────────
+    Route::middleware('permission:manage-deposits')->group(function () {
+        Route::get('deposits/data', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.data');
+        Route::get('deposits', [\App\Http\Controllers\Admin\DepositController::class, 'index'])->name('deposits.index');
+        Route::get('deposits/{deposit}', [\App\Http\Controllers\Admin\DepositController::class, 'show'])->name('deposits.show');
+        Route::post('deposits/{deposit}/process', [\App\Http\Controllers\Admin\DepositController::class, 'process'])->name('deposits.process');
+    });
+
+    // ─── Notifications Management ───────────────────────────────────────
+    Route::middleware('permission:manage-notifications')->group(function () {
+        Route::get('notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
+        Route::post('notifications/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('notifications.send');
+        Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.mark_read');
+        Route::get('notifications/latest-unread', [\App\Http\Controllers\Admin\NotificationController::class, 'getLatestUnread'])->name('notifications.latest_unread');
+    });
+
+    // ─── Auctions Management ────────────────────────────────────────────
+    Route::middleware('permission:manage-all-auctions')->group(function () {
+        Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
+        Route::get('auctions/analytics', [\App\Http\Controllers\Admin\AuctionController::class, 'analytics'])->name('auctions.analytics');
+        Route::get('auctions/export-report', [\App\Http\Controllers\Admin\AuctionController::class, 'exportReport'])->name('auctions.export-report');
+        Route::post('auctions/{auction}/pause', [\App\Http\Controllers\Admin\AuctionController::class, 'pause'])->name('auctions.pause');
+        Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
+        Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
+        Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])->name('auctions.force-end');
+        Route::post('auctions/{auction}/block-user', [\App\Http\Controllers\Admin\AuctionController::class, 'blockUser'])->name('auctions.block-user');
+        Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
+    });
+
+    // ─── Bids Management ────────────────────────────────────────────────
+    Route::middleware('permission:manage-bids')->group(function () {
+        Route::get('bids/data', [\App\Http\Controllers\Admin\BidController::class, 'getData'])->name('bids.data');
+        Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
+        Route::post('bids/{bid}/void', [\App\Http\Controllers\Admin\BidController::class, 'void'])->name('bids.void');
+    });
+
+    // ─── Vehicles Management ────────────────────────────────────────────
+    Route::middleware('permission:manage-vehicles')->group(function () {
+        Route::post('vehicles/decode-vin', [\App\Http\Controllers\Admin\VehicleController::class, 'decodeVin'])->name('vehicles.decode-vin');
+        Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
+        Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])->name('vehicles.approve');
+        Route::post('vehicles/{vehicle}/reject', [\App\Http\Controllers\Admin\VehicleController::class, 'reject'])->name('vehicles.reject');
+        Route::delete('vehicles/images/{image}', [\App\Http\Controllers\Admin\VehicleController::class, 'deleteImage'])->name('vehicles.delete-image');
+        Route::post('vehicles/images/{image}/set-primary', [\App\Http\Controllers\Admin\VehicleController::class, 'setPrimaryImage'])->name('vehicles.set-primary-image');
+        Route::post('vehicles/images/reorder', [\App\Http\Controllers\Admin\VehicleController::class, 'reorderImages'])->name('vehicles.images.reorder');
+        Route::post('vehicles/images/{image}/update', [\App\Http\Controllers\Admin\VehicleController::class, 'updateImage'])->name('vehicles.images.update');
+        Route::resource('vehicles', \App\Http\Controllers\Admin\VehicleController::class);
+    });
 });
 // Bidder Management Routes
 Route::prefix('bidder')->name('bidder.')->middleware(['auth', 'role:bidder'])->group(function () {
