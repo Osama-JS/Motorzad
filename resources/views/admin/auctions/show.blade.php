@@ -672,6 +672,7 @@
     {{-- Right Column: Bids & Deposits feed --}}
     <div class="col-lg-5">
         {{-- Emergency Controls Panel --}}
+        @canany(['manage-all-auctions', 'pause-auctions', 'edit-auctions', 'force-end-auctions'])
         @if(!in_array($auction->status, ['sold', 'cancelled']))
             <div class="premium-panel border border-danger">
                 <div class="panel-header-premium bg-danger bg-opacity-10 text-danger" style="border-bottom: 1px solid var(--glass-border);">
@@ -682,6 +683,7 @@
                 </div>
                 <div class="panel-body-premium p-4">
                     {{-- Pause / Resume --}}
+                    @canany(['manage-all-auctions', 'pause-auctions'])
                     <div class="mb-4">
                         <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'حالة المزاد الحالية' : 'Current Auction State' }}</h6>
                         <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-3" style="background:#f8fafc !important; border: 1px solid var(--glass-border);">
@@ -709,8 +711,10 @@
                             </div>
                         </div>
                     </div>
+                    @endcanany
 
                     {{-- Manual Extension --}}
+                    @canany(['manage-all-auctions', 'edit-auctions'])
                     <div class="mb-4">
                         <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'تمديد المزاد يدوياً' : 'Manual Time Extension' }}</h6>
                         <div class="d-flex flex-wrap gap-2">
@@ -720,8 +724,10 @@
                             <button onclick="extendAuction(60)" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 0.8rem; border-color:#6366f1; color:#6366f1;">+1 {{ app()->getLocale() === 'ar' ? 'ساعة' : 'Hour' }}</button>
                         </div>
                     </div>
+                    @endcanany
 
                     {{-- Force End / Closure --}}
+                    @canany(['manage-all-auctions', 'force-end-auctions'])
                     <div>
                         <h6 class="font-weight-bold text-dark mb-2" style="font-size:0.9rem;">{{ app()->getLocale() === 'ar' ? 'الإنهاء الفوري للمزاد' : 'Immediate Closure' }}</h6>
                         <div class="row g-2">
@@ -737,9 +743,11 @@
                             </div>
                         </div>
                     </div>
+                    @endcanany
                 </div>
             </div>
         @endif
+        @endcanany
 
         {{-- Winner Highlight panel --}}
         @if($auction->winner)
@@ -813,6 +821,28 @@
                                         @if($bid->is_auto_bid)
                                             <span class="tbi-badge tbi-badge-auto" title="Limit: {{ $bid->max_auto_bid }}"><i class="fa-solid fa-robot"></i> {{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}</span>
                                         @endif
+
+                                        @canany(['manage-all-auctions', 'block-auction-bidders'])
+                                            <div class="dropdown mt-1 text-end">
+                                                <button class="btn btn-xs btn-outline-danger dropdown-toggle py-0 px-2 rounded-pill" style="font-size: 0.7rem; border-color: rgba(239,68,68,0.4);" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fa-solid fa-user-slash"></i> {{ app()->getLocale() === 'ar' ? 'حظر المزايد' : 'Block' }}
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-1" style="font-size: 0.8rem;">
+                                                    <li><a class="dropdown-item text-warning" href="javascript:void(0)" onclick="blockBidder({{ $bid->user->id }}, '{{ addslashes($bid->user->name) }}', 'auction')"><i class="fa-solid fa-ban me-1"></i> {{ app()->getLocale() === 'ar' ? 'حظر من هذا المزاد فقط' : 'Block from this auction' }}</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="blockBidder({{ $bid->user->id }}, '{{ addslashes($bid->user->name) }}', 'global')"><i class="fa-solid fa-user-xmark me-1"></i> {{ app()->getLocale() === 'ar' ? 'حظر عام (إيقاف الحساب)' : 'Suspend user globally' }}</a></li>
+                                                </ul>
+                                            </div>
+                                        @endcanany
+
+                                        @canany(['manage-bids', 'void-bids'])
+                                            @if($bid->status === 'active')
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-xs btn-outline-danger py-0 px-2 rounded-pill" style="font-size: 0.7rem;" type="button" onclick="voidBid({{ $bid->id }})" title="{{ app()->getLocale() === 'ar' ? 'إلغاء المزايدة وإرجاع السعر' : 'Void bid & rollback price' }}">
+                                                        <i class="fa-solid fa-ban"></i> {{ app()->getLocale() === 'ar' ? 'إلغاء المزايدة' : 'Void Bid' }}
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        @endcanany
                                     </div>
                                 </div>
                             </div>
@@ -1065,6 +1095,85 @@
                     },
                     error: function() {
                         toastr.error("{{ __('Something went wrong!') }}");
+                    }
+                });
+            }
+        });
+    }
+
+    function blockBidder(userId, userName, type) {
+        let title = type === 'global' 
+            ? "{{ __('حظر عام وتعليق الحساب؟') }}" 
+            : "{{ __('حظر المزايد من هذا المزاد؟') }}";
+        let text = type === 'global'
+            ? "{{ __('هل أنت متأكد من تعليق حساب المستخدم: ') }}" + userName + "{{ __(' بشكل كامل على المنصة؟') }}"
+            : "{{ __('هل أنت متأكد من منع ') }}" + userName + "{{ __(' من وضع أي مزايدات إضافية على هذا المزاد؟') }}";
+
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: "{{ __('تأكيد الحظر') }}",
+            cancelButtonText: "{{ __('إلغاء') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('admin.auctions.block-user', $auction->id) }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        user_id: userId,
+                        type: type
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1200);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "{{ __('Something went wrong!') }}";
+                        toastr.error(msg);
+                    }
+                });
+            }
+        });
+    }
+
+    function voidBid(bidId) {
+        Swal.fire({
+            title: "{{ app()->getLocale() === 'ar' ? 'إلغاء المزايدة وتراجع السعر؟' : 'Void Bid and rollback price?' }}",
+            text: "{{ app()->getLocale() === 'ar' ? 'سيتم إلغاء هذه المزايدة واستعادة السعر السابق والفائز السابق فوراً.' : 'This will void the bid and restore the previous highest bid and leader immediately.' }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: "{{ app()->getLocale() === 'ar' ? 'تأكيد الإلغاء' : 'Confirm Void' }}",
+            cancelButtonText: "{{ __('Cancel') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ url('admin/bids') }}/" + bidId + "/void",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1200);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "{{ __('Something went wrong!') }}";
+                        toastr.error(msg);
                     }
                 });
             }

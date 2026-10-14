@@ -42,9 +42,13 @@ class VehicleController extends Controller
         $perPage = $request->input('per_page', 10);
         $paginator = $query->paginate($perPage);
 
+        $authUser = auth()->user();
+        $canApproveReject = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-vehicles') || $authUser->can('approve-reject-vehicles')) : false;
+        $canManageVehicles = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-vehicles')) : false;
+
         return response()->json([
             'success' => true,
-            'data' => collect($paginator->items())->map(function($vehicle) {
+            'data' => collect($paginator->items())->map(function($vehicle) use ($canApproveReject, $canManageVehicles) {
                 $statusBadge = match($vehicle->status) {
                     'approved' => '<span class="status-indicator status-live" style="background:#dcfce7; color:#15803d; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-circle-check" style="font-size:0.75rem;"></i> '.__('Approved').'</span>',
                     'pending' => '<span class="status-indicator status-scheduled" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:50px; font-weight:600; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock" style="font-size:0.75rem;"></i> '.__('Pending').'</span>',
@@ -53,7 +57,7 @@ class VehicleController extends Controller
                 };
 
                 $quickActions = '';
-                if ($vehicle->status === 'pending') {
+                if ($vehicle->status === 'pending' && $canApproveReject) {
                     $quickActions = '
                         <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center flex-grow-1 py-2 rounded-3" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check"></i></button>
                         <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center flex-grow-1 py-2 rounded-3" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark"></i></button>
@@ -63,6 +67,20 @@ class VehicleController extends Controller
                 $imageHtml = $vehicle->primary_image_url 
                                 ? '<img src="' . $vehicle->primary_image_url . '" width="60" style="border-radius:10px; object-fit:cover; height:45px; border: 1px solid var(--border);" alt="">' 
                                 : '<div style="width:60px;height:45px;background:#eee;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;border: 1px solid var(--border);">' . __('No Image') . '</div>';
+
+                $actionsHtml = '<div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">';
+                if ($vehicle->status === 'pending' && $canApproveReject) {
+                    $actionsHtml .= '
+                        <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check" style="font-size:0.75rem;"></i></button>
+                        <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark" style="font-size:0.75rem;"></i></button>
+                    ';
+                }
+                $actionsHtml .= '<a href="' . route('admin.vehicles.show', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i></a>';
+                if ($canManageVehicles) {
+                    $actionsHtml .= '<a href="' . route('admin.vehicles.edit', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i></a>';
+                    $actionsHtml .= '<button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>';
+                }
+                $actionsHtml .= '</div>';
 
                 return [
                     'id' => $vehicle->id,
@@ -77,16 +95,7 @@ class VehicleController extends Controller
                     'year' => $vehicle->year,
                     'created_at' => $vehicle->created_at->format('Y-m-d'),
                     'quick_actions' => $quickActions,
-                    'actions' => '
-                        <div class="actions-cell" style="display:flex; gap:6px; justify-content:center; align-items:center;">
-                            ' . ($vehicle->status === 'pending' ? '
-                                <button onclick="approveVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#10b981; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="قبول"><i class="fa-solid fa-check" style="font-size:0.75rem;"></i></button>
-                                <button onclick="rejectVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="رفض"><i class="fa-solid fa-xmark" style="font-size:0.75rem;"></i></button>
-                            ' : '') . '
-                            <a href="' . route('admin.vehicles.show', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#0ea5e9; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('View') . '"><i class="fa-solid fa-eye" style="font-size:0.75rem;"></i></a>
-                            <a href="' . route('admin.vehicles.edit', $vehicle->id) . '" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:var(--primary); border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Edit') . '"><i class="fa-solid fa-pen-to-square" style="font-size:0.75rem;"></i></a>
-                            <button onclick="deleteVehicle(' . $vehicle->id . ')" class="btn btn-sm text-white d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-pill" style="background:#ef4444; border:none; font-size:0.8rem; font-weight:700; transition:all 0.2s;" title="' . __('Delete') . '"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>
-                        </div>',
+                    'actions' => $actionsHtml,
                     'view_url' => route('admin.vehicles.show', $vehicle->id),
                     'edit_url' => route('admin.vehicles.edit', $vehicle->id)
                 ];

@@ -10,10 +10,12 @@ class RoleController extends \App\Http\Controllers\Controller
 {
     public function index()
     {
+        \App\Services\PermissionRegistry::ensureSystemPermissions();
         $rolesCount = Role::count();
         $totalUsers = Role::withCount('users')->get()->sum('users_count');
         $permissions = Permission::all();
-        return view('admin.roles.index', compact('rolesCount', 'totalUsers', 'permissions'));
+        $groupedPermissions = \App\Services\PermissionRegistry::groupPermissions($permissions, app()->getLocale());
+        return view('admin.roles.index', compact('rolesCount', 'totalUsers', 'permissions', 'groupedPermissions'));
     }
 
     public function getData(Request $request)
@@ -27,19 +29,35 @@ class RoleController extends \App\Http\Controllers\Controller
         $perPage = $request->per_page ?? 10;
         $roles = $query->paginate($perPage);
 
+        $isEn = app()->getLocale() === 'en';
+        $authUser = auth()->user();
+        $canManage = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-roles')) : false;
+
         $data = [];
         foreach ($roles as $role) {
+            $permsList = [];
+            foreach ($role->permissions as $p) {
+                $meta = \App\Services\PermissionRegistry::getMetadata($p->name);
+                $label = $isEn ? ($meta['label_en'] ?? $p->name) : ($meta['label_ar'] ?? $p->name);
+                $permsList[] = [
+                    'name' => $p->name,
+                    'label' => $label,
+                ];
+            }
+
             $data[] = [
                 'id' => $role->id,
                 'name' => $role->name,
                 'is_system' => in_array($role->name, ['admin', 'seller', 'bidder']),
-                'permissions' => $role->permissions->pluck('name')->toArray(),
-                'users_count' => $role->users->count()
+                'permissions' => $permsList,
+                'users_count' => $role->users->count(),
+                'can_manage' => $canManage
             ];
         }
 
         return response()->json([
             'success' => true,
+            'can_manage' => $canManage,
             'data' => $data,
             'pagination' => [
                 'total' => $roles->total(),

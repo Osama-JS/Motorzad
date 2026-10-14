@@ -145,9 +145,11 @@
             <div id="table-view-container" class="card shadow-sm border-0 mb-4">
                 <div class="card-header pb-0 d-flex justify-content-between align-items-center bg-white">
                     <h6 class="mb-0">{{ __('Bank Accounts List') }}</h6>
+                    @can('manage-bank-accounts')
                     <button class="btn btn-primary btn-sm" onclick="openAddModal()">
                         <i class="fas fa-plus me-2"></i> {{ __('Add New Bank Account') }}
                     </button>
+                    @endcan
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-3">

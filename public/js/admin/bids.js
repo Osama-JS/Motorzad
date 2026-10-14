@@ -82,7 +82,7 @@ $(document).ready(function() {
         tbody.empty();
 
         if (data.length === 0) {
-            tbody.html('<tr><td colspan="7" class="text-center py-4 text-muted">' + window.BidConfig.trans.noRecords + '</td></tr>');
+            tbody.html('<tr><td colspan="8" class="text-center py-4 text-muted">' + window.BidConfig.trans.noRecords + '</td></tr>');
             return;
         }
 
@@ -96,6 +96,7 @@ $(document).ready(function() {
                     <td class="col-toggle-4">${bid.status_badge}</td>
                     <td class="col-toggle-5">${bid.time}</td>
                     <td class="col-toggle-6">${bid.ip}</td>
+                    <td class="text-center">${bid.actions}</td>
                 </tr>
             `;
             tbody.append(tr);
@@ -170,6 +171,13 @@ $(document).ready(function() {
                                 <span class="text-muted">${__('IP Address', 'عنوان IP')}:</span>
                                 <code class="text-dark">${bid.ip_address}</code>
                             </div>
+                            ${bid.can_void ? `
+                                <div class="mt-2 pt-2 border-top">
+                                    <button onclick="voidBid(${bid.id})" class="btn btn-sm btn-outline-danger w-100 py-1.5 rounded-pill d-flex align-items-center justify-content-center gap-1.5" style="font-size:0.8rem; font-weight:600;">
+                                        <i class="fa-solid fa-ban"></i> ${window.BidConfig.trans.voidBid}
+                                    </button>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -280,6 +288,44 @@ $(document).ready(function() {
         fetchBids(1);
     });
     
+    // Void Bid action with SweetAlert confirmation
+    window.voidBid = function(bidId) {
+        Swal.fire({
+            title: window.BidConfig.trans.voidBid,
+            text: window.BidConfig.trans.confirmVoid,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: window.BidConfig.trans.voidBid,
+            cancelButtonText: __('Cancel', 'إلغاء')
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `${window.BidConfig.urls.voidBase}/${bidId}/void`,
+                    type: 'POST',
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: window.BidConfig.trans.voidSuccess,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            window.fetchBids(currentPage);
+                        } else {
+                            Swal.fire('Error', res.message || 'Operation failed', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error voiding bid';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    };
+
     // Initial fetch
     fetchBids(1);
 });

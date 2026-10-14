@@ -23,14 +23,33 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Admin Modules
             'manage-all-auctions',
+            'view-admin-auctions',
+            'edit-auctions',
+            'pause-auctions',
+            'force-end-auctions',
+            'block-auction-bidders',
+            'delete-auctions',
+
             'manage-vehicles',
+            'approve-reject-vehicles',
+
             'manage-bids',
+            'void-bids',
+
             'manage-users',
+            'view-users',
+            'edit-users',
+            'delete-users',
+            'verify-users-kyc',
+
             'manage-roles',
             'manage-seller-requests',
 
             // Financial & Wallets
             'manage-wallets',
+            'view-wallets',
+            'edit-user-balance',
+            'manage-debt-ceilings',
             'manage-withdrawals',
             'manage-deposits',
             'manage-bank-accounts',

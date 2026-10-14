@@ -65,17 +65,23 @@ class WalletController extends Controller
                     </div>
                     <small>' . $wallet->debt_usage . '%</small>';
 
+                $authUser = auth()->user();
+                $canManageDebt = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-wallets') || $authUser->can('manage-debt-ceilings')) : false;
+
                 $baseUrl = url('admin/wallets');
+                $debtBtn = $canManageDebt ? '
+                    <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1 px-2 py-1 fw-bold" onclick="openDebtModal(' . $wallet->id . ', ' . $wallet->debt_ceiling . ')" title="' . __('Debt Ceiling') . '">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                        <span>' . __('Ceiling') . '</span>
+                    </button>' : '';
+
                 $actionsHtml = '
                     <div class="btn-group shadow-sm" style="border-radius: 8px;">
                         <a href="' . $baseUrl . '/' . $wallet->id . '/transactions" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-3 py-1 fw-bold" title="عرض سجل الحركات، الإيداعات والسحوبات">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4H10a2 2 0 0 1-2-2v-4"/><circle cx="18" cy="12" r="1.5"/></svg>
                             <span>حركات المحفظة</span>
                         </a>
-                        <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1 px-2 py-1 fw-bold" onclick="openDebtModal(' . $wallet->id . ', ' . $wallet->debt_ceiling . ')" title="' . __('Debt Ceiling') . '">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                            <span>' . __('Ceiling') . '</span>
-                        </button>
+                        ' . $debtBtn . '
                     </div>';
 
                 return [

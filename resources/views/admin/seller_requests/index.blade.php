@@ -327,6 +327,7 @@
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
 
+                                @can('manage-seller-requests')
                                 @if(in_array($req->status, ['pending', 'under_review']))
                                     {{-- Approve Button --}}
                                     <button type="button" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 px-3" onclick="openApproveModal({{ $req->id }}, '{{ addslashes($req->user->full_name) }}')">
@@ -350,6 +351,7 @@
                                         <i class="fa-solid fa-lock"></i>
                                     </span>
                                 @endif
+                                @endcan
                             </div>
                         </td>
                     </tr>

@@ -17,9 +17,11 @@
 
 @section('content')
 <x-admin-header :title="__('Wallet Details for:') . ' ' . $wallet->user->name" :breadcrumb="__('Details')">
+    @canany(['manage-wallets', 'edit-user-balance'])
     <button type="button" class="btn-ultra" onclick="$('#transactionModal').modal('show')">
         {{ __('Add Financial Transaction') }}
     </button>
+    @endcanany
 </x-admin-header>
 
 <div class="row mb-4">

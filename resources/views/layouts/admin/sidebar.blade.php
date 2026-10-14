@@ -29,11 +29,11 @@
             </a>
 
             {{-- 2. المزادات والمركبات --}}
-            @canany(['manage-all-auctions', 'manage-bids', 'manage-vehicles'])
+            @canany(['manage-all-auctions', 'view-admin-auctions', 'manage-bids', 'manage-vehicles'])
             <div class="nav-section-title">
                 <span>{{ __('المزادات والمركبات') }}</span>
             </div>
-            @can('manage-all-auctions')
+            @canany(['manage-all-auctions', 'view-admin-auctions'])
             <a href="{{ route('admin.auctions.index') }}" class="nav-item {{ request()->routeIs('admin.auctions.*') && !request()->routeIs('admin.auctions.analytics') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>{{ __('إدارة المزادات') }}</span>
@@ -42,7 +42,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 <span>{{ __('إحصائيات وتحليلات المزادات') }}</span>
             </a>
-            @endcan
+            @endcanany
             @can('manage-bids')
             <a href="{{ route('admin.bids.index') }}" class="nav-item {{ request()->routeIs('admin.bids.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-5 5 1.5 1.5-1.5 1.5L5 17l1.5-1.5L5 14l5-5L14 13Z"/><path d="m16 8 5-5-1.5-1.5-5 5 1.5-1.5 1.5-1.5-5 5 1.5 1.5 5-5-1.5-1.5Z"/></svg>
@@ -58,16 +58,16 @@
             @endcanany
 
             {{-- 3. الإدارة المالية والمحافظ --}}
-            @canany(['manage-wallets', 'manage-deposits', 'manage-bank-accounts'])
+            @canany(['manage-wallets', 'view-wallets', 'manage-deposits', 'manage-bank-accounts'])
             <div class="nav-section-title">
                 <span>{{ __('الإدارة المالية') }}</span>
             </div>
-            @can('manage-wallets')
+            @canany(['manage-wallets', 'view-wallets'])
             <a href="{{ route('admin.wallets.index') }}" class="nav-item {{ request()->routeIs('admin.wallets.index') || request()->routeIs('admin.wallets.show') || request()->routeIs('transactions.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 <span>{{ __('محافظ المستخدمين') }}</span>
             </a>
-            @endcan
+            @endcanany
             @can('manage-deposits')
             <a href="{{ route('admin.deposits.index') }}" class="nav-item {{ request()->routeIs('admin.deposits.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -95,16 +95,16 @@
             @endcanany
 
             {{-- 4. المستخدمين والأدوار --}}
-            @canany(['manage-users', 'manage-seller-requests', 'manage-roles'])
+            @canany(['manage-users', 'view-users', 'manage-seller-requests', 'manage-roles'])
             <div class="nav-section-title">
                 <span>{{ __('المستخدمين والأدوار') }}</span>
             </div>
-            @can('manage-users')
+            @canany(['manage-users', 'view-users'])
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span>{{ __('المستخدمين') }}</span>
             </a>
-            @endcan
+            @endcanany
             @can('manage-seller-requests')
             <a href="{{ route('admin.seller-requests.index') }}" class="nav-item {{ request()->routeIs('admin.seller-requests.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>

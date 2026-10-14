@@ -50,8 +50,11 @@ class BidController extends Controller
         $perPage = $request->input('per_page', 10);
         $bids = $query->latest()->paginate($perPage);
 
+        $authUser = auth()->user();
+        $canVoid = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-bids') || $authUser->can('void-bids')) : false;
+
         $locale = app()->getLocale();
-        $data = $bids->map(function ($bid) use ($locale) {
+        $data = $bids->map(function ($bid) use ($locale, $canVoid) {
             // User Column html
             $userHtml = '
                 <div class="d-flex align-items-center gap-2">
@@ -98,6 +101,14 @@ class BidController extends Controller
             // IP Column html
             $ipHtml = '<code>' . e($bid->ip_address ?? '-') . '</code>';
 
+            // Actions html
+            $actionsHtml = '';
+            if ($canVoid && $bid->status === 'active') {
+                $actionsHtml = '<button onclick="voidBid(' . $bid->id . ')" class="btn btn-sm btn-outline-danger py-1 px-2.5 rounded-pill d-inline-flex align-items-center gap-1" style="font-size:0.75rem;" title="' . ($locale === 'ar' ? 'إلغاء المزايدة' : 'Void Bid') . '"><i class="fa-solid fa-ban"></i> ' . ($locale === 'ar' ? 'إلغاء' : 'Void') . '</button>';
+            } else {
+                $actionsHtml = '<span class="text-muted" style="font-size:0.8rem;">-</span>';
+            }
+
             // We also return raw values so we can easily render grid view cards without regex parsing
             return [
                 'id' => $bid->id,
@@ -113,6 +124,7 @@ class BidController extends Controller
                 'time_diff' => $bid->created_at->diffForHumans(),
                 'time_formatted' => $bid->created_at->format('Y-m-d H:i:s'),
                 'ip_address' => $bid->ip_address ?? '-',
+                'can_void' => $canVoid && $bid->status === 'active',
 
                 // Formatted html columns for the table view
                 'user' => $userHtml,
@@ -122,6 +134,7 @@ class BidController extends Controller
                 'status_badge' => $statusBadge,
                 'time' => $timeHtml,
                 'ip' => $ipHtml,
+                'actions' => $actionsHtml,
             ];
         });
 

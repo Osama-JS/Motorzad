@@ -295,10 +295,12 @@
             <i class="fa-solid fa-arrow-left me-2"></i>
             {{ __('Back to List') }}
         </a>
+        @canany(['manage-vehicles', 'edit-vehicles'])
         <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn-ultra" style="padding: 0.6rem 1.2rem; font-size: 0.95rem;">
             <i class="fa-solid fa-pen-to-square me-2"></i>
             {{ __('Edit Vehicle') }}
         </a>
+        @endcanany
     </div>
 </x-admin-header>
 
@@ -499,6 +501,7 @@
                     @endif
                 </div>
 
+                @canany(['manage-vehicles', 'approve-reject-vehicles'])
                 @if($vehicle->status === 'pending')
                     <div class="d-grid gap-2">
                         <button onclick="approveVehicle({{ $vehicle->id }})" class="btn btn-success py-2.5 rounded-pill font-weight-bold d-flex align-items-center justify-content-center gap-2" style="border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);">
@@ -515,6 +518,7 @@
                         </button>
                     </div>
                 @endif
+                @endcanany
             </div>
         </div>
 

@@ -27,17 +27,22 @@ class PermissionController extends Controller
         $perPage = $request->per_page ?? 10;
         $permissions = $query->paginate($perPage);
 
+        $authUser = auth()->user();
+        $canManage = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-roles')) : false;
+
         $data = [];
         foreach ($permissions as $permission) {
             $data[] = [
                 'id' => $permission->id,
                 'name' => $permission->name,
-                'roles_count' => $permission->roles->count()
+                'roles_count' => $permission->roles->count(),
+                'can_manage' => $canManage
             ];
         }
 
         return response()->json([
             'success' => true,
+            'can_manage' => $canManage,
             'data' => $data,
             'pagination' => [
                 'total' => $permissions->total(),

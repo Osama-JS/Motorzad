@@ -96,15 +96,15 @@ Route::middleware('auth')->group(function () {
 });
 
 // مسارات إدارة حركات المحفظة المخصصة بالمعيار الصناعي (ذات أولوية توجيه عليا)
-Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role_or_permission:admin|manage-wallets'])->group(function () {
+Route::prefix('admin/wallets/{wallet}')->middleware(['auth', 'role_or_permission:admin|manage-wallets|view-wallets|edit-user-balance'])->group(function () {
     // جلب سجل الحركات للجدول
-    Route::get('/transactions', [WalletTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions', [WalletTransactionController::class, 'index'])->middleware('permission:manage-wallets|view-wallets')->name('transactions.index');
     // حفظ معاملة جديدة من النافذة المنبثقة
-    Route::post('/transactions', [WalletTransactionController::class, 'store'])->name('transactions.store');
+    Route::post('/transactions', [WalletTransactionController::class, 'store'])->middleware('permission:manage-wallets|edit-user-balance')->name('transactions.store');
     // جلب بيانات معاملة محددة للتعديل
-    Route::get('/transactions/{transaction}/edit', [WalletTransactionController::class, 'edit'])->name('transactions.edit');
+    Route::get('/transactions/{transaction}/edit', [WalletTransactionController::class, 'edit'])->middleware('permission:manage-wallets|edit-user-balance')->name('transactions.edit');
     // تحديث المعاملة المالية عبر AJAX
-    Route::post('/transactions/{transaction}/update', [WalletTransactionController::class, 'update'])->name('transactions.update');
+    Route::post('/transactions/{transaction}/update', [WalletTransactionController::class, 'update'])->middleware('permission:manage-wallets|edit-user-balance')->name('transactions.update');
 });
 
 // Admin Management Routes
@@ -131,14 +131,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role_or_permission:
         Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
     });
 
-    // ─── Users Management ───────────────────────────────────────────────
-    Route::middleware('permission:manage-users')->group(function () {
+    // ─── Users Management (CRUD Granularity) ───────────────────────────
+    Route::middleware('permission:manage-users|view-users')->group(function () {
         Route::get('users/data', [\App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users.data');
+        Route::get('users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
+    });
+
+    Route::middleware('permission:manage-users|edit-users')->group(function () {
+        Route::get('users/create', [\App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
+        Route::post('users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
+        Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+        Route::match(['put', 'patch'], 'users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+    });
+
+    Route::middleware('permission:manage-users|verify-users-kyc')->group(function () {
         Route::post('users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
         Route::post('users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verify'])->name('users.verify');
         Route::post('users/{user}/verify-identity', [\App\Http\Controllers\Admin\UserController::class, 'verifyIdentity'])->name('users.verify-identity');
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     });
+
+    Route::delete('users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])
+        ->middleware('permission:manage-users|delete-users')
+        ->name('users.destroy');
 
     // ─── Seller Requests & Dynamic Form Templates ───────────────────────
     Route::middleware('permission:manage-seller-requests')->group(function () {
@@ -216,15 +231,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role_or_permission:
         Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
     });
 
-    // ─── Wallets Management ─────────────────────────────────────────────
-    Route::middleware('permission:manage-wallets')->group(function () {
+    // ─── Wallets Management (CRUD Granularity) ──────────────────────────
+    Route::middleware('permission:manage-wallets|view-wallets')->group(function () {
         Route::get('wallets/data', [\App\Http\Controllers\Admin\WalletController::class, 'getData'])->name('wallets.data');
         Route::get('wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');
         Route::get('wallets/online-payments', [\App\Http\Controllers\Admin\WalletController::class, 'onlinePayments'])->name('wallets.online-payments');
         Route::get('wallets/{wallet}', [\App\Http\Controllers\Admin\WalletController::class, 'show'])->name('wallets.show');
-        Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])->name('wallets.transactions.store');
-        Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])->name('wallets.debt-ceiling.update');
     });
+    Route::post('wallets/{wallet}/transaction', [\App\Http\Controllers\Admin\WalletController::class, 'storeTransaction'])
+        ->middleware('permission:manage-wallets|edit-user-balance')
+        ->name('wallets.transactions.store');
+    Route::post('wallets/{wallet}/debt-ceiling', [\App\Http\Controllers\Admin\WalletController::class, 'updateDebtCeiling'])
+        ->middleware('permission:manage-wallets|manage-debt-ceilings')
+        ->name('wallets.debt-ceiling.update');
 
     // ─── Withdrawals Management ─────────────────────────────────────────
     Route::middleware('permission:manage-withdrawals')->group(function () {
@@ -251,32 +270,59 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role_or_permission:
         Route::get('notifications/latest-unread', [\App\Http\Controllers\Admin\NotificationController::class, 'getLatestUnread'])->name('notifications.latest_unread');
     });
 
-    // ─── Auctions Management ────────────────────────────────────────────
-    Route::middleware('permission:manage-all-auctions')->group(function () {
+    // ─── Auctions Management (CRUD Granularity) ─────────────────────────
+    Route::middleware('permission:manage-all-auctions|view-admin-auctions')->group(function () {
         Route::get('auctions/data', [\App\Http\Controllers\Admin\AuctionController::class, 'getData'])->name('auctions.data');
         Route::get('auctions/analytics', [\App\Http\Controllers\Admin\AuctionController::class, 'analytics'])->name('auctions.analytics');
         Route::get('auctions/export-report', [\App\Http\Controllers\Admin\AuctionController::class, 'exportReport'])->name('auctions.export-report');
-        Route::post('auctions/{auction}/pause', [\App\Http\Controllers\Admin\AuctionController::class, 'pause'])->name('auctions.pause');
-        Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
-        Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
-        Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])->name('auctions.force-end');
-        Route::post('auctions/{auction}/block-user', [\App\Http\Controllers\Admin\AuctionController::class, 'blockUser'])->name('auctions.block-user');
-        Route::resource('auctions', \App\Http\Controllers\Admin\AuctionController::class);
+        Route::get('auctions', [\App\Http\Controllers\Admin\AuctionController::class, 'index'])->name('auctions.index');
+        Route::get('auctions/{auction}', [\App\Http\Controllers\Admin\AuctionController::class, 'show'])->name('auctions.show');
     });
 
-    // ─── Bids Management ────────────────────────────────────────────────
+    Route::middleware('permission:manage-all-auctions|edit-auctions')->group(function () {
+        Route::get('auctions/create', [\App\Http\Controllers\Admin\AuctionController::class, 'create'])->name('auctions.create');
+        Route::post('auctions', [\App\Http\Controllers\Admin\AuctionController::class, 'store'])->name('auctions.store');
+        Route::get('auctions/{auction}/edit', [\App\Http\Controllers\Admin\AuctionController::class, 'edit'])->name('auctions.edit');
+        Route::match(['put', 'patch'], 'auctions/{auction}', [\App\Http\Controllers\Admin\AuctionController::class, 'update'])->name('auctions.update');
+        Route::post('auctions/{auction}/extend', [\App\Http\Controllers\Admin\AuctionController::class, 'extend'])->name('auctions.extend');
+    });
+
+    Route::middleware('permission:manage-all-auctions|pause-auctions')->group(function () {
+        Route::post('auctions/{auction}/pause', [\App\Http\Controllers\Admin\AuctionController::class, 'pause'])->name('auctions.pause');
+        Route::post('auctions/{auction}/resume', [\App\Http\Controllers\Admin\AuctionController::class, 'resume'])->name('auctions.resume');
+    });
+
+    Route::post('auctions/{auction}/force-end', [\App\Http\Controllers\Admin\AuctionController::class, 'forceEnd'])
+        ->middleware('permission:manage-all-auctions|force-end-auctions')
+        ->name('auctions.force-end');
+
+    Route::post('auctions/{auction}/block-user', [\App\Http\Controllers\Admin\AuctionController::class, 'blockUser'])
+        ->middleware('permission:manage-all-auctions|block-auction-bidders')
+        ->name('auctions.block-user');
+
+    Route::delete('auctions/{auction}', [\App\Http\Controllers\Admin\AuctionController::class, 'destroy'])
+        ->middleware('permission:manage-all-auctions|delete-auctions')
+        ->name('auctions.destroy');
+
+    // ─── Bids Management (CRUD Granularity) ─────────────────────────────
     Route::middleware('permission:manage-bids')->group(function () {
         Route::get('bids/data', [\App\Http\Controllers\Admin\BidController::class, 'getData'])->name('bids.data');
         Route::get('bids', [\App\Http\Controllers\Admin\BidController::class, 'index'])->name('bids.index');
-        Route::post('bids/{bid}/void', [\App\Http\Controllers\Admin\BidController::class, 'void'])->name('bids.void');
+        Route::post('bids/{bid}/void', [\App\Http\Controllers\Admin\BidController::class, 'void'])
+            ->middleware('permission:manage-bids|void-bids')
+            ->name('bids.void');
     });
 
-    // ─── Vehicles Management ────────────────────────────────────────────
+    // ─── Vehicles Management (CRUD Granularity) ─────────────────────────
     Route::middleware('permission:manage-vehicles')->group(function () {
         Route::post('vehicles/decode-vin', [\App\Http\Controllers\Admin\VehicleController::class, 'decodeVin'])->name('vehicles.decode-vin');
         Route::get('vehicles/data', [\App\Http\Controllers\Admin\VehicleController::class, 'getData'])->name('vehicles.data');
-        Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])->name('vehicles.approve');
-        Route::post('vehicles/{vehicle}/reject', [\App\Http\Controllers\Admin\VehicleController::class, 'reject'])->name('vehicles.reject');
+        Route::post('vehicles/{vehicle}/approve', [\App\Http\Controllers\Admin\VehicleController::class, 'approve'])
+            ->middleware('permission:manage-vehicles|approve-reject-vehicles')
+            ->name('vehicles.approve');
+        Route::post('vehicles/{vehicle}/reject', [\App\Http\Controllers\Admin\VehicleController::class, 'reject'])
+            ->middleware('permission:manage-vehicles|approve-reject-vehicles')
+            ->name('vehicles.reject');
         Route::delete('vehicles/images/{image}', [\App\Http\Controllers\Admin\VehicleController::class, 'deleteImage'])->name('vehicles.delete-image');
         Route::post('vehicles/images/{image}/set-primary', [\App\Http\Controllers\Admin\VehicleController::class, 'setPrimaryImage'])->name('vehicles.set-primary-image');
         Route::post('vehicles/images/reorder', [\App\Http\Controllers\Admin\VehicleController::class, 'reorderImages'])->name('vehicles.images.reorder');

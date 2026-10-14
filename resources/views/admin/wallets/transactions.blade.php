@@ -102,9 +102,11 @@
 
 @section('content')
 <x-admin-header :title="__('سجل الحركات المالية للمحفظة') . ' — ' . $wallet->user->name" :breadcrumb="__('سجل المعاملات')">
+    @canany(['manage-wallets', 'edit-user-balance'])
     <button type="button" class="btn-ultra" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
         <i class="fas fa-plus me-2"></i> {{ __('إضافة معاملة جديدة') }}
     </button>
+    @endcanany
 </x-admin-header>
 
 <!-- بطاقات الإحصائيات العلوية للتحديث الديناميكي -->

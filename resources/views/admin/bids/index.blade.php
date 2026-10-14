@@ -280,11 +280,12 @@
                     <th class="border-bottom-0 col-toggle-4">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
                     <th class="border-bottom-0 col-toggle-5">{{ app()->getLocale() === 'ar' ? 'التوقيت' : 'Time' }}</th>
                     <th class="border-bottom-0 col-toggle-6">{{ app()->getLocale() === 'ar' ? 'عنوان IP' : 'IP Address' }}</th>
+                    <th class="border-bottom-0 text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody id="custom-bids-tbody">
                 <tr>
-                    <td colspan="7" class="text-center py-4 text-muted">
+                    <td colspan="8" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" role="status"></div> {{ __('Loading...') }}
                     </td>
                 </tr>
@@ -315,7 +316,8 @@
     window.BidConfig = {
         csrf: '{{ csrf_token() }}',
         urls: {
-            data: "{{ route('admin.bids.data') }}"
+            data: "{{ route('admin.bids.data') }}",
+            voidBase: "{{ url('admin/bids') }}"
         },
         trans: {
             loading: "{{ __('Loading...') }}",
@@ -331,7 +333,11 @@
             type: "{{ __('Type') }}",
             status: "{{ __('Status') }}",
             time: "{{ __('Time') }}",
-            ipAddress: "{{ __('IP Address') }}"
+            ipAddress: "{{ __('IP Address') }}",
+            actions: "{{ __('Actions') }}",
+            voidBid: "{{ app()->getLocale() === 'ar' ? 'إلغاء المزايدة' : 'Void Bid' }}",
+            confirmVoid: "{{ app()->getLocale() === 'ar' ? 'هل أنت متأكد من إلغاء هذه المزايدة وتراجع سعر المزاد؟' : 'Are you sure you want to void this bid and rollback the auction price?' }}",
+            voidSuccess: "{{ app()->getLocale() === 'ar' ? 'تم إلغاء المزايدة وتحديث السعر بنجاح.' : 'Bid voided and auction price rolled back successfully.' }}"
         }
     };
 </script>

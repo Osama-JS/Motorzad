@@ -65,7 +65,12 @@ class UserController extends Controller
         $perPage = $request->input('per_page', 10);
         $users = $query->latest()->paginate($perPage);
 
-        $data = $users->map(function($user) {
+        $authUser = auth()->user();
+        $canEdit = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-users') || $authUser->can('edit-users')) : false;
+        $canDelete = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-users') || $authUser->can('delete-users')) : false;
+        $canVerifyKyc = $authUser ? ($authUser->hasRole('admin') || $authUser->can('manage-users') || $authUser->can('verify-users-kyc')) : false;
+
+        $data = $users->map(function($user) use ($canEdit, $canDelete, $canVerifyKyc) {
             if ($user->is_deleted) {
                 $statusBadge = '<span class="badge" style="background-color: #dc3545; color: white;">'.__("حساب محذوف").' 🗑️</span>';
             } elseif ($user->status === 'approved') {
@@ -97,16 +102,24 @@ class UserController extends Controller
             }
             if(empty($rolesHtml)) $rolesHtml = '<span class="text-muted">'.__("No Role").'</span>';
 
-            $approveBtn = $user->status !== 'approved' 
+            $editBtn = $canEdit
+                ? '<li><a class="dropdown-item text-info" href="#" onclick="editUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '.__("Edit User").'</a></li>'
+                : '';
+
+            $approveBtn = ($canVerifyKyc && $user->status !== 'approved') 
                 ? '<li><a class="dropdown-item text-success" href="#" onclick="approveWithKycData(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> '.__("Approve").'</a></li>' 
                 : '';
                 
-            $rejectBtn = $user->status !== 'rejected' 
+            $rejectBtn = ($canVerifyKyc && $user->status !== 'rejected') 
                 ? '<li><a class="dropdown-item text-danger" href="#" onclick="updateUserStatus(' . $user->id . ', \'rejected\')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> '.__("Reject").'</a></li>' 
                 : '';
 
-            $verifyBtn = !$user->email_verified_at
+            $verifyBtn = ($canVerifyKyc && !$user->email_verified_at)
                 ? '<li><a class="dropdown-item text-warning" href="#" onclick="verifyUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> '.__("Verify Account").'</a></li>'
+                : '';
+
+            $deleteBtn = $canDelete
+                ? '<li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" href="#" onclick="deleteUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> '.__("Delete").'</a></li>'
                 : '';
 
             $actions = '
@@ -116,12 +129,11 @@ class UserController extends Controller
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                         <li><a class="dropdown-item text-primary" href="#" onclick="viewUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> '.__("View Profile").'</a></li>
-                        <li><a class="dropdown-item text-info" href="#" onclick="editUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '.__("Edit User").'</a></li>
-                        '.$approveBtn.'
-                        '.$rejectBtn.'
-                        '.$verifyBtn.'
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser(' . $user->id . ')"><svg width="16" height="16" class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> '.__("Delete").'</a></li>
+                        ' . $editBtn . '
+                        ' . $approveBtn . '
+                        ' . $rejectBtn . '
+                        ' . $verifyBtn . '
+                        ' . $deleteBtn . '
                     </ul>
                 </div>';
 

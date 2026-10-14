@@ -171,17 +171,24 @@ function renderPermissionsTable(data) {
         html = '<tr><td colspan="4" class="text-center py-4 text-muted">' + window.PermissionConfig.trans.noRecords + '</td></tr>';
     } else {
         data.forEach(permission => {
-            let actionsHtml = `
-                <div class="dropdown action-dropdown text-center">
-                    <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
-                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deletePermission(${permission.id})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>${__('Delete', 'حذف')}</a></li>
-                    </ul>
-                </div>
-            `;
+            let canManagePerm = (typeof permission.can_manage !== 'undefined') ? permission.can_manage : (window.PermissionConfig && window.PermissionConfig.canManage);
+
+            let actionsHtml = '';
+            if (canManagePerm) {
+                actionsHtml = `
+                    <div class="dropdown action-dropdown text-center">
+                        <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
+                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deletePermission(${permission.id})">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>${__('Delete', 'حذف')}</a></li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                actionsHtml = '<div class="text-center text-muted small">-</div>';
+            }
 
             html += '<tr>';
             html += '<td class="align-middle text-muted small col-toggle-0">' + permission.id + '</td>';
@@ -200,22 +207,28 @@ function renderPermissionsGrid(data) {
         html = '<div class="col-12 text-center py-4 text-muted">' + window.PermissionConfig.trans.noRecords + '</div>';
     } else {
         data.forEach(permission => {
+            let canManagePerm = (typeof permission.can_manage !== 'undefined') ? permission.can_manage : (window.PermissionConfig && window.PermissionConfig.canManage);
+
+            let gridActions = canManagePerm ? `
+                <div class="d-flex justify-content-center mt-auto col-toggle-3">
+                    <button class="btn btn-sm btn-outline-danger px-3 w-100" onclick="deletePermission(${permission.id})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        ${__('Delete', 'حذف')}
+                    </button>
+                </div>
+            ` : '';
+
             html += `
             <div class="col-12 col-sm-6 col-md-4 col-xl-3">
                 <div class="card h-100 border-0 shadow-sm user-grid-card position-relative overflow-hidden">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle col-toggle-0" style="width: 56px; height: 56px;">
+                    <div class="card-body p-4 text-center d-flex flex-column">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle col-toggle-0 mx-auto" style="width: 56px; height: 56px;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
                         <h6 class="fw-bold mb-2 col-toggle-1">${permission.name}</h6>
-                        <span class="badge bg-light text-dark px-3 py-1 border mb-3 col-toggle-2">${permission.roles_count} ${__('Role', 'أدوار')}</span>
+                        <span class="badge bg-light text-dark px-3 py-1 border mb-3 col-toggle-2 mx-auto">${permission.roles_count} ${__('Role', 'أدوار')}</span>
                         
-                        <div class="d-flex justify-content-center mt-auto col-toggle-3">
-                            <button class="btn btn-sm btn-outline-danger px-3 w-100" onclick="deletePermission(${permission.id})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                ${__('Delete', 'حذف')}
-                            </button>
-                        </div>
+                        ${gridActions}
                     </div>
                 </div>
             </div>

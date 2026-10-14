@@ -672,5 +672,11 @@
     "سجل المدفوعات والشحن": "Payments & Recharges History",
     "البيانات البنكية": "Bank Details",
     "الاشتراك كبائع": "Subscribe as Seller",
-    "الدعم الفني": "Technical Support"
+    "الدعم الفني": "Technical Support",
+    "صلاحيات الدور (مبوبة ومترجمة بالتفصيل)": "Role Permissions (Categorized & Detailed)",
+    "أنشئ دوراً إدارياً جديداً وحدد باقة الصلاحيات بدقة حسب المهام الوظيفية": "Create a new administrative role and define its assigned permissions based on job responsibilities",
+    "تعديل مسمى الدور أو إعادة تشكيل باقة الصلاحيات المرتبطة به": "Update role title or reconfigure its assigned permissions package",
+    "دور نظام أساسي (محمي)": "System Core Role (Protected)",
+    "لا يمكن تغيير اسم هذا الدور لأنه محوري في منطق عمل المنصة، ولكن يمكنك تخصيص صلاحياته بحرية.": "This role name cannot be modified as it is central to platform core logic, but its permissions can be customized.",
+    "مثال: مدير المزادات الميداني، مسؤول المالية، دعم العملاء...": "e.g., Field Operations Manager, Finance Officer, Support Agent..."
 }

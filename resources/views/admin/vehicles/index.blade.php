@@ -147,10 +147,12 @@
 
 @section('content')
 <x-admin-header :title="__('Vehicles Management')" :breadcrumb="__('Vehicles')">
+    @canany(['manage-vehicles', 'edit-vehicles'])
     <a href="{{ route('admin.vehicles.create') }}" class="btn-ultra">
         <i class="fa-solid fa-plus me-1"></i>
         {{ __('Add New Vehicle') }}
     </a>
+    @endcanany
 </x-admin-header>
 
 <div class="row mb-4 g-3">

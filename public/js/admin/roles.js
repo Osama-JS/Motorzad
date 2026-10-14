@@ -37,16 +37,19 @@ $(document).ready(function () {
             method: 'POST',
             data: $(this).serialize(),
             success: function(res) {
-                WJHTAKAdmin.btnLoading(btn, false);
+                WJHTAdmin_btnLoading_helper(btn, false);
                 if (res.success) {
                     toastr.success(res.message);
                     $('#addRoleModal').modal('hide');
                     $('#addRoleForm')[0].reset();
+                    if (typeof syncPermissionSelectorState === 'function') {
+                        syncPermissionSelectorState('add');
+                    }
                     fetchRoles(1);
                 }
             },
             error: function(err) {
-                WJHTAKAdmin.btnLoading(btn, false);
+                WJHTAdmin_btnLoading_helper(btn, false);
                 if (err.responseJSON && err.responseJSON.errors) {
                     let msg = '';
                     Object.values(err.responseJSON.errors).forEach(e => msg += e[0] + '<br>');
@@ -62,7 +65,7 @@ $(document).ready(function () {
     $('#editRoleForm').on('submit', function(e) {
         e.preventDefault();
         let btn = $(this).find('button[type="submit"]');
-        WJHTAKAdmin.btnLoading(btn, true);
+        WJHTAdmin_btnLoading_helper(btn, true);
 
         let id = $('#edit_role_id').val();
         let url = window.RoleConfig.urls.update.replace(':id', id);
@@ -72,7 +75,7 @@ $(document).ready(function () {
             method: 'POST',
             data: $(this).serialize() + '&_method=PUT',
             success: function(res) {
-                WJHTAKAdmin.btnLoading(btn, false);
+                WJHTAdmin_btnLoading_helper(btn, false);
                 if (res.success) {
                     toastr.success(res.message);
                     $('#editRoleModal').modal('hide');
@@ -80,7 +83,7 @@ $(document).ready(function () {
                 }
             },
             error: function(err) {
-                WJHTAKAdmin.btnLoading(btn, false);
+                WJHTAdmin_btnLoading_helper(btn, false);
                 if (err.responseJSON && err.responseJSON.errors) {
                     let msg = '';
                     Object.values(err.responseJSON.errors).forEach(e => msg += e[0] + '<br>');
@@ -91,6 +94,14 @@ $(document).ready(function () {
             }
         });
     });
+
+    function WJHTAdmin_btnLoading_helper(btn, isLoading) {
+        if (typeof WJHTAKAdmin !== 'undefined' && WJHTAKAdmin.btnLoading) {
+            WJHTAKAdmin.btnLoading(btn, isLoading);
+        } else {
+            btn.prop('disabled', isLoading);
+        }
+    }
 
     // Initialize Select2 globally
     function initSelect2() {
@@ -114,6 +125,17 @@ $(document).ready(function () {
         });
         localStorage.setItem('roles_col_visibility', JSON.stringify(visArray));
         applyColumnVisibility();
+    });
+
+    // Initialize Permission Selectors
+    $('.perm-selector-wrapper').each(function() {
+        initPermissionSelector(this);
+    });
+
+    $('#addRoleModal').on('show.bs.modal', function () {
+        if (typeof syncPermissionSelectorState === 'function') {
+            syncPermissionSelectorState('add');
+        }
     });
 });
 
@@ -199,53 +221,60 @@ window.fetchRoles = function(page) {
     });
 };
 
-function generatePermissionsHtml(permissionsArray) {
-    let html = '<div style="display:flex; flex-wrap:wrap; gap:0.3rem; justify-content:center;">';
-    let displayPerms = permissionsArray.slice(0, 3);
-    displayPerms.forEach(perm => {
-        html += '<span class="badge bg-primary text-white">' + perm + '</span>';
-    });
-    if (permissionsArray.length > 3) {
-        html += '<span class="badge" style="background:rgba(100,116,139,0.1); color:var(--text-muted);">+' + (permissionsArray.length - 3) + '</span>';
-    }
-    html += '</div>';
-    return html;
-}
-
 function renderRolesTable(data) {
     let html = '';
     if (data.length === 0) {
         html = '<tr><td colspan="4" class="text-center py-4 text-muted">' + window.RoleConfig.trans.noRecords + '</td></tr>';
     } else {
         data.forEach(role => {
-            let permissionsHtml = generatePermissionsHtml(role.permissions);
-            let isSystem = role.is_system || ['admin', 'seller', 'bidder'].includes(role.name);
-            
-            let deleteActionHtml = isSystem ? '' : `
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteRole(${role.id})">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>${__('Delete', 'حذف')}</a></li>
-            `;
+            let badgeHtml = role.is_system 
+                ? '<span class="badge bg-warning text-dark ms-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' + __('System Role', 'دور نظام أساسي') + '</span>' 
+                : '';
 
-            let actionsHtml = `
-                <div class="dropdown action-dropdown text-center">
-                    <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
-                        <li><a class="dropdown-item text-primary" href="javascript:void(0)" onclick="editRole(${role.id})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>${isSystem ? __('Edit Permissions', 'تعديل الصلاحيات') : __('Edit', 'تعديل')}</a></li>
-                        ${deleteActionHtml}
-                    </ul>
-                </div>
-            `;
+            let permsBadges = '';
+            if (role.permissions && role.permissions.length > 0) {
+                let limit = 4;
+                let shown = role.permissions.slice(0, limit);
+                shown.forEach(p => {
+                    let label = (typeof p === 'object' && p !== null) ? (p.label || p.name) : p;
+                    let code = (typeof p === 'object' && p !== null) ? (p.name || '') : p;
+                    permsBadges += '<span class="badge bg-light text-dark border me-1 mb-1" style="font-size:0.75rem;" title="' + code + '">' + label + '</span>';
+                });
+                if (role.permissions.length > limit) {
+                    permsBadges += '<span class="badge bg-secondary-subtle text-secondary me-1 mb-1" style="font-size:0.75rem;">+' + (role.permissions.length - limit) + '</span>';
+                }
+            } else {
+                permsBadges = '<span class="text-muted small">' + __('No permissions', 'لا توجد صلاحيات') + '</span>';
+            }
 
-            let systemBadge = isSystem ? ` <span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem; font-weight: 600;">${__('Core', 'أساسي')}</span>` : '';
+            let canManageRole = (typeof role.can_manage !== 'undefined') ? role.can_manage : (window.RoleConfig && window.RoleConfig.canManage);
+
+            let actionsHtml = '';
+            if (canManageRole) {
+                let deleteBtn = role.is_system 
+                    ? '' 
+                    : '<li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteRole(' + role.id + ')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' + __('Delete', 'حذف') + '</a></li>';
+
+                actionsHtml = `
+                    <div class="dropdown action-dropdown text-center">
+                        <button class="btn btn-sm btn-icon border-0 shadow-none dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm py-2">
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="editRole(${role.id})">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2 text-primary"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>${__('Edit Role & Permissions', 'تعديل الدور والصلاحيات')}</a></li>
+                            ${deleteBtn}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                actionsHtml = '<div class="text-center text-muted small">-</div>';
+            }
 
             html += '<tr>';
-            html += '<td class="align-middle fw-bold col-toggle-0">' + role.name + systemBadge + '</td>';
-            html += '<td class="align-middle col-toggle-1">' + permissionsHtml + '</td>';
-            html += '<td class="align-middle text-center col-toggle-2"><span class="badge bg-light text-dark px-3 py-2 border">' + role.users_count + '</span></td>';
+            html += '<td class="align-middle fw-bold col-toggle-0"><div class="d-flex align-items-center">' + role.name + badgeHtml + '</div></td>';
+            html += '<td class="align-middle col-toggle-1">' + permsBadges + '</td>';
+            html += '<td class="align-middle col-toggle-2"><span class="badge bg-light text-dark px-3 py-2 border">' + role.users_count + ' ' + __('User', 'مستخدم') + '</span></td>';
             html += '<td class="align-middle col-toggle-3">' + actionsHtml + '</td>';
             html += '</tr>';
         });
@@ -259,44 +288,67 @@ function renderRolesGrid(data) {
         html = '<div class="col-12 text-center py-4 text-muted">' + window.RoleConfig.trans.noRecords + '</div>';
     } else {
         data.forEach(role => {
-            let permissionsHtml = generatePermissionsHtml(role.permissions);
-            let isSystem = role.is_system || ['admin', 'seller', 'bidder'].includes(role.name);
-            let systemBadge = isSystem ? ` <span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;">${__('Core Role', 'دور أساسي')}</span>` : '';
-            
-            let buttonsHtml = isSystem ? `
-                <button class="btn btn-sm btn-outline-primary px-3 w-100" onclick="editRole(${role.id})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    ${__('Edit Permissions', 'تعديل الصلاحيات')}
-                </button>
-            ` : `
-                <button class="btn btn-sm btn-outline-primary px-3 flex-grow-1" onclick="editRole(${role.id})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    ${__('Edit', 'تعديل')}
-                </button>
-                <button class="btn btn-sm btn-outline-danger px-3" onclick="deleteRole(${role.id})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    ${__('Delete', 'حذف')}
-                </button>
-            `;
+            let badgeHtml = role.is_system 
+                ? '<span class="badge bg-warning text-dark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="me-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' + __('System Role', 'دور أساسي') + '</span>' 
+                : '<span class="badge bg-light text-dark border">' + __('Custom Role', 'دور مخصص') + '</span>';
+
+            let permsBadges = '';
+            if (role.permissions && role.permissions.length > 0) {
+                let limit = 4;
+                let shown = role.permissions.slice(0, limit);
+                shown.forEach(p => {
+                    let label = (typeof p === 'object' && p !== null) ? (p.label || p.name) : p;
+                    let code = (typeof p === 'object' && p !== null) ? (p.name || '') : p;
+                    permsBadges += '<span class="badge bg-light text-dark border me-1 mb-1" style="font-size:0.75rem;" title="' + code + '">' + label + '</span>';
+                });
+                if (role.permissions.length > limit) {
+                    permsBadges += '<span class="badge bg-secondary-subtle text-secondary me-1 mb-1" style="font-size:0.75rem;">+' + (role.permissions.length - limit) + '</span>';
+                }
+            } else {
+                permsBadges = '<span class="text-muted small">' + __('No permissions', 'لا توجد صلاحيات') + '</span>';
+            }
+
+            let canManageRole = (typeof role.can_manage !== 'undefined') ? role.can_manage : (window.RoleConfig && window.RoleConfig.canManage);
+
+            let gridActions = '';
+            if (canManageRole) {
+                let deleteBtn = role.is_system 
+                    ? '' 
+                    : `<button class="btn btn-sm btn-outline-danger px-2" onclick="deleteRole(${role.id})" title="${__('Delete', 'حذف')}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                       </button>`;
+
+                gridActions = `
+                    <div class="d-flex gap-2 mt-auto pt-3 border-top">
+                        <button class="btn btn-sm btn-primary flex-grow-1" onclick="editRole(${role.id})">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            ${__('Edit Permissions', 'تعديل الصلاحيات')}
+                        </button>
+                        ${deleteBtn}
+                    </div>
+                `;
+            }
 
             html += `
-            <div class="col-12 col-md-6 col-xl-4">
-                <div class="card h-100 border-0 shadow-sm user-grid-card position-relative overflow-hidden">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle col-toggle-0" style="width: 64px; height: 64px;">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        </div>
-                        <h5 class="fw-bold mb-1 col-toggle-0">${role.name}${systemBadge}</h5>
-                        <p class="text-muted small mb-3 col-toggle-2">${role.users_count} ${__('Users', 'مستخدمين')}</p>
-                        
-                        <div class="p-3 bg-light rounded-3 mb-3 col-toggle-1">
-                            <p class="text-muted small fw-bold mb-2">${__('Permissions', 'الصلاحيات')}</p>
-                            ${permissionsHtml}
+            <div class="col-12 col-sm-6 col-md-4 col-xl-4">
+                <div class="card h-100 border-0 shadow-sm user-grid-card position-relative overflow-hidden" style="border-radius: var(--radius-lg); background: var(--bg-card);">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 48px; height: 48px;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            ${badgeHtml}
                         </div>
 
-                        <div class="d-flex gap-2 justify-content-center mt-auto col-toggle-3">
-                            ${buttonsHtml}
+                        <h5 class="fw-bold mb-1">${role.name}</h5>
+                        <p class="text-muted small mb-3">${role.users_count} ${__('Users assigned', 'مستخدم مرتبط')}</p>
+
+                        <div class="mb-4 flex-grow-1">
+                            <div class="small fw-semibold text-muted mb-2">${__('Permissions:', 'الصلاحيات:')}</div>
+                            <div class="d-flex flex-wrap">${permsBadges}</div>
                         </div>
+                        
+                        ${gridActions}
                     </div>
                 </div>
             </div>
@@ -374,6 +426,10 @@ window.editRole = function(id) {
                     });
                 }
                 
+                if (typeof syncPermissionSelectorState === 'function') {
+                    syncPermissionSelectorState('edit');
+                }
+
                 $('#editRoleModal').modal('show');
             }
         },
@@ -420,4 +476,157 @@ window.deleteRole = function(id) {
             });
         }
     });
+};
+
+// ========================================================
+// ===== PERMISSION SELECTOR COMPONENT LOGIC =============
+// ========================================================
+function initPermissionSelector(wrapper) {
+    let $wrapper = $(wrapper);
+
+    // 1. Checkbox click / change
+    $wrapper.on('change', '.perm-checkbox', function () {
+        let isChecked = $(this).is(':checked');
+        let $card = $(this).closest('.perm-card');
+        $card.toggleClass('is-checked', isChecked);
+
+        let $catSection = $(this).closest('.perm-category-section');
+        updateCategoryState($catSection);
+        updateGlobalCount($wrapper);
+    });
+
+    // 2. Category header toggle all
+    $wrapper.on('change', '.perm-cat-toggle-all', function () {
+        let isChecked = $(this).is(':checked');
+        let $catSection = $(this).closest('.perm-category-section');
+
+        $catSection.find('.perm-checkbox').each(function () {
+            $(this).prop('checked', isChecked);
+            $(this).closest('.perm-card').toggleClass('is-checked', isChecked);
+        });
+
+        updateCategoryState($catSection);
+        updateGlobalCount($wrapper);
+    });
+
+    // 3. Global Select All button
+    $wrapper.on('click', '.perm-btn-select-all', function () {
+        $wrapper.find('.perm-checkbox').each(function () {
+            $(this).prop('checked', true);
+            $(this).closest('.perm-card').addClass('is-checked');
+        });
+        $wrapper.find('.perm-category-section').each(function () {
+            updateCategoryState($(this));
+        });
+        updateGlobalCount($wrapper);
+    });
+
+    // 4. Global Deselect All button
+    $wrapper.on('click', '.perm-btn-deselect-all', function () {
+        $wrapper.find('.perm-checkbox').each(function () {
+            $(this).prop('checked', false);
+            $(this).closest('.perm-card').removeClass('is-checked');
+        });
+        $wrapper.find('.perm-category-section').each(function () {
+            updateCategoryState($(this));
+        });
+        updateGlobalCount($wrapper);
+    });
+
+    // 5. Category Pills filtering
+    $wrapper.on('click', '.perm-filter-pill', function () {
+        $wrapper.find('.perm-filter-pill').removeClass('active');
+        $(this).addClass('active');
+
+        let target = $(this).data('target');
+        if (target === 'all') {
+            $wrapper.find('.perm-category-section').removeClass('d-none');
+        } else {
+            $wrapper.find('.perm-category-section').each(function () {
+                let cat = $(this).data('category');
+                $(this).toggleClass('d-none', cat !== target);
+            });
+        }
+        applyPermSearch($wrapper);
+    });
+
+    // 6. Live Search filtering
+    let searchTimeout;
+    $wrapper.on('keyup input', '.perm-search-box', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            applyPermSearch($wrapper);
+        }, 150);
+    });
+}
+
+function applyPermSearch($wrapper) {
+    let query = $.trim($wrapper.find('.perm-search-box').val()).toLowerCase();
+    let activePill = $wrapper.find('.perm-filter-pill.active').data('target') || 'all';
+    let totalVisibleCards = 0;
+
+    $wrapper.find('.perm-category-section').each(function () {
+        let $section = $(this);
+        let cat = $section.data('category');
+        let allowedByPill = (activePill === 'all' || activePill === cat);
+
+        if (!allowedByPill) {
+            $section.addClass('d-none');
+            return;
+        }
+
+        let visibleCardsInCat = 0;
+        $section.find('.perm-card').each(function () {
+            let keywords = $(this).data('keywords') || '';
+            let matches = !query || keywords.indexOf(query) !== -1;
+            $(this).toggleClass('d-none', !matches);
+            if (matches) {
+                visibleCardsInCat++;
+                totalVisibleCards++;
+            }
+        });
+
+        // Hide section if no cards match search query
+        $section.toggleClass('d-none', visibleCardsInCat === 0);
+    });
+
+    // Show empty notice if no cards match anywhere
+    $wrapper.find('.perm-empty-search').toggleClass('d-none', totalVisibleCards > 0);
+}
+
+function updateCategoryState($catSection) {
+    let total = $catSection.find('.perm-checkbox').length;
+    let checked = $catSection.find('.perm-checkbox:checked').length;
+
+    $catSection.find('.cat-selected-count').text(checked);
+    let $toggle = $catSection.find('.perm-cat-toggle-all');
+
+    if (checked === 0) {
+        $toggle.prop('checked', false).prop('indeterminate', false);
+    } else if (checked === total) {
+        $toggle.prop('checked', true).prop('indeterminate', false);
+    } else {
+        $toggle.prop('checked', false).prop('indeterminate', true);
+    }
+}
+
+function updateGlobalCount($wrapper) {
+    let checked = $wrapper.find('.perm-checkbox:checked').length;
+    $wrapper.find('.perm-selected-count').text(checked);
+}
+
+window.syncPermissionSelectorState = function (prefix) {
+    let $wrapper = $('#' + prefix + '_perm_selector_container');
+    if (!$wrapper.length) return;
+
+    $wrapper.find('.perm-checkbox').each(function () {
+        let isChecked = $(this).is(':checked');
+        $(this).closest('.perm-card').toggleClass('is-checked', isChecked);
+    });
+
+    $wrapper.find('.perm-category-section').each(function () {
+        updateCategoryState($(this));
+    });
+
+    updateGlobalCount($wrapper);
 };
